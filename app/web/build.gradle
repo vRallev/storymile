@@ -1,0 +1,14 @@
+plugins {
+  id 'software.ralf.storymile.app.web'
+}
+
+storymile {
+  enableComposeUi true
+  enableMetro true
+  enableComposePresenters true
+  addImplModuleDependencies true
+}
+
+dependencies {
+  commonMainImplementation project(':app-framework:impl')
+}

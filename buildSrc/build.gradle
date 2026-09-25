@@ -1,0 +1,78 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+  id 'java-gradle-plugin'
+  alias libs.plugins.android.lint
+  alias libs.plugins.kotlin.jvm
+  alias libs.plugins.sort.dependencies
+}
+
+java {
+  sourceCompatibility = JavaVersion.toVersion(libs.versions.jvm.buildsrc.get())
+  targetCompatibility = JavaVersion.toVersion(libs.versions.jvm.buildsrc.get())
+}
+
+kotlin {
+  compilerOptions {
+    jvmTarget.set(JvmTarget.fromTarget(libs.versions.jvm.buildsrc.get()))
+    allWarningsAsErrors.set(providers.environmentVariable('CI').map { true }.orElse(false))
+  }
+
+  explicitApi()
+}
+
+lint {
+  warningsAsErrors = true
+}
+
+gradlePlugin {
+  plugins {
+    storymileRoot {
+      id = 'software.ralf.storymile.root'
+      implementationClass = 'software.ralf.storymile.gradle.RootPlugin'
+      displayName = 'Storymile root convention plugin'
+      description = 'Shared root build conventions for Storymile.'
+    }
+    storymileLibraryKmp {
+      id = 'software.ralf.storymile.library.kmp'
+      implementationClass = 'software.ralf.storymile.gradle.LibraryKmpPlugin'
+      displayName = 'Storymile Kotlin Multiplatform library convention plugin'
+      description = 'Shared KMP library conventions for Storymile.'
+    }
+    storymileAppAndroid {
+      id = 'software.ralf.storymile.app.android'
+      implementationClass = 'software.ralf.storymile.gradle.AppAndroidPlugin'
+      displayName = 'Storymile Android app convention plugin'
+      description = 'Android application conventions for Storymile.'
+    }
+    storymileAppDesktop {
+      id = 'software.ralf.storymile.app.desktop'
+      implementationClass = 'software.ralf.storymile.gradle.AppDesktopPlugin'
+      displayName = 'Storymile Desktop app convention plugin'
+      description = 'Desktop application conventions for Storymile.'
+    }
+    storymileAppWeb {
+      id = 'software.ralf.storymile.app.web'
+      implementationClass = 'software.ralf.storymile.gradle.AppWebPlugin'
+      displayName = 'Storymile Web app convention plugin'
+      description = 'Wasm web application conventions for Storymile.'
+    }
+  }
+}
+
+dependencies {
+  implementation libs.android.gradle.plugin
+  implementation libs.app.platform.gradle.plugin
+  implementation libs.compose.gradle.plugin
+  implementation libs.compose.hot.reload.gradle.plugin
+  implementation libs.detekt.gradle.plugin
+  implementation libs.kotlin.gradle.plugin
+  implementation libs.metro.gradle.plugin
+  implementation libs.sort.dependencies.gradle.plugin
+
+  lintChecks libs.androidx.lint.gradle
+}
+
+tasks.register('release') {
+  dependsOn('build', 'check', 'checkSortDependencies', 'lint')
+}

@@ -1,0 +1,26 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  enableComposeUi true
+  enableMetro true
+  enableComposePresenters true
+}
+
+dependencies {
+  commonMainApi project(':library:impl-robots')
+
+  androidMainImplementation libs.androidx.test.junit
+  androidMainImplementation libs.androidx.test.rules
+  androidMainImplementation libs.androidx.test.runner
+  androidMainImplementation libs.compose.ui.test.junit4
+  androidMainImplementation libs.compose.ui.test.junit4.android
+
+  commonMainImplementation project(':app-framework:impl')
+  commonMainImplementation project(':library:impl')
+  commonMainImplementation project(':presenter-navigation:impl')
+  commonMainImplementation project(':templates:impl')
+  commonMainImplementation project(':theme:public')
+  commonMainImplementation project(':util:impl')
+}

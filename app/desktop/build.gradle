@@ -1,0 +1,17 @@
+plugins {
+  id 'software.ralf.storymile.app.desktop'
+}
+
+storymile {
+  enableComposeUi true
+  enableMetro true
+  enableComposePresenters true
+  addImplModuleDependencies true
+}
+
+dependencies {
+  commonMainImplementation project(':app-framework:impl')
+  commonMainImplementation project(':util:public')
+
+  desktopTestImplementation project(':app-framework:impl-ui-test-robots')
+}
