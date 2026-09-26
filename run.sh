@@ -263,5 +263,5 @@ case "$PLATFORM" in
   0) run_android ;;
   1) run_desktop ;;
   2) run_ios ;;
-  3) ./gradlew --quiet -PenableWasm=true --no-isolated-projects :app:web:wasmJsBrowserDevelopmentRun ;;
+  3) ./gradlew --quiet -Pstorymile.enableWasm=true --no-isolated-projects :app:web:wasmJsBrowserDevelopmentRun ;;
 esac

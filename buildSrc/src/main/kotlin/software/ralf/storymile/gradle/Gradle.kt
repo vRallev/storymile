@@ -21,7 +21,7 @@ internal val Project.ci: Boolean
   get() = providers.environmentVariable("CI").isPresent
 
 internal val Project.enableWasm: Boolean
-  get() = providers.gradleProperty("enableWasm").map { it.toBoolean() }.getOrElse(false)
+  get() = providers.gradleProperty("storymile.enableWasm").map { it.toBoolean() }.getOrElse(false)
 
 internal val Project.androidCompileSdk: Int
   get() = libs.findVersion("android-compileSdk").get().requiredVersion.toInt()
