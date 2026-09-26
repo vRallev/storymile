@@ -33,6 +33,9 @@ Use the matching skill for detailed guidance:
 Create new PRs as ready for review, never as drafts, even when a skill says otherwise.
 Only an explicit instruction in the user's prompt can override this rule.
 
+When CI fails, verify and push the fix promptly without waiting for
+unrelated jobs to finish, so cancellation frees workers for the updated run.
+
 ### Gradle build files
 
 Module `build.gradle` files should only apply one Storymile plugin, configure `storymile { ... }`,
@@ -131,8 +134,7 @@ tests use the blueprint's managed Pixel 3 emulator.
 
 `.github/workflows/ci.yml` runs checks, tests, and platform builds on pushes and pull requests.
 Every push to `main` runs CI without canceling earlier runs. New PR pushes cancel older
-runs for that PR. When CI fails, verify and push the fix promptly without waiting for
-unrelated jobs to finish, so cancellation frees workers for the updated run.
+runs for that PR.
 
 The optional `GRADLE_ENCRYPTION_KEY` repository secret enables Gradle configuration-cache caching.
 
