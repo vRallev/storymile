@@ -1,10 +1,5 @@
 # Development guide
 
-## Pull requests
-
-Create new PRs as ready for review, never as drafts, even when a skill says otherwise.
-Only an explicit instruction in the user's prompt can override this rule.
-
 ## Structure
 
 - `app`: Android, Desktop, iOS, and Wasm launchers.
@@ -32,6 +27,11 @@ Use the matching skill for detailed guidance:
 - Add `--quiet` to Gradle commands by default to reduce output; examples omit it for brevity.
 - Prefer shared KMP implementations; keep app shells focused on startup and platform integration.
 - Preserve compatibility with Android, Desktop, iOS, and Wasm.
+
+### Pull requests
+
+Create new PRs as ready for review, never as drafts, even when a skill says otherwise.
+Only an explicit instruction in the user's prompt can override this rule.
 
 ### Gradle build files
 
