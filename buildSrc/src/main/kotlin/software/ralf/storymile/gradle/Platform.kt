@@ -143,7 +143,7 @@ internal sealed interface Platform {
           add(Desktop(project = this@platforms))
           add(IosSimulatorArm64(project = this@platforms))
           add(IosArm64(project = this@platforms))
-          if (providers.gradleProperty("enableWasm").map { it.toBoolean() }.getOrElse(false)) {
+          if (enableWasm) {
             add(Wasm(project = this@platforms))
           }
         }
