@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 env:
-  GRADLE_ARGS: --warning-mode none --stacktrace --continue --show-version
+  GRADLE_ARGS: --stacktrace --continue --show-version
 
 jobs:
   ci-passed:
