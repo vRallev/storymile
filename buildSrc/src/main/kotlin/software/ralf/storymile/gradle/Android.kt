@@ -6,14 +6,7 @@ import kotlin.collections.plusAssign
 
 internal fun configureAndroidLint(lint: Lint) {
   lint.warningsAsErrors = true
-  lint.disable +=
-    setOf(
-      "GradleDependency",
-      "ObsoleteLintCustomCheck",
-      "NewerVersionAvailable",
-      "AndroidGradlePluginVersion",
-      "OldTargetApi",
-    )
+  lint.disable += setOf("NewerVersionAvailable")
 }
 
 internal fun configureAndroidPackaging(packaging: Packaging) {

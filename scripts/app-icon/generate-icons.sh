@@ -18,7 +18,8 @@ resize() {
   sips -s format png -z "$size" "$size" "$source" --out "$destination" >/dev/null
 }
 
-resize 512 app/android/src/main/res/drawable-nodpi/ic_launcher_artwork.png
+# The _foreground suffix identifies an adaptive layer to Android Lint.
+resize 512 app/android/src/main/res/drawable-nodpi/ic_launcher_artwork_foreground.png
 resize 1024 app/ios/iosApp/Assets.xcassets/AppIcon.appiconset/icon.png
 resize 512 app/desktop/src/desktopMain/resources/icon.png
 

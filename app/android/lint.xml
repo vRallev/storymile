@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<lint>
-  <!-- The adaptive icon masks this artwork after applying the foreground inset. -->
-  <issue id="IconLauncherShape">
-    <ignore path="src/main/res/drawable-nodpi/ic_launcher_artwork.png" />
-  </issue>
-</lint>
