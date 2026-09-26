@@ -20,7 +20,9 @@ dependencyResolutionManagement {
 
 include ':app:android'
 include ':app:desktop'
-include ':app:web'
+if (providers.gradleProperty('enableWasm').map { it.toBoolean() }.getOrElse(false)) {
+  include ':app:web'
+}
 include ':app-framework:impl'
 include ':app-framework:impl-ui-test-robots'
 include ':library:impl'
