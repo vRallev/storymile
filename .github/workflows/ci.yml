@@ -15,6 +15,35 @@ permissions:
   contents: read
 
 jobs:
+  ci-passed:
+    name: CI passed
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: ${{ always() }}
+    # Include every CI job so this is the only required check in branch rules.
+    needs:
+      - check-build-src
+      - check-dependency-order
+      - check-module-boundaries
+      - detekt
+      - ktfmt
+      - android-lint
+      - test-android
+      - test-desktop
+      - test-integration-desktop
+      - test-integration-android
+      - test-wasm
+      - build-android-debug
+      - build-desktop
+      - build-web
+      - build-ios
+    steps:
+      - name: Verify all jobs passed
+        env:
+          NEEDS_RESULTS: ${{ toJSON(needs) }}
+        run: |
+          printf '%s\n' "$NEEDS_RESULTS" | jq -e 'all(.[]; .result == "success")'
+
   check-build-src:
     runs-on: ubuntu-latest
     timeout-minutes: 25
