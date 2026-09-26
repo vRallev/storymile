@@ -143,7 +143,9 @@ internal sealed interface Platform {
           add(Desktop(project = this@platforms))
           add(IosSimulatorArm64(project = this@platforms))
           add(IosArm64(project = this@platforms))
-          add(Wasm(project = this@platforms))
+          if (enableWasm) {
+            add(Wasm(project = this@platforms))
+          }
         }
       }
     }

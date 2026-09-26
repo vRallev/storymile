@@ -34,6 +34,8 @@ Module `build.gradle` files should only apply one Storymile plugin, configure `s
 and declare dependencies. Put other configuration in `buildSrc`, exposing DSL options when needed.
 Configuration used only once may stay in its build file.
 
+Prefix project-specific Gradle properties with `storymile.`.
+
 ### Dependencies
 
 - Reusable modules depend on public APIs.
@@ -67,11 +69,15 @@ Use Azul Zulu JDK 25, the Android SDK, and Xcode for iOS.
 Run `./run.sh` to choose a platform, device, or Desktop window size. Desktop uses hot
 reload. Android and iOS device selection also requires Python 3.
 
+Wasm is disabled and Isolated Projects is enabled by default. Wasm commands need
+`-Pstorymile.enableWasm=true --no-isolated-projects` until Kotlin's Wasm plugin supports isolation.
+`run.sh` and Wasm CI jobs pass both flags.
+
 ```sh
 ./gradlew :app:android:installDebug
 ./gradlew :app:desktop:run
 ./gradlew :app:desktop:hotRunDesktop --auto
-./gradlew :app:web:wasmJsBrowserDevelopmentRun
+./gradlew -Pstorymile.enableWasm=true --no-isolated-projects :app:web:wasmJsBrowserDevelopmentRun
 open app/ios/iosApp.xcodeproj
 ```
 
@@ -112,10 +118,11 @@ Android Lint checks the app and shared KMP code.
 ./gradlew lint lintAndroidMain
 ./gradlew :app-framework:impl:testAndroidHostTest
 ./gradlew :app:android:testDebugUnitTest
-./gradlew wasmJsTest iosSimulatorArm64Test
+./gradlew iosSimulatorArm64Test
+./gradlew -Pstorymile.enableWasm=true --no-isolated-projects wasmJsTest
 ./gradlew :app:android:emulatorCheck
 ./gradlew :app:android:assembleDebug :app:desktop:createDistributable
-./gradlew :app:web:wasmJsBrowserDistribution
+./gradlew -Pstorymile.enableWasm=true --no-isolated-projects :app:web:wasmJsBrowserDistribution
 ./gradlew :app-framework:impl:linkDebugFrameworkIosSimulatorArm64
 ```
 
