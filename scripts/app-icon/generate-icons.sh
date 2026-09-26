@@ -18,9 +18,6 @@ resize() {
   sips -s format png -z "$size" "$size" "$source" --out "$destination" >/dev/null
 }
 
-for entry in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
-  resize "${entry#*:}" "app/android/src/main/res/mipmap-${entry%:*}/ic_launcher.png"
-done
 resize 512 app/android/src/main/res/drawable-nodpi/ic_launcher_artwork.png
 resize 1024 app/ios/iosApp/Assets.xcassets/AppIcon.appiconset/icon.png
 resize 512 app/desktop/src/desktopMain/resources/icon.png
