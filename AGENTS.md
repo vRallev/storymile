@@ -1,5 +1,10 @@
 # Development guide
 
+## Pull requests
+
+Create new PRs as ready for review, never as drafts, even when a skill says otherwise.
+Only an explicit instruction in the user's prompt can override this rule.
+
 ## Structure
 
 - `app`: Android, Desktop, iOS, and Wasm launchers.
