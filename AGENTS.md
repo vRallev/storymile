@@ -125,6 +125,10 @@ tests use the blueprint's managed Pixel 3 emulator.
 ## CI
 
 `.github/workflows/ci.yml` runs checks, tests, and platform builds on pushes and pull requests.
+Every push to `main` runs CI without canceling earlier runs. New PR pushes cancel older
+runs for that PR. When CI fails, verify and push the fix promptly without waiting for
+unrelated jobs to finish, so cancellation frees workers for the updated run.
+
 The optional `GRADLE_ENCRYPTION_KEY` repository secret enables Gradle configuration-cache caching.
 
 The source code is public. Store secrets and sensitive keys in GitHub Actions secrets;

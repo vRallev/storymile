@@ -10,7 +10,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  # Replace older PR runs; give every main push its own group so none are dropped.
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -24,7 +25,8 @@ jobs:
     name: CI passed
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    if: ${{ always() }}
+    # Report failures, but allow superseded PR runs to cancel this job too.
+    if: ${{ !cancelled() }}
     # Include every CI job so this is the only required check in branch rules.
     needs:
       - check-build-src
