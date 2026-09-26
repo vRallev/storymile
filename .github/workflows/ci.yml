@@ -14,6 +14,9 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  GRADLE_ARGS: --warning-mode all --stacktrace --continue --show-version
+
 jobs:
   ci-passed:
     name: CI passed
@@ -48,57 +51,57 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Check buildSrc
-        run: ./gradlew --quiet -p buildSrc release
+        run: ./gradlew $GRADLE_ARGS -p buildSrc release
 
   check-dependency-order:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Check dependency order
-        run: ./gradlew --quiet checkSortDependencies --stacktrace
+        run: ./gradlew $GRADLE_ARGS checkSortDependencies
       - name: Check buildSrc dependency order
-        run: ./gradlew --quiet -p buildSrc checkSortDependencies --stacktrace
+        run: ./gradlew $GRADLE_ARGS -p buildSrc checkSortDependencies
 
   check-module-boundaries:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Check module boundaries
-        run: ./gradlew --quiet checkModuleStructureDependencies checkModuleStructureNesting
+        run: ./gradlew $GRADLE_ARGS checkModuleStructureDependencies checkModuleStructureNesting
 
   detekt:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Detekt
-        run: ./gradlew --quiet detekt --stacktrace --show-version --continue
+        run: ./gradlew $GRADLE_ARGS detekt
 
   ktfmt:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
@@ -110,15 +113,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Android Lint
-        run: ./gradlew --quiet lint lintAndroidMain --stacktrace --continue
+        run: ./gradlew $GRADLE_ARGS lint lintAndroidMain
       - name: Upload lint reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ failure() }}
         with:
           name: android-lint-reports
@@ -128,39 +131,39 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Run Android tests
-        run: ./gradlew --quiet testDebugUnitTest testAndroidHostTest --continue
+        run: ./gradlew $GRADLE_ARGS testDebugUnitTest testAndroidHostTest
 
   test-desktop:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Run Desktop unit tests
-        run: ./gradlew --quiet desktopTest -x :app:desktop:desktopTest --continue
+        run: ./gradlew $GRADLE_ARGS desktopTest -x :app:desktop:desktopTest
 
   test-integration-desktop:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Run Desktop integration tests
-        run: ./gradlew --quiet :app:desktop:desktopTest --stacktrace
+        run: ./gradlew $GRADLE_ARGS :app:desktop:desktopTest
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ failure() }}
         with:
           name: test-results-${{ github.job }}
@@ -170,7 +173,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
@@ -178,9 +181,9 @@ jobs:
       - name: Prepare emulator
         uses: ./.github/actions/prepare-emulator-action
       - name: Run Android integration tests
-        run: ./gradlew --quiet :app:android:emulatorCheck --stacktrace
+        run: ./gradlew $GRADLE_ARGS :app:android:emulatorCheck
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ failure() }}
         with:
           name: test-results-${{ github.job }}
@@ -192,65 +195,65 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Run Wasm tests
-        run: ./gradlew --quiet wasmJsTest --continue
+        run: ./gradlew $GRADLE_ARGS wasmJsTest
 
   build-android-debug:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Build Android app
-        run: ./gradlew --quiet :app:android:assembleDebug
+        run: ./gradlew $GRADLE_ARGS :app:android:assembleDebug
 
   build-desktop:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Build Desktop app
-        run: ./gradlew --quiet :app:desktop:desktopMainClasses
+        run: ./gradlew $GRADLE_ARGS :app:desktop:desktopMainClasses
 
   build-web:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Build Wasm web app
-        run: ./gradlew --quiet :app:web:wasmJsBrowserDistribution
+        run: ./gradlew $GRADLE_ARGS :app:web:wasmJsBrowserDistribution
 
   build-ios:
     runs-on: macos-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           select-xcode-26: "true"
       - name: Run iOS simulator tests
-        run: ./gradlew --quiet iosSimulatorArm64Test --continue
+        run: ./gradlew $GRADLE_ARGS iosSimulatorArm64Test
       - name: Build iOS app
         run: >
-          /usr/bin/xcodebuild -quiet
+          /usr/bin/xcodebuild
           -project app/ios/iosApp.xcodeproj
           -scheme iosApp
           -configuration Debug
