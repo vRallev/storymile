@@ -1,0 +1,13 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  enableComposeUi true
+  enableMetro true
+  enableComposePresenterBackstack true
+}
+
+dependencies {
+  commonMainImplementation project(':templates:public')
+}

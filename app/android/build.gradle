@@ -1,0 +1,19 @@
+plugins {
+  id 'software.ralf.storymile.app.android'
+}
+
+storymile {
+  enableComposeUi true
+  enableMetro true
+  enableComposePresenters true
+  addImplModuleDependencies true
+}
+
+dependencies {
+  implementation project(':app-framework:impl')
+
+  // Android tests inherit strict versions from the app runtime.
+  implementation libs.androidx.concurrent.futures
+
+  androidTestImplementation project(':app-framework:impl-ui-test-robots')
+}

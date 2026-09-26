@@ -1,0 +1,4 @@
+<resources>
+  <string name="library_title">Library</string>
+  <string name="library_empty">Your library is empty.</string>
+</resources>

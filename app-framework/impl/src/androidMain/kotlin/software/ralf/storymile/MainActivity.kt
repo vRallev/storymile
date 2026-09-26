@@ -1,0 +1,30 @@
+package software.ralf.storymile
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import software.ralf.app.platform.renderer.ComposeAndroidRendererFactory
+import software.ralf.app.platform.renderer.renderCompose
+import software.ralf.storymile.util.rootScopeProvider
+
+/** Android entry point that renders the shared template stream. */
+class MainActivity : ComponentActivity() {
+  private val viewModel by viewModels<MainActivityViewModel>()
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    enableEdgeToEdge()
+
+    val rendererFactory =
+      ComposeAndroidRendererFactory.createForComposeUi(rootScopeProvider = rootScopeProvider())
+
+    setContent {
+      val template by viewModel.templates.collectAsState()
+      rendererFactory.renderCompose(template)
+    }
+  }
+}

@@ -1,0 +1,25 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  enableComposeUi true
+  enableMetro true
+  enableComposePresenters true
+  addImplModuleDependencies true
+
+  // The application graph intentionally imports implementation modules.
+  enableModuleStructureDependencyCheck false
+}
+
+dependencies {
+  androidMainImplementation libs.androidx.activity.compose
+
+  commonMainImplementation project(':library:impl')
+  commonMainImplementation project(':presenter-navigation:impl')
+  commonMainImplementation project(':templates:impl')
+  commonMainImplementation project(':theme:public')
+  commonMainImplementation project(':util:impl')
+
+  commonTestImplementation project(':library:testing')
+}
