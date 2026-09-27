@@ -193,6 +193,26 @@ run_desktop() {
   ./gradlew --quiet :app:desktop:hotRunDesktop --auto --args="--window-size=$size"
 }
 
+run_web_tests() {
+  local test_status
+  require_command node
+  require_command npm
+  require_command npx
+  require_command python3
+  if ./gradlew --quiet -Pstorymile.enableWasm=true --no-isolated-projects :app:web:wasmJsBrowserDistribution && (
+    cd "$ROOT_DIR/app/web/e2e" &&
+    npm ci &&
+    npx playwright install --with-deps chromium &&
+    npm test
+  ); then
+    echo "✅ Wasm browser smoke tests passed."
+  else
+    test_status=$?
+    echo "❌ Wasm browser smoke tests failed (exit code $test_status)." >&2
+    return "$test_status"
+  fi
+}
+
 run_ios() {
   [[ "$(uname -s)" == Darwin ]] || fail "iOS requires macOS and Xcode."
   require_command xcodebuild
@@ -270,14 +290,19 @@ PY
 }
 
 if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then
-  echo "Usage: ./run.sh"
-  echo "Choose Android, Desktop (hot reload), iOS, Wasm, or Android release tests."
+  echo "Usage: ./run.sh [--web-test]"
+  echo "Choose Android, Desktop (hot reload), iOS, Wasm, Android release tests, or Wasm browser smoke tests."
   echo "Then choose a device, emulator, or window size."
+  echo "Use --web-test to build and test the production web app without the menu."
   exit 0
 fi
-[[ $# == 0 ]] || fail "Usage: ./run.sh"
+if [[ $# == 1 && "$1" == --web-test ]]; then
+  run_web_tests
+  exit 0
+fi
+[[ $# == 0 ]] || fail "Usage: ./run.sh [--web-test]"
 
-choose "What would you like to run?" 2 Android Desktop iOS Wasm "Android release tests"
+choose "What would you like to run?" 2 Android Desktop iOS Wasm "Android release tests" "Wasm browser smoke tests"
 PLATFORM="$SELECTION"
 WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/storymile-run.XXXXXX")"
 trap 'rm -rf -- "$WORK_DIR"' EXIT
@@ -289,4 +314,5 @@ case "$PLATFORM" in
   2) run_ios ;;
   3) ./gradlew --quiet -Pstorymile.enableWasm=true --no-isolated-projects :app:web:wasmJsBrowserDevelopmentRun ;;
   4) run_android_release_tests ;;
+  5) run_web_tests ;;
 esac

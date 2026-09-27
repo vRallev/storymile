@@ -42,7 +42,7 @@ jobs:
       - test-wasm
       - build-android-release
       - build-desktop
-      - build-web
+      - build-web-release
       - build-ios
     steps:
       - name: Verify all jobs passed
@@ -250,8 +250,8 @@ jobs:
       - name: Build Desktop app
         run: ./gradlew $GRADLE_ARGS :app:desktop:desktopMainClasses
 
-  build-web:
-    runs-on: ubuntu-latest
+  build-web-release:
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
@@ -261,6 +261,28 @@ jobs:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Build Wasm web app
         run: ./gradlew $GRADLE_ARGS -Pstorymile.enableWasm=true --no-isolated-projects :app:web:wasmJsBrowserDistribution
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/web/e2e/package-lock.json
+      - name: Install browser tests
+        working-directory: app/web/e2e
+        run: npm ci
+      - name: Install Chromium
+        working-directory: app/web/e2e
+        run: npx playwright install --with-deps chromium
+      - name: Verify Wasm app launch
+        working-directory: app/web/e2e
+        run: npm test
+      - name: Upload browser test results
+        uses: actions/upload-artifact@v7
+        if: ${{ failure() }}
+        with:
+          name: test-results-${{ github.job }}
+          path: |
+            app/web/e2e/playwright-report/
+            app/web/e2e/test-results/
 
   build-ios:
     runs-on: macos-latest
