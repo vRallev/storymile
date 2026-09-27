@@ -19,6 +19,7 @@ dependencyResolutionManagement {
 }
 
 include ':app:android'
+include ':app:android-blackbox-test'
 include ':app:desktop'
 if (providers.gradleProperty('storymile.enableWasm').map { it.toBoolean() }.getOrElse(false)) {
   include ':app:web'

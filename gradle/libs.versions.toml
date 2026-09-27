@@ -10,6 +10,7 @@ androidx-test-junit = "1.3.0"
 androidx-test-orchestrator = "1.6.1"
 androidx-test-rules = "1.7.0"
 androidx-test-runner = "1.7.0"
+androidx-test-uiautomator = "2.4.0"
 app-platform = "0.2.2"
 assertk = "0.28.1"
 compose-android = "1.12.1"
@@ -35,6 +36,7 @@ androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "andro
 androidx-test-orchestrator = { module = "androidx.test:orchestrator", version.ref = "androidx-test-orchestrator" }
 androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidx-test-rules" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test-runner" }
+androidx-test-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "androidx-test-uiautomator" }
 app-platform-gradle-plugin = { module = "software.ralf.app.platform:gradle-plugin", version.ref = "app-platform" }
 assertk = { module = "com.willowtreeapps.assertk:assertk", version.ref = "assertk" }
 compose-desktop-linux-arm64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-linux-arm64", version.ref = "compose-multiplatform" }

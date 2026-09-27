@@ -24,6 +24,12 @@ internal class BaseAndroidPlugin : Plugin<Project> {
       sourceCompatibility = javaVersion
       targetCompatibility = javaVersion
     }
+    android.buildTypes.named("release") {
+      it.optimization { enable = true }
+      it.isDebuggable = false
+      // Use local debug signing until a release signing key is configured.
+      it.signingConfig = android.signingConfigs.getByName("debug")
+    }
     android.testOptions.unitTests {
       isIncludeAndroidResources = false
       isReturnDefaultValues = true
@@ -41,13 +47,7 @@ internal class BaseAndroidPlugin : Plugin<Project> {
       testInstrumentationRunnerArguments += "clearPackageData" to "true"
     }
     android.testOptions.execution = "ANDROIDX_TEST_ORCHESTRATOR"
-    @Suppress("UnstableApiUsage")
-    android.testOptions.managedDevices.localDevices.create("emulator") {
-      it.device = "Pixel 3"
-      it.apiLevel = 30
-      it.require64Bit = true
-      it.systemImageSource = "aosp-atd"
-    }
+    configureAndroidEmulator(android.testOptions)
     dependencies.add(
       "androidTestUtil",
       libs.findLibrary("androidx-test-orchestrator").get().get().toString(),

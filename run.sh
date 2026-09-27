@@ -46,7 +46,7 @@ choose_target() {
     TARGET_IDS+=("$identifier")
     TARGET_LABELS+=("$label")
   done < "$WORK_DIR/targets"
-  choose "Which device should run Storymile?" 1 "${TARGET_LABELS[@]}"
+  choose "${1:-Which device should run Storymile?}" 1 "${TARGET_LABELS[@]}"
   TARGET_KIND="${TARGET_KINDS[$SELECTION]}"
   TARGET_ID="${TARGET_IDS[$SELECTION]}"
 }
@@ -83,8 +83,8 @@ find_running_avd() {
   return 1
 }
 
-run_android() {
-  require_command python3
+prepare_android() {
+  local emulators_only="${1:-false}"
   ADB="$(find_android_tool adb platform-tools/adb)" || fail "Install Android SDK platform-tools and set ANDROID_HOME."
   EMULATOR="$(find_android_tool emulator emulator/emulator || true)"
   local serial state details name avd deadline emulator_pid booted
@@ -93,6 +93,7 @@ run_android() {
   "$ADB" devices -l > "$WORK_DIR/adb-devices"
   while read -r serial state details; do
     [[ -n "$serial" && "$serial" != List ]] || continue
+    [[ "$emulators_only" == false || "$serial" == emulator-* ]] || continue
     if [[ "$state" != device ]]; then
       echo "Skipping $serial ($state). Unlock the device and authorize USB debugging if needed." >&2
       continue
@@ -116,7 +117,12 @@ run_android() {
       fi
     done < "$WORK_DIR/avds"
   fi
-  choose_target
+  if [[ "$emulators_only" == true ]]; then
+    [[ -s "$WORK_DIR/targets" ]] || fail "No available Android emulators. Create an AVD in Android Studio first."
+    choose_target "Which emulator should run the Android release tests?"
+  else
+    choose_target
+  fi
   ANDROID_SERIAL_ID="$TARGET_ID"
   if [[ "$TARGET_KIND" == avd ]]; then
     echo "Starting $TARGET_ID..."
@@ -138,7 +144,11 @@ run_android() {
     (( SECONDS < deadline )) || fail "Android did not finish booting within three minutes."
     sleep 2
   done
+}
 
+run_android() {
+  require_command python3
+  prepare_android
   ./gradlew --quiet :app:android:assembleDebug
   python3 - "$ROOT_DIR" > "$WORK_DIR/apk" <<'PY'
 import json
@@ -161,6 +171,19 @@ PY
   [[ "$activity" == */* ]] || fail "Could not resolve the launcher activity for $app_id."
   "$ADB" -s "$ANDROID_SERIAL_ID" shell am start -W -S -n "$activity" | tee "$WORK_DIR/android-launch"
   grep -q '^Status: ok' "$WORK_DIR/android-launch" || fail "Android did not report a successful launch."
+}
+
+run_android_release_tests() {
+  local test_status
+  prepare_android true
+  if ANDROID_SERIAL="$ANDROID_SERIAL_ID" \
+    ./gradlew --quiet :app:android-blackbox-test:connectedReleaseAndroidTest; then
+    echo "✅ Android release tests passed."
+  else
+    test_status=$?
+    echo "❌ Android release tests failed (exit code $test_status)." >&2
+    return "$test_status"
+  fi
 }
 
 run_desktop() {
@@ -248,12 +271,13 @@ PY
 
 if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then
   echo "Usage: ./run.sh"
-  echo "Choose Android, Desktop (hot reload), iOS, or Wasm, then a device or window size."
+  echo "Choose Android, Desktop (hot reload), iOS, Wasm, or Android release tests."
+  echo "Then choose a device, emulator, or window size."
   exit 0
 fi
 [[ $# == 0 ]] || fail "Usage: ./run.sh"
 
-choose "Which platform?" 2 Android Desktop iOS Wasm
+choose "What would you like to run?" 2 Android Desktop iOS Wasm "Android release tests"
 PLATFORM="$SELECTION"
 WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/storymile-run.XXXXXX")"
 trap 'rm -rf -- "$WORK_DIR"' EXIT
@@ -264,4 +288,5 @@ case "$PLATFORM" in
   1) run_desktop ;;
   2) run_ios ;;
   3) ./gradlew --quiet -Pstorymile.enableWasm=true --no-isolated-projects :app:web:wasmJsBrowserDevelopmentRun ;;
+  4) run_android_release_tests ;;
 esac
