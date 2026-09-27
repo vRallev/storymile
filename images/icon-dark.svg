@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 48 48" role="img" aria-labelledby="title description">
+  <title id="title">Storymile paper boat for dark surfaces</title>
+  <desc id="description">A folded blue paper boat with a pale blue sail, softly shaded hull facets, and gently rounded outer corners, in the Harbor Night palette.</desc>
+  <!-- Gradient stops blend the theme's ocean, ice, mist, and navy blues. -->
+  <!-- Source colors: #365F7D, #ACC9DC, #DCE8EE, #294C63. -->
+  <defs>
+    <clipPath id="harbor-night-rounded-outline" clipPathUnits="userSpaceOnUse">
+      <path d="M6.31446 18.51099 Q6 18 6.58571 18.13016 L18.54808 20.78846 L23.65592 13.49154 Q24 13 24.34408 13.49154 L29.45192 20.78846 L41.41429 18.13016 Q42 18 41.68554 18.51099 L34.20964 30.65934 Q34 31 33.60777 31.07845 L24.49029 32.90194 Q24 33 23.50971 32.90194 L14.39223 31.07845 Q14 31 13.79036 30.65934Z"/>
+    </clipPath>
+    <linearGradient id="harbor-night-rear" gradientUnits="userSpaceOnUse" x1="24" y1="18" x2="24" y2="26">
+      <stop offset="0" stop-color="#507692"/>
+      <stop offset="1" stop-color="#294C63"/>
+    </linearGradient>
+    <linearGradient id="harbor-night-sail-left" gradientUnits="userSpaceOnUse" x1="24" y1="13" x2="17" y2="25">
+      <stop offset="0" stop-color="#ACC9DC"/>
+      <stop offset="1" stop-color="#C9DCE7"/>
+    </linearGradient>
+    <linearGradient id="harbor-night-sail-right" gradientUnits="userSpaceOnUse" x1="24" y1="13" x2="31" y2="26">
+      <stop offset="0" stop-color="#8EAEC4"/>
+      <stop offset="1" stop-color="#B3CEDF"/>
+    </linearGradient>
+    <linearGradient id="harbor-night-hull-left" gradientUnits="userSpaceOnUse" x1="6" y1="18" x2="24" y2="31">
+      <stop offset="0" stop-color="#7194AC"/>
+      <stop offset="1" stop-color="#507692"/>
+    </linearGradient>
+    <linearGradient id="harbor-night-keel-left" gradientUnits="userSpaceOnUse" x1="18" y1="26" x2="20" y2="33">
+      <stop offset="0" stop-color="#507692"/>
+      <stop offset="1" stop-color="#294C63"/>
+    </linearGradient>
+    <linearGradient id="harbor-night-hull-right" gradientUnits="userSpaceOnUse" x1="42" y1="18" x2="24" y2="31">
+      <stop offset="0" stop-color="#86A7BE"/>
+      <stop offset="1" stop-color="#6387A1"/>
+    </linearGradient>
+    <linearGradient id="harbor-night-keel-right" gradientUnits="userSpaceOnUse" x1="30" y1="26" x2="26" y2="33">
+      <stop offset="0" stop-color="#6387A1"/>
+      <stop offset="1" stop-color="#365F7D"/>
+    </linearGradient>
+  </defs>
+  <!-- Round only the outer corners, keeping the paper folds crisp. -->
+  <g clip-path="url(#harbor-night-rounded-outline)">
+    <path fill="#365F7D" d="M6 18 24 22 42 18 34 31 24 33 14 31Z"/>
+    <path fill="url(#harbor-night-rear)" d="M6 18 24 22 42 18 24 26Z"/>
+    <path fill="url(#harbor-night-sail-left)" d="M24 13 17 23 24 26 31 23Z"/>
+    <path fill="url(#harbor-night-sail-right)" d="M24 13 31 23 24 26Z"/>
+    <path fill="url(#harbor-night-hull-left)" d="M6 18 24 26 14 31Z"/>
+    <path fill="url(#harbor-night-keel-left)" d="M14 31 24 26 24 33Z"/>
+    <path fill="url(#harbor-night-hull-right)" d="M24 26 42 18 34 31Z"/>
+    <path fill="url(#harbor-night-keel-right)" d="M24 26 34 31 24 33Z"/>
+  </g>
+</svg>

@@ -136,6 +136,10 @@ Android Lint checks the app and shared KMP code.
 ./gradlew :app-framework:impl:linkDebugFrameworkIosSimulatorArm64
 ```
 
+## Design
+
+- Use Material 3 components and color roles from `AppTheme` in `:theme:public`.
+
 ## CI
 
 `.github/workflows/ci.yml` runs checks, tests, and platform builds on pushes and pull requests.
