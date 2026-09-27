@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 48 48" role="img" aria-labelledby="title description">
+  <title id="title">Storymile paper boat</title>
+  <desc id="description">A folded blue paper boat with a pale blue sail, softly shaded hull facets, and gently rounded outer corners, in the Paper Tide palette.</desc>
+  <!-- Gradient stops blend the theme's ocean, ice, mist, and navy blues. -->
+  <!-- Source colors: #365F7D, #ACC9DC, #DCE8EE, #233B50, #294C63. -->
+  <defs>
+    <clipPath id="paper-tide-rounded-outline" clipPathUnits="userSpaceOnUse">
+      <path d="M6.31446 18.51099 Q6 18 6.58571 18.13016 L18.54808 20.78846 L23.65592 13.49154 Q24 13 24.34408 13.49154 L29.45192 20.78846 L41.41429 18.13016 Q42 18 41.68554 18.51099 L34.20964 30.65934 Q34 31 33.60777 31.07845 L24.49029 32.90194 Q24 33 23.50971 32.90194 L14.39223 31.07845 Q14 31 13.79036 30.65934Z"/>
+    </clipPath>
+    <linearGradient id="paper-tide-rear" gradientUnits="userSpaceOnUse" x1="24" y1="18" x2="24" y2="26">
+      <stop offset="0" stop-color="#365F7D"/>
+      <stop offset="1" stop-color="#233B50"/>
+    </linearGradient>
+    <linearGradient id="paper-tide-sail-left" gradientUnits="userSpaceOnUse" x1="24" y1="13" x2="17" y2="25">
+      <stop offset="0" stop-color="#9AB9CE"/>
+      <stop offset="1" stop-color="#BAD2E1"/>
+    </linearGradient>
+    <linearGradient id="paper-tide-sail-right" gradientUnits="userSpaceOnUse" x1="24" y1="13" x2="31" y2="26">
+      <stop offset="0" stop-color="#7D9FB6"/>
+      <stop offset="1" stop-color="#ACC9DC"/>
+    </linearGradient>
+    <linearGradient id="paper-tide-hull-left" gradientUnits="userSpaceOnUse" x1="6" y1="18" x2="24" y2="31">
+      <stop offset="0" stop-color="#527894"/>
+      <stop offset="1" stop-color="#365F7D"/>
+    </linearGradient>
+    <linearGradient id="paper-tide-keel-left" gradientUnits="userSpaceOnUse" x1="18" y1="26" x2="20" y2="33">
+      <stop offset="0" stop-color="#365F7D"/>
+      <stop offset="1" stop-color="#233B50"/>
+    </linearGradient>
+    <linearGradient id="paper-tide-hull-right" gradientUnits="userSpaceOnUse" x1="42" y1="18" x2="24" y2="31">
+      <stop offset="0" stop-color="#5F849E"/>
+      <stop offset="1" stop-color="#365F7D"/>
+    </linearGradient>
+    <linearGradient id="paper-tide-keel-right" gradientUnits="userSpaceOnUse" x1="30" y1="26" x2="26" y2="33">
+      <stop offset="0" stop-color="#446C88"/>
+      <stop offset="1" stop-color="#294C63"/>
+    </linearGradient>
+  </defs>
+  <!-- Round only the outer corners, keeping the paper folds crisp. -->
+  <g clip-path="url(#paper-tide-rounded-outline)">
+    <path fill="#365F7D" d="M6 18 24 22 42 18 34 31 24 33 14 31Z"/>
+    <path fill="url(#paper-tide-rear)" d="M6 18 24 22 42 18 24 26Z"/>
+    <path fill="url(#paper-tide-sail-left)" d="M24 13 17 23 24 26 31 23Z"/>
+    <path fill="url(#paper-tide-sail-right)" d="M24 13 31 23 24 26Z"/>
+    <path fill="url(#paper-tide-hull-left)" d="M6 18 24 26 14 31Z"/>
+    <path fill="url(#paper-tide-keel-left)" d="M14 31 24 26 24 33Z"/>
+    <path fill="url(#paper-tide-hull-right)" d="M24 26 42 18 34 31Z"/>
+    <path fill="url(#paper-tide-keel-right)" d="M24 26 34 31 24 33Z"/>
+  </g>
+</svg>
