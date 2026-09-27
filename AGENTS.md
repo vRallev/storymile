@@ -152,7 +152,6 @@ never commit them or expose them in logs or artifacts.
 #### Desktop
 
 Desktop tests include rendered and headless application smoke tests.
-Run Desktop instrumented tests with `./run.sh --desktop-test` or the launcher menu.
 
 #### Android
 
