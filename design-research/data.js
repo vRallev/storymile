@@ -1,529 +1,4370 @@
 window.STORYMILE_DESIGN = {
-  "boards": [
+  "screens": [
     {
-      "id": "a-paper-tide",
-      "name": "A \u00b7 Paper Tide",
-      "kind": "palette",
-      "palette": {
-        "background": "#F7F3EB",
-        "surface": "#FFFDF8",
-        "text": "#233B50",
-        "primary": "#365F7D",
-        "accent": "#D6BA8E",
-        "onPrimary": "#FFFDF8",
-        "onAccent": "#233B50",
-        "secondary": "#5B6E79",
-        "selection": "#DCE8EE"
-      },
-      "file": "a-paper-tide.png",
-      "prompt": "Use case: ui-mockup\nAsset type: high-fidelity Storymile podcast app design exploration, palette A \"Paper Tide\".\nPrimary request: Create a beautifully finished UI mockup board showing SIX complete portrait mobile screens arranged in a clean three-column two-row grid. Large portrait board at 2400x3200 or highest available resolution. Each screen must be equally large and legible, no overlapping or cropping. Narrow understated device outlines only. Board title \"A / PAPER TIDE\" and five small palette swatches at top. A small caption label outside each screen. This is a practical product design presentation, no photography of devices, no perspective.\nReference context: The app's current icon depicts an ivory paper boat traveling over dusty blue ocean with a winding sand-colored audio-wave path. Echo its palette and gentle curves; use a tiny boat/wave app mark, do not turn app backgrounds into illustrations.\nColor palette: warm paper background #F7F3EB, white-ivory surfaces #FFFDF8, ink #233B50, primary deep muted blue #365F7D, mist #DCE8EE, sand accent #D6BA8E. Dark blue buttons with ivory text. Generous whitespace, flat clean surfaces, restrained soft shadows. Editorial contemporary sans-serif typography with occasional elegant serif feature title. Corners 16-24dp, crisp simple line icons, clear hierarchy, humane readable UI.\nScreen 1 caption \"DISCOVER\": small Storymile mark at top, heading \"Find your next story\", search field \"Podcasts, episodes, people\", filter chips \"For you\", \"Science\", \"Culture\", editorial feature podcast artwork of quiet sea horizon titled \"The Quiet Current\" and \"Stories from the coast\"; recommendation section \"Worth a listen\" with two small original podcast cover tiles \"Small Wonders\" and \"Field Notes\". Mini-player above bottom bar: \"The art of slowing down\" with tiny cover and pause icon. Bottom navigation exactly \"Discover\", \"Saved\", \"Profile\", Discover selected.\nScreen 2 caption \"LISTEN\": full now-playing screen, top chevron down and \"Now playing\"; large square original blue ocean podcast artwork; show \"The art of slowing down\", \"The Quiet Current\"; save bookmark and overflow; progress scrubber with \"12:34\" and \"42:18\"; big pause button with 15-second rewind and 30-second forward; lower actions \"1.2\u00d7\", \"Sleep\", \"Queue\"; chapter section \"Finding a slower rhythm\". Do not add another mini-player or bottom navigation on full player.\nScreen 3 caption \"SAVED\": title \"Saved episodes\", filter chips \"All\", \"Downloaded\", \"Unplayed\"; list rows with square covers, episode titles, show name, duration, filled bookmark and play icons. Include \"The art of slowing down\" / \"The Quiet Current\" / \"42 min\", \"A small act of wonder\" / \"Small Wonders\" / \"31 min\", \"The paths we take\" / \"Field Notes\" / \"56 min\". First row selected mist blue. One clear downloaded check badge and progress in one partially played episode. \"Sort: Recently saved\". Same mini-player and bottom navigation Saved selected.\nScreen 4 caption \"SIGN IN\": uncluttered auth screen, small paper boat mark, heading \"Your stories, everywhere\", text \"Sign in to sync your saved episodes and listening progress.\"; email field labelled \"Email\" with placeholder \"you@example.com\"; primary \"Continue with email\", outlined \"Continue with Apple\", outlined \"Continue with Google\"; quiet link \"Continue without an account\". No provider logos needed. Back arrow and safe spacing. Clearly a login choice, not a paywall.\nScreen 5 caption \"PROFILE\": signed-in profile with simple initials avatar \"AL\", \"Alex Lee\", \"alex@example.com\", small \"Synced just now\"; counts \"24 saved\", \"8 followed\"; rows \"Listening history\", \"Downloads\", \"Settings\", \"Help\"; secondary \"Sign out\". Same mini-player and bottom navigation Profile selected. No subscription upsell.\nScreen 6 caption \"SETTINGS\": back arrow, heading \"Settings\", tidy grouped setting rows: \"Playback\" with \"Default speed\" value \"1.2\u00d7\" and \"Skip silence\" switch; \"Downloads\" with \"Wi-Fi only\" switch and \"Manage storage\" value \"1.2 GB\"; \"Appearance\" value \"System\"; \"Notifications\"; \"Privacy\". Show actual switches and chevrons, short clear copy, same mini-player at foot.\nConstraints: all six distinct screens complete, all exact main labels spelled correctly; align UI to an 8pt grid and practical 48dp touch areas. Mock content is fictional. No ads, premium plans, generation features, chat screens, lorem ipsum, gradients, glassmorphism, gigantic decorative whitespace or watermark. This is palette/layout exploration rather than finished implementation.",
-      "description": "Warm paper and muted ocean blue. Closest to the current app icon.",
-      "screens": 6,
-      "width": 1086,
-      "height": 1448
+      "id": "android-phone-home-light",
+      "title": "Home",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-home-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1871,
+      "preview": "previews/android-phone-home-light.webp",
+      "thumbnail": "previews/android-phone-home-light-small.webp"
     },
     {
-      "id": "b-harbor-night",
-      "name": "B \u00b7 Harbor Night",
-      "kind": "palette",
-      "palette": {
-        "background": "#0F202D",
-        "surface": "#182F40",
-        "text": "#F4EFE5",
-        "primary": "#ACC9DC",
-        "onPrimary": "#0F202D",
-        "accent": "#E4C79D",
-        "onAccent": "#0F202D",
-        "secondary": "#AFBFCA",
-        "selection": "#294C63"
-      },
-      "file": "b-harbor-night.png",
-      "prompt": "Use case: ui-mockup\nAsset type: high-fidelity Storymile podcast app design exploration, palette B \u00b7 Harbor Night.\nPrimary request: Create a beautifully finished UI mockup board showing SIX complete portrait mobile screens arranged in a clean three-column two-row grid. Large portrait board at 2400x3200 or highest available resolution. Each screen must be equally large and legible, no overlapping or cropping. Narrow understated device outlines only. Board title \"B / HARBOR NIGHT\" and five small palette swatches at top. A small caption label outside each screen. This is a practical product design presentation, no photography of devices, no perspective.\nReference context: The app's current icon depicts an ivory paper boat traveling over dusty blue ocean with a winding sand-colored audio-wave path. Echo its palette and gentle curves; use a tiny boat/wave app mark, do not turn app backgrounds into illustrations.\nColor palette: {\"background\":\"#0F202D\",\"surface\":\"#182F40\",\"text\":\"#F4EFE5\",\"primary\":\"#ACC9DC\",\"onPrimary\":\"#0F202D\",\"accent\":\"#E4C79D\",\"onAccent\":\"#0F202D\",\"secondary\":\"#AFBFCA\",\"selection\":\"#294C63\"}. Style: Immersive quiet dark navy, layered deep blue surfaces, ivory typography, icy-blue transport controls and champagne bookmarks. All UI sans-serif, confident restrained headings, square original cover art with 16dp corners. Avoid black crush. Distinct dark version grounded in the blue paper-boat icon.\nScreen 1 caption \"DISCOVER\": small Storymile mark at top, heading \"Find your next story\", search field \"Podcasts, episodes, people\", filter chips \"For you\", \"Science\", \"Culture\", editorial feature podcast artwork of quiet sea horizon titled \"The Quiet Current\" and \"Stories from the coast\"; recommendation section \"Worth a listen\" with two small original podcast cover tiles \"Small Wonders\" and \"Field Notes\". Mini-player above bottom bar: \"The art of slowing down\" with tiny cover and pause icon. Bottom navigation exactly \"Discover\", \"Saved\", \"Profile\", Discover selected.\nScreen 2 caption \"LISTEN\": full now-playing screen, top chevron down and \"Now playing\"; large square original blue ocean podcast artwork; show \"The art of slowing down\", \"The Quiet Current\"; save bookmark and overflow; progress scrubber with \"12:34\" and \"42:18\"; big pause button with 15-second rewind and 30-second forward; lower actions \"1.2\u00d7\", \"Sleep\", \"Queue\"; chapter section \"Finding a slower rhythm\". Do not add another mini-player or bottom navigation on full player.\nScreen 3 caption \"SAVED\": title \"Saved episodes\", filter chips \"All\", \"Downloaded\", \"Unplayed\"; list rows with square covers, episode titles, show name, duration, filled bookmark and play icons. Include \"The art of slowing down\" / \"The Quiet Current\" / \"42 min\", \"A small act of wonder\" / \"Small Wonders\" / \"31 min\", \"The paths we take\" / \"Field Notes\" / \"56 min\". First row selected using the selection container token. One clear downloaded check badge and progress in one partially played episode. \"Sort: Recently saved\". Same mini-player and bottom navigation Saved selected.\nScreen 4 caption \"SIGN IN\": uncluttered auth screen, small paper boat mark, heading \"Your stories, everywhere\", text \"Sign in to sync your saved episodes and listening progress.\"; email field labelled \"Email\" with placeholder \"you@example.com\"; primary \"Continue with email\", outlined \"Continue with Apple\", outlined \"Continue with Google\"; quiet link \"Continue without an account\". No provider logos needed. Back arrow and safe spacing. Clearly a login choice, not a paywall.\nScreen 5 caption \"PROFILE\": signed-in profile with simple initials avatar \"AL\", \"Alex Lee\", \"alex@example.com\", small \"Synced just now\"; counts \"24 saved\", \"8 followed\"; rows \"Listening history\", \"Downloads\", \"Settings\", \"Help\"; secondary \"Sign out\". Same mini-player and bottom navigation Profile selected. No subscription upsell.\nScreen 6 caption \"SETTINGS\": back arrow, heading \"Settings\", tidy grouped setting rows: \"Playback\" with \"Default speed\" value \"1.2\u00d7\" and \"Skip silence\" switch; \"Downloads\" with \"Wi-Fi only\" switch and \"Manage storage\" value \"1.2 GB\"; \"Appearance\" value \"System\"; \"Notifications\"; \"Privacy\". Show actual switches and chevrons, short clear copy, same mini-player at foot.\nConstraints: all six distinct screens complete, all exact main labels spelled correctly; align UI to an 8pt grid and practical 48dp touch areas. Mock content is fictional. No ads, premium plans, generation features, chat screens, lorem ipsum, gradients, glassmorphism, gigantic decorative whitespace or watermark. This is palette/layout exploration rather than finished implementation.",
-      "description": "Deep navy, ice blue, and champagne. An immersive dark direction.",
-      "screens": 6,
-      "width": 1086,
-      "height": 1448
+      "id": "android-phone-home-dark",
+      "title": "Home",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-home-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1871,
+      "preview": "previews/android-phone-home-dark.webp",
+      "thumbnail": "previews/android-phone-home-dark-small.webp"
     },
     {
-      "id": "c-sea-glass",
-      "name": "C \u00b7 Sea Glass",
-      "kind": "palette",
-      "palette": {
-        "background": "#F1F6F1",
-        "surface": "#FFFFFF",
-        "text": "#193C3D",
-        "primary": "#216B68",
-        "onPrimary": "#FFFFFF",
-        "accent": "#C9DCC2",
-        "onAccent": "#193C3D",
-        "secondary": "#54716D",
-        "selection": "#DCECE6"
-      },
-      "file": "c-sea-glass.png",
-      "prompt": "Use case: ui-mockup\nAsset type: high-fidelity Storymile podcast app design exploration, palette C \u00b7 Sea Glass.\nPrimary request: Create a beautifully finished UI mockup board showing SIX complete portrait mobile screens arranged in a clean three-column two-row grid. Large portrait board at 2400x3200 or highest available resolution. Each screen must be equally large and legible, no overlapping or cropping. Narrow understated device outlines only. Board title \"C / SEA GLASS\" and five small palette swatches at top. A small caption label outside each screen. This is a practical product design presentation, no photography of devices, no perspective.\nReference context: The app's current icon depicts an ivory paper boat traveling over dusty blue ocean with a winding sand-colored audio-wave path. Echo its palette and gentle curves; use a tiny boat/wave app mark, do not turn app backgrounds into illustrations.\nColor palette: {\"background\":\"#F1F6F1\",\"surface\":\"#FFFFFF\",\"text\":\"#193C3D\",\"primary\":\"#216B68\",\"onPrimary\":\"#FFFFFF\",\"accent\":\"#C9DCC2\",\"onAccent\":\"#193C3D\",\"secondary\":\"#54716D\",\"selection\":\"#DCECE6\"}. Style: Fresh calm light UI with cool ivory, blue-green teal controls and soft sage selections. Friendly humanist sans-serif. Spacious rounded cards and generous tap areas. Original ocean-blue podcast art ensures connection to icon, blue tiny paper boat mark. Restrained and functional.\nScreen 1 caption \"DISCOVER\": small Storymile mark at top, heading \"Find your next story\", search field \"Podcasts, episodes, people\", filter chips \"For you\", \"Science\", \"Culture\", editorial feature podcast artwork of quiet sea horizon titled \"The Quiet Current\" and \"Stories from the coast\"; recommendation section \"Worth a listen\" with two small original podcast cover tiles \"Small Wonders\" and \"Field Notes\". Mini-player above bottom bar: \"The art of slowing down\" with tiny cover and pause icon. Bottom navigation exactly \"Discover\", \"Saved\", \"Profile\", Discover selected.\nScreen 2 caption \"LISTEN\": full now-playing screen, top chevron down and \"Now playing\"; large square original blue ocean podcast artwork; show \"The art of slowing down\", \"The Quiet Current\"; save bookmark and overflow; progress scrubber with \"12:34\" and \"42:18\"; big pause button with 15-second rewind and 30-second forward; lower actions \"1.2\u00d7\", \"Sleep\", \"Queue\"; chapter section \"Finding a slower rhythm\". Do not add another mini-player or bottom navigation on full player.\nScreen 3 caption \"SAVED\": title \"Saved episodes\", filter chips \"All\", \"Downloaded\", \"Unplayed\"; list rows with square covers, episode titles, show name, duration, filled bookmark and play icons. Include \"The art of slowing down\" / \"The Quiet Current\" / \"42 min\", \"A small act of wonder\" / \"Small Wonders\" / \"31 min\", \"The paths we take\" / \"Field Notes\" / \"56 min\". First row selected using the selection container token. One clear downloaded check badge and progress in one partially played episode. \"Sort: Recently saved\". Same mini-player and bottom navigation Saved selected.\nScreen 4 caption \"SIGN IN\": uncluttered auth screen, small paper boat mark, heading \"Your stories, everywhere\", text \"Sign in to sync your saved episodes and listening progress.\"; email field labelled \"Email\" with placeholder \"you@example.com\"; primary \"Continue with email\", outlined \"Continue with Apple\", outlined \"Continue with Google\"; quiet link \"Continue without an account\". No provider logos needed. Back arrow and safe spacing. Clearly a login choice, not a paywall.\nScreen 5 caption \"PROFILE\": signed-in profile with simple initials avatar \"AL\", \"Alex Lee\", \"alex@example.com\", small \"Synced just now\"; counts \"24 saved\", \"8 followed\"; rows \"Listening history\", \"Downloads\", \"Settings\", \"Help\"; secondary \"Sign out\". Same mini-player and bottom navigation Profile selected. No subscription upsell.\nScreen 6 caption \"SETTINGS\": back arrow, heading \"Settings\", tidy grouped setting rows: \"Playback\" with \"Default speed\" value \"1.2\u00d7\" and \"Skip silence\" switch; \"Downloads\" with \"Wi-Fi only\" switch and \"Manage storage\" value \"1.2 GB\"; \"Appearance\" value \"System\"; \"Notifications\"; \"Privacy\". Show actual switches and chevrons, short clear copy, same mini-player at foot.\nConstraints: all six distinct screens complete, all exact main labels spelled correctly; align UI to an 8pt grid and practical 48dp touch areas. Mock content is fictional. No ads, premium plans, generation features, chat screens, lorem ipsum, gradients, glassmorphism, gigantic decorative whitespace or watermark. This is palette/layout exploration rather than finished implementation.",
-      "description": "Teal and sage on cool ivory. Soft, fresh, and calm.",
-      "screens": 6,
-      "width": 1086,
-      "height": 1448
+      "id": "android-phone-library-light",
+      "title": "Library",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-library-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 840,
+      "height": 1871,
+      "preview": "previews/android-phone-library-light.webp",
+      "thumbnail": "previews/android-phone-library-light-small.webp"
     },
     {
-      "id": "d-apricot-coast",
-      "name": "D \u00b7 Apricot Coast",
-      "kind": "palette",
-      "palette": {
-        "background": "#FFF6EE",
-        "surface": "#FFFCF8",
-        "text": "#253F50",
-        "primary": "#375F7A",
-        "onPrimary": "#FFFFFF",
-        "accent": "#B34F35",
-        "onAccent": "#FFFFFF",
-        "secondary": "#66717A",
-        "selection": "#F7DFD0"
-      },
-      "file": "d-apricot-coast.png",
-      "prompt": "Use case: ui-mockup\nAsset type: high-fidelity Storymile podcast app design exploration, palette D \u00b7 Apricot Coast.\nPrimary request: Create a beautifully finished UI mockup board showing SIX complete portrait mobile screens arranged in a clean three-column two-row grid. Large portrait board at 2400x3200 or highest available resolution. Each screen must be equally large and legible, no overlapping or cropping. Narrow understated device outlines only. Board title \"D / APRICOT COAST\" and five small palette swatches at top. A small caption label outside each screen. This is a practical product design presentation, no photography of devices, no perspective.\nReference context: The app's current icon depicts an ivory paper boat traveling over dusty blue ocean with a winding sand-colored audio-wave path. Echo its palette and gentle curves; use a tiny boat/wave app mark, do not turn app backgrounds into illustrations.\nColor palette: {\"background\":\"#FFF6EE\",\"surface\":\"#FFFCF8\",\"text\":\"#253F50\",\"primary\":\"#375F7A\",\"onPrimary\":\"#FFFFFF\",\"accent\":\"#B34F35\",\"onAccent\":\"#FFFFFF\",\"secondary\":\"#66717A\",\"selection\":\"#F7DFD0\"}. Style: Warm magazine-like light UI with apricot canvas, denim-blue primary controls, clay/terracotta bookmark accents, bold editorial feature titles, clean sans-serif functional text. Larger asymmetric feature artwork with quiet dividers and low card chrome. Natural art in blue ocean, terracotta landscape and warm paper. No excessive decorative elements.\nScreen 1 caption \"DISCOVER\": small Storymile mark at top, heading \"Find your next story\", search field \"Podcasts, episodes, people\", filter chips \"For you\", \"Science\", \"Culture\", editorial feature podcast artwork of quiet sea horizon titled \"The Quiet Current\" and \"Stories from the coast\"; recommendation section \"Worth a listen\" with two small original podcast cover tiles \"Small Wonders\" and \"Field Notes\". Mini-player above bottom bar: \"The art of slowing down\" with tiny cover and pause icon. Bottom navigation exactly \"Discover\", \"Saved\", \"Profile\", Discover selected.\nScreen 2 caption \"LISTEN\": full now-playing screen, top chevron down and \"Now playing\"; large square original blue ocean podcast artwork; show \"The art of slowing down\", \"The Quiet Current\"; save bookmark and overflow; progress scrubber with \"12:34\" and \"42:18\"; big pause button with 15-second rewind and 30-second forward; lower actions \"1.2\u00d7\", \"Sleep\", \"Queue\"; chapter section \"Finding a slower rhythm\". Do not add another mini-player or bottom navigation on full player.\nScreen 3 caption \"SAVED\": title \"Saved episodes\", filter chips \"All\", \"Downloaded\", \"Unplayed\"; list rows with square covers, episode titles, show name, duration, filled bookmark and play icons. Include \"The art of slowing down\" / \"The Quiet Current\" / \"42 min\", \"A small act of wonder\" / \"Small Wonders\" / \"31 min\", \"The paths we take\" / \"Field Notes\" / \"56 min\". First row selected using the selection container token. One clear downloaded check badge and progress in one partially played episode. \"Sort: Recently saved\". Same mini-player and bottom navigation Saved selected.\nScreen 4 caption \"SIGN IN\": uncluttered auth screen, small paper boat mark, heading \"Your stories, everywhere\", text \"Sign in to sync your saved episodes and listening progress.\"; email field labelled \"Email\" with placeholder \"you@example.com\"; primary \"Continue with email\", outlined \"Continue with Apple\", outlined \"Continue with Google\"; quiet link \"Continue without an account\". No provider logos needed. Back arrow and safe spacing. Clearly a login choice, not a paywall.\nScreen 5 caption \"PROFILE\": signed-in profile with simple initials avatar \"AL\", \"Alex Lee\", \"alex@example.com\", small \"Synced just now\"; counts \"24 saved\", \"8 followed\"; rows \"Listening history\", \"Downloads\", \"Settings\", \"Help\"; secondary \"Sign out\". Same mini-player and bottom navigation Profile selected. No subscription upsell.\nScreen 6 caption \"SETTINGS\": back arrow, heading \"Settings\", tidy grouped setting rows: \"Playback\" with \"Default speed\" value \"1.2\u00d7\" and \"Skip silence\" switch; \"Downloads\" with \"Wi-Fi only\" switch and \"Manage storage\" value \"1.2 GB\"; \"Appearance\" value \"System\"; \"Notifications\"; \"Privacy\". Show actual switches and chevrons, short clear copy, same mini-player at foot.\nConstraints: all six distinct screens complete, all exact main labels spelled correctly; align UI to an 8pt grid and practical 48dp touch areas. Mock content is fictional. No ads, premium plans, generation features, chat screens, lorem ipsum, gradients, glassmorphism, gigantic decorative whitespace or watermark. This is palette/layout exploration rather than finished implementation.",
-      "description": "Denim blue with terracotta and apricot. Warm editorial character.",
-      "screens": 6,
-      "width": 1086,
-      "height": 1448
+      "id": "android-phone-library-dark",
+      "title": "Library",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-library-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 840,
+      "height": 1871,
+      "preview": "previews/android-phone-library-dark.webp",
+      "thumbnail": "previews/android-phone-library-dark-small.webp"
     },
     {
-      "id": "e-indigo-dusk",
-      "name": "E \u00b7 Indigo Dusk",
-      "kind": "palette",
-      "palette": {
-        "background": "#191D33",
-        "surface": "#272C49",
-        "text": "#F0EEFA",
-        "primary": "#B8C5F5",
-        "onPrimary": "#191D33",
-        "accent": "#E5C79C",
-        "onAccent": "#191D33",
-        "secondary": "#B7BCD2",
-        "selection": "#3B4163"
-      },
-      "file": "e-indigo-dusk.png",
-      "prompt": "Use case: ui-mockup\nAsset type: high-fidelity Storymile podcast app design exploration, palette E \u00b7 Indigo Dusk.\nPrimary request: Create a beautifully finished UI mockup board showing SIX complete portrait mobile screens arranged in a clean three-column two-row grid. Large portrait board at 2400x3200 or highest available resolution. Each screen must be equally large and legible, no overlapping or cropping. Narrow understated device outlines only. Board title \"E / INDIGO DUSK\" and five small palette swatches at top. A small caption label outside each screen. This is a practical product design presentation, no photography of devices, no perspective.\nReference context: The app's current icon depicts an ivory paper boat traveling over dusty blue ocean with a winding sand-colored audio-wave path. Echo its palette and gentle curves; use a tiny boat/wave app mark, do not turn app backgrounds into illustrations.\nColor palette: {\"background\":\"#191D33\",\"surface\":\"#272C49\",\"text\":\"#F0EEFA\",\"primary\":\"#B8C5F5\",\"onPrimary\":\"#191D33\",\"accent\":\"#E5C79C\",\"onAccent\":\"#191D33\",\"secondary\":\"#B7BCD2\",\"selection\":\"#3B4163\"}. Style: Sophisticated expressive dark theme with violet-indigo surfaces, periwinkle controls, warm sand accents and rich original blue twilight podcast artwork. Strong sans-serif titles, artwork-led hierarchy, geometric rounded rectangles. More expressive than Harbor Night while retaining excellent text contrast and low visual noise. Absolutely no neon or gradients on UI chrome.\nScreen 1 caption \"DISCOVER\": small Storymile mark at top, heading \"Find your next story\", search field \"Podcasts, episodes, people\", filter chips \"For you\", \"Science\", \"Culture\", editorial feature podcast artwork of quiet sea horizon titled \"The Quiet Current\" and \"Stories from the coast\"; recommendation section \"Worth a listen\" with two small original podcast cover tiles \"Small Wonders\" and \"Field Notes\". Mini-player above bottom bar: \"The art of slowing down\" with tiny cover and pause icon. Bottom navigation exactly \"Discover\", \"Saved\", \"Profile\", Discover selected.\nScreen 2 caption \"LISTEN\": full now-playing screen, top chevron down and \"Now playing\"; large square original blue ocean podcast artwork; show \"The art of slowing down\", \"The Quiet Current\"; save bookmark and overflow; progress scrubber with \"12:34\" and \"42:18\"; big pause button with 15-second rewind and 30-second forward; lower actions \"1.2\u00d7\", \"Sleep\", \"Queue\"; chapter section \"Finding a slower rhythm\". Do not add another mini-player or bottom navigation on full player.\nScreen 3 caption \"SAVED\": title \"Saved episodes\", filter chips \"All\", \"Downloaded\", \"Unplayed\"; list rows with square covers, episode titles, show name, duration, filled bookmark and play icons. Include \"The art of slowing down\" / \"The Quiet Current\" / \"42 min\", \"A small act of wonder\" / \"Small Wonders\" / \"31 min\", \"The paths we take\" / \"Field Notes\" / \"56 min\". First row selected using the selection container token. One clear downloaded check badge and progress in one partially played episode. \"Sort: Recently saved\". Same mini-player and bottom navigation Saved selected.\nScreen 4 caption \"SIGN IN\": uncluttered auth screen, small paper boat mark, heading \"Your stories, everywhere\", text \"Sign in to sync your saved episodes and listening progress.\"; email field labelled \"Email\" with placeholder \"you@example.com\"; primary \"Continue with email\", outlined \"Continue with Apple\", outlined \"Continue with Google\"; quiet link \"Continue without an account\". No provider logos needed. Back arrow and safe spacing. Clearly a login choice, not a paywall.\nScreen 5 caption \"PROFILE\": signed-in profile with simple initials avatar \"AL\", \"Alex Lee\", \"alex@example.com\", small \"Synced just now\"; counts \"24 saved\", \"8 followed\"; rows \"Listening history\", \"Downloads\", \"Settings\", \"Help\"; secondary \"Sign out\". Same mini-player and bottom navigation Profile selected. No subscription upsell.\nScreen 6 caption \"SETTINGS\": back arrow, heading \"Settings\", tidy grouped setting rows: \"Playback\" with \"Default speed\" value \"1.2\u00d7\" and \"Skip silence\" switch; \"Downloads\" with \"Wi-Fi only\" switch and \"Manage storage\" value \"1.2 GB\"; \"Appearance\" value \"System\"; \"Notifications\"; \"Privacy\". Show actual switches and chevrons, short clear copy, same mini-player at foot.\nConstraints: all six distinct screens complete, all exact main labels spelled correctly; align UI to an 8pt grid and practical 48dp touch areas. Mock content is fictional. No ads, premium plans, generation features, chat screens, lorem ipsum, gradients, glassmorphism, gigantic decorative whitespace or watermark. This is palette/layout exploration rather than finished implementation.",
-      "description": "Midnight indigo and periwinkle. A more expressive dark direction.",
-      "screens": 6,
-      "width": 1086,
-      "height": 1448
+      "id": "android-phone-downloads-light",
+      "title": "Downloads",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-downloads-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-downloads-light.webp",
+      "thumbnail": "previews/android-phone-downloads-light-small.webp"
     },
     {
-      "id": "f-cobalt-honey",
-      "name": "F \u00b7 Cobalt & Honey",
-      "kind": "palette",
-      "palette": {
-        "background": "#FFF9EC",
-        "surface": "#FFFFFF",
-        "text": "#202D4C",
-        "primary": "#304DA5",
-        "onPrimary": "#FFFFFF",
-        "accent": "#D8B35C",
-        "onAccent": "#202D4C",
-        "secondary": "#59657A",
-        "selection": "#E5E9FD"
-      },
-      "file": "f-cobalt-honey.png",
-      "prompt": "Use case: ui-mockup\nAsset type: high-fidelity Storymile podcast app design exploration, palette F \u00b7 Cobalt & Honey.\nPrimary request: Create a beautifully finished UI mockup board showing SIX complete portrait mobile screens arranged in a clean three-column two-row grid. Large portrait board at 2400x3200 or highest available resolution. Each screen must be equally large and legible, no overlapping or cropping. Narrow understated device outlines only. Board title \"F / COBALT & HONEY\" and five small palette swatches at top. A small caption label outside each screen. This is a practical product design presentation, no photography of devices, no perspective.\nReference context: The app's current icon depicts an ivory paper boat traveling over dusty blue ocean with a winding sand-colored audio-wave path. Echo its palette and gentle curves; use a tiny boat/wave app mark, do not turn app backgrounds into illustrations.\nColor palette: {\"background\":\"#FFF9EC\",\"surface\":\"#FFFFFF\",\"text\":\"#202D4C\",\"primary\":\"#304DA5\",\"onPrimary\":\"#FFFFFF\",\"accent\":\"#D8B35C\",\"onAccent\":\"#202D4C\",\"secondary\":\"#59657A\",\"selection\":\"#E5E9FD\"}. Style: Energetic graphic light direction with cream, crisp cobalt blue controls, honey highlights with dark ink labels. Strong modern grotesk sans-serif, bolder section headers, simple high contrast outlines, 12dp corners and playful but professional original cover art. Keep all functionality clear, no noisy patterns, no gradients.\nScreen 1 caption \"DISCOVER\": small Storymile mark at top, heading \"Find your next story\", search field \"Podcasts, episodes, people\", filter chips \"For you\", \"Science\", \"Culture\", editorial feature podcast artwork of quiet sea horizon titled \"The Quiet Current\" and \"Stories from the coast\"; recommendation section \"Worth a listen\" with two small original podcast cover tiles \"Small Wonders\" and \"Field Notes\". Mini-player above bottom bar: \"The art of slowing down\" with tiny cover and pause icon. Bottom navigation exactly \"Discover\", \"Saved\", \"Profile\", Discover selected.\nScreen 2 caption \"LISTEN\": full now-playing screen, top chevron down and \"Now playing\"; large square original blue ocean podcast artwork; show \"The art of slowing down\", \"The Quiet Current\"; save bookmark and overflow; progress scrubber with \"12:34\" and \"42:18\"; big pause button with 15-second rewind and 30-second forward; lower actions \"1.2\u00d7\", \"Sleep\", \"Queue\"; chapter section \"Finding a slower rhythm\". Do not add another mini-player or bottom navigation on full player.\nScreen 3 caption \"SAVED\": title \"Saved episodes\", filter chips \"All\", \"Downloaded\", \"Unplayed\"; list rows with square covers, episode titles, show name, duration, filled bookmark and play icons. Include \"The art of slowing down\" / \"The Quiet Current\" / \"42 min\", \"A small act of wonder\" / \"Small Wonders\" / \"31 min\", \"The paths we take\" / \"Field Notes\" / \"56 min\". First row selected using the selection container token. One clear downloaded check badge and progress in one partially played episode. \"Sort: Recently saved\". Same mini-player and bottom navigation Saved selected.\nScreen 4 caption \"SIGN IN\": uncluttered auth screen, small paper boat mark, heading \"Your stories, everywhere\", text \"Sign in to sync your saved episodes and listening progress.\"; email field labelled \"Email\" with placeholder \"you@example.com\"; primary \"Continue with email\", outlined \"Continue with Apple\", outlined \"Continue with Google\"; quiet link \"Continue without an account\". No provider logos needed. Back arrow and safe spacing. Clearly a login choice, not a paywall.\nScreen 5 caption \"PROFILE\": signed-in profile with simple initials avatar \"AL\", \"Alex Lee\", \"alex@example.com\", small \"Synced just now\"; counts \"24 saved\", \"8 followed\"; rows \"Listening history\", \"Downloads\", \"Settings\", \"Help\"; secondary \"Sign out\". Same mini-player and bottom navigation Profile selected. No subscription upsell.\nScreen 6 caption \"SETTINGS\": back arrow, heading \"Settings\", tidy grouped setting rows: \"Playback\" with \"Default speed\" value \"1.2\u00d7\" and \"Skip silence\" switch; \"Downloads\" with \"Wi-Fi only\" switch and \"Manage storage\" value \"1.2 GB\"; \"Appearance\" value \"System\"; \"Notifications\"; \"Privacy\". Show actual switches and chevrons, short clear copy, same mini-player at foot.\nConstraints: all six distinct screens complete, all exact main labels spelled correctly; align UI to an 8pt grid and practical 48dp touch areas. Mock content is fictional. No ads, premium plans, generation features, chat screens, lorem ipsum, gradients, glassmorphism, gigantic decorative whitespace or watermark. This is palette/layout exploration rather than finished implementation.",
-      "description": "Cobalt and honey on cream. The brightest and most graphic option.",
-      "screens": 6,
-      "width": 1086,
-      "height": 1448
+      "id": "android-phone-downloads-dark",
+      "title": "Downloads",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-downloads-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-downloads-dark.webp",
+      "thumbnail": "previews/android-phone-downloads-dark-small.webp"
     },
     {
-      "id": "g-adaptive-discovery",
-      "name": "G \u00b7 Discover across sizes",
-      "kind": "adaptive",
-      "palette": {
-        "background": "#F7F3EB",
-        "surface": "#FFFDF8",
-        "text": "#233B50",
-        "primary": "#365F7D",
-        "accent": "#D6BA8E",
-        "onPrimary": "#FFFDF8",
-        "onAccent": "#233B50",
-        "secondary": "#5B6E79",
-        "selection": "#DCE8EE"
-      },
-      "screens": 4,
-      "description": "Search results and a selected show: phone detail becomes a side-by-side browser as the window grows.",
-      "file": "g-adaptive-discovery-v2.png",
-      "prompt": "Use case: ui-mockup\nAsset type: high-fidelity adaptive Storymile podcast app product design board.\nPrimary request: A meticulous practical UI mockup showing FOUR differently sized app windows on one spacious landscape board, roughly 3200x2400 at highest available resolution. Layout: two rows. Top row contains a compact portrait PHONE at left and an UNFOLDED FOLDABLE at right. Bottom row contains a landscape TABLET at left and a wider DESKTOP app window at right. All four fully visible and large enough for legible labels. Maintain enough gutters. Under each window print the exact small label provided. Flat front views, slim device outlines, no perspective, hardware props, heavy shadows or overlapped windows.\nApp identity: Storymile, a tiny blue/ivory paper boat logo and blue-ocean podcast cover art. Clean contemporary typography, 8pt spacing logic, 48dp controls. Real UI structure and short readable labels. Navigation choices \"Discover\", \"Saved\", \"Profile\"; \"Settings\" as a secondary desktop item.\nAdaptive behavior: phone uses one main pane and bottom navigation; selected details replace lists with Back. Foldable window 900dp wide shows a slim labeled icon rail and two genuinely separate panes with a safe central gutter; no text crosses the fold. Tablet window 1200dp shows rail and two spacious panes. Desktop window 1600dp shows labeled sidebar and two panes. Keep search/selection and playback position unchanged on resizing. Fit content and columns to windows, never stretch a phone screenshot. Wider does not mean bigger fonts.\nSample content: podcast \"The Quiet Current\", episode \"The art of slowing down\", 42:18 duration, playback at 12:34, blue ocean original cover. Secondary episodes \"A small act of wonder\" / \"Small Wonders\" and \"The paths we take\" / \"Field Notes\". All fictional.\nPersistent playback: compact mini-player above bottom navigation on phone, persistent bottom transport bar within foldable/tablet/desktop. One pause/play transport surface per window, no duplicate competing controls.\nConstraints: no wireframe placeholders, gibberish, tiny illegible paragraphs, chat bubbles, gradients on UI chrome, ads, paid plans or watermark. Detail panes must differ from lists and have an obvious hierarchy. Show selected rows with both a container and a check or clear title. Short exact captions outside each device. No prose explanation paragraphs on the board.\nTitle \"DISCOVER / FROM SEARCH TO SHOW\".\nPalette and typography: Paper Tide, warm ivory #F7F3EB, white #FFFDF8, ink #233B50, primary #365F7D, mist selection #DCE8EE and sand #D6BA8E. Editorial serif show title, clean sans serif UI.\nPhone caption \"PHONE \u00b7 390dp \u00b7 show detail\": Back \"Search\", show artwork, \"The Quiet Current\", \"Stories from the coast\", \"+ Follow\", episode list with \"The art of slowing down\" 42 min and \"Listening to the shoreline\" 36 min, each with play and save. Mini player 12:34, Discover active.\nFoldable caption \"FOLDABLE \u00b7 900dp \u00b7 results + show\": rail, left search field \"quiet\" with result list headed \"Search results\", \"The Quiet Current\" selected; right selected show details, Follow and Episodes. Keep hinge gap clear.\nTablet caption \"TABLET \u00b7 1200dp \u00b7 results + show\": rail, left results list with original covers and query quiet, right larger show overview + episode list. Same selection.\nDesktop caption \"DESKTOP \u00b7 1600dp \u00b7 sidebar + results + show\": labeled sidebar Storymile / Discover / Saved / Profile / Settings, search-results column and spacious show page with show header, artwork, Follow, tabs \"Episodes\" and \"About\", sorted list. Bottom player with 12:34 / 42:18, speed 1.2\u00d7, pause, volume. Keep layout about browsing podcasts, not only listening.",
-      "revisions": [
-        {
-          "prompt": "Use case: ui-mockup. Targeted edit of the supplied FOUR-device Storymile mock board. Preserve the palette, layout, typography, artwork and ALL content of the phone, tablet and desktop, and keep the entire board fully opaque. Change ONLY the TOP-RIGHT FOLDABLE device as follows: the vertical physical hinge in the middle is an occluding zone. Align the list/detail pane boundary exactly on that physical center hinge. No text, row, button or slider may overlap it. In the foldable bottom player dock, keep only small artwork and episode title on the LEFT half. Put the COMPLETE scrubber, its 12:34 and 42:18 labels, rewind 15, pause, forward 30, all on the RIGHT half. Use two compact rows for the right-half player if necessary: entire seek track plus times on upper row, transport buttons on lower row. Leave a clear narrow gutter at the hinge across the whole height including the player. The track must start well to the RIGHT of the center hinge and must never cross it. Shrink/reflow controls inside their half, do not split a control. Preserve all other device windows exactly. Re-render text sharply. Keep original title and captions. This correction demonstrates a real fold-aware adaptive layout."
-        }
+      "id": "android-phone-player-light",
+      "title": "Player",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-player-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-player-light.webp",
+      "thumbnail": "previews/android-phone-player-light-small.webp"
+    },
+    {
+      "id": "android-phone-player-dark",
+      "title": "Player",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-player-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-player-dark.webp",
+      "thumbnail": "previews/android-phone-player-dark-small.webp"
+    },
+    {
+      "id": "android-phone-profile-light",
+      "title": "Profile",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-profile-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-profile-light.webp",
+      "thumbnail": "previews/android-phone-profile-light-small.webp"
+    },
+    {
+      "id": "android-phone-profile-dark",
+      "title": "Profile",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-profile-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-profile-dark.webp",
+      "thumbnail": "previews/android-phone-profile-dark-small.webp"
+    },
+    {
+      "id": "android-phone-settings-light",
+      "title": "Settings",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-settings-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-settings-light.webp",
+      "thumbnail": "previews/android-phone-settings-light-small.webp"
+    },
+    {
+      "id": "android-phone-settings-dark",
+      "title": "Settings",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-settings-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-settings-dark.webp",
+      "thumbnail": "previews/android-phone-settings-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-player-light",
+      "title": "Now playing · Phone landscape",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-player-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-player-light.webp",
+      "thumbnail": "previews/android-phone-landscape-player-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-player-dark",
+      "title": "Now playing · Phone landscape",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-player-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-player-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-player-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-library-light",
+      "title": "Library · Tablet portrait",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-library-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-library-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-library-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-library-dark",
+      "title": "Library · Tablet portrait",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-library-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-library-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-library-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-discovery-light",
+      "title": "Discovery · Tablet landscape",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-discovery-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-discovery-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-discovery-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-discovery-dark",
+      "title": "Discovery · Tablet landscape",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-discovery-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-discovery-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-discovery-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-discovery-light",
+      "title": "Discovery · Foldable",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-discovery-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-discovery-light.webp",
+      "thumbnail": "previews/android-foldable-discovery-light-small.webp"
+    },
+    {
+      "id": "android-foldable-discovery-dark",
+      "title": "Discovery · Foldable",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-discovery-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-discovery-dark.webp",
+      "thumbnail": "previews/android-foldable-discovery-dark-small.webp"
+    },
+    {
+      "id": "desktop-settings-light",
+      "title": "Settings · Desktop",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-settings-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-settings-light.webp",
+      "thumbnail": "previews/desktop-settings-light-small.webp"
+    },
+    {
+      "id": "desktop-settings-dark",
+      "title": "Settings · Desktop",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-settings-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-settings-dark.webp",
+      "thumbnail": "previews/desktop-settings-dark-small.webp"
+    },
+    {
+      "id": "android-phone-search-light",
+      "title": "Search results",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-search-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-search-light.webp",
+      "thumbnail": "previews/android-phone-search-light-small.webp"
+    },
+    {
+      "id": "android-phone-search-dark",
+      "title": "Search results",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-search-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-search-dark.webp",
+      "thumbnail": "previews/android-phone-search-dark-small.webp"
+    },
+    {
+      "id": "android-phone-show-light",
+      "title": "Show",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-show-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-show-light.webp",
+      "thumbnail": "previews/android-phone-show-light-small.webp"
+    },
+    {
+      "id": "android-phone-show-dark",
+      "title": "Show",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-show-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-show-dark.webp",
+      "thumbnail": "previews/android-phone-show-dark-small.webp"
+    },
+    {
+      "id": "android-phone-episode-light",
+      "title": "Episode",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-episode-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-episode-light.webp",
+      "thumbnail": "previews/android-phone-episode-light-small.webp"
+    },
+    {
+      "id": "android-phone-episode-dark",
+      "title": "Episode",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-episode-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-episode-dark.webp",
+      "thumbnail": "previews/android-phone-episode-dark-small.webp"
+    },
+    {
+      "id": "android-phone-queue-light",
+      "title": "Queue",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-queue-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-queue-light.webp",
+      "thumbnail": "previews/android-phone-queue-light-small.webp"
+    },
+    {
+      "id": "android-phone-queue-dark",
+      "title": "Queue",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-queue-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-queue-dark.webp",
+      "thumbnail": "previews/android-phone-queue-dark-small.webp"
+    },
+    {
+      "id": "android-phone-chapters-light",
+      "title": "Chapters",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-chapters-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-chapters-light.webp",
+      "thumbnail": "previews/android-phone-chapters-light-small.webp"
+    },
+    {
+      "id": "android-phone-chapters-dark",
+      "title": "Chapters",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-chapters-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-chapters-dark.webp",
+      "thumbnail": "previews/android-phone-chapters-dark-small.webp"
+    },
+    {
+      "id": "android-phone-guest-light",
+      "title": "Guest profile",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-guest-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-guest-light.webp",
+      "thumbnail": "previews/android-phone-guest-light-small.webp"
+    },
+    {
+      "id": "android-phone-guest-dark",
+      "title": "Guest profile",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-guest-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-guest-dark.webp",
+      "thumbnail": "previews/android-phone-guest-dark-small.webp"
+    },
+    {
+      "id": "android-phone-signin-light",
+      "title": "Sign in",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-signin-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-signin-light.webp",
+      "thumbnail": "previews/android-phone-signin-light-small.webp"
+    },
+    {
+      "id": "android-phone-signin-dark",
+      "title": "Sign in",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-signin-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-signin-dark.webp",
+      "thumbnail": "previews/android-phone-signin-dark-small.webp"
+    },
+    {
+      "id": "android-phone-check-email-light",
+      "title": "Check your email",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-check-email-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-check-email-light.webp",
+      "thumbnail": "previews/android-phone-check-email-light-small.webp"
+    },
+    {
+      "id": "android-phone-check-email-dark",
+      "title": "Check your email",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-check-email-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 842,
+      "height": 1869,
+      "preview": "previews/android-phone-check-email-dark.webp",
+      "thumbnail": "previews/android-phone-check-email-dark-small.webp"
+    },
+    {
+      "id": "android-phone-playback-light",
+      "title": "Playback settings",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-playback-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-playback-light.webp",
+      "thumbnail": "previews/android-phone-playback-light-small.webp"
+    },
+    {
+      "id": "android-phone-playback-dark",
+      "title": "Playback settings",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-playback-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-playback-dark.webp",
+      "thumbnail": "previews/android-phone-playback-dark-small.webp"
+    },
+    {
+      "id": "android-phone-download-detail-light",
+      "title": "Downloaded episode",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-download-detail-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-download-detail-light.webp",
+      "thumbnail": "previews/android-phone-download-detail-light-small.webp"
+    },
+    {
+      "id": "android-phone-download-detail-dark",
+      "title": "Downloaded episode",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-download-detail-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-download-detail-dark.webp",
+      "thumbnail": "previews/android-phone-download-detail-dark-small.webp"
+    },
+    {
+      "id": "ios-phone-home-light",
+      "title": "Home",
+      "device": "phone-portrait",
+      "platform": "ios",
+      "theme": "light",
+      "file": "screens/ios-phone-home-light.png",
+      "viewport": [
+        393,
+        852
+      ],
+      "width": 853,
+      "height": 1844,
+      "preview": "previews/ios-phone-home-light.webp",
+      "thumbnail": "previews/ios-phone-home-light-small.webp"
+    },
+    {
+      "id": "ios-phone-library-light",
+      "title": "Library",
+      "device": "phone-portrait",
+      "platform": "ios",
+      "theme": "light",
+      "file": "screens/ios-phone-library-light.png",
+      "viewport": [
+        393,
+        852
+      ],
+      "width": 853,
+      "height": 1844,
+      "preview": "previews/ios-phone-library-light.webp",
+      "thumbnail": "previews/ios-phone-library-light-small.webp"
+    },
+    {
+      "id": "ios-phone-player-light",
+      "title": "Player",
+      "device": "phone-portrait",
+      "platform": "ios",
+      "theme": "light",
+      "file": "screens/ios-phone-player-light.png",
+      "viewport": [
+        393,
+        852
+      ],
+      "width": 853,
+      "height": 1844,
+      "preview": "previews/ios-phone-player-light.webp",
+      "thumbnail": "previews/ios-phone-player-light-small.webp"
+    },
+    {
+      "id": "ios-phone-profile-light",
+      "title": "Profile",
+      "device": "phone-portrait",
+      "platform": "ios",
+      "theme": "light",
+      "file": "screens/ios-phone-profile-light.png",
+      "viewport": [
+        393,
+        852
+      ],
+      "width": 853,
+      "height": 1844,
+      "preview": "previews/ios-phone-profile-light.webp",
+      "thumbnail": "previews/ios-phone-profile-light-small.webp"
+    },
+    {
+      "id": "ios-phone-settings-light",
+      "title": "Settings",
+      "device": "phone-portrait",
+      "platform": "ios",
+      "theme": "light",
+      "file": "screens/ios-phone-settings-light.png",
+      "viewport": [
+        393,
+        852
+      ],
+      "width": 853,
+      "height": 1844,
+      "preview": "previews/ios-phone-settings-light.webp",
+      "thumbnail": "previews/ios-phone-settings-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-home-light",
+      "title": "Home",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-home-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-home-light.webp",
+      "thumbnail": "previews/android-phone-landscape-home-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-home-dark",
+      "title": "Home",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-home-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-home-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-home-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-home-light",
+      "title": "Home",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-home-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-home-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-home-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-home-dark",
+      "title": "Home",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-home-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-home-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-home-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-home-light",
+      "title": "Home",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-home-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-home-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-home-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-home-dark",
+      "title": "Home",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-home-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-home-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-home-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-home-light",
+      "title": "Home",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-home-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-home-light.webp",
+      "thumbnail": "previews/android-foldable-home-light-small.webp"
+    },
+    {
+      "id": "android-foldable-home-dark",
+      "title": "Home",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-home-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-home-dark.webp",
+      "thumbnail": "previews/android-foldable-home-dark-small.webp"
+    },
+    {
+      "id": "desktop-home-light",
+      "title": "Home",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-home-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-home-light.webp",
+      "thumbnail": "previews/desktop-home-light-small.webp"
+    },
+    {
+      "id": "desktop-home-dark",
+      "title": "Home",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-home-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-home-dark.webp",
+      "thumbnail": "previews/desktop-home-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-library-light",
+      "title": "Library",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-library-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-library-light.webp",
+      "thumbnail": "previews/android-phone-landscape-library-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-library-dark",
+      "title": "Library",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-library-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-library-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-library-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-library-light",
+      "title": "Library",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-library-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1585,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-library-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-library-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-library-dark",
+      "title": "Library",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-library-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-library-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-library-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-library-light",
+      "title": "Library",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-library-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-library-light.webp",
+      "thumbnail": "previews/android-foldable-library-light-small.webp"
+    },
+    {
+      "id": "android-foldable-library-dark",
+      "title": "Library",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-library-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-library-dark.webp",
+      "thumbnail": "previews/android-foldable-library-dark-small.webp"
+    },
+    {
+      "id": "desktop-library-light",
+      "title": "Library",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-library-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-library-light.webp",
+      "thumbnail": "previews/desktop-library-light-small.webp"
+    },
+    {
+      "id": "desktop-library-dark",
+      "title": "Library",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-library-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-library-dark.webp",
+      "thumbnail": "previews/desktop-library-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-downloads-light",
+      "title": "Downloads",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-downloads-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-downloads-light.webp",
+      "thumbnail": "previews/android-phone-landscape-downloads-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-downloads-dark",
+      "title": "Downloads",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-downloads-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-downloads-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-downloads-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-downloads-light",
+      "title": "Downloads",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-downloads-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-downloads-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-downloads-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-downloads-dark",
+      "title": "Downloads",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-downloads-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1585,
+      "preview": "previews/android-tablet-portrait-downloads-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-downloads-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-downloads-light",
+      "title": "Downloads",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-downloads-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-downloads-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-downloads-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-downloads-dark",
+      "title": "Downloads",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-downloads-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1584,
+      "height": 993,
+      "preview": "previews/android-tablet-landscape-downloads-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-downloads-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-downloads-light",
+      "title": "Downloads",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-downloads-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-downloads-light.webp",
+      "thumbnail": "previews/android-foldable-downloads-light-small.webp"
+    },
+    {
+      "id": "android-foldable-downloads-dark",
+      "title": "Downloads",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-downloads-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-downloads-dark.webp",
+      "thumbnail": "previews/android-foldable-downloads-dark-small.webp"
+    },
+    {
+      "id": "desktop-downloads-light",
+      "title": "Downloads",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-downloads-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-downloads-light.webp",
+      "thumbnail": "previews/desktop-downloads-light-small.webp"
+    },
+    {
+      "id": "desktop-downloads-dark",
+      "title": "Downloads",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-downloads-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-downloads-dark.webp",
+      "thumbnail": "previews/desktop-downloads-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-player-light",
+      "title": "Player",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-player-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-player-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-player-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-player-dark",
+      "title": "Player",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-player-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-player-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-player-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-player-light",
+      "title": "Player",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-player-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1584,
+      "height": 993,
+      "preview": "previews/android-tablet-landscape-player-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-player-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-player-dark",
+      "title": "Player",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-player-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1584,
+      "height": 993,
+      "preview": "previews/android-tablet-landscape-player-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-player-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-player-light",
+      "title": "Player",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-player-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-player-light.webp",
+      "thumbnail": "previews/android-foldable-player-light-small.webp"
+    },
+    {
+      "id": "android-foldable-player-dark",
+      "title": "Player",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-player-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-player-dark.webp",
+      "thumbnail": "previews/android-foldable-player-dark-small.webp"
+    },
+    {
+      "id": "desktop-player-light",
+      "title": "Player",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-player-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-player-light.webp",
+      "thumbnail": "previews/desktop-player-light-small.webp"
+    },
+    {
+      "id": "desktop-player-dark",
+      "title": "Player",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-player-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-player-dark.webp",
+      "thumbnail": "previews/desktop-player-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-profile-light",
+      "title": "Profile",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-profile-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-profile-light.webp",
+      "thumbnail": "previews/android-phone-landscape-profile-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-profile-dark",
+      "title": "Profile",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-profile-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-profile-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-profile-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-profile-light",
+      "title": "Profile",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-profile-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-profile-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-profile-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-profile-dark",
+      "title": "Profile",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-profile-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 993,
+      "height": 1584,
+      "preview": "previews/android-tablet-portrait-profile-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-profile-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-profile-light",
+      "title": "Profile",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-profile-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-profile-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-profile-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-profile-dark",
+      "title": "Profile",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-profile-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1584,
+      "height": 993,
+      "preview": "previews/android-tablet-landscape-profile-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-profile-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-profile-light",
+      "title": "Profile",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-profile-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1374,
+      "height": 1145,
+      "preview": "previews/android-foldable-profile-light.webp",
+      "thumbnail": "previews/android-foldable-profile-light-small.webp"
+    },
+    {
+      "id": "android-foldable-profile-dark",
+      "title": "Profile",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-profile-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1374,
+      "height": 1145,
+      "preview": "previews/android-foldable-profile-dark.webp",
+      "thumbnail": "previews/android-foldable-profile-dark-small.webp"
+    },
+    {
+      "id": "desktop-profile-light",
+      "title": "Profile",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-profile-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-profile-light.webp",
+      "thumbnail": "previews/desktop-profile-light-small.webp"
+    },
+    {
+      "id": "desktop-profile-dark",
+      "title": "Profile",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-profile-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-profile-dark.webp",
+      "thumbnail": "previews/desktop-profile-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-settings-light",
+      "title": "Settings",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-settings-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-settings-light.webp",
+      "thumbnail": "previews/android-phone-landscape-settings-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-settings-dark",
+      "title": "Settings",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-settings-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-settings-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-settings-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-settings-light",
+      "title": "Settings",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-settings-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-settings-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-settings-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-settings-dark",
+      "title": "Settings",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-settings-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 993,
+      "height": 1584,
+      "preview": "previews/android-tablet-portrait-settings-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-settings-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-settings-light",
+      "title": "Settings",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-settings-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1584,
+      "height": 993,
+      "preview": "previews/android-tablet-landscape-settings-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-settings-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-settings-dark",
+      "title": "Settings",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-settings-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1584,
+      "height": 993,
+      "preview": "previews/android-tablet-landscape-settings-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-settings-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-settings-light",
+      "title": "Settings",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-settings-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-settings-light.webp",
+      "thumbnail": "previews/android-foldable-settings-light-small.webp"
+    },
+    {
+      "id": "android-foldable-settings-dark",
+      "title": "Settings",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-settings-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-settings-dark.webp",
+      "thumbnail": "previews/android-foldable-settings-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-show-light",
+      "title": "Show",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-show-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-show-light.webp",
+      "thumbnail": "previews/android-phone-landscape-show-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-show-dark",
+      "title": "Show",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-show-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-show-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-show-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-show-light",
+      "title": "Show",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-show-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-show-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-show-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-show-dark",
+      "title": "Show",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-show-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 993,
+      "height": 1584,
+      "preview": "previews/android-tablet-portrait-show-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-show-dark-small.webp"
+    },
+    {
+      "id": "desktop-show-light",
+      "title": "Show",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-show-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-show-light.webp",
+      "thumbnail": "previews/desktop-show-light-small.webp"
+    },
+    {
+      "id": "desktop-show-dark",
+      "title": "Show",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-show-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-show-dark.webp",
+      "thumbnail": "previews/desktop-show-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-search-light",
+      "title": "Search results",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-search-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-search-light.webp",
+      "thumbnail": "previews/android-phone-landscape-search-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-search-dark",
+      "title": "Search results",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-search-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-search-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-search-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-search-light",
+      "title": "Search results",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-search-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 993,
+      "height": 1584,
+      "preview": "previews/android-tablet-portrait-search-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-search-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-search-dark",
+      "title": "Search results",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-search-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 993,
+      "height": 1584,
+      "preview": "previews/android-tablet-portrait-search-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-search-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-search-light",
+      "title": "Search results",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-search-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-search-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-search-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-search-dark",
+      "title": "Search results",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-search-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1584,
+      "height": 993,
+      "preview": "previews/android-tablet-landscape-search-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-search-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-search-light",
+      "title": "Search results",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-search-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-search-light.webp",
+      "thumbnail": "previews/android-foldable-search-light-small.webp"
+    },
+    {
+      "id": "android-foldable-search-dark",
+      "title": "Search results",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-search-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-search-dark.webp",
+      "thumbnail": "previews/android-foldable-search-dark-small.webp"
+    },
+    {
+      "id": "desktop-search-light",
+      "title": "Search results",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-search-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-search-light.webp",
+      "thumbnail": "previews/desktop-search-light-small.webp"
+    },
+    {
+      "id": "desktop-search-dark",
+      "title": "Search results",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-search-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-search-dark.webp",
+      "thumbnail": "previews/desktop-search-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-episode-light",
+      "title": "Episode",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-episode-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-episode-light.webp",
+      "thumbnail": "previews/android-phone-landscape-episode-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-episode-dark",
+      "title": "Episode",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-episode-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-episode-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-episode-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-episode-light",
+      "title": "Episode",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-episode-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-episode-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-episode-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-episode-dark",
+      "title": "Episode",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-episode-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 993,
+      "height": 1584,
+      "preview": "previews/android-tablet-portrait-episode-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-episode-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-episode-light",
+      "title": "Episode",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-episode-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-episode-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-episode-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-episode-dark",
+      "title": "Episode",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-episode-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-episode-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-episode-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-episode-light",
+      "title": "Episode",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-episode-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-episode-light.webp",
+      "thumbnail": "previews/android-foldable-episode-light-small.webp"
+    },
+    {
+      "id": "android-foldable-episode-dark",
+      "title": "Episode",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-episode-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-episode-dark.webp",
+      "thumbnail": "previews/android-foldable-episode-dark-small.webp"
+    },
+    {
+      "id": "desktop-episode-light",
+      "title": "Episode",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-episode-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-episode-light.webp",
+      "thumbnail": "previews/desktop-episode-light-small.webp"
+    },
+    {
+      "id": "desktop-episode-dark",
+      "title": "Episode",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-episode-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-episode-dark.webp",
+      "thumbnail": "previews/desktop-episode-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-queue-light",
+      "title": "Queue",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-queue-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-queue-light.webp",
+      "thumbnail": "previews/android-phone-landscape-queue-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-queue-dark",
+      "title": "Queue",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-queue-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-queue-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-queue-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-queue-light",
+      "title": "Queue",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-queue-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-queue-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-queue-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-queue-dark",
+      "title": "Queue",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-queue-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 993,
+      "height": 1584,
+      "preview": "previews/android-tablet-portrait-queue-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-queue-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-queue-light",
+      "title": "Queue",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-queue-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1585,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-queue-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-queue-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-queue-dark",
+      "title": "Queue",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-queue-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1585,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-queue-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-queue-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-queue-light",
+      "title": "Queue",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-queue-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-queue-light.webp",
+      "thumbnail": "previews/android-foldable-queue-light-small.webp"
+    },
+    {
+      "id": "android-foldable-queue-dark",
+      "title": "Queue",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-queue-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-queue-dark.webp",
+      "thumbnail": "previews/android-foldable-queue-dark-small.webp"
+    },
+    {
+      "id": "desktop-queue-light",
+      "title": "Queue",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-queue-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-queue-light.webp",
+      "thumbnail": "previews/desktop-queue-light-small.webp"
+    },
+    {
+      "id": "desktop-queue-dark",
+      "title": "Queue",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-queue-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-queue-dark.webp",
+      "thumbnail": "previews/desktop-queue-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-chapters-light",
+      "title": "Chapters",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-chapters-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-chapters-light.webp",
+      "thumbnail": "previews/android-phone-landscape-chapters-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-chapters-dark",
+      "title": "Chapters",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-chapters-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-chapters-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-chapters-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-chapters-light",
+      "title": "Chapters",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-chapters-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-chapters-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-chapters-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-chapters-dark",
+      "title": "Chapters",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-chapters-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 993,
+      "height": 1584,
+      "preview": "previews/android-tablet-portrait-chapters-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-chapters-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-chapters-light",
+      "title": "Chapters",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-chapters-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-chapters-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-chapters-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-chapters-dark",
+      "title": "Chapters",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-chapters-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-chapters-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-chapters-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-chapters-light",
+      "title": "Chapters",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-chapters-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-chapters-light.webp",
+      "thumbnail": "previews/android-foldable-chapters-light-small.webp"
+    },
+    {
+      "id": "android-foldable-chapters-dark",
+      "title": "Chapters",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-chapters-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-chapters-dark.webp",
+      "thumbnail": "previews/android-foldable-chapters-dark-small.webp"
+    },
+    {
+      "id": "desktop-chapters-light",
+      "title": "Chapters",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-chapters-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-chapters-light.webp",
+      "thumbnail": "previews/desktop-chapters-light-small.webp"
+    },
+    {
+      "id": "desktop-chapters-dark",
+      "title": "Chapters",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-chapters-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-chapters-dark.webp",
+      "thumbnail": "previews/desktop-chapters-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-guest-light",
+      "title": "Guest profile",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-guest-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-guest-light.webp",
+      "thumbnail": "previews/android-phone-landscape-guest-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-guest-dark",
+      "title": "Guest profile",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-guest-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-guest-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-guest-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-guest-light",
+      "title": "Guest profile",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-guest-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-guest-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-guest-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-guest-dark",
+      "title": "Guest profile",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-guest-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 993,
+      "height": 1584,
+      "preview": "previews/android-tablet-portrait-guest-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-guest-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-guest-light",
+      "title": "Guest profile",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-guest-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1585,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-guest-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-guest-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-guest-dark",
+      "title": "Guest profile",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-guest-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-guest-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-guest-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-guest-light",
+      "title": "Guest profile",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-guest-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-guest-light.webp",
+      "thumbnail": "previews/android-foldable-guest-light-small.webp"
+    },
+    {
+      "id": "android-foldable-guest-dark",
+      "title": "Guest profile",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-guest-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-guest-dark.webp",
+      "thumbnail": "previews/android-foldable-guest-dark-small.webp"
+    },
+    {
+      "id": "desktop-guest-light",
+      "title": "Guest profile",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-guest-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-guest-light.webp",
+      "thumbnail": "previews/desktop-guest-light-small.webp"
+    },
+    {
+      "id": "desktop-guest-dark",
+      "title": "Guest profile",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-guest-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-guest-dark.webp",
+      "thumbnail": "previews/desktop-guest-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-signin-light",
+      "title": "Sign in",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-signin-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-signin-light.webp",
+      "thumbnail": "previews/android-phone-landscape-signin-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-signin-dark",
+      "title": "Sign in",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-signin-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-signin-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-signin-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-signin-light",
+      "title": "Sign in",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-signin-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-signin-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-signin-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-signin-dark",
+      "title": "Sign in",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-signin-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 993,
+      "height": 1584,
+      "preview": "previews/android-tablet-portrait-signin-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-signin-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-signin-light",
+      "title": "Sign in",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-signin-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-signin-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-signin-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-signin-dark",
+      "title": "Sign in",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-signin-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1584,
+      "height": 993,
+      "preview": "previews/android-tablet-landscape-signin-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-signin-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-signin-light",
+      "title": "Sign in",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-signin-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-signin-light.webp",
+      "thumbnail": "previews/android-foldable-signin-light-small.webp"
+    },
+    {
+      "id": "android-foldable-signin-dark",
+      "title": "Sign in",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-signin-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-signin-dark.webp",
+      "thumbnail": "previews/android-foldable-signin-dark-small.webp"
+    },
+    {
+      "id": "desktop-signin-light",
+      "title": "Sign in",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-signin-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-signin-light.webp",
+      "thumbnail": "previews/desktop-signin-light-small.webp"
+    },
+    {
+      "id": "desktop-signin-dark",
+      "title": "Sign in",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-signin-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-signin-dark.webp",
+      "thumbnail": "previews/desktop-signin-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-check-email-light",
+      "title": "Check your email",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-check-email-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1869,
+      "height": 842,
+      "preview": "previews/android-phone-landscape-check-email-light.webp",
+      "thumbnail": "previews/android-phone-landscape-check-email-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-check-email-dark",
+      "title": "Check your email",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-check-email-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-check-email-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-check-email-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-check-email-light",
+      "title": "Check your email",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-check-email-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-check-email-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-check-email-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-check-email-dark",
+      "title": "Check your email",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-check-email-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 993,
+      "height": 1584,
+      "preview": "previews/android-tablet-portrait-check-email-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-check-email-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-check-email-light",
+      "title": "Check your email",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-check-email-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-check-email-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-check-email-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-check-email-dark",
+      "title": "Check your email",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-check-email-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1584,
+      "height": 993,
+      "preview": "previews/android-tablet-landscape-check-email-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-check-email-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-check-email-light",
+      "title": "Check your email",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-check-email-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1146,
+      "preview": "previews/android-foldable-check-email-light.webp",
+      "thumbnail": "previews/android-foldable-check-email-light-small.webp"
+    },
+    {
+      "id": "android-foldable-check-email-dark",
+      "title": "Check your email",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-check-email-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1372,
+      "height": 1146,
+      "preview": "previews/android-foldable-check-email-dark.webp",
+      "thumbnail": "previews/android-foldable-check-email-dark-small.webp"
+    },
+    {
+      "id": "desktop-check-email-light",
+      "title": "Check your email",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-check-email-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-check-email-light.webp",
+      "thumbnail": "previews/desktop-check-email-light-small.webp"
+    },
+    {
+      "id": "desktop-check-email-dark",
+      "title": "Check your email",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-check-email-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-check-email-dark.webp",
+      "thumbnail": "previews/desktop-check-email-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-playback-light",
+      "title": "Playback settings",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-playback-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1869,
+      "height": 842,
+      "preview": "previews/android-phone-landscape-playback-light.webp",
+      "thumbnail": "previews/android-phone-landscape-playback-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-playback-dark",
+      "title": "Playback settings",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-playback-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1869,
+      "height": 842,
+      "preview": "previews/android-phone-landscape-playback-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-playback-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-playback-light",
+      "title": "Playback settings",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-playback-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-playback-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-playback-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-playback-dark",
+      "title": "Playback settings",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-playback-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 993,
+      "height": 1584,
+      "preview": "previews/android-tablet-portrait-playback-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-playback-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-playback-light",
+      "title": "Playback settings",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-playback-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-playback-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-playback-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-playback-dark",
+      "title": "Playback settings",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-playback-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1584,
+      "height": 993,
+      "preview": "previews/android-tablet-landscape-playback-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-playback-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-playback-light",
+      "title": "Playback settings",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-playback-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-playback-light.webp",
+      "thumbnail": "previews/android-foldable-playback-light-small.webp"
+    },
+    {
+      "id": "android-foldable-playback-dark",
+      "title": "Playback settings",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-playback-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-playback-dark.webp",
+      "thumbnail": "previews/android-foldable-playback-dark-small.webp"
+    },
+    {
+      "id": "desktop-playback-light",
+      "title": "Playback settings",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-playback-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-playback-light.webp",
+      "thumbnail": "previews/desktop-playback-light-small.webp"
+    },
+    {
+      "id": "desktop-playback-dark",
+      "title": "Playback settings",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-playback-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-playback-dark.webp",
+      "thumbnail": "previews/desktop-playback-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-download-detail-light",
+      "title": "Downloaded episode",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-download-detail-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-download-detail-light.webp",
+      "thumbnail": "previews/android-phone-landscape-download-detail-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-download-detail-dark",
+      "title": "Downloaded episode",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-download-detail-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-download-detail-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-download-detail-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-download-detail-light",
+      "title": "Downloaded episode",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-download-detail-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-download-detail-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-download-detail-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-download-detail-dark",
+      "title": "Downloaded episode",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-download-detail-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 993,
+      "height": 1584,
+      "preview": "previews/android-tablet-portrait-download-detail-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-download-detail-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-download-detail-light",
+      "title": "Downloaded episode",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-download-detail-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1585,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-download-detail-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-download-detail-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-download-detail-dark",
+      "title": "Downloaded episode",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-download-detail-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1585,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-download-detail-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-download-detail-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-download-detail-light",
+      "title": "Downloaded episode",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-download-detail-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-download-detail-light.webp",
+      "thumbnail": "previews/android-foldable-download-detail-light-small.webp"
+    },
+    {
+      "id": "android-foldable-download-detail-dark",
+      "title": "Downloaded episode",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-download-detail-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-download-detail-dark.webp",
+      "thumbnail": "previews/android-foldable-download-detail-dark-small.webp"
+    },
+    {
+      "id": "desktop-download-detail-light",
+      "title": "Downloaded episode",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-download-detail-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-download-detail-light.webp",
+      "thumbnail": "previews/desktop-download-detail-light-small.webp"
+    },
+    {
+      "id": "desktop-download-detail-dark",
+      "title": "Downloaded episode",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-download-detail-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-download-detail-dark.webp",
+      "thumbnail": "previews/desktop-download-detail-dark-small.webp"
+    },
+    {
+      "id": "ios-phone-home-dark",
+      "title": "Home",
+      "device": "phone-portrait",
+      "platform": "ios",
+      "theme": "dark",
+      "file": "screens/ios-phone-home-dark.png",
+      "viewport": [
+        393,
+        852
+      ],
+      "width": 853,
+      "height": 1844,
+      "preview": "previews/ios-phone-home-dark.webp",
+      "thumbnail": "previews/ios-phone-home-dark-small.webp"
+    },
+    {
+      "id": "ios-phone-library-dark",
+      "title": "Library",
+      "device": "phone-portrait",
+      "platform": "ios",
+      "theme": "dark",
+      "file": "screens/ios-phone-library-dark.png",
+      "viewport": [
+        393,
+        852
+      ],
+      "width": 853,
+      "height": 1844,
+      "preview": "previews/ios-phone-library-dark.webp",
+      "thumbnail": "previews/ios-phone-library-dark-small.webp"
+    },
+    {
+      "id": "ios-phone-player-dark",
+      "title": "Player",
+      "device": "phone-portrait",
+      "platform": "ios",
+      "theme": "dark",
+      "file": "screens/ios-phone-player-dark.png",
+      "viewport": [
+        393,
+        852
+      ],
+      "width": 853,
+      "height": 1844,
+      "preview": "previews/ios-phone-player-dark.webp",
+      "thumbnail": "previews/ios-phone-player-dark-small.webp"
+    },
+    {
+      "id": "ios-phone-profile-dark",
+      "title": "Profile",
+      "device": "phone-portrait",
+      "platform": "ios",
+      "theme": "dark",
+      "file": "screens/ios-phone-profile-dark.png",
+      "viewport": [
+        393,
+        852
+      ],
+      "width": 853,
+      "height": 1844,
+      "preview": "previews/ios-phone-profile-dark.webp",
+      "thumbnail": "previews/ios-phone-profile-dark-small.webp"
+    },
+    {
+      "id": "ios-phone-settings-dark",
+      "title": "Settings",
+      "device": "phone-portrait",
+      "platform": "ios",
+      "theme": "dark",
+      "file": "screens/ios-phone-settings-dark.png",
+      "viewport": [
+        393,
+        852
+      ],
+      "width": 853,
+      "height": 1844,
+      "preview": "previews/ios-phone-settings-dark.webp",
+      "thumbnail": "previews/ios-phone-settings-dark-small.webp"
+    },
+    {
+      "id": "ios-tablet-landscape-home-light",
+      "title": "Home",
+      "device": "tablet-landscape",
+      "platform": "ios",
+      "theme": "light",
+      "file": "screens/ios-tablet-landscape-home-light.png",
+      "viewport": [
+        1366,
+        1024
       ],
       "width": 1448,
-      "height": 1086
+      "height": 1086,
+      "preview": "previews/ios-tablet-landscape-home-light.webp",
+      "thumbnail": "previews/ios-tablet-landscape-home-light-small.webp"
     },
     {
-      "id": "h-adaptive-listening",
-      "name": "H \u00b7 Listening across sizes",
-      "kind": "adaptive",
-      "palette": {
-        "background": "#0F202D",
-        "surface": "#182F40",
-        "text": "#F4EFE5",
-        "primary": "#ACC9DC",
-        "onPrimary": "#0F202D",
-        "accent": "#E4C79D",
-        "onAccent": "#0F202D",
-        "secondary": "#AFBFCA",
-        "selection": "#294C63"
-      },
-      "screens": 4,
-      "description": "Player with a queue sheet on phone, side-by-side queue on larger windows, and hinge-aware tabletop controls.",
-      "file": "h-adaptive-listening.png",
-      "prompt": "Use case: ui-mockup\nAsset type: high-fidelity adaptive Storymile podcast app product design board.\nPrimary request: A meticulous practical UI mockup showing FOUR differently sized app windows on one spacious landscape board, roughly 3200x2400 at highest available resolution. Layout: two rows. Top row contains a compact portrait PHONE at left and an UNFOLDED FOLDABLE at right. Bottom row contains a landscape TABLET at left and a wider DESKTOP app window at right. All four fully visible and large enough for legible labels. Maintain enough gutters. Under each window print the exact small label provided. Flat front views, slim device outlines, no perspective, hardware props, heavy shadows or overlapped windows.\nApp identity: Storymile, a tiny blue/ivory paper boat logo and blue-ocean podcast cover art. Clean contemporary typography, 8pt spacing logic, 48dp controls. Real UI structure and short readable labels. Navigation choices \"Discover\", \"Saved\", \"Profile\"; \"Settings\" as a secondary desktop item.\nAdaptive behavior: phone uses one main pane and bottom navigation; selected details replace lists with Back. Foldable window 900dp wide shows a slim labeled icon rail and two genuinely separate panes with a safe central gutter; no text crosses the fold. Tablet window 1200dp shows rail and two spacious panes. Desktop window 1600dp shows labeled sidebar and two panes. Keep search/selection and playback position unchanged on resizing. Fit content and columns to windows, never stretch a phone screenshot. Wider does not mean bigger fonts.\nSample content: podcast \"The Quiet Current\", episode \"The art of slowing down\", 42:18 duration, playback at 12:34, blue ocean original cover. Secondary episodes \"A small act of wonder\" / \"Small Wonders\" and \"The paths we take\" / \"Field Notes\". All fictional.\nPersistent playback: compact mini-player above bottom navigation on phone, persistent bottom transport bar within foldable/tablet/desktop. One pause/play transport surface per window, no duplicate competing controls.\nConstraints: no wireframe placeholders, gibberish, tiny illegible paragraphs, chat bubbles, gradients on UI chrome, ads, paid plans or watermark. Detail panes must differ from lists and have an obvious hierarchy. Show selected rows with both a container and a check or clear title. Short exact captions outside each device. No prose explanation paragraphs on the board.\nTitle \"LISTEN / PLAYER + QUEUE\".\nPalette Harbor Night: background #0F202D, surfaces #182F40, ivory text #F4EFE5, icy blue controls #ACC9DC, champagne bookmarks #E4C79D. Precise elegant sans serif, quiet dark layers.\nOverride generic phone/foldable structure for this supporting-pane PLAYER board: Full player has no duplicate mini-player. Phone is single full player. Top-right foldable is in TABLETOP posture with horizontal hinge, two stacked content regions, not side-by-side.\nPhone caption \"PHONE \u00b7 full player\": top close-chevron \"Now playing\", large ocean cover, title, save, scrubber 12:34 / 42:18, rewind15, pause, forward30, speed1.2\u00d7, Sleep, Queue. Small queue affordance only.\nFoldable caption \"FOLDABLE \u00b7 tabletop\": wide device bent indicated only by subtle horizontal hinge gutter; above hinge show artwork beside title and chapter text; below hinge show transport controls and short Up next list. No controls on hinge. Navigation small bottom bar where appropriate. No duplicated progress bar or controls.\nTablet caption \"TABLET \u00b7 player + queue\": slim rail left, spacious main player on left two thirds, visible supporting pane on right one third heading \"Up next\", current item \"Playing\", two next episodes with drag handles, durations and overflow. Tabs Queue / Chapters. Single big transport cluster inside player.\nDesktop caption \"DESKTOP \u00b7 player + queue\": labeled sidebar, artwork and title in central player, right supporting pane \"Up next\" with reorder handles, next episodes, \"Autoplay\" switch. A single wide bottom transport dock with scrubber, 12:34 / 42:18, rewind15 pause forward30, speed and volume. Do not duplicate central and dock transports. Active row \"The art of slowing down\".",
-      "revisions": [
-        {
-          "prompt": "Use case: ui-mockup. This is a targeted repair of the attached Storymile adaptive listening mockup board. Preserve all FOUR device UI layouts, all positions, internal colors and content. Repair only the broken transparent OUTER CANVAS and its headings/captions: make the entire outer board a perfectly solid opaque deep navy #0F202D. Re-render the top heading cleanly as \"LISTEN / PLAYER + QUEUE\" in large crisp ivory #F4EFE5 with ample margin; remove the broken small logo/title fragments above it. Re-render the four existing device captions in crisp ivory on the solid navy canvas. No transparent pixels anywhere. No glow fringes or mottled background. Keep all devices and their UI unchanged. Output a fully opaque finished presentation board."
-        }
+      "id": "ios-tablet-landscape-home-dark",
+      "title": "Home",
+      "device": "tablet-landscape",
+      "platform": "ios",
+      "theme": "dark",
+      "file": "screens/ios-tablet-landscape-home-dark.png",
+      "viewport": [
+        1366,
+        1024
       ],
       "width": 1448,
-      "height": 1086
+      "height": 1086,
+      "preview": "previews/ios-tablet-landscape-home-dark.webp",
+      "thumbnail": "previews/ios-tablet-landscape-home-dark-small.webp"
     },
     {
-      "id": "i-adaptive-saved",
-      "name": "I \u00b7 Saved across sizes",
-      "kind": "adaptive",
-      "palette": {
-        "background": "#F1F6F1",
-        "surface": "#FFFFFF",
-        "text": "#193C3D",
-        "primary": "#216B68",
-        "onPrimary": "#FFFFFF",
-        "accent": "#C9DCC2",
-        "onAccent": "#193C3D",
-        "secondary": "#54716D",
-        "selection": "#DCECE6"
-      },
-      "screens": 4,
-      "description": "Saved list and episode detail stay connected. Bookmarking, downloading, and playback remain separate actions.",
-      "file": "i-adaptive-saved-v2.png",
-      "prompt": "Use case: ui-mockup\nAsset type: high-fidelity adaptive Storymile podcast app product design board.\nPrimary request: A meticulous practical UI mockup showing FOUR differently sized app windows on one spacious landscape board, roughly 3200x2400 at highest available resolution. Layout: two rows. Top row contains a compact portrait PHONE at left and an UNFOLDED FOLDABLE at right. Bottom row contains a landscape TABLET at left and a wider DESKTOP app window at right. All four fully visible and large enough for legible labels. Maintain enough gutters. Under each window print the exact small label provided. Flat front views, slim device outlines, no perspective, hardware props, heavy shadows or overlapped windows.\nApp identity: Storymile, a tiny blue/ivory paper boat logo and blue-ocean podcast cover art. Clean contemporary typography, 8pt spacing logic, 48dp controls. Real UI structure and short readable labels. Navigation choices \"Discover\", \"Saved\", \"Profile\"; \"Settings\" as a secondary desktop item.\nAdaptive behavior: phone uses one main pane and bottom navigation; selected details replace lists with Back. Foldable window 900dp wide shows a slim labeled icon rail and two genuinely separate panes with a safe central gutter; no text crosses the fold. Tablet window 1200dp shows rail and two spacious panes. Desktop window 1600dp shows labeled sidebar and two panes. Keep search/selection and playback position unchanged on resizing. Fit content and columns to windows, never stretch a phone screenshot. Wider does not mean bigger fonts.\nSample content: podcast \"The Quiet Current\", episode \"The art of slowing down\", 42:18 duration, playback at 12:34, blue ocean original cover. Secondary episodes \"A small act of wonder\" / \"Small Wonders\" and \"The paths we take\" / \"Field Notes\". All fictional.\nPersistent playback: compact mini-player above bottom navigation on phone, persistent bottom transport bar within foldable/tablet/desktop. One pause/play transport surface per window, no duplicate competing controls.\nConstraints: no wireframe placeholders, gibberish, tiny illegible paragraphs, chat bubbles, gradients on UI chrome, ads, paid plans or watermark. Detail panes must differ from lists and have an obvious hierarchy. Show selected rows with both a container and a check or clear title. Short exact captions outside each device. No prose explanation paragraphs on the board.\nTitle \"SAVED / KEEP YOUR PLACE\".\nPalette Sea Glass: ivory #F1F6F1, white surfaces, dark teal text #193C3D, controls #216B68, sage #C9DCC2, selection #DCECE6, ocean-blue podcast artwork. Humanist sans serif.\nPhone caption \"PHONE \u00b7 selected episode\": back \"Saved\", ocean cover, \"The art of slowing down\", \"The Quiet Current\", \"Saved\" filled bookmark, separate \"Download\" icon/label, description \"A conversation about attention, rest, and making room for a slower day.\", \"Resume \u00b7 12:34\", tabs \"About\" / \"Chapters\". Mini player, Saved active.\nFoldable caption \"FOLDABLE \u00b7 saved + detail\": rail, saved list left with \"All\", \"Downloaded\", \"Unplayed\" filters, first row selected, detail right for same episode. Real vertical fold gutter.\nTablet caption \"TABLET \u00b7 saved + detail\": rail, list left 35%, episode detail right 65%, distinct Save state and download state, show notes and three chapter rows. Same selected row and progress.\nDesktop caption \"DESKTOP \u00b7 sidebar + saved + detail\": sidebar, \"Saved episodes\" list column with search and \"Recently saved\" sort, selected episode detail showing cover beside heading, \"Saved\", \"Download\", \"Add to queue\". Chapters \"00:00 A quieter start\", \"08:20 Making space\", \"12:34 Finding a slower rhythm\". One persistent bottom player pause and progress 12:34 / 42:18. No multiple resume/play buttons competing with dock.\nInclude a downloaded badge on a DIFFERENT list row \"The paths we take\". Bookmark status does not imply download status.",
-      "revisions": [
-        {
-          "prompt": "Use case: ui-mockup. Targeted edit of the supplied FOUR-device Storymile mock board. Preserve the palette, layout, typography, artwork and ALL content of the phone, tablet and desktop, and keep the entire board fully opaque. Change ONLY the TOP-RIGHT FOLDABLE device as follows: the vertical physical hinge in the middle is an occluding zone. Align the list/detail pane boundary exactly on that physical center hinge. No text, row, button or slider may overlap it. In the foldable bottom player dock, keep only small artwork and episode title on the LEFT half. Put the COMPLETE scrubber, its 12:34 and 42:18 labels, rewind 15, pause, forward 30, all on the RIGHT half. Use two compact rows for the right-half player if necessary: entire seek track plus times on upper row, transport buttons on lower row. Leave a clear narrow gutter at the hinge across the whole height including the player. The track must start well to the RIGHT of the center hinge and must never cross it. Shrink/reflow controls inside their half, do not split a control. Preserve all other device windows exactly. Re-render text sharply. Keep original title and captions. This correction demonstrates a real fold-aware adaptive layout. In this foldable, narrow the saved list so all row titles and filled bookmark controls remain LEFT of the hinge with at least 20px inset; start episode detail entirely RIGHT of hinge. Keep the correct selected episode."
-        }
+      "id": "ios-tablet-landscape-library-light",
+      "title": "Library",
+      "device": "tablet-landscape",
+      "platform": "ios",
+      "theme": "light",
+      "file": "screens/ios-tablet-landscape-library-light.png",
+      "viewport": [
+        1366,
+        1024
       ],
       "width": 1448,
-      "height": 1086
+      "height": 1086,
+      "preview": "previews/ios-tablet-landscape-library-light.webp",
+      "thumbnail": "previews/ios-tablet-landscape-library-light-small.webp"
     },
     {
-      "id": "j-adaptive-settings",
-      "name": "J \u00b7 Settings across sizes",
-      "kind": "adaptive",
-      "palette": {
-        "background": "#FFF6EE",
-        "surface": "#FFFCF8",
-        "text": "#253F50",
-        "primary": "#375F7A",
-        "onPrimary": "#FFFFFF",
-        "accent": "#B34F35",
-        "onAccent": "#FFFFFF",
-        "secondary": "#66717A",
-        "selection": "#F7DFD0"
-      },
-      "screens": 4,
-      "description": "Settings categories lead to one focused detail pane, with identical values across all window sizes.",
-      "file": "j-adaptive-settings-v2.png",
-      "prompt": "Use case: ui-mockup\nAsset type: high-fidelity adaptive Storymile podcast app product design board.\nPrimary request: A meticulous practical UI mockup showing FOUR differently sized app windows on one spacious landscape board, roughly 3200x2400 at highest available resolution. Layout: two rows. Top row contains a compact portrait PHONE at left and an UNFOLDED FOLDABLE at right. Bottom row contains a landscape TABLET at left and a wider DESKTOP app window at right. All four fully visible and large enough for legible labels. Maintain enough gutters. Under each window print the exact small label provided. Flat front views, slim device outlines, no perspective, hardware props, heavy shadows or overlapped windows.\nApp identity: Storymile, a tiny blue/ivory paper boat logo and blue-ocean podcast cover art. Clean contemporary typography, 8pt spacing logic, 48dp controls. Real UI structure and short readable labels. Navigation choices \"Discover\", \"Saved\", \"Profile\"; \"Settings\" as a secondary desktop item.\nAdaptive behavior: phone uses one main pane and bottom navigation; selected details replace lists with Back. Foldable window 900dp wide shows a slim labeled icon rail and two genuinely separate panes with a safe central gutter; no text crosses the fold. Tablet window 1200dp shows rail and two spacious panes. Desktop window 1600dp shows labeled sidebar and two panes. Keep search/selection and playback position unchanged on resizing. Fit content and columns to windows, never stretch a phone screenshot. Wider does not mean bigger fonts.\nSample content: podcast \"The Quiet Current\", episode \"The art of slowing down\", 42:18 duration, playback at 12:34, blue ocean original cover. Secondary episodes \"A small act of wonder\" / \"Small Wonders\" and \"The paths we take\" / \"Field Notes\". All fictional.\nPersistent playback: compact mini-player above bottom navigation on phone, persistent bottom transport bar within foldable/tablet/desktop. One pause/play transport surface per window, no duplicate competing controls.\nConstraints: no wireframe placeholders, gibberish, tiny illegible paragraphs, chat bubbles, gradients on UI chrome, ads, paid plans or watermark. Detail panes must differ from lists and have an obvious hierarchy. Show selected rows with both a container and a check or clear title. Short exact captions outside each device. No prose explanation paragraphs on the board.\nTitle \"SETTINGS / ONE PLACE FOR EVERY PREFERENCE\".\nPalette Apricot Coast: #FFF6EE canvas, #FFFCF8 surfaces, #253F50 ink, #375F7A denim controls, terracotta #B34F35, apricot #F7DFD0 selected container. Clean sans serif.\nPhone caption \"PHONE \u00b7 playback settings\": back \"Settings\", title \"Playback\", rows \"Default speed\" value \"1.2\u00d7\", \"Skip silence\" ON, \"Rewind\" \"15 seconds\", \"Skip forward\" \"30 seconds\", \"Sleep timer\" \"Off\". Small helper \"Applies to new playback sessions\". Mini player at foot.\nFoldable caption \"FOLDABLE \u00b7 categories + controls\": rail, settings categories left \"Playback\" selected, \"Downloads\", \"Appearance\", \"Notifications\", \"Privacy\", \"Account\"; right same Playback rows. Honor fold gutter.\nTablet caption \"TABLET \u00b7 categories + controls\": rail and category list, wider right content with a bounded 560dp form and simple section headings. Same values.\nDesktop caption \"DESKTOP \u00b7 sidebar + categories + controls\": labeled sidebar with Settings active, settings category column with Playback highlighted, spacious right form with exactly the same controls, no unnecessary stretched toggles, small short explanations below Skip silence and speed, bottom player at 12:34.\nTreat switches consistently: active in denim, inactive neutral; chevrons only for navigable rows. No Save button for immediate preferences. No marketing tiles.",
-      "revisions": [
-        {
-          "prompt": "Use case: ui-mockup. Targeted edit of the supplied FOUR-device Storymile mock board. Preserve the palette, layout, typography, artwork and ALL content of the phone, tablet and desktop, and keep the entire board fully opaque. Change ONLY the TOP-RIGHT FOLDABLE device as follows: the vertical physical hinge in the middle is an occluding zone. Align the list/detail pane boundary exactly on that physical center hinge. No text, row, button or slider may overlap it. In the foldable bottom player dock, keep only small artwork and episode title on the LEFT half. Put the COMPLETE scrubber, its 12:34 and 42:18 labels, rewind 15, pause, forward 30, all on the RIGHT half. Use two compact rows for the right-half player if necessary: entire seek track plus times on upper row, transport buttons on lower row. Leave a clear narrow gutter at the hinge across the whole height including the player. The track must start well to the RIGHT of the center hinge and must never cross it. Shrink/reflow controls inside their half, do not split a control. Preserve all other device windows exactly. Re-render text sharply. Keep original title and captions. This correction demonstrates a real fold-aware adaptive layout. One additional small correction in the PHONE only: bottom navigation must show Profile selected and Discover unselected, because Settings belongs under Profile. Keep the phone settings controls and all remaining pixels unchanged."
-        }
+      "id": "ios-tablet-landscape-library-dark",
+      "title": "Library",
+      "device": "tablet-landscape",
+      "platform": "ios",
+      "theme": "dark",
+      "file": "screens/ios-tablet-landscape-library-dark.png",
+      "viewport": [
+        1366,
+        1024
       ],
       "width": 1448,
-      "height": 1086
+      "height": 1086,
+      "preview": "previews/ios-tablet-landscape-library-dark.webp",
+      "thumbnail": "previews/ios-tablet-landscape-library-dark-small.webp"
     },
     {
-      "id": "k-adaptive-profile",
-      "name": "K \u00b7 Profile across sizes",
-      "kind": "adaptive",
-      "palette": {
-        "background": "#191D33",
-        "surface": "#272C49",
-        "text": "#F0EEFA",
-        "primary": "#B8C5F5",
-        "onPrimary": "#191D33",
-        "accent": "#E5C79C",
-        "onAccent": "#191D33",
-        "secondary": "#B7BCD2",
-        "selection": "#3B4163"
-      },
-      "screens": 4,
-      "description": "Profile overview and account details expand into two panes while forms stay comfortably narrow.",
-      "file": "k-adaptive-profile-v2.png",
-      "prompt": "Use case: ui-mockup\nAsset type: high-fidelity adaptive Storymile podcast app product design board.\nPrimary request: A meticulous practical UI mockup showing FOUR differently sized app windows on one spacious landscape board, roughly 3200x2400 at highest available resolution. Layout: two rows. Top row contains a compact portrait PHONE at left and an UNFOLDED FOLDABLE at right. Bottom row contains a landscape TABLET at left and a wider DESKTOP app window at right. All four fully visible and large enough for legible labels. Maintain enough gutters. Under each window print the exact small label provided. Flat front views, slim device outlines, no perspective, hardware props, heavy shadows or overlapped windows.\nApp identity: Storymile, a tiny blue/ivory paper boat logo and blue-ocean podcast cover art. Clean contemporary typography, 8pt spacing logic, 48dp controls. Real UI structure and short readable labels. Navigation choices \"Discover\", \"Saved\", \"Profile\"; \"Settings\" as a secondary desktop item.\nAdaptive behavior: phone uses one main pane and bottom navigation; selected details replace lists with Back. Foldable window 900dp wide shows a slim labeled icon rail and two genuinely separate panes with a safe central gutter; no text crosses the fold. Tablet window 1200dp shows rail and two spacious panes. Desktop window 1600dp shows labeled sidebar and two panes. Keep search/selection and playback position unchanged on resizing. Fit content and columns to windows, never stretch a phone screenshot. Wider does not mean bigger fonts.\nSample content: podcast \"The Quiet Current\", episode \"The art of slowing down\", 42:18 duration, playback at 12:34, blue ocean original cover. Secondary episodes \"A small act of wonder\" / \"Small Wonders\" and \"The paths we take\" / \"Field Notes\". All fictional.\nPersistent playback: compact mini-player above bottom navigation on phone, persistent bottom transport bar within foldable/tablet/desktop. One pause/play transport surface per window, no duplicate competing controls.\nConstraints: no wireframe placeholders, gibberish, tiny illegible paragraphs, chat bubbles, gradients on UI chrome, ads, paid plans or watermark. Detail panes must differ from lists and have an obvious hierarchy. Show selected rows with both a container and a check or clear title. Short exact captions outside each device. No prose explanation paragraphs on the board.\nTitle \"PROFILE / CONNECTED ACROSS DEVICES\".\nPalette Indigo Dusk: #191D33 background, #272C49 surfaces, #F0EEFA text, #B8C5F5 periwinkle primary, #E5C79C sand. Elegant readable sans serif. This board uses a signed-in account with FICTIONAL example identity.\nPhone caption \"PHONE \u00b7 profile overview\": avatar \"AL\", \"Alex Lee\", \"alex@example.com\", \"Synced just now\", 24 saved / 8 followed; rows \"Account\", \"Listening history\", \"Downloads\", \"Settings\", \"Help\", \"Sign out\"; mini-player, Profile selected.\nFoldable caption \"FOLDABLE \u00b7 profile + account\": rail, profile summary and menu left, account details on right headed \"Account\", Name Alex Lee, Email alex@example.com, \"Sync saved episodes\" ON, \"Sync playback position\" ON. Safe center gutter.\nTablet caption \"TABLET \u00b7 profile + account\": same two pane design with legible bounded form and selected Account row. In right panel \"Connected services\" then \"Apple\" \"Connected\", \"Google\" \"Not connected\"; no passwords or actual personal data.\nDesktop caption \"DESKTOP \u00b7 sidebar + profile + account\": labeled sidebar Profile selected, middle profile menu/summary, main account panel with same information and clear \"Edit profile\" action, sync statuses, \"Sign out\" in muted secondary style. Bottom player at 12:34. Avoid huge empty right area but do not add dashboard graphs, premium plans or follower feed.",
-      "revisions": [
-        {
-          "prompt": "Use case: ui-mockup. Targeted edit of the supplied FOUR-device Storymile mock board. Preserve the palette, layout, typography, artwork and ALL content of the phone, tablet and desktop, and keep the entire board fully opaque. Change ONLY the TOP-RIGHT FOLDABLE device as follows: the vertical physical hinge in the middle is an occluding zone. Align the list/detail pane boundary exactly on that physical center hinge. No text, row, button or slider may overlap it. In the foldable bottom player dock, keep only small artwork and episode title on the LEFT half. Put the COMPLETE scrubber, its 12:34 and 42:18 labels, rewind 15, pause, forward 30, all on the RIGHT half. Use two compact rows for the right-half player if necessary: entire seek track plus times on upper row, transport buttons on lower row. Leave a clear narrow gutter at the hinge across the whole height including the player. The track must start well to the RIGHT of the center hinge and must never cross it. Shrink/reflow controls inside their half, do not split a control. Preserve all other device windows exactly. Re-render text sharply. Keep original title and captions. This correction demonstrates a real fold-aware adaptive layout."
-        }
+      "id": "ios-tablet-landscape-player-light",
+      "title": "Player",
+      "device": "tablet-landscape",
+      "platform": "ios",
+      "theme": "light",
+      "file": "screens/ios-tablet-landscape-player-light.png",
+      "viewport": [
+        1366,
+        1024
+      ],
+      "width": 1449,
+      "height": 1086,
+      "preview": "previews/ios-tablet-landscape-player-light.webp",
+      "thumbnail": "previews/ios-tablet-landscape-player-light-small.webp"
+    },
+    {
+      "id": "ios-tablet-landscape-player-dark",
+      "title": "Player",
+      "device": "tablet-landscape",
+      "platform": "ios",
+      "theme": "dark",
+      "file": "screens/ios-tablet-landscape-player-dark.png",
+      "viewport": [
+        1366,
+        1024
       ],
       "width": 1448,
-      "height": 1086
+      "height": 1086,
+      "preview": "previews/ios-tablet-landscape-player-dark.webp",
+      "thumbnail": "previews/ios-tablet-landscape-player-dark-small.webp"
     },
     {
-      "id": "l-key-flow-states",
-      "name": "L \u00b7 Sign-in and useful states",
-      "kind": "flow",
-      "palette": {
-        "background": "#F7F3EB",
-        "surface": "#FFFDF8",
-        "text": "#233B50",
-        "primary": "#365F7D",
-        "accent": "#D6BA8E",
-        "onPrimary": "#FFFDF8",
-        "onAccent": "#233B50",
-        "secondary": "#5B6E79",
-        "selection": "#DCE8EE"
-      },
-      "screens": 6,
-      "description": "Guest profile \u2192 email sign-in \u2192 check email \u2192 synced profile, plus empty Saved and search with no results.",
-      "file": "l-key-flow-states.png",
-      "prompt": "Use case: ui-mockup\nAsset type: high-fidelity adaptive Storymile podcast app product design board.\nPrimary request: A meticulous practical UI mockup showing FOUR differently sized app windows on one spacious landscape board, roughly 3200x2400 at highest available resolution. Layout: two rows. Top row contains a compact portrait PHONE at left and an UNFOLDED FOLDABLE at right. Bottom row contains a landscape TABLET at left and a wider DESKTOP app window at right. All four fully visible and large enough for legible labels. Maintain enough gutters. Under each window print the exact small label provided. Flat front views, slim device outlines, no perspective, hardware props, heavy shadows or overlapped windows.\nApp identity: Storymile, a tiny blue/ivory paper boat logo and blue-ocean podcast cover art. Clean contemporary typography, 8pt spacing logic, 48dp controls. Real UI structure and short readable labels. Navigation choices \"Discover\", \"Saved\", \"Profile\"; \"Settings\" as a secondary desktop item.\nAdaptive behavior: phone uses one main pane and bottom navigation; selected details replace lists with Back. Foldable window 900dp wide shows a slim labeled icon rail and two genuinely separate panes with a safe central gutter; no text crosses the fold. Tablet window 1200dp shows rail and two spacious panes. Desktop window 1600dp shows labeled sidebar and two panes. Keep search/selection and playback position unchanged on resizing. Fit content and columns to windows, never stretch a phone screenshot. Wider does not mean bigger fonts.\nSample content: podcast \"The Quiet Current\", episode \"The art of slowing down\", 42:18 duration, playback at 12:34, blue ocean original cover. Secondary episodes \"A small act of wonder\" / \"Small Wonders\" and \"The paths we take\" / \"Field Notes\". All fictional.\nPersistent playback: compact mini-player above bottom navigation on phone, persistent bottom transport bar within foldable/tablet/desktop. One pause/play transport surface per window, no duplicate competing controls.\nConstraints: no wireframe placeholders, gibberish, tiny illegible paragraphs, chat bubbles, gradients on UI chrome, ads, paid plans or watermark. Detail panes must differ from lists and have an obvious hierarchy. Show selected rows with both a container and a check or clear title. Short exact captions outside each device. No prose explanation paragraphs on the board.\nOverride generic FOUR device board: show SIX complete mobile screens in a three-column two-row PORTRAIT board, 2400x3200 highest available resolution, same style as Paper Tide mobile exploration. No foldables tablets or desktop in this board.\nTitle \"STORYMILE / SIGN IN + EVERYDAY STATES\". Warm paper #F7F3EB, ivory #FFFDF8, ink #233B50, primary #365F7D, mist #DCE8EE, sand #D6BA8E.\nTop-left caption \"1 \u00b7 GUEST PROFILE\": Storymile mark, heading \"Your stories, everywhere\", \"Sign in to sync your saved episodes and listening progress.\" primary \"Sign in\", secondary link \"Keep listening as a guest\", a small group labelled \"On this device\" showing \"3 saved episodes\". Bottom nav Discover / Saved / Profile. Local saves are usable without login.\nTop-middle caption \"2 \u00b7 EMAIL SIGN-IN\": Back, title \"Sign in\", labelled Email input \"alex@example.com\", primary \"Send sign-in link\", divider \"or\", outlined \"Continue with Apple\" and \"Continue with Google\", short \"No password needed.\" No real authentication occurs.\nTop-right caption \"3 \u00b7 CHECK EMAIL\": Back, envelope illustration simple, heading \"Check your email\", text \"We sent a sign-in link to alex@example.com\", primary \"Open email app\", \"Resend link\", \"Use a different email\". No code boxes, no timer claim.\nBottom-left caption \"4 \u00b7 PROFILE SYNCED\": avatar AL / Alex Lee / alex@example.com, \"Synced just now\"; small confirmation \"Your saved episodes are ready\"; stats 24 saved / 8 followed; Account / Downloads / Settings / Sign out; bottom nav Profile. No promise of a particular server merge rule.\nBottom-middle caption \"EMPTY SAVED\": title \"Saved episodes\", very small line bookmark illustration, \"Keep a good story for later\", \"Tap the bookmark on an episode to save it here.\", primary \"Explore podcasts\", bottom nav Saved. No player because nothing playing.\nBottom-right caption \"NO SEARCH RESULTS\": search with query \"quiet planets\", clear X button; heading \"No results yet\", \"Try a show name, topic, or host.\", primary \"Clear search\"; browse topic chips Science / Culture / History; bottom nav Discover. No player.\nAll six screens readable and fully contained. These are visual flow proposals, not wired screens.",
-      "width": 1086,
-      "height": 1448
+      "id": "ios-tablet-landscape-profile-light",
+      "title": "Profile",
+      "device": "tablet-landscape",
+      "platform": "ios",
+      "theme": "light",
+      "file": "screens/ios-tablet-landscape-profile-light.png",
+      "viewport": [
+        1366,
+        1024
+      ],
+      "width": 1448,
+      "height": 1086,
+      "preview": "previews/ios-tablet-landscape-profile-light.webp",
+      "thumbnail": "previews/ios-tablet-landscape-profile-light-small.webp"
+    },
+    {
+      "id": "ios-tablet-landscape-profile-dark",
+      "title": "Profile",
+      "device": "tablet-landscape",
+      "platform": "ios",
+      "theme": "dark",
+      "file": "screens/ios-tablet-landscape-profile-dark.png",
+      "viewport": [
+        1366,
+        1024
+      ],
+      "width": 1448,
+      "height": 1086,
+      "preview": "previews/ios-tablet-landscape-profile-dark.webp",
+      "thumbnail": "previews/ios-tablet-landscape-profile-dark-small.webp"
+    },
+    {
+      "id": "ios-tablet-landscape-settings-light",
+      "title": "Settings",
+      "device": "tablet-landscape",
+      "platform": "ios",
+      "theme": "light",
+      "file": "screens/ios-tablet-landscape-settings-light.png",
+      "viewport": [
+        1366,
+        1024
+      ],
+      "width": 1448,
+      "height": 1086,
+      "preview": "previews/ios-tablet-landscape-settings-light.webp",
+      "thumbnail": "previews/ios-tablet-landscape-settings-light-small.webp"
+    },
+    {
+      "id": "ios-tablet-landscape-settings-dark",
+      "title": "Settings",
+      "device": "tablet-landscape",
+      "platform": "ios",
+      "theme": "dark",
+      "file": "screens/ios-tablet-landscape-settings-dark.png",
+      "viewport": [
+        1366,
+        1024
+      ],
+      "width": 1448,
+      "height": 1086,
+      "preview": "previews/ios-tablet-landscape-settings-dark.webp",
+      "thumbnail": "previews/ios-tablet-landscape-settings-dark-small.webp"
     }
   ],
-  "sources": [
+  "themePairs": [
     {
-      "title": "Adobe Color \u2014 color wheel",
-      "url": "https://color.adobe.com/create/color-wheel",
-      "note": "Starting from the icon\u2019s blue and sand, explore tonal, adjacent-hue, and complementary families. The proposed palettes are original."
+      "id": "android-phone-home",
+      "title": "Home",
+      "device": "phone-portrait",
+      "light": "android-phone-home-light",
+      "dark": "android-phone-home-dark"
     },
     {
-      "title": "Radix \u2014 composing a palette",
-      "url": "https://www.radix-ui.com/colors/docs/palette-composition/composing-a-palette",
-      "note": "Blue/indigo with slate, teal with sage, and amber with sand informed the neutral and accent pairings."
+      "id": "android-phone-library",
+      "title": "Library",
+      "device": "phone-portrait",
+      "light": "android-phone-library-light",
+      "dark": "android-phone-library-dark"
     },
     {
-      "title": "Radix \u2014 understanding the scale",
-      "url": "https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale",
-      "note": "Separate backgrounds, selected containers, controls, and text rather than using one accent everywhere."
+      "id": "android-phone-downloads",
+      "title": "Downloads",
+      "device": "phone-portrait",
+      "light": "android-phone-downloads-light",
+      "dark": "android-phone-downloads-dark"
     },
     {
-      "title": "Material 3 \u2014 color schemes",
-      "url": "https://developer.android.com/develop/ui/compose/designsystems/material3#color-scheme",
-      "note": "Use brand-derived light and dark color roles, each paired with an appropriate foreground."
+      "id": "android-phone-player",
+      "title": "Player",
+      "device": "phone-portrait",
+      "light": "android-phone-player-light",
+      "dark": "android-phone-player-dark"
     },
     {
-      "title": "Android \u2014 canonical layouts",
-      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/canonical-layouts",
-      "note": "List/detail for browsing and Saved; supporting panes for the player and queue."
+      "id": "android-phone-profile",
+      "title": "Profile",
+      "device": "phone-portrait",
+      "light": "android-phone-profile-light",
+      "dark": "android-phone-profile-dark"
     },
     {
-      "title": "Android \u2014 reference video",
-      "url": "https://developer.android.com/static/develop/ui/compose/images/layouts/adaptive/canonical-layouts/list-detail_conversations.mp4",
-      "note": "Inspected the compact phone and expanded two-pane states; supplied screenshots also guide the desktop arrangement."
+      "id": "android-phone-settings",
+      "title": "Settings",
+      "device": "phone-portrait",
+      "light": "android-phone-settings-light",
+      "dark": "android-phone-settings-dark"
     },
     {
-      "title": "Android \u2014 window size classes",
-      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/use-window-size-classes",
-      "note": "Use the current app-window size, including resized desktop windows and split screen."
+      "id": "android-phone-landscape-player",
+      "title": "Now playing",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-player-light",
+      "dark": "android-phone-landscape-player-dark"
     },
     {
-      "title": "Android \u2014 adaptive navigation",
-      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/build-adaptive-navigation",
-      "note": "Bottom navigation and rail adapt to available space. The labeled desktop sidebar is a proposed Storymile choice."
+      "id": "android-tablet-portrait-library",
+      "title": "Library",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-library-light",
+      "dark": "android-tablet-portrait-library-dark"
     },
     {
-      "title": "Android \u2014 fold-aware layouts",
-      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/foldables/make-your-app-fold-aware",
-      "note": "Respect separating hinges; use tabletop posture to separate content and controls."
+      "id": "android-tablet-landscape-discovery",
+      "title": "Discovery",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-discovery-light",
+      "dark": "android-tablet-landscape-discovery-dark"
     },
     {
-      "title": "W3C \u2014 minimum contrast",
-      "url": "https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum",
-      "note": "Normal text needs 4.5:1. The table checks intended color tokens, not generated image pixels."
+      "id": "android-foldable-discovery",
+      "title": "Discovery",
+      "device": "foldable",
+      "light": "android-foldable-discovery-light",
+      "dark": "android-foldable-discovery-dark"
+    },
+    {
+      "id": "desktop-settings",
+      "title": "Settings",
+      "device": "desktop",
+      "light": "desktop-settings-light",
+      "dark": "desktop-settings-dark"
+    },
+    {
+      "id": "android-phone-search",
+      "title": "Search results",
+      "device": "phone-portrait",
+      "light": "android-phone-search-light",
+      "dark": "android-phone-search-dark"
+    },
+    {
+      "id": "android-phone-show",
+      "title": "Show",
+      "device": "phone-portrait",
+      "light": "android-phone-show-light",
+      "dark": "android-phone-show-dark"
+    },
+    {
+      "id": "android-phone-episode",
+      "title": "Episode",
+      "device": "phone-portrait",
+      "light": "android-phone-episode-light",
+      "dark": "android-phone-episode-dark"
+    },
+    {
+      "id": "android-phone-queue",
+      "title": "Queue",
+      "device": "phone-portrait",
+      "light": "android-phone-queue-light",
+      "dark": "android-phone-queue-dark"
+    },
+    {
+      "id": "android-phone-chapters",
+      "title": "Chapters",
+      "device": "phone-portrait",
+      "light": "android-phone-chapters-light",
+      "dark": "android-phone-chapters-dark"
+    },
+    {
+      "id": "android-phone-guest",
+      "title": "Guest profile",
+      "device": "phone-portrait",
+      "light": "android-phone-guest-light",
+      "dark": "android-phone-guest-dark"
+    },
+    {
+      "id": "android-phone-signin",
+      "title": "Sign in",
+      "device": "phone-portrait",
+      "light": "android-phone-signin-light",
+      "dark": "android-phone-signin-dark"
+    },
+    {
+      "id": "android-phone-check-email",
+      "title": "Check your email",
+      "device": "phone-portrait",
+      "light": "android-phone-check-email-light",
+      "dark": "android-phone-check-email-dark"
+    },
+    {
+      "id": "android-phone-playback",
+      "title": "Playback settings",
+      "device": "phone-portrait",
+      "light": "android-phone-playback-light",
+      "dark": "android-phone-playback-dark"
+    },
+    {
+      "id": "android-phone-download-detail",
+      "title": "Downloaded episode",
+      "device": "phone-portrait",
+      "light": "android-phone-download-detail-light",
+      "dark": "android-phone-download-detail-dark"
+    },
+    {
+      "id": "android-phone-landscape-home",
+      "title": "Home",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-home-light",
+      "dark": "android-phone-landscape-home-dark"
+    },
+    {
+      "id": "android-tablet-portrait-home",
+      "title": "Home",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-home-light",
+      "dark": "android-tablet-portrait-home-dark"
+    },
+    {
+      "id": "android-tablet-landscape-home",
+      "title": "Home",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-home-light",
+      "dark": "android-tablet-landscape-home-dark"
+    },
+    {
+      "id": "android-foldable-home",
+      "title": "Home",
+      "device": "foldable",
+      "light": "android-foldable-home-light",
+      "dark": "android-foldable-home-dark"
+    },
+    {
+      "id": "desktop-home",
+      "title": "Home",
+      "device": "desktop",
+      "light": "desktop-home-light",
+      "dark": "desktop-home-dark"
+    },
+    {
+      "id": "android-phone-landscape-library",
+      "title": "Library",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-library-light",
+      "dark": "android-phone-landscape-library-dark"
+    },
+    {
+      "id": "android-tablet-landscape-library",
+      "title": "Library",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-library-light",
+      "dark": "android-tablet-landscape-library-dark"
+    },
+    {
+      "id": "android-foldable-library",
+      "title": "Library",
+      "device": "foldable",
+      "light": "android-foldable-library-light",
+      "dark": "android-foldable-library-dark"
+    },
+    {
+      "id": "desktop-library",
+      "title": "Library",
+      "device": "desktop",
+      "light": "desktop-library-light",
+      "dark": "desktop-library-dark"
+    },
+    {
+      "id": "android-phone-landscape-downloads",
+      "title": "Downloads",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-downloads-light",
+      "dark": "android-phone-landscape-downloads-dark"
+    },
+    {
+      "id": "android-tablet-portrait-downloads",
+      "title": "Downloads",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-downloads-light",
+      "dark": "android-tablet-portrait-downloads-dark"
+    },
+    {
+      "id": "android-tablet-landscape-downloads",
+      "title": "Downloads",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-downloads-light",
+      "dark": "android-tablet-landscape-downloads-dark"
+    },
+    {
+      "id": "android-foldable-downloads",
+      "title": "Downloads",
+      "device": "foldable",
+      "light": "android-foldable-downloads-light",
+      "dark": "android-foldable-downloads-dark"
+    },
+    {
+      "id": "desktop-downloads",
+      "title": "Downloads",
+      "device": "desktop",
+      "light": "desktop-downloads-light",
+      "dark": "desktop-downloads-dark"
+    },
+    {
+      "id": "android-tablet-portrait-player",
+      "title": "Player",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-player-light",
+      "dark": "android-tablet-portrait-player-dark"
+    },
+    {
+      "id": "android-tablet-landscape-player",
+      "title": "Player",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-player-light",
+      "dark": "android-tablet-landscape-player-dark"
+    },
+    {
+      "id": "android-foldable-player",
+      "title": "Player",
+      "device": "foldable",
+      "light": "android-foldable-player-light",
+      "dark": "android-foldable-player-dark"
+    },
+    {
+      "id": "desktop-player",
+      "title": "Player",
+      "device": "desktop",
+      "light": "desktop-player-light",
+      "dark": "desktop-player-dark"
+    },
+    {
+      "id": "android-phone-landscape-profile",
+      "title": "Profile",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-profile-light",
+      "dark": "android-phone-landscape-profile-dark"
+    },
+    {
+      "id": "android-tablet-portrait-profile",
+      "title": "Profile",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-profile-light",
+      "dark": "android-tablet-portrait-profile-dark"
+    },
+    {
+      "id": "android-tablet-landscape-profile",
+      "title": "Profile",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-profile-light",
+      "dark": "android-tablet-landscape-profile-dark"
+    },
+    {
+      "id": "android-foldable-profile",
+      "title": "Profile",
+      "device": "foldable",
+      "light": "android-foldable-profile-light",
+      "dark": "android-foldable-profile-dark"
+    },
+    {
+      "id": "desktop-profile",
+      "title": "Profile",
+      "device": "desktop",
+      "light": "desktop-profile-light",
+      "dark": "desktop-profile-dark"
+    },
+    {
+      "id": "android-phone-landscape-settings",
+      "title": "Settings",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-settings-light",
+      "dark": "android-phone-landscape-settings-dark"
+    },
+    {
+      "id": "android-tablet-portrait-settings",
+      "title": "Settings",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-settings-light",
+      "dark": "android-tablet-portrait-settings-dark"
+    },
+    {
+      "id": "android-tablet-landscape-settings",
+      "title": "Settings",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-settings-light",
+      "dark": "android-tablet-landscape-settings-dark"
+    },
+    {
+      "id": "android-foldable-settings",
+      "title": "Settings",
+      "device": "foldable",
+      "light": "android-foldable-settings-light",
+      "dark": "android-foldable-settings-dark"
+    },
+    {
+      "id": "android-phone-landscape-show",
+      "title": "Show",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-show-light",
+      "dark": "android-phone-landscape-show-dark"
+    },
+    {
+      "id": "android-tablet-portrait-show",
+      "title": "Show",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-show-light",
+      "dark": "android-tablet-portrait-show-dark"
+    },
+    {
+      "id": "desktop-show",
+      "title": "Show",
+      "device": "desktop",
+      "light": "desktop-show-light",
+      "dark": "desktop-show-dark"
+    },
+    {
+      "id": "android-phone-landscape-search",
+      "title": "Search results",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-search-light",
+      "dark": "android-phone-landscape-search-dark"
+    },
+    {
+      "id": "android-tablet-portrait-search",
+      "title": "Search results",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-search-light",
+      "dark": "android-tablet-portrait-search-dark"
+    },
+    {
+      "id": "android-tablet-landscape-search",
+      "title": "Search results",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-search-light",
+      "dark": "android-tablet-landscape-search-dark"
+    },
+    {
+      "id": "android-foldable-search",
+      "title": "Search results",
+      "device": "foldable",
+      "light": "android-foldable-search-light",
+      "dark": "android-foldable-search-dark"
+    },
+    {
+      "id": "desktop-search",
+      "title": "Search results",
+      "device": "desktop",
+      "light": "desktop-search-light",
+      "dark": "desktop-search-dark"
+    },
+    {
+      "id": "android-phone-landscape-episode",
+      "title": "Episode",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-episode-light",
+      "dark": "android-phone-landscape-episode-dark"
+    },
+    {
+      "id": "android-tablet-portrait-episode",
+      "title": "Episode",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-episode-light",
+      "dark": "android-tablet-portrait-episode-dark"
+    },
+    {
+      "id": "android-tablet-landscape-episode",
+      "title": "Episode",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-episode-light",
+      "dark": "android-tablet-landscape-episode-dark"
+    },
+    {
+      "id": "android-foldable-episode",
+      "title": "Episode",
+      "device": "foldable",
+      "light": "android-foldable-episode-light",
+      "dark": "android-foldable-episode-dark"
+    },
+    {
+      "id": "desktop-episode",
+      "title": "Episode",
+      "device": "desktop",
+      "light": "desktop-episode-light",
+      "dark": "desktop-episode-dark"
+    },
+    {
+      "id": "android-phone-landscape-queue",
+      "title": "Queue",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-queue-light",
+      "dark": "android-phone-landscape-queue-dark"
+    },
+    {
+      "id": "android-tablet-portrait-queue",
+      "title": "Queue",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-queue-light",
+      "dark": "android-tablet-portrait-queue-dark"
+    },
+    {
+      "id": "android-tablet-landscape-queue",
+      "title": "Queue",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-queue-light",
+      "dark": "android-tablet-landscape-queue-dark"
+    },
+    {
+      "id": "android-foldable-queue",
+      "title": "Queue",
+      "device": "foldable",
+      "light": "android-foldable-queue-light",
+      "dark": "android-foldable-queue-dark"
+    },
+    {
+      "id": "desktop-queue",
+      "title": "Queue",
+      "device": "desktop",
+      "light": "desktop-queue-light",
+      "dark": "desktop-queue-dark"
+    },
+    {
+      "id": "android-phone-landscape-chapters",
+      "title": "Chapters",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-chapters-light",
+      "dark": "android-phone-landscape-chapters-dark"
+    },
+    {
+      "id": "android-tablet-portrait-chapters",
+      "title": "Chapters",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-chapters-light",
+      "dark": "android-tablet-portrait-chapters-dark"
+    },
+    {
+      "id": "android-tablet-landscape-chapters",
+      "title": "Chapters",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-chapters-light",
+      "dark": "android-tablet-landscape-chapters-dark"
+    },
+    {
+      "id": "android-foldable-chapters",
+      "title": "Chapters",
+      "device": "foldable",
+      "light": "android-foldable-chapters-light",
+      "dark": "android-foldable-chapters-dark"
+    },
+    {
+      "id": "desktop-chapters",
+      "title": "Chapters",
+      "device": "desktop",
+      "light": "desktop-chapters-light",
+      "dark": "desktop-chapters-dark"
+    },
+    {
+      "id": "android-phone-landscape-guest",
+      "title": "Guest profile",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-guest-light",
+      "dark": "android-phone-landscape-guest-dark"
+    },
+    {
+      "id": "android-tablet-portrait-guest",
+      "title": "Guest profile",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-guest-light",
+      "dark": "android-tablet-portrait-guest-dark"
+    },
+    {
+      "id": "android-tablet-landscape-guest",
+      "title": "Guest profile",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-guest-light",
+      "dark": "android-tablet-landscape-guest-dark"
+    },
+    {
+      "id": "android-foldable-guest",
+      "title": "Guest profile",
+      "device": "foldable",
+      "light": "android-foldable-guest-light",
+      "dark": "android-foldable-guest-dark"
+    },
+    {
+      "id": "desktop-guest",
+      "title": "Guest profile",
+      "device": "desktop",
+      "light": "desktop-guest-light",
+      "dark": "desktop-guest-dark"
+    },
+    {
+      "id": "android-phone-landscape-signin",
+      "title": "Sign in",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-signin-light",
+      "dark": "android-phone-landscape-signin-dark"
+    },
+    {
+      "id": "android-tablet-portrait-signin",
+      "title": "Sign in",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-signin-light",
+      "dark": "android-tablet-portrait-signin-dark"
+    },
+    {
+      "id": "android-tablet-landscape-signin",
+      "title": "Sign in",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-signin-light",
+      "dark": "android-tablet-landscape-signin-dark"
+    },
+    {
+      "id": "android-foldable-signin",
+      "title": "Sign in",
+      "device": "foldable",
+      "light": "android-foldable-signin-light",
+      "dark": "android-foldable-signin-dark"
+    },
+    {
+      "id": "desktop-signin",
+      "title": "Sign in",
+      "device": "desktop",
+      "light": "desktop-signin-light",
+      "dark": "desktop-signin-dark"
+    },
+    {
+      "id": "android-phone-landscape-check-email",
+      "title": "Check your email",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-check-email-light",
+      "dark": "android-phone-landscape-check-email-dark"
+    },
+    {
+      "id": "android-tablet-portrait-check-email",
+      "title": "Check your email",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-check-email-light",
+      "dark": "android-tablet-portrait-check-email-dark"
+    },
+    {
+      "id": "android-tablet-landscape-check-email",
+      "title": "Check your email",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-check-email-light",
+      "dark": "android-tablet-landscape-check-email-dark"
+    },
+    {
+      "id": "android-foldable-check-email",
+      "title": "Check your email",
+      "device": "foldable",
+      "light": "android-foldable-check-email-light",
+      "dark": "android-foldable-check-email-dark"
+    },
+    {
+      "id": "desktop-check-email",
+      "title": "Check your email",
+      "device": "desktop",
+      "light": "desktop-check-email-light",
+      "dark": "desktop-check-email-dark"
+    },
+    {
+      "id": "android-phone-landscape-playback",
+      "title": "Playback settings",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-playback-light",
+      "dark": "android-phone-landscape-playback-dark"
+    },
+    {
+      "id": "android-tablet-portrait-playback",
+      "title": "Playback settings",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-playback-light",
+      "dark": "android-tablet-portrait-playback-dark"
+    },
+    {
+      "id": "android-tablet-landscape-playback",
+      "title": "Playback settings",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-playback-light",
+      "dark": "android-tablet-landscape-playback-dark"
+    },
+    {
+      "id": "android-foldable-playback",
+      "title": "Playback settings",
+      "device": "foldable",
+      "light": "android-foldable-playback-light",
+      "dark": "android-foldable-playback-dark"
+    },
+    {
+      "id": "desktop-playback",
+      "title": "Playback settings",
+      "device": "desktop",
+      "light": "desktop-playback-light",
+      "dark": "desktop-playback-dark"
+    },
+    {
+      "id": "android-phone-landscape-download-detail",
+      "title": "Downloaded episode",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-download-detail-light",
+      "dark": "android-phone-landscape-download-detail-dark"
+    },
+    {
+      "id": "android-tablet-portrait-download-detail",
+      "title": "Downloaded episode",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-download-detail-light",
+      "dark": "android-tablet-portrait-download-detail-dark"
+    },
+    {
+      "id": "android-tablet-landscape-download-detail",
+      "title": "Downloaded episode",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-download-detail-light",
+      "dark": "android-tablet-landscape-download-detail-dark"
+    },
+    {
+      "id": "android-foldable-download-detail",
+      "title": "Downloaded episode",
+      "device": "foldable",
+      "light": "android-foldable-download-detail-light",
+      "dark": "android-foldable-download-detail-dark"
+    },
+    {
+      "id": "desktop-download-detail",
+      "title": "Downloaded episode",
+      "device": "desktop",
+      "light": "desktop-download-detail-light",
+      "dark": "desktop-download-detail-dark"
     }
   ],
-  "notes": [
+  "platformPairs": [
     {
-      "title": "Phone",
-      "text": "Below 600dp, show one pane and bottom navigation. Selecting an item opens its detail. Back restores the list and scroll position. Keep the mini-player above navigation."
+      "id": "home",
+      "title": "Home",
+      "android": "android-phone-home-light",
+      "ios": "ios-phone-home-light",
+      "note": "Android’s Roboto and status bar become SF Pro and iPhone chrome; iOS uses an inset floating tab bar.",
+      "sources": [
+        {
+          "label": "Android themes",
+          "url": "https://developer.android.com/design/ui/mobile/guides/styles/themes"
+        },
+        {
+          "label": "iOS tab bars",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/tab-bars"
+        }
+      ]
     },
     {
-      "title": "Foldable",
-      "text": "The 900dp examples can show rail, list, and detail. Narrower unfolded windows may still need one pane. Align content to a separating hinge; transport controls must stay on one side."
+      "id": "library",
+      "title": "Library",
+      "android": "android-phone-library-light",
+      "ios": "ios-phone-library-light",
+      "note": "Android uses Material category pills; iOS uses a segmented control, SF Symbols, and the floating tab bar.",
+      "sources": [
+        {
+          "label": "Android segments",
+          "url": "https://developer.android.com/develop/ui/compose/components/segmented-button"
+        },
+        {
+          "label": "iOS segments",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/segmented-controls"
+        }
+      ]
     },
     {
-      "title": "Tablet and desktop",
-      "text": "Expanded windows from 840dp can show two content panes. Use a rail, then a labeled sidebar on roomy desktops. Keep forms bounded and text readable; adapt to the app window, not the device name."
+      "id": "player",
+      "title": "Player",
+      "android": "android-phone-player-light",
+      "ios": "ios-phone-player-light",
+      "note": "Android’s Material transport icons become SF Symbols; iOS adds iPhone safe areas while keeping the same playback controls.",
+      "sources": [
+        {
+          "label": "SF Symbols",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/sf-symbols"
+        },
+        {
+          "label": "Apple resources",
+          "url": "https://developer.apple.com/design/resources/"
+        }
+      ]
     },
     {
-      "title": "Selection and playback",
-      "text": "Resizing preserves the selected episode, query, filters, and playback at 12:34. Narrowing keeps selected detail visible. The player owns one listening session across all destinations."
+      "id": "profile",
+      "title": "Profile",
+      "android": "android-phone-profile-light",
+      "ios": "ios-phone-profile-light",
+      "note": "Android’s Up arrow becomes an iOS chevron; rows use native disclosure indicators and the inset floating tab bar.",
+      "sources": [
+        {
+          "label": "Android navigation",
+          "url": "https://developer.android.com/guide/navigation/principles"
+        },
+        {
+          "label": "iOS toolbars",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/toolbars"
+        }
+      ]
     },
     {
+      "id": "settings",
+      "title": "Settings",
+      "android": "android-phone-settings-light",
+      "ios": "ios-phone-settings-light",
+      "note": "Android switches show Material thumbs and checks; iOS switches use white thumbs, with SF Pro text and native chevrons.",
+      "sources": [
+        {
+          "label": "Android switches",
+          "url": "https://developer.android.com/develop/ui/compose/components/switch"
+        },
+        {
+          "label": "iOS toggles",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/toggles"
+        }
+      ]
+    },
+    {
+      "id": "tablet-home",
+      "title": "Home",
+      "android": "android-tablet-landscape-home-light",
+      "ios": "ios-tablet-landscape-home-light",
+      "note": "Android uses a compact navigation rail; this iPad layout uses a wider sidebar with inline labels and SF Symbols.",
+      "sources": [
+        {
+          "label": "iPad sidebars",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars"
+        }
+      ]
+    },
+    {
+      "id": "tablet-library",
+      "title": "Library",
+      "android": "android-tablet-landscape-library-light",
+      "ios": "ios-tablet-landscape-library-light",
+      "note": "Both keep saved episodes beside details; iPad uses a continuous segmented control and a wider sidebar.",
+      "sources": [
+        {
+          "label": "iPad segments",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/segmented-controls"
+        }
+      ]
+    },
+    {
+      "id": "tablet-player",
+      "title": "Player",
+      "android": "android-tablet-landscape-player-light",
+      "ios": "ios-tablet-landscape-player-light",
+      "note": "Both split artwork and controls; iPad uses SF Symbols and circular toolbar buttons.",
+      "sources": [
+        {
+          "label": "SF Symbols",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/sf-symbols"
+        }
+      ]
+    },
+    {
+      "id": "tablet-profile",
+      "title": "Profile",
+      "android": "android-tablet-landscape-profile-light",
+      "ios": "ios-tablet-landscape-profile-light",
+      "note": "The iPad layout uses a sidebar, back chevron, and disclosure rows for the same account content.",
+      "sources": [
+        {
+          "label": "iPad sidebars",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars"
+        }
+      ]
+    },
+    {
+      "id": "tablet-settings",
+      "title": "Settings",
+      "android": "android-tablet-landscape-settings-light",
+      "ios": "ios-tablet-landscape-settings-light",
+      "note": "iPad uses grouped settings and plain white switch thumbs; Android uses Material switches with checks.",
+      "sources": [
+        {
+          "label": "iPad toggles",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/toggles"
+        }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "discovery",
+      "title": "Discovery",
+      "screens": [
+        "android-phone-home-light",
+        "android-phone-search-light",
+        "android-phone-show-light",
+        "android-phone-episode-light",
+        "android-tablet-landscape-home-light",
+        "android-tablet-landscape-search-light",
+        "android-tablet-landscape-discovery-light",
+        "android-tablet-landscape-episode-light"
+      ]
+    },
+    {
+      "id": "listening",
       "title": "Listening",
-      "text": "The full player replaces the mini-player. Queue and chapters open in a sheet on phones or a supporting pane on wider windows. In tabletop posture, keep artwork above the fold and controls below."
+      "screens": [
+        "android-phone-player-light",
+        "android-phone-queue-light",
+        "android-phone-chapters-light",
+        "android-tablet-landscape-player-light",
+        "android-tablet-landscape-queue-light",
+        "android-tablet-landscape-chapters-light"
+      ]
     },
     {
-      "title": "Account and Saved",
-      "text": "Proposed UX: allow discovery, listening, and local saves as a guest. Sign-in adds sync. Bookmarking saves an episode; downloading is a separate action. Auth providers and sync rules remain product decisions."
+      "id": "library",
+      "title": "Library",
+      "screens": [
+        "android-phone-library-light",
+        "android-phone-episode-light",
+        "android-tablet-landscape-library-light",
+        "android-tablet-landscape-episode-light"
+      ]
     },
     {
-      "title": "Color choices",
-      "text": "Six original palettes extend the live icon\u2019s blue, ivory, and sand. A is the closest match, B its quieter dark counterpart; C and D shift hue, E deepens it, F raises saturation."
+      "id": "downloads",
+      "title": "Downloads",
+      "screens": [
+        "android-phone-downloads-light",
+        "android-phone-download-detail-light",
+        "android-phone-player-light",
+        "android-tablet-landscape-downloads-light",
+        "android-tablet-landscape-download-detail-light",
+        "android-tablet-landscape-player-light"
+      ]
     },
     {
-      "title": "Reading the boards",
-      "text": "These are generated visual concepts. Some icons, small labels, and device proportions vary. The HTML color tokens and these behavior notes are the precise reference for a later implementation."
+      "id": "account",
+      "title": "Account",
+      "screens": [
+        "android-phone-guest-light",
+        "android-phone-signin-light",
+        "android-phone-check-email-light",
+        "android-phone-profile-light",
+        "android-tablet-landscape-guest-light",
+        "android-tablet-landscape-signin-light",
+        "android-tablet-landscape-check-email-light",
+        "android-tablet-landscape-profile-light"
+      ]
     },
     {
-      "title": "Next refinement",
-      "text": "Choose a color direction and preferred density, then refine individual screens and behavior. The current set contains 12 boards and 62 screen studies across all five requested areas."
+      "id": "settings",
+      "title": "Settings",
+      "screens": [
+        "android-phone-profile-light",
+        "android-phone-settings-light",
+        "android-phone-playback-light",
+        "android-tablet-landscape-profile-light",
+        "android-tablet-landscape-settings-light",
+        "android-tablet-landscape-playback-light"
+      ]
     }
   ],
-  "contrast": [
+  "platformThemePairs": [
     {
-      "palette": "A \u00b7 Paper Tide",
-      "pairing": "Text / background",
-      "ratio": "10.47:1",
-      "standard": "Pass 4.5:1"
+      "id": "ios-phone-home",
+      "title": "Home",
+      "device": "phone-portrait",
+      "light": "ios-phone-home-light",
+      "dark": "ios-phone-home-dark"
     },
     {
-      "palette": "A \u00b7 Paper Tide",
-      "pairing": "Secondary / background",
-      "ratio": "4.8:1",
-      "standard": "Pass 4.5:1"
+      "id": "ios-phone-library",
+      "title": "Library",
+      "device": "phone-portrait",
+      "light": "ios-phone-library-light",
+      "dark": "ios-phone-library-dark"
     },
     {
-      "palette": "A \u00b7 Paper Tide",
-      "pairing": "Button label / primary",
-      "ratio": "6.69:1",
-      "standard": "Pass 4.5:1"
+      "id": "ios-phone-player",
+      "title": "Player",
+      "device": "phone-portrait",
+      "light": "ios-phone-player-light",
+      "dark": "ios-phone-player-dark"
     },
     {
-      "palette": "A \u00b7 Paper Tide",
-      "pairing": "Accent label / accent",
-      "ratio": "6.22:1",
-      "standard": "Pass 4.5:1"
+      "id": "ios-phone-profile",
+      "title": "Profile",
+      "device": "phone-portrait",
+      "light": "ios-phone-profile-light",
+      "dark": "ios-phone-profile-dark"
     },
     {
-      "palette": "B \u00b7 Harbor Night",
-      "pairing": "Text / background",
-      "ratio": "14.49:1",
-      "standard": "Pass 4.5:1"
+      "id": "ios-phone-settings",
+      "title": "Settings",
+      "device": "phone-portrait",
+      "light": "ios-phone-settings-light",
+      "dark": "ios-phone-settings-dark"
     },
     {
-      "palette": "B \u00b7 Harbor Night",
-      "pairing": "Secondary / background",
-      "ratio": "8.8:1",
-      "standard": "Pass 4.5:1"
+      "id": "ios-tablet-landscape-home",
+      "title": "Home",
+      "device": "tablet-landscape",
+      "light": "ios-tablet-landscape-home-light",
+      "dark": "ios-tablet-landscape-home-dark"
     },
     {
-      "palette": "B \u00b7 Harbor Night",
-      "pairing": "Button label / primary",
-      "ratio": "9.6:1",
-      "standard": "Pass 4.5:1"
+      "id": "ios-tablet-landscape-library",
+      "title": "Library",
+      "device": "tablet-landscape",
+      "light": "ios-tablet-landscape-library-light",
+      "dark": "ios-tablet-landscape-library-dark"
     },
     {
-      "palette": "B \u00b7 Harbor Night",
-      "pairing": "Accent label / accent",
-      "ratio": "10.24:1",
-      "standard": "Pass 4.5:1"
+      "id": "ios-tablet-landscape-player",
+      "title": "Player",
+      "device": "tablet-landscape",
+      "light": "ios-tablet-landscape-player-light",
+      "dark": "ios-tablet-landscape-player-dark"
     },
     {
-      "palette": "C \u00b7 Sea Glass",
-      "pairing": "Text / background",
-      "ratio": "10.94:1",
-      "standard": "Pass 4.5:1"
+      "id": "ios-tablet-landscape-profile",
+      "title": "Profile",
+      "device": "tablet-landscape",
+      "light": "ios-tablet-landscape-profile-light",
+      "dark": "ios-tablet-landscape-profile-dark"
     },
     {
-      "palette": "C \u00b7 Sea Glass",
-      "pairing": "Secondary / background",
-      "ratio": "4.85:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "C \u00b7 Sea Glass",
-      "pairing": "Button label / primary",
-      "ratio": "6.24:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "C \u00b7 Sea Glass",
-      "pairing": "Accent label / accent",
-      "ratio": "8.26:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "D \u00b7 Apricot Coast",
-      "pairing": "Text / background",
-      "ratio": "10.32:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "D \u00b7 Apricot Coast",
-      "pairing": "Secondary / background",
-      "ratio": "4.67:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "D \u00b7 Apricot Coast",
-      "pairing": "Button label / primary",
-      "ratio": "6.82:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "D \u00b7 Apricot Coast",
-      "pairing": "Accent label / accent",
-      "ratio": "5.14:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "E \u00b7 Indigo Dusk",
-      "pairing": "Text / background",
-      "ratio": "14.48:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "E \u00b7 Indigo Dusk",
-      "pairing": "Secondary / background",
-      "ratio": "8.81:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "E \u00b7 Indigo Dusk",
-      "pairing": "Button label / primary",
-      "ratio": "9.76:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "E \u00b7 Indigo Dusk",
-      "pairing": "Accent label / accent",
-      "ratio": "10.26:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "F \u00b7 Cobalt & Honey",
-      "pairing": "Text / background",
-      "ratio": "12.99:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "F \u00b7 Cobalt & Honey",
-      "pairing": "Secondary / background",
-      "ratio": "5.61:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "F \u00b7 Cobalt & Honey",
-      "pairing": "Button label / primary",
-      "ratio": "7.69:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "F \u00b7 Cobalt & Honey",
-      "pairing": "Accent label / accent",
-      "ratio": "6.83:1",
-      "standard": "Pass 4.5:1"
+      "id": "ios-tablet-landscape-settings",
+      "title": "Settings",
+      "device": "tablet-landscape",
+      "light": "ios-tablet-landscape-settings-light",
+      "dark": "ios-tablet-landscape-settings-dark"
     }
   ]
 };
