@@ -40,7 +40,7 @@ jobs:
       - test-integration-desktop
       - test-integration-android
       - test-wasm
-      - build-android-debug
+      - build-android-release
       - build-desktop
       - build-web
       - build-ios
@@ -207,17 +207,36 @@ jobs:
       - name: Run Wasm tests
         run: ./gradlew $GRADLE_ARGS -Pstorymile.enableWasm=true --no-isolated-projects wasmJsTest
 
-  build-android-debug:
+  build-android-release:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v7
       - name: Setup
         uses: ./.github/actions/setup-action
         with:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-      - name: Build Android app
-        run: ./gradlew $GRADLE_ARGS :app:android:assembleDebug
+      - name: Prepare emulator
+        uses: ./.github/actions/prepare-emulator-action
+      - name: Build Android release app
+        run: ./gradlew $GRADLE_ARGS :app:android:assembleRelease
+      - name: Test Android release app
+        run: ./gradlew $GRADLE_ARGS :app:android-blackbox-test:emulatorReleaseAndroidTest
+      - name: Upload release APK
+        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: android-release
+          path: app/android/build/outputs/apk/release/*.apk
+      - name: Upload test results
+        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: test-results-${{ github.job }}
+          path: |
+            app/android-blackbox-test/build/reports/
+            app/android-blackbox-test/build/outputs/androidTest-results/
+            app/android-blackbox-test/build/outputs/managed_device_android_test_additional_output/
 
   build-desktop:
     runs-on: ubuntu-latest

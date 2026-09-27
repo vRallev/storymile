@@ -129,13 +129,11 @@ Android Lint checks the app and shared KMP code.
 ./gradlew iosSimulatorArm64Test
 ./gradlew -Pstorymile.enableWasm=true --no-isolated-projects wasmJsTest
 ./gradlew :app:android:emulatorCheck
+./gradlew :app:android-blackbox-test:emulatorReleaseAndroidTest
 ./gradlew :app:android:assembleDebug :app:desktop:createDistributable
 ./gradlew -Pstorymile.enableWasm=true --no-isolated-projects :app:web:wasmJsBrowserDistribution
 ./gradlew :app-framework:impl:linkDebugFrameworkIosSimulatorArm64
 ```
-
-Desktop tests include rendered and headless application smoke tests. Android UI
-tests use the blueprint's managed Pixel 3 emulator.
 
 ## CI
 
@@ -147,3 +145,9 @@ The optional `GRADLE_ENCRYPTION_KEY` repository secret enables Gradle configurat
 
 The source code is public. Store secrets and sensitive keys in GitHub Actions secrets;
 never commit them or expose them in logs or artifacts.
+
+### Smoke tests
+
+Desktop tests include rendered and headless application smoke tests. Android UI
+tests use a managed Pixel 3 emulator. The blackbox test checks the initial screen
+of the release APK, signed with the debug key and shrunk by R8 without obfuscation.

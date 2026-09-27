@@ -45,6 +45,12 @@ gradlePlugin {
       displayName = 'Storymile Android app convention plugin'
       description = 'Android application conventions for Storymile.'
     }
+    storymileAndroidBlackboxTest {
+      id = 'software.ralf.storymile.android.blackbox-test'
+      implementationClass = 'software.ralf.storymile.gradle.AndroidBlackboxTestPlugin'
+      displayName = 'Storymile Android blackbox test convention plugin'
+      description = 'UIAutomator tests of the Storymile release app.'
+    }
     storymileAppDesktop {
       id = 'software.ralf.storymile.app.desktop'
       implementationClass = 'software.ralf.storymile.gradle.AppDesktopPlugin'
