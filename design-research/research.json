@@ -1,238 +1,347 @@
 {
-  "sources": [
+  "themes": [
     {
-      "title": "Adobe Color \u2014 color wheel",
-      "url": "https://color.adobe.com/create/color-wheel",
-      "note": "Starting from the icon\u2019s blue and sand, explore tonal, adjacent-hue, and complementary families. The proposed palettes are original."
+      "id": "light",
+      "name": "A · Paper Tide",
+      "tokens": {
+        "background": "#F7F3EB",
+        "surface": "#FFFDF8",
+        "text": "#233B50",
+        "primary": "#365F7D",
+        "onPrimary": "#FFFDF8",
+        "accent": "#D6BA8E",
+        "onAccent": "#233B50",
+        "secondary": "#5B6E79",
+        "selection": "#DCE8EE"
+      }
     },
     {
-      "title": "Radix \u2014 composing a palette",
-      "url": "https://www.radix-ui.com/colors/docs/palette-composition/composing-a-palette",
-      "note": "Blue/indigo with slate, teal with sage, and amber with sand informed the neutral and accent pairings."
+      "id": "dark",
+      "name": "B · Harbor Night",
+      "tokens": {
+        "background": "#0F202D",
+        "surface": "#182F40",
+        "text": "#F4EFE5",
+        "primary": "#ACC9DC",
+        "onPrimary": "#0F202D",
+        "accent": "#E4C79D",
+        "onAccent": "#0F202D",
+        "secondary": "#AFBFCA",
+        "selection": "#294C63"
+      }
+    }
+  ],
+  "frames": [
+    {
+      "device": "phone-portrait",
+      "platform": "android",
+      "viewport": [
+        412,
+        916
+      ],
+      "unit": "dp",
+      "basis": "Storymile phone target."
     },
     {
-      "title": "Radix \u2014 understanding the scale",
-      "url": "https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale",
-      "note": "Separate backgrounds, selected containers, controls, and text rather than using one accent everywhere."
+      "device": "phone-landscape",
+      "platform": "android",
+      "viewport": [
+        916,
+        412
+      ],
+      "unit": "dp",
+      "basis": "Rotated phone target."
     },
     {
-      "title": "Material 3 \u2014 color schemes",
-      "url": "https://developer.android.com/develop/ui/compose/designsystems/material3#color-scheme",
-      "note": "Use brand-derived light and dark color roles, each paired with an appropriate foreground."
+      "device": "tablet-portrait",
+      "platform": "android",
+      "viewport": [
+        800,
+        1280
+      ],
+      "unit": "dp",
+      "basis": "Rotated 1280 × 800 tablet target.",
+      "source": "https://developer.android.com/docs/quality-guidelines/adaptive-app-quality"
     },
     {
-      "title": "Android \u2014 canonical layouts",
-      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/canonical-layouts",
-      "note": "List/detail for browsing and Saved; supporting panes for the player and queue."
+      "device": "tablet-landscape",
+      "platform": "android",
+      "viewport": [
+        1280,
+        800
+      ],
+      "unit": "dp",
+      "source": "https://developer.android.com/docs/quality-guidelines/adaptive-app-quality"
     },
     {
-      "title": "Android \u2014 reference video",
-      "url": "https://developer.android.com/static/develop/ui/compose/images/layouts/adaptive/canonical-layouts/list-detail_conversations.mp4",
-      "note": "Inspected the compact phone and expanded two-pane states; supplied screenshots also guide the desktop arrangement."
+      "device": "foldable",
+      "platform": "android",
+      "viewport": [
+        841,
+        701
+      ],
+      "unit": "dp",
+      "source": "https://developer.android.com/docs/quality-guidelines/adaptive-app-quality"
     },
     {
-      "title": "Android \u2014 window size classes",
-      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/use-window-size-classes",
-      "note": "Use the current app-window size, including resized desktop windows and split screen."
+      "device": "desktop",
+      "platform": "desktop",
+      "viewport": [
+        1600,
+        900
+      ],
+      "unit": "logical pixels",
+      "basis": "Chromebook-sized window target.",
+      "source": "https://developer.android.com/docs/quality-guidelines/adaptive-app-quality"
     },
     {
-      "title": "Android \u2014 adaptive navigation",
-      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/build-adaptive-navigation",
-      "note": "Bottom navigation and rail adapt to available space. The labeled desktop sidebar is a proposed Storymile choice."
+      "device": "phone-portrait",
+      "platform": "ios",
+      "viewport": [
+        393,
+        852
+      ],
+      "unit": "pt",
+      "basis": "Storymile iPhone target.",
+      "source": "https://developer.apple.com/design/resources/"
     },
     {
-      "title": "Android \u2014 fold-aware layouts",
-      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/foldables/make-your-app-fold-aware",
-      "note": "Respect separating hinges; use tabletop posture to separate content and controls."
+      "device": "tablet-landscape",
+      "platform": "ios",
+      "viewport": [
+        1366,
+        1024
+      ],
+      "unit": "pt",
+      "basis": "Storymile iPad landscape target (4:3).",
+      "source": "https://developer.apple.com/design/resources/"
+    }
+  ],
+  "platformNotes": [
+    {
+      "id": "home",
+      "title": "Home",
+      "note": "Android’s Roboto and status bar become SF Pro and iPhone chrome; iOS uses an inset floating tab bar.",
+      "sources": [
+        {
+          "label": "Android themes",
+          "url": "https://developer.android.com/design/ui/mobile/guides/styles/themes"
+        },
+        {
+          "label": "iOS tab bars",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/tab-bars"
+        }
+      ]
     },
     {
-      "title": "W3C \u2014 minimum contrast",
-      "url": "https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum",
-      "note": "Normal text needs 4.5:1. The table checks intended color tokens, not generated image pixels."
+      "id": "library",
+      "title": "Library",
+      "note": "Android uses Material category pills; iOS uses a segmented control, SF Symbols, and the floating tab bar.",
+      "sources": [
+        {
+          "label": "Android segments",
+          "url": "https://developer.android.com/develop/ui/compose/components/segmented-button"
+        },
+        {
+          "label": "iOS segments",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/segmented-controls"
+        }
+      ]
+    },
+    {
+      "id": "player",
+      "title": "Player",
+      "note": "Android’s Material transport icons become SF Symbols; iOS adds iPhone safe areas while keeping the same playback controls.",
+      "sources": [
+        {
+          "label": "SF Symbols",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/sf-symbols"
+        },
+        {
+          "label": "Apple resources",
+          "url": "https://developer.apple.com/design/resources/"
+        }
+      ]
+    },
+    {
+      "id": "profile",
+      "title": "Profile",
+      "note": "Android’s Up arrow becomes an iOS chevron; rows use native disclosure indicators and the inset floating tab bar.",
+      "sources": [
+        {
+          "label": "Android navigation",
+          "url": "https://developer.android.com/guide/navigation/principles"
+        },
+        {
+          "label": "iOS toolbars",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/toolbars"
+        }
+      ]
+    },
+    {
+      "id": "settings",
+      "title": "Settings",
+      "note": "Android switches show Material thumbs and checks; iOS switches use white thumbs, with SF Pro text and native chevrons.",
+      "sources": [
+        {
+          "label": "Android switches",
+          "url": "https://developer.android.com/develop/ui/compose/components/switch"
+        },
+        {
+          "label": "iOS toggles",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/toggles"
+        }
+      ]
+    },
+    {
+      "id": "tablet-home",
+      "title": "Home",
+      "note": "Android uses a compact navigation rail; this iPad layout uses a wider sidebar with inline labels and SF Symbols.",
+      "sources": [
+        {
+          "label": "iPad sidebars",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars"
+        }
+      ]
+    },
+    {
+      "id": "tablet-library",
+      "title": "Library",
+      "note": "Both keep saved episodes beside details; iPad uses a continuous segmented control and a wider sidebar.",
+      "sources": [
+        {
+          "label": "iPad segments",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/segmented-controls"
+        }
+      ]
+    },
+    {
+      "id": "tablet-player",
+      "title": "Player",
+      "note": "Both split artwork and controls; iPad uses SF Symbols and circular toolbar buttons.",
+      "sources": [
+        {
+          "label": "SF Symbols",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/sf-symbols"
+        }
+      ]
+    },
+    {
+      "id": "tablet-profile",
+      "title": "Profile",
+      "note": "The iPad layout uses a sidebar, back chevron, and disclosure rows for the same account content.",
+      "sources": [
+        {
+          "label": "iPad sidebars",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars"
+        }
+      ]
+    },
+    {
+      "id": "tablet-settings",
+      "title": "Settings",
+      "note": "iPad uses grouped settings and plain white switch thumbs; Android uses Material switches with checks.",
+      "sources": [
+        {
+          "label": "iPad toggles",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/toggles"
+        }
+      ]
     }
   ],
   "notes": [
-    {
-      "title": "Phone",
-      "text": "Below 600dp, show one pane and bottom navigation. Selecting an item opens its detail. Back restores the list and scroll position. Keep the mini-player above navigation."
-    },
-    {
-      "title": "Foldable",
-      "text": "The 900dp examples can show rail, list, and detail. Narrower unfolded windows may still need one pane. Align content to a separating hinge; transport controls must stay on one side."
-    },
-    {
-      "title": "Tablet and desktop",
-      "text": "Expanded windows from 840dp can show two content panes. Use a rail, then a labeled sidebar on roomy desktops. Keep forms bounded and text readable; adapt to the app window, not the device name."
-    },
-    {
-      "title": "Selection and playback",
-      "text": "Resizing preserves the selected episode, query, filters, and playback at 12:34. Narrowing keeps selected detail visible. The player owns one listening session across all destinations."
-    },
-    {
-      "title": "Listening",
-      "text": "The full player replaces the mini-player. Queue and chapters open in a sheet on phones or a supporting pane on wider windows. In tabletop posture, keep artwork above the fold and controls below."
-    },
-    {
-      "title": "Account and Saved",
-      "text": "Proposed UX: allow discovery, listening, and local saves as a guest. Sign-in adds sync. Bookmarking saves an episode; downloading is a separate action. Auth providers and sync rules remain product decisions."
-    },
-    {
-      "title": "Color choices",
-      "text": "Six original palettes extend the live icon\u2019s blue, ivory, and sand. A is the closest match, B its quieter dark counterpart; C and D shift hue, E deepens it, F raises saturation."
-    },
-    {
-      "title": "Reading the boards",
-      "text": "These are generated visual concepts. Some icons, small labels, and device proportions vary. The HTML color tokens and these behavior notes are the precise reference for a later implementation."
-    },
-    {
-      "title": "Next refinement",
-      "text": "Choose a color direction and preferred density, then refine individual screens and behavior. The current set contains 12 boards and 62 screen studies across all five requested areas."
-    }
+    "Android is the default. Five screens compare Android and iOS on phone portrait and tablet landscape in both themes.",
+    "Viewports are layout targets. PNG dimensions come from the generated images; the gallery preserves their native proportions.",
+    "The supplied blue paper boat remains the brand mark. Profile opens from the avatar; primary destinations are Home, Library, and Downloads.",
+    "Phone detail screens become neighboring panes in larger windows. Playback and selection persist when the window changes.",
+    "Queue and Chapters are separate choices from the player; they do not form an automatic sequence.",
+    "Saving keeps a Library bookmark. Downloading stores audio locally. Removing a download keeps the bookmark.",
+    "Generated screens are design references. Exact typography, platform components, and accessibility need implementation validation."
   ],
-  "contrast": [
+  "sources": [
     {
-      "palette": "A \u00b7 Paper Tide",
-      "pairing": "Text / background",
-      "ratio": "10.47:1",
-      "standard": "Pass 4.5:1"
+      "title": "Android themes",
+      "url": "https://developer.android.com/design/ui/mobile/guides/styles/themes"
     },
     {
-      "palette": "A \u00b7 Paper Tide",
-      "pairing": "Secondary / background",
-      "ratio": "4.8:1",
-      "standard": "Pass 4.5:1"
+      "title": "Apple design resources",
+      "url": "https://developer.apple.com/design/resources/"
     },
     {
-      "palette": "A \u00b7 Paper Tide",
-      "pairing": "Button label / primary",
-      "ratio": "6.69:1",
-      "standard": "Pass 4.5:1"
+      "title": "iOS tab bars",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/tab-bars"
     },
     {
-      "palette": "A \u00b7 Paper Tide",
-      "pairing": "Accent label / accent",
-      "ratio": "6.22:1",
-      "standard": "Pass 4.5:1"
+      "title": "Android segmented buttons",
+      "url": "https://developer.android.com/develop/ui/compose/components/segmented-button"
     },
     {
-      "palette": "B \u00b7 Harbor Night",
-      "pairing": "Text / background",
-      "ratio": "14.49:1",
-      "standard": "Pass 4.5:1"
+      "title": "iOS segmented controls",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/segmented-controls"
     },
     {
-      "palette": "B \u00b7 Harbor Night",
-      "pairing": "Secondary / background",
-      "ratio": "8.8:1",
-      "standard": "Pass 4.5:1"
+      "title": "SF Symbols",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sf-symbols"
     },
     {
-      "palette": "B \u00b7 Harbor Night",
-      "pairing": "Button label / primary",
-      "ratio": "9.6:1",
-      "standard": "Pass 4.5:1"
+      "title": "Android navigation principles",
+      "url": "https://developer.android.com/guide/navigation/principles"
     },
     {
-      "palette": "B \u00b7 Harbor Night",
-      "pairing": "Accent label / accent",
-      "ratio": "10.24:1",
-      "standard": "Pass 4.5:1"
+      "title": "iOS toolbars",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/toolbars"
     },
     {
-      "palette": "C \u00b7 Sea Glass",
-      "pairing": "Text / background",
-      "ratio": "10.94:1",
-      "standard": "Pass 4.5:1"
+      "title": "Android switches",
+      "url": "https://developer.android.com/develop/ui/compose/components/switch"
     },
     {
-      "palette": "C \u00b7 Sea Glass",
-      "pairing": "Secondary / background",
-      "ratio": "4.85:1",
-      "standard": "Pass 4.5:1"
+      "title": "iOS toggles",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/toggles"
     },
     {
-      "palette": "C \u00b7 Sea Glass",
-      "pairing": "Button label / primary",
-      "ratio": "6.24:1",
-      "standard": "Pass 4.5:1"
+      "title": "Android adaptive app quality",
+      "url": "https://developer.android.com/docs/quality-guidelines/adaptive-app-quality"
     },
     {
-      "palette": "C \u00b7 Sea Glass",
-      "pairing": "Accent label / accent",
-      "ratio": "8.26:1",
-      "standard": "Pass 4.5:1"
+      "title": "Android canonical layouts",
+      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/canonical-layouts"
     },
     {
-      "palette": "D \u00b7 Apricot Coast",
-      "pairing": "Text / background",
-      "ratio": "10.32:1",
-      "standard": "Pass 4.5:1"
+      "title": "Android window size classes",
+      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/use-window-size-classes"
     },
     {
-      "palette": "D \u00b7 Apricot Coast",
-      "pairing": "Secondary / background",
-      "ratio": "4.67:1",
-      "standard": "Pass 4.5:1"
+      "title": "Android adaptive navigation",
+      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/build-adaptive-navigation"
     },
     {
-      "palette": "D \u00b7 Apricot Coast",
-      "pairing": "Button label / primary",
-      "ratio": "6.82:1",
-      "standard": "Pass 4.5:1"
+      "title": "Android fold-aware layouts",
+      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/foldables/make-your-app-fold-aware"
     },
     {
-      "palette": "D \u00b7 Apricot Coast",
-      "pairing": "Accent label / accent",
-      "ratio": "5.14:1",
-      "standard": "Pass 4.5:1"
+      "title": "Android reference video",
+      "url": "https://developer.android.com/static/develop/ui/compose/images/layouts/adaptive/canonical-layouts/list-detail_conversations.mp4"
     },
     {
-      "palette": "E \u00b7 Indigo Dusk",
-      "pairing": "Text / background",
-      "ratio": "14.48:1",
-      "standard": "Pass 4.5:1"
+      "title": "Adobe color wheel",
+      "url": "https://color.adobe.com/create/color-wheel"
     },
     {
-      "palette": "E \u00b7 Indigo Dusk",
-      "pairing": "Secondary / background",
-      "ratio": "8.81:1",
-      "standard": "Pass 4.5:1"
+      "title": "Radix palette composition",
+      "url": "https://www.radix-ui.com/colors/docs/palette-composition/composing-a-palette"
     },
     {
-      "palette": "E \u00b7 Indigo Dusk",
-      "pairing": "Button label / primary",
-      "ratio": "9.76:1",
-      "standard": "Pass 4.5:1"
+      "title": "Radix color roles",
+      "url": "https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale"
     },
     {
-      "palette": "E \u00b7 Indigo Dusk",
-      "pairing": "Accent label / accent",
-      "ratio": "10.26:1",
-      "standard": "Pass 4.5:1"
+      "title": "Material 3 color schemes",
+      "url": "https://developer.android.com/develop/ui/compose/designsystems/material3#color-scheme"
     },
     {
-      "palette": "F \u00b7 Cobalt & Honey",
-      "pairing": "Text / background",
-      "ratio": "12.99:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "F \u00b7 Cobalt & Honey",
-      "pairing": "Secondary / background",
-      "ratio": "5.61:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "F \u00b7 Cobalt & Honey",
-      "pairing": "Button label / primary",
-      "ratio": "7.69:1",
-      "standard": "Pass 4.5:1"
-    },
-    {
-      "palette": "F \u00b7 Cobalt & Honey",
-      "pairing": "Accent label / accent",
-      "ratio": "6.83:1",
-      "standard": "Pass 4.5:1"
+      "title": "iPad sidebars",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars"
     }
   ]
 }
