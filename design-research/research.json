@@ -1,0 +1,238 @@
+{
+  "sources": [
+    {
+      "title": "Adobe Color \u2014 color wheel",
+      "url": "https://color.adobe.com/create/color-wheel",
+      "note": "Starting from the icon\u2019s blue and sand, explore tonal, adjacent-hue, and complementary families. The proposed palettes are original."
+    },
+    {
+      "title": "Radix \u2014 composing a palette",
+      "url": "https://www.radix-ui.com/colors/docs/palette-composition/composing-a-palette",
+      "note": "Blue/indigo with slate, teal with sage, and amber with sand informed the neutral and accent pairings."
+    },
+    {
+      "title": "Radix \u2014 understanding the scale",
+      "url": "https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale",
+      "note": "Separate backgrounds, selected containers, controls, and text rather than using one accent everywhere."
+    },
+    {
+      "title": "Material 3 \u2014 color schemes",
+      "url": "https://developer.android.com/develop/ui/compose/designsystems/material3#color-scheme",
+      "note": "Use brand-derived light and dark color roles, each paired with an appropriate foreground."
+    },
+    {
+      "title": "Android \u2014 canonical layouts",
+      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/canonical-layouts",
+      "note": "List/detail for browsing and Saved; supporting panes for the player and queue."
+    },
+    {
+      "title": "Android \u2014 reference video",
+      "url": "https://developer.android.com/static/develop/ui/compose/images/layouts/adaptive/canonical-layouts/list-detail_conversations.mp4",
+      "note": "Inspected the compact phone and expanded two-pane states; supplied screenshots also guide the desktop arrangement."
+    },
+    {
+      "title": "Android \u2014 window size classes",
+      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/use-window-size-classes",
+      "note": "Use the current app-window size, including resized desktop windows and split screen."
+    },
+    {
+      "title": "Android \u2014 adaptive navigation",
+      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/build-adaptive-navigation",
+      "note": "Bottom navigation and rail adapt to available space. The labeled desktop sidebar is a proposed Storymile choice."
+    },
+    {
+      "title": "Android \u2014 fold-aware layouts",
+      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/foldables/make-your-app-fold-aware",
+      "note": "Respect separating hinges; use tabletop posture to separate content and controls."
+    },
+    {
+      "title": "W3C \u2014 minimum contrast",
+      "url": "https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum",
+      "note": "Normal text needs 4.5:1. The table checks intended color tokens, not generated image pixels."
+    }
+  ],
+  "notes": [
+    {
+      "title": "Phone",
+      "text": "Below 600dp, show one pane and bottom navigation. Selecting an item opens its detail. Back restores the list and scroll position. Keep the mini-player above navigation."
+    },
+    {
+      "title": "Foldable",
+      "text": "The 900dp examples can show rail, list, and detail. Narrower unfolded windows may still need one pane. Align content to a separating hinge; transport controls must stay on one side."
+    },
+    {
+      "title": "Tablet and desktop",
+      "text": "Expanded windows from 840dp can show two content panes. Use a rail, then a labeled sidebar on roomy desktops. Keep forms bounded and text readable; adapt to the app window, not the device name."
+    },
+    {
+      "title": "Selection and playback",
+      "text": "Resizing preserves the selected episode, query, filters, and playback at 12:34. Narrowing keeps selected detail visible. The player owns one listening session across all destinations."
+    },
+    {
+      "title": "Listening",
+      "text": "The full player replaces the mini-player. Queue and chapters open in a sheet on phones or a supporting pane on wider windows. In tabletop posture, keep artwork above the fold and controls below."
+    },
+    {
+      "title": "Account and Saved",
+      "text": "Proposed UX: allow discovery, listening, and local saves as a guest. Sign-in adds sync. Bookmarking saves an episode; downloading is a separate action. Auth providers and sync rules remain product decisions."
+    },
+    {
+      "title": "Color choices",
+      "text": "Six original palettes extend the live icon\u2019s blue, ivory, and sand. A is the closest match, B its quieter dark counterpart; C and D shift hue, E deepens it, F raises saturation."
+    },
+    {
+      "title": "Reading the boards",
+      "text": "These are generated visual concepts. Some icons, small labels, and device proportions vary. The HTML color tokens and these behavior notes are the precise reference for a later implementation."
+    },
+    {
+      "title": "Next refinement",
+      "text": "Choose a color direction and preferred density, then refine individual screens and behavior. The current set contains 12 boards and 62 screen studies across all five requested areas."
+    }
+  ],
+  "contrast": [
+    {
+      "palette": "A \u00b7 Paper Tide",
+      "pairing": "Text / background",
+      "ratio": "10.47:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "A \u00b7 Paper Tide",
+      "pairing": "Secondary / background",
+      "ratio": "4.8:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "A \u00b7 Paper Tide",
+      "pairing": "Button label / primary",
+      "ratio": "6.69:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "A \u00b7 Paper Tide",
+      "pairing": "Accent label / accent",
+      "ratio": "6.22:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "B \u00b7 Harbor Night",
+      "pairing": "Text / background",
+      "ratio": "14.49:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "B \u00b7 Harbor Night",
+      "pairing": "Secondary / background",
+      "ratio": "8.8:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "B \u00b7 Harbor Night",
+      "pairing": "Button label / primary",
+      "ratio": "9.6:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "B \u00b7 Harbor Night",
+      "pairing": "Accent label / accent",
+      "ratio": "10.24:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "C \u00b7 Sea Glass",
+      "pairing": "Text / background",
+      "ratio": "10.94:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "C \u00b7 Sea Glass",
+      "pairing": "Secondary / background",
+      "ratio": "4.85:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "C \u00b7 Sea Glass",
+      "pairing": "Button label / primary",
+      "ratio": "6.24:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "C \u00b7 Sea Glass",
+      "pairing": "Accent label / accent",
+      "ratio": "8.26:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "D \u00b7 Apricot Coast",
+      "pairing": "Text / background",
+      "ratio": "10.32:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "D \u00b7 Apricot Coast",
+      "pairing": "Secondary / background",
+      "ratio": "4.67:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "D \u00b7 Apricot Coast",
+      "pairing": "Button label / primary",
+      "ratio": "6.82:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "D \u00b7 Apricot Coast",
+      "pairing": "Accent label / accent",
+      "ratio": "5.14:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "E \u00b7 Indigo Dusk",
+      "pairing": "Text / background",
+      "ratio": "14.48:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "E \u00b7 Indigo Dusk",
+      "pairing": "Secondary / background",
+      "ratio": "8.81:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "E \u00b7 Indigo Dusk",
+      "pairing": "Button label / primary",
+      "ratio": "9.76:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "E \u00b7 Indigo Dusk",
+      "pairing": "Accent label / accent",
+      "ratio": "10.26:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "F \u00b7 Cobalt & Honey",
+      "pairing": "Text / background",
+      "ratio": "12.99:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "F \u00b7 Cobalt & Honey",
+      "pairing": "Secondary / background",
+      "ratio": "5.61:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "F \u00b7 Cobalt & Honey",
+      "pairing": "Button label / primary",
+      "ratio": "7.69:1",
+      "standard": "Pass 4.5:1"
+    },
+    {
+      "palette": "F \u00b7 Cobalt & Honey",
+      "pairing": "Accent label / accent",
+      "ratio": "6.83:1",
+      "standard": "Pass 4.5:1"
+    }
+  ]
+}
