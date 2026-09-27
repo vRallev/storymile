@@ -152,6 +152,7 @@ never commit them or expose them in logs or artifacts.
 #### Desktop
 
 Desktop tests include rendered and headless application smoke tests.
+Run Desktop instrumented tests with `./run.sh --desktop-test` or the launcher menu.
 
 #### Android
 
@@ -166,3 +167,4 @@ for setup and test commands.
 #### iOS
 
 The iOS smoke test launches the Release app on a fresh iPhone simulator with iOS 26.
+Run it with `./run.sh --ios-test` or the launcher menu.
