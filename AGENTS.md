@@ -24,7 +24,7 @@ Use the matching skill for detailed guidance:
 
 - Use Desktop for most development and testing because it is the fastest.
 - Use other platforms only when requested or to verify platform integration.
-- Add `--quiet` to Gradle commands by default to reduce output; examples omit it for brevity.
+- Add `--quiet` to local Gradle commands by default; omit it in CI. Examples omit it for brevity.
 - Prefer shared KMP implementations; keep app shells focused on startup and platform integration.
 - Preserve compatibility with Android, Desktop, iOS, and Wasm.
 
@@ -148,6 +148,16 @@ never commit them or expose them in logs or artifacts.
 
 ### Smoke tests
 
-Desktop tests include rendered and headless application smoke tests. Android UI
-tests use a managed Pixel 3 emulator. The blackbox test checks the initial screen
+#### Desktop
+
+Desktop tests include rendered and headless application smoke tests.
+
+#### Android
+
+Android UI tests use a managed Pixel 3 emulator. The blackbox test checks the initial screen
 of the release APK, signed with the debug key and shrunk by R8 without obfuscation.
+
+#### Web
+
+Use the `build-web-release` job in [CI](.github/workflows/ci.yml) as the source of truth
+for setup and test commands.
