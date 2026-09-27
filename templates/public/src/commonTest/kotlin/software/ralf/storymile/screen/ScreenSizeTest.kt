@@ -8,18 +8,23 @@ import kotlin.test.Test
 
 class ScreenSizeTest {
   @Test
-  fun `wide landscape window is a tablet`() {
+  fun `landscape window below width threshold is a phone`() {
+    assertCategory(width = 599.dp, height = 400.dp, expected = ScreenSize.Category.PHONE)
+  }
+
+  @Test
+  fun `landscape window at width threshold is a tablet`() {
     assertCategory(width = 600.dp, height = 599.dp, expected = ScreenSize.Category.TABLET)
   }
 
   @Test
-  fun `square window is a phone`() {
-    assertCategory(width = 600.dp, height = 600.dp, expected = ScreenSize.Category.PHONE)
+  fun `square window at width threshold is a tablet`() {
+    assertCategory(width = 600.dp, height = 600.dp, expected = ScreenSize.Category.TABLET)
   }
 
   @Test
-  fun `portrait window is a phone regardless of width`() {
-    assertCategory(width = 900.dp, height = 1200.dp, expected = ScreenSize.Category.PHONE)
+  fun `portrait window at width threshold is a tablet`() {
+    assertCategory(width = 600.dp, height = 900.dp, expected = ScreenSize.Category.TABLET)
   }
 
   private fun assertCategory(width: Dp, height: Dp, expected: ScreenSize.Category) {

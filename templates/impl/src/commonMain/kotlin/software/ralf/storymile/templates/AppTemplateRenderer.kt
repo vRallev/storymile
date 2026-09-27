@@ -2,6 +2,7 @@ package software.ralf.storymile.templates
 
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawing
@@ -14,7 +15,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.isSpecified
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -39,7 +42,7 @@ import software.ralf.storymile.theme.StorymileTheme
  */
 @Inject
 @ContributesRenderer
-class ComposeAppTemplateRenderer(
+class AppTemplateRenderer(
   private val backGestureDispatcherPresenter: BackGestureDispatcherPresenter,
   private val screenSizeProvider: DefaultScreenSizeProvider,
 ) : ComposeRenderer<AppTemplate>() {
@@ -57,7 +60,9 @@ class ComposeAppTemplateRenderer(
         ) {
           SharedTransitionLayout {
             CompositionLocalProvider(LocalSharedTransitionScope provides this) {
-              AppTemplateContent(model)
+              when (model) {
+                is AppTemplate.AdaptiveTemplate -> AdaptiveTemplateContent(model)
+              }
               backGestureDispatcherPresenter.ForwardBackPressEventsToPresenters()
             }
           }
@@ -79,12 +84,67 @@ class ComposeAppTemplateRenderer(
   }
 
   @Composable
-  private fun AppTemplateContent(template: AppTemplate) {
-    when (template) {
-      is AppTemplate.FullScreenTemplate -> {
-        Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-          Render(template.model, Modifier.fillMaxSize())
+  private fun AdaptiveTemplateContent(template: AppTemplate.AdaptiveTemplate) {
+    BoxWithConstraints(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+      val tabPlacement =
+        when (ScreenSize.from(maxWidth, maxHeight).category) {
+          ScreenSize.Category.PHONE -> TabPlacement.BOTTOM
+          ScreenSize.Category.TABLET -> TabPlacement.START
         }
+
+      AppShell(template, tabPlacement)
+      template.overlay?.let { Render(it, Modifier.matchParentSize()) }
+    }
+  }
+
+  @Composable
+  private fun AppShell(
+    template: AppTemplate.AdaptiveTemplate,
+    tabPlacement: TabPlacement,
+  ) {
+    // Keep each slot in the same composition position when tabs move between bar and rail.
+    Layout(
+      modifier = Modifier.fillMaxSize(),
+      content = {
+        Box(propagateMinConstraints = true) { Render(template.content, Modifier.fillMaxSize()) }
+        Box(propagateMinConstraints = true) {
+          CompositionLocalProvider(LocalTabPlacement provides tabPlacement) {
+            template.tabs?.let { Render(it) }
+          }
+        }
+        Box(propagateMinConstraints = true) { template.playback?.let { Render(it) } }
+      },
+    ) { measurables, constraints ->
+      val width = constraints.maxWidth
+      val height = constraints.maxHeight
+      val playback =
+        measurables[2].measure(
+          if (template.playback == null) Constraints.fixed(0, 0)
+          else Constraints(minWidth = width, maxWidth = width, maxHeight = height)
+        )
+      val remainingHeight = height - playback.height
+      val tabsAtStart = tabPlacement == TabPlacement.START
+      val tabs =
+        measurables[1].measure(
+          when {
+            template.tabs == null -> Constraints.fixed(0, 0)
+            tabsAtStart ->
+              Constraints(
+                maxWidth = width,
+                minHeight = remainingHeight,
+                maxHeight = remainingHeight,
+              )
+            else -> Constraints(minWidth = width, maxWidth = width, maxHeight = remainingHeight)
+          }
+        )
+      val contentWidth = width - if (tabsAtStart) tabs.width else 0
+      val contentHeight = remainingHeight - if (tabsAtStart) 0 else tabs.height
+      val content = measurables[0].measure(Constraints.fixed(contentWidth, contentHeight))
+
+      layout(width, height) {
+        content.placeRelative(if (tabsAtStart) tabs.width else 0, 0)
+        tabs.placeRelative(0, if (tabsAtStart) 0 else height - tabs.height)
+        playback.placeRelative(0, contentHeight)
       }
     }
   }

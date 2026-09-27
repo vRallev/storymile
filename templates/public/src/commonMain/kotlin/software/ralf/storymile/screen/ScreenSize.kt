@@ -17,15 +17,15 @@ private constructor(
   val width: Dp,
   /** Current window height in density-independent pixels. */
   val height: Dp,
-  /** Layout category selected from [width] and [height]. */
+  /** Layout category selected from [width]. */
   val category: Category,
 ) {
   /** Adaptive layouts supported by the application. */
   enum class Category {
-    /** Single-pane navigation intended for phones and portrait windows. */
+    /** Compact layout for windows narrower than 600 dp. */
     PHONE,
 
-    /** Two-pane layout intended for sufficiently wide landscape windows. */
+    /** Expanded layout for windows at least 600 dp wide, in either orientation. */
     TABLET,
   }
 
@@ -37,7 +37,7 @@ private constructor(
     /**
      * Creates a screen size and derives its adaptive category.
      *
-     * Tablet layout requires both a width of at least 600 dp and landscape orientation.
+     * Tablet layout requires a width of at least 600 dp, regardless of orientation.
      */
     fun from(width: Dp, height: Dp): ScreenSize {
       require(width.isSpecified) { "width must be specified." }
@@ -47,7 +47,7 @@ private constructor(
         width = width,
         height = height,
         category =
-          if (width >= 600.dp && width > height) {
+          if (width >= 600.dp) {
             Category.TABLET
           } else {
             Category.PHONE
