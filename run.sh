@@ -334,7 +334,7 @@ fi
 [[ $# == 0 ]] || fail "Usage: ./run.sh [--web-test | --ios-test | --desktop-test]"
 
 choose "What would you like to run?" 2 Android Desktop iOS Wasm "Android release tests" \
-  "Wasm browser smoke tests" "iOS smoke tests" "Desktop instrumented tests"
+  "Desktop instrumented tests" "iOS smoke tests" "Wasm browser smoke tests"
 PLATFORM="$SELECTION"
 WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/storymile-run.XXXXXX")"
 trap 'rm -rf -- "$WORK_DIR"' EXIT
@@ -346,7 +346,7 @@ case "$PLATFORM" in
   2) run_ios ;;
   3) ./gradlew --quiet -Pstorymile.enableWasm=true --no-isolated-projects :app:web:wasmJsBrowserDevelopmentRun ;;
   4) run_android_release_tests ;;
-  5) run_web_tests ;;
+  5) run_desktop_tests ;;
   6) run_ios_tests ;;
-  7) run_desktop_tests ;;
+  7) run_web_tests ;;
 esac
