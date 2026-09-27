@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
@@ -49,26 +50,36 @@ import software.ralf.storymile.screen.DefaultScreenSizeProvider
 
 class AppTemplateRendererTest {
   @Test
-  fun `phone reserves space for playback above bottom tabs`() =
+  fun `phone layers bottom tabs over playback while reserving content space`() =
     runDesktopComposeUiTest(width = 400, height = 900) {
       val fixture = Fixture()
       setContent { fixture.Render(template()) }
 
       assertBounds("content", left = 0, top = 0, right = 400, bottom = 756)
-      assertBounds("playback", left = 0, top = 756, right = 400, bottom = 820)
+      assertBounds("playback", left = 0, top = 756, right = 400, bottom = 900)
       assertBounds("tabs", left = 0, top = 820, right = 400, bottom = 900)
       onNodeWithTag("tabs").assertTextEquals("tabs 0 BOTTOM")
+
+      onNodeWithTag("tabs").performTouchInput { click(center) }
+      onNodeWithTag("tabs").assertTextEquals("tabs 1 BOTTOM")
+      onNodeWithTag("playback").assertTextEquals("playback 0")
+      onNodeWithTag("playback").performTouchInput { click(Offset(center.x, 32f)) }
+      onNodeWithTag("playback").assertTextEquals("playback 1")
     }
 
   @Test
-  fun `wide portrait uses a rail and full width playback`() =
+  fun `wide portrait extends the rail behind full width playback`() =
     runDesktopComposeUiTest(width = 600, height = 900) {
       val fixture = Fixture()
       setContent { fixture.Render(template()) }
 
-      assertBounds("tabs", left = 0, top = 0, right = 96, bottom = 836)
+      assertBounds("tabs", left = 0, top = 0, right = 96, bottom = 900)
       assertBounds("content", left = 96, top = 0, right = 600, bottom = 836)
       assertBounds("playback", left = 0, top = 836, right = 600, bottom = 900)
+      onNodeWithTag("tabs").assertTextEquals("tabs 0 START")
+
+      onNodeWithTag("playback").performTouchInput { click(Offset(48f, center.y)) }
+      onNodeWithTag("playback").assertTextEquals("playback 1")
       onNodeWithTag("tabs").assertTextEquals("tabs 0 START")
     }
 
@@ -78,7 +89,7 @@ class AppTemplateRendererTest {
       val fixture = Fixture()
       setContent { fixture.Render(template(), layoutDirection = LayoutDirection.Rtl) }
 
-      assertBounds("tabs", left = 904, top = 0, right = 1000, bottom = 536)
+      assertBounds("tabs", left = 904, top = 0, right = 1000, bottom = 600)
       assertBounds("content", left = 0, top = 0, right = 904, bottom = 536)
       assertBounds("playback", left = 0, top = 536, right = 1000, bottom = 600)
       onNodeWithTag("tabs").assertTextEquals("tabs 0 START")
@@ -86,20 +97,21 @@ class AppTemplateRendererTest {
 
   @Test
   fun `optional chrome reserves and releases space without resetting content`() =
-    runDesktopComposeUiTest(width = 800, height = 600) {
+    runDesktopComposeUiTest(width = 400, height = 900) {
       val fixture = Fixture()
       var model by mutableStateOf(AppTemplate.AdaptiveTemplate(content = SlotModel("content")))
       setContent { fixture.Render(model) }
 
-      assertBounds("content", left = 0, top = 0, right = 800, bottom = 600)
+      assertBounds("content", left = 0, top = 0, right = 400, bottom = 900)
       onNodeWithTag("content").performClick()
       runOnIdle { model = template() }
-      assertBounds("content", left = 96, top = 0, right = 800, bottom = 536)
+      assertBounds("content", left = 0, top = 0, right = 400, bottom = 756)
 
-      runOnIdle { model = model.copy(playback = null) }
-      assertBounds("content", left = 96, top = 0, right = 800, bottom = 600)
       runOnIdle { model = model.copy(tabs = null) }
-      assertBounds("content", left = 0, top = 0, right = 800, bottom = 600)
+      assertBounds("content", left = 0, top = 0, right = 400, bottom = 836)
+      assertBounds("playback", left = 0, top = 836, right = 400, bottom = 900)
+      runOnIdle { model = model.copy(playback = null) }
+      assertBounds("content", left = 0, top = 0, right = 400, bottom = 900)
       onNodeWithTag("content").assertTextEquals("content 1")
     }
 
@@ -113,7 +125,9 @@ class AppTemplateRendererTest {
       var model by mutableStateOf(template { originalClicks++ })
       setContent { fixture.Render(model, Modifier.size(width, 900.dp)) }
 
-      listOf("content", "tabs", "playback").forEach { onNodeWithTag(it).performClick() }
+      listOf("content", "tabs", "playback").forEach {
+        onNodeWithTag(it).performTouchInput { click(Offset(center.x, 32f)) }
+      }
       runOnIdle {
         assertThat(originalClicks).isEqualTo(3)
         width = 600.dp
@@ -124,7 +138,9 @@ class AppTemplateRendererTest {
       onNodeWithTag("playback").assertTextEquals("playback 1")
 
       runOnIdle { model = template { latestClicks += it } }
-      listOf("content", "tabs", "playback").forEach { onNodeWithTag(it).performClick() }
+      listOf("content", "tabs", "playback").forEach {
+        onNodeWithTag(it).performTouchInput { click(Offset(center.x, 32f)) }
+      }
 
       onNodeWithTag("content").assertTextEquals("content 2")
       onNodeWithTag("tabs").assertTextEquals("tabs 2 START")
@@ -132,7 +148,13 @@ class AppTemplateRendererTest {
       runOnIdle {
         assertThat(originalClicks).isEqualTo(3)
         assertThat(latestClicks).isEqualTo(listOf("content", "tabs", "playback"))
+        width = 599.dp
       }
+      onNodeWithTag("content").assertTextEquals("content 2")
+      onNodeWithTag("tabs").assertTextEquals("tabs 2 BOTTOM")
+      onNodeWithTag("playback").assertTextEquals("playback 2")
+      assertBounds("content", left = 0, top = 0, right = 599, bottom = 756)
+      assertBounds("playback", left = 0, top = 756, right = 599, bottom = 900)
     }
 
   @Test
@@ -215,7 +237,8 @@ class AppTemplateRendererTest {
       val placement = LocalTabPlacement.current
       val slotSize =
         when {
-          model.name == "playback" -> Modifier.fillMaxWidth().height(64.dp)
+          model.name == "playback" ->
+            Modifier.fillMaxWidth().height(64.dp + LocalPlaybackBottomInset.current)
           model.name == "tabs" && placement == TabPlacement.BOTTOM ->
             Modifier.fillMaxWidth().height(80.dp)
           model.name == "tabs" -> Modifier.width(96.dp).fillMaxHeight()

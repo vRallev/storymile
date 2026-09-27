@@ -16,12 +16,13 @@ sealed interface AppTemplate : Template {
     val content: BaseModel,
     /**
      * App tabs. The renderer reads [LocalTabPlacement] and provides its height at the bottom or
-     * width at the start. The template fills the other dimension.
+     * width at the start. The template fills the other dimension. At the start, the rail extends
+     * behind playback.
      */
     val tabs: BaseModel? = null,
     /**
      * Persistent playback above bottom tabs or across the expanded bottom edge. Its renderer
-     * provides the height; the template fills the width.
+     * provides the height, including [LocalPlaybackBottomInset]; the template fills the width.
      */
     val playback: BaseModel? = null,
     /**

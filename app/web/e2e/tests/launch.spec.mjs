@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('launches into the empty library', async ({ page }, testInfo) => {
+test('launches into empty app containers', async ({ page }, testInfo) => {
   const errors = [];
   const consoleMessages = [];
   page.on('pageerror', error => errors.push(error.stack ?? error.message));
@@ -19,10 +19,12 @@ test('launches into the empty library', async ({ page }, testInfo) => {
   try {
     await page.goto('/');
     await expect(page).toHaveTitle('Storymile');
-    // Compose exposes text through its accessibility DOM; pixels are checked separately.
-    await expect(page.getByText('Library', { exact: true })).toBeAttached();
-    await expect(page.getByText('Your library is empty.', { exact: true })).toBeAttached();
-    await expect(page).toHaveScreenshot('empty-library.png');
+    // Compose exposes test tags as accessibility DOM IDs; pixels are checked separately.
+    for (const tag of ['library', 'tabs', 'playback']) {
+      await expect(page.locator(`[id="${tag}"]`)).toBeAttached();
+      await expect(page.locator(`[id="${tag}"]`)).toHaveText('');
+    }
+    await expect(page).toHaveScreenshot('empty-shell.png');
     expect(errors, 'Browser errors during startup').toEqual([]);
   } finally {
     await testInfo.attach('browser-errors', {

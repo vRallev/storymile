@@ -121,6 +121,9 @@ Run `./gradlew -p buildSrc release` when changing build conventions.
 
 ### Platform integration
 
+Run Android, iOS, and Wasm smoke and e2e tests only in CI unless requested. Use Desktop smoke tests
+for local verification.
+
 Run only the checks needed for the change or requested platform. Android KMP libraries
 use `testAndroidHostTest`; the Android app shell uses `testDebugUnitTest`.
 Android Lint checks the app and shared KMP code.
@@ -130,10 +133,7 @@ Android Lint checks the app and shared KMP code.
 ./gradlew :app-framework:impl:testAndroidHostTest
 ./gradlew :app:android:testDebugUnitTest
 ./gradlew iosSimulatorArm64Test
-./scripts/ios-smoke-test.sh
 ./gradlew -Pstorymile.enableWasm=true --no-isolated-projects wasmJsTest
-./gradlew :app:android:emulatorCheck
-./gradlew :app:android-blackbox-test:emulatorReleaseAndroidTest
 ./gradlew :app:android:assembleDebug :app:desktop:createDistributable
 ./gradlew -Pstorymile.enableWasm=true --no-isolated-projects :app:web:wasmJsBrowserDistribution
 ./gradlew :app-framework:impl:linkDebugFrameworkIosSimulatorArm64
