@@ -193,6 +193,17 @@ run_desktop() {
   ./gradlew --quiet :app:desktop:hotRunDesktop --auto --args="--window-size=$size"
 }
 
+run_desktop_tests() {
+  local test_status
+  if ./gradlew --quiet :app:desktop:desktopTest; then
+    echo "✅ Desktop instrumented tests passed."
+  else
+    test_status=$?
+    echo "❌ Desktop instrumented tests failed (exit code $test_status)." >&2
+    return "$test_status"
+  fi
+}
+
 run_web_tests() {
   local test_status
   require_command node
@@ -289,20 +300,41 @@ PY
   fi
 }
 
+run_ios_tests() {
+  local test_status
+  [[ "$(uname -s)" == Darwin ]] || fail "iOS requires macOS and Xcode."
+  require_command xcodebuild
+  require_command xcrun
+  require_command python3
+  if ./scripts/ios-smoke-test.sh; then
+    echo "✅ iOS smoke tests passed."
+  else
+    test_status=$?
+    echo "❌ iOS smoke tests failed (exit code $test_status)." >&2
+    return "$test_status"
+  fi
+}
+
 if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then
-  echo "Usage: ./run.sh [--web-test]"
-  echo "Choose Android, Desktop (hot reload), iOS, Wasm, Android release tests, or Wasm browser smoke tests."
+  echo "Usage: ./run.sh [--web-test | --ios-test | --desktop-test]"
+  echo "Choose Android, Desktop (hot reload), iOS, Wasm, or platform tests."
   echo "Then choose a device, emulator, or window size."
   echo "Use --web-test to build and test the production web app without the menu."
+  echo "Use --ios-test to run Release iOS smoke tests on a fresh simulator without the menu."
+  echo "Use --desktop-test to run Desktop instrumented tests without the menu."
   exit 0
 fi
-if [[ $# == 1 && "$1" == --web-test ]]; then
-  run_web_tests
-  exit 0
+if [[ $# == 1 ]]; then
+  case "$1" in
+    --web-test) run_web_tests; exit 0 ;;
+    --ios-test) run_ios_tests; exit 0 ;;
+    --desktop-test) run_desktop_tests; exit 0 ;;
+  esac
 fi
-[[ $# == 0 ]] || fail "Usage: ./run.sh [--web-test]"
+[[ $# == 0 ]] || fail "Usage: ./run.sh [--web-test | --ios-test | --desktop-test]"
 
-choose "What would you like to run?" 2 Android Desktop iOS Wasm "Android release tests" "Wasm browser smoke tests"
+choose "What would you like to run?" 2 Android Desktop iOS Wasm "Android release tests" \
+  "Desktop instrumented tests" "iOS smoke tests" "Wasm browser smoke tests"
 PLATFORM="$SELECTION"
 WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/storymile-run.XXXXXX")"
 trap 'rm -rf -- "$WORK_DIR"' EXIT
@@ -314,5 +346,7 @@ case "$PLATFORM" in
   2) run_ios ;;
   3) ./gradlew --quiet -Pstorymile.enableWasm=true --no-isolated-projects :app:web:wasmJsBrowserDevelopmentRun ;;
   4) run_android_release_tests ;;
-  5) run_web_tests ;;
+  5) run_desktop_tests ;;
+  6) run_ios_tests ;;
+  7) run_web_tests ;;
 esac

@@ -127,6 +127,7 @@ Android Lint checks the app and shared KMP code.
 ./gradlew :app-framework:impl:testAndroidHostTest
 ./gradlew :app:android:testDebugUnitTest
 ./gradlew iosSimulatorArm64Test
+./scripts/ios-smoke-test.sh
 ./gradlew -Pstorymile.enableWasm=true --no-isolated-projects wasmJsTest
 ./gradlew :app:android:emulatorCheck
 ./gradlew :app:android-blackbox-test:emulatorReleaseAndroidTest
@@ -161,3 +162,7 @@ of the release APK, signed with the debug key and shrunk by R8 without obfuscati
 
 Use the `build-web-release` job in [CI](.github/workflows/ci.yml) as the source of truth
 for setup and test commands.
+
+#### iOS
+
+The iOS smoke test launches the Release app on a fresh iPhone simulator with iOS 26.
