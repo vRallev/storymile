@@ -11,6 +11,7 @@ storymile {
 
 dependencies {
   commonMainImplementation project(':app-framework:impl')
+  commonMainImplementation project(':theme:public')
   commonMainImplementation project(':util:public')
 
   desktopTestImplementation project(':app-framework:impl-ui-test-robots')
