@@ -61,9 +61,10 @@ Prefix project-specific Gradle properties with `storymile.`.
 
 ### Testing
 
-Evaluate each unit test for usefulness; 100% coverage is not the goal. Test meaningful
-behavior and regressions. Avoid trivial tests that duplicate or are tightly coupled to
-their implementation.
+Evaluate each unit test by the behavior it protects, the complexity it covers, and its
+maintenance cost. Prefer meaningful logic, edge cases, and regressions. Skip trivial
+wrappers, dependency behavior, and tests that mirror the implementation. Coverage
+percentage is not a goal.
 
 ### Icons
 

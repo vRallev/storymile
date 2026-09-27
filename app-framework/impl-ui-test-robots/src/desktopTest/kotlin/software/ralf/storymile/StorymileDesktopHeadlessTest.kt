@@ -13,16 +13,16 @@ class StorymileDesktopHeadlessTest {
   @Test
   fun `phone starts with library template`() = headlessTestRule.runPhoneTest {
     assertThat(awaitItem())
-      .isInstanceOf<AppTemplate.FullScreenTemplate>()
-      .transform { it.model }
+      .isInstanceOf<AppTemplate.AdaptiveTemplate>()
+      .transform { it.content }
       .isEqualTo(LibraryPresenterImpl.Model)
   }
 
   @Test
   fun `tablet starts with library template`() = headlessTestRule.runTabletTest {
     assertThat(awaitItem())
-      .isInstanceOf<AppTemplate.FullScreenTemplate>()
-      .transform { it.model }
+      .isInstanceOf<AppTemplate.AdaptiveTemplate>()
+      .transform { it.content }
       .isEqualTo(LibraryPresenterImpl.Model)
   }
 }
