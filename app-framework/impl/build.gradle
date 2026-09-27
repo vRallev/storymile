@@ -16,10 +16,10 @@ dependencies {
   androidMainImplementation libs.androidx.activity.compose
 
   commonMainImplementation project(':library:impl')
+  commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':presenter-navigation:impl')
+  commonMainImplementation project(':tabs:impl')
   commonMainImplementation project(':templates:impl')
   commonMainImplementation project(':theme:public')
   commonMainImplementation project(':util:impl')
-
-  commonTestImplementation project(':library:testing')
 }
