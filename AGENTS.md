@@ -166,4 +166,3 @@ for setup and test commands.
 #### iOS
 
 The iOS smoke test launches the Release app on a fresh iPhone simulator with iOS 26.
-Run it with `./run.sh --ios-test` or the launcher menu.
