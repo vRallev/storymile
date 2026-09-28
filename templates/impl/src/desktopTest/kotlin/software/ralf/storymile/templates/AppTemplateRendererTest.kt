@@ -178,21 +178,24 @@ class AppTemplateRendererTest {
           assertThat(awaitItem()).isEqualTo(ScreenSize.from(400.dp, 900.dp))
 
           listOf(
-              DpSize(900.dp, 400.dp),
-              DpSize(600.dp, 900.dp),
-              DpSize(700.dp, 900.dp),
-              DpSize(900.dp, 700.dp),
-              DpSize(840.dp, 1200.dp),
-              DpSize(1200.dp, 840.dp),
-              DpSize(400.dp, 900.dp),
+              DpSize(900.dp, 400.dp) to "BOTTOM",
+              DpSize(600.dp, 900.dp) to "START",
+              DpSize(700.dp, 900.dp) to "START",
+              DpSize(900.dp, 700.dp) to "START",
+              DpSize(840.dp, 1200.dp) to "START",
+              DpSize(1199.dp, 900.dp) to "START",
+              DpSize(1200.dp, 900.dp) to "START_EXPANDED",
+              DpSize(1200.dp, 839.dp) to "START_EXPANDED",
+              DpSize(1200.dp, 840.dp) to "START_EXPANDED",
+              DpSize(1200.dp, 400.dp) to "START_EXPANDED",
+              DpSize(1199.dp, 400.dp) to "BOTTOM",
+              DpSize(400.dp, 900.dp) to "BOTTOM",
             )
-            .forEach { size ->
+            .forEach { (size, placement) ->
               runOnIdle { windowInfo.containerDpSize = size }
               waitForIdle()
               val screenSize = awaitItem()
               assertThat(screenSize).isEqualTo(ScreenSize.from(size.width, size.height))
-              val placement =
-                if (screenSize.category == ScreenSize.Category.PHONE) "BOTTOM" else "START"
               onNodeWithTag("tabs").assertTextEquals("tabs 0 $placement")
             }
         }
@@ -291,7 +294,9 @@ class AppTemplateRendererTest {
             Modifier.fillMaxWidth().height(64.dp + LocalPlaybackBottomInset.current)
           model.name == "tabs" && placement == TabPlacement.BOTTOM ->
             Modifier.fillMaxWidth().height(80.dp)
-          model.name == "tabs" -> Modifier.width(96.dp).fillMaxHeight()
+          model.name == "tabs" ->
+            Modifier.width(if (placement == TabPlacement.START_EXPANDED) 280.dp else 96.dp)
+              .fillMaxHeight()
           else -> Modifier.fillMaxSize()
         }
       Box(

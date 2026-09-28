@@ -86,11 +86,12 @@ class AppTemplateRenderer(
   @Composable
   private fun AdaptiveTemplateContent(template: AppTemplate.AdaptiveTemplate) {
     Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+      val screenSize = LocalScreenSize.current
       val tabPlacement =
-        when (LocalScreenSize.current.category) {
-          ScreenSize.Category.PHONE -> TabPlacement.BOTTOM
-          ScreenSize.Category.TABLET_SMALL,
-          ScreenSize.Category.TABLET_LARGE -> TabPlacement.START
+        when {
+          screenSize.width >= 1200.dp -> TabPlacement.START_EXPANDED
+          screenSize.category == ScreenSize.Category.PHONE -> TabPlacement.BOTTOM
+          else -> TabPlacement.START
         }
 
       AppShell(template, tabPlacement)
@@ -107,7 +108,7 @@ class AppTemplateRenderer(
     SubcomposeLayout(Modifier.fillMaxSize()) { constraints ->
       val width = constraints.maxWidth
       val height = constraints.maxHeight
-      val tabsAtStart = tabPlacement == TabPlacement.START
+      val tabsAtStart = tabPlacement != TabPlacement.BOTTOM
       val tabs =
         subcompose("tabs") {
             Box(propagateMinConstraints = true) {
