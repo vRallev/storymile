@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
 
 /**
- * Window dimensions and the adaptive category derived from them.
+ * Window dimensions, category, and orientation shared by renderers and presenters.
  *
  * Instances are created through [from] so category calculation remains consistent across all
  * platforms.
@@ -17,42 +17,60 @@ private constructor(
   val width: Dp,
   /** Current window height in density-independent pixels. */
   val height: Dp,
-  /** Layout category selected from [width]. */
+  /** Layout category selected from the shorter window dimension. */
   val category: Category,
+  /** Orientation selected from the current window dimensions. */
+  val orientation: Orientation,
 ) {
-  /** Adaptive layouts supported by the application. */
-  enum class Category {
-    /** Compact layout for windows narrower than 600 dp. */
-    PHONE,
-
-    /** Expanded layout for windows at least 600 dp wide, in either orientation. */
-    TABLET,
-  }
-
-  /** Creates screen sizes with a category derived from the window dimensions. */
+  /** Creates screen sizes from window dimensions. */
   companion object {
     /** Initial value used before a platform reports a specified window size. */
     val Zero = from(width = 0.dp, height = 0.dp)
 
     /**
-     * Creates a screen size and derives its adaptive category.
+     * Derives category from the shorter side: phone below 600 dp, small tablet below 840 dp, and
+     * large tablet otherwise. Rotating the same window preserves its category.
      *
-     * Tablet layout requires a width of at least 600 dp, regardless of orientation.
+     * Square windows are portrait, including [Zero] before the first measurement.
      */
     fun from(width: Dp, height: Dp): ScreenSize {
       require(width.isSpecified) { "width must be specified." }
       require(height.isSpecified) { "height must be specified." }
 
+      val shortSide = minOf(width, height)
+
       return ScreenSize(
         width = width,
         height = height,
         category =
-          if (width >= 600.dp) {
-            Category.TABLET
-          } else {
-            Category.PHONE
+          when {
+            shortSide < 600.dp -> Category.PHONE
+            shortSide < 840.dp -> Category.TABLET_SMALL
+            else -> Category.TABLET_LARGE
           },
+        orientation = if (width > height) Orientation.LANDSCAPE else Orientation.PORTRAIT,
       )
     }
+  }
+
+  /** Adaptive window categories, independent of rotation. */
+  enum class Category {
+    /** The shorter side is less than 600 dp. */
+    PHONE,
+
+    /** The shorter side is at least 600 dp and less than 840 dp. */
+    TABLET_SMALL,
+
+    /** The shorter side is at least 840 dp. */
+    TABLET_LARGE,
+  }
+
+  /** Orientation of the app window, including freely resizable windows. */
+  enum class Orientation {
+    /** The window is taller than it is wide, or square. */
+    PORTRAIT,
+
+    /** The window is wider than it is tall. */
+    LANDSCAPE,
   }
 }

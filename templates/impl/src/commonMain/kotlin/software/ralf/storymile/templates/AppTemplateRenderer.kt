@@ -2,7 +2,6 @@ package software.ralf.storymile.templates
 
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawing
@@ -86,11 +85,12 @@ class AppTemplateRenderer(
 
   @Composable
   private fun AdaptiveTemplateContent(template: AppTemplate.AdaptiveTemplate) {
-    BoxWithConstraints(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
       val tabPlacement =
-        when (ScreenSize.from(maxWidth, maxHeight).category) {
+        when (LocalScreenSize.current.category) {
           ScreenSize.Category.PHONE -> TabPlacement.BOTTOM
-          ScreenSize.Category.TABLET -> TabPlacement.START
+          ScreenSize.Category.TABLET_SMALL,
+          ScreenSize.Category.TABLET_LARGE -> TabPlacement.START
         }
 
       AppShell(template, tabPlacement)
