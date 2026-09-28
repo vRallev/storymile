@@ -25,9 +25,7 @@ class StorymileReleaseTest {
 
     listOf("library", "tabs", "playback").forEach { tag ->
       onElement(timeoutMs = 10_000) {
-        packageName?.toString() == APP_PACKAGE &&
-          isVisibleToUser &&
-          extras.getString("androidx.compose.ui.semantics.testTag") == tag
+        packageName?.toString() == APP_PACKAGE && isVisibleToUser && viewIdResourceName == tag
       }
     }
   }

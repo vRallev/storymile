@@ -7,6 +7,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import software.ralf.app.platform.renderer.ComposeAndroidRendererFactory
 import software.ralf.app.platform.renderer.renderCompose
 import software.ralf.storymile.util.rootScopeProvider
@@ -24,7 +27,10 @@ class MainActivity : ComponentActivity() {
 
     setContent {
       val template by viewModel.templates.collectAsState()
-      rendererFactory.renderCompose(template)
+      rendererFactory.renderCompose(
+        template,
+        Modifier.semantics { testTagsAsResourceId = true },
+      )
     }
   }
 }
