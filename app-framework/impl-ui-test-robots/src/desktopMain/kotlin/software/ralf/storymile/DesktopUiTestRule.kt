@@ -29,9 +29,10 @@ class DesktopUiTestRule {
     runRobotTest(windowSize = DesktopWindowSizes.tablet, darkTheme = darkTheme, block = block)
   }
 
-  private fun runRobotTest(
+  /** Runs [block] at [windowSize], optionally overriding the system theme with [darkTheme]. */
+  fun runRobotTest(
     windowSize: DpSize,
-    darkTheme: Boolean?,
+    darkTheme: Boolean? = null,
     block: ComposeUiTest.() -> Unit,
   ) {
     val desktopApp = DesktopApp {

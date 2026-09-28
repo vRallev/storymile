@@ -7,6 +7,8 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
@@ -39,6 +41,28 @@ class StorymileDesktopUiTest {
         saveScreenshot("tablet-${if (darkTheme) "dark" else "light"}")
       }
     }
+  }
+
+  @Test
+  fun `sidebar expansion follows width instead of height`() {
+    listOf(
+        DpSize(1440.dp, 900.dp) to 280.dp,
+        DpSize(1199.dp, 900.dp) to 96.dp,
+        DpSize(1200.dp, 900.dp) to 280.dp,
+        DpSize(1200.dp, 500.dp) to 280.dp,
+        DpSize(900.dp, 1440.dp) to 96.dp,
+      )
+      .forEach { (size, tabWidth) ->
+        listOf(false, true).forEach { darkTheme ->
+          uiTestRule.runRobotTest(windowSize = size, darkTheme = darkTheme) {
+            waitUntilCatching("side tabs displayed at the expected width", timeout = 3.seconds) {
+              composeRobot<AppShellRobot> { seeExpandedLayout(tabWidth = tabWidth) }
+            }
+            val dimensions = "${size.width.value.toInt()}x${size.height.value.toInt()}"
+            saveScreenshot("sidebar-$dimensions-${if (darkTheme) "dark" else "light"}")
+          }
+        }
+      }
   }
 
   private fun ComposeUiTest.saveScreenshot(name: String) {

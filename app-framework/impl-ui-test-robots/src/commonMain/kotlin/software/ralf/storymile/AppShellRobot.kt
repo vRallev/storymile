@@ -5,6 +5,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import dev.zacsweers.metro.AppScope
@@ -35,12 +37,13 @@ class AppShellRobot : ComposeRobot() {
     assertThat(playback.right).isEqualTo(tabs.right)
   }
 
-  /** Checks that the rail extends behind playback, which spans both columns. */
-  fun seeExpandedLayout() {
+  /** Checks the tabs width and that the tabs extend behind playback, which spans both columns. */
+  fun seeExpandedLayout(tabWidth: Dp = 96.dp) {
     seeEmptyLayers()
     val content = compose.onNodeWithTag("library").getUnclippedBoundsInRoot()
     val playback = compose.onNodeWithTag("playback").getUnclippedBoundsInRoot()
     val tabs = compose.onNodeWithTag("tabs").getUnclippedBoundsInRoot()
+    assertThat(tabs.right - tabs.left).isEqualTo(tabWidth)
     assertThat(tabs.right).isEqualTo(content.left)
     assertThat(tabs.bottom).isEqualTo(playback.bottom)
     assertThat(content.bottom).isEqualTo(playback.top)
