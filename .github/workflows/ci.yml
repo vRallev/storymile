@@ -50,7 +50,11 @@ jobs:
         env:
           NEEDS_RESULTS: ${{ toJSON(needs) }}
         run: |
-          printf '%s\n' "$NEEDS_RESULTS" | jq -e 'all(.[]; .result == "success")'
+          printf '%s\n' "$NEEDS_RESULTS" | jq -e '
+            all(to_entries[];
+              .value.result == "success" or
+              (.key == "build-ios-release" and .value.result == "skipped" and env.GITHUB_REF != "refs/heads/main")
+            )'
 
   check-build-src:
     runs-on: ubuntu-latest
@@ -305,6 +309,7 @@ jobs:
             app/web/e2e/test-results/
 
   build-ios-release:
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: macos-latest
     timeout-minutes: 30
     steps:
