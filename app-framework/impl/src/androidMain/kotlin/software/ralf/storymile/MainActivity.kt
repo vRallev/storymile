@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -27,10 +29,10 @@ class MainActivity : ComponentActivity() {
 
     setContent {
       val template by viewModel.templates.collectAsState()
-      rendererFactory.renderCompose(
-        template,
-        Modifier.semantics { testTagsAsResourceId = true },
-      )
+      // The Android interop renderer does not forward the root modifier.
+      Box(Modifier.fillMaxSize().semantics { testTagsAsResourceId = true }) {
+        rendererFactory.renderCompose(template)
+      }
     }
   }
 }
