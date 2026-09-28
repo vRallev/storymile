@@ -2,7 +2,6 @@ package software.ralf.storymile.playback
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,6 +13,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
+import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.templates.LocalPlaybackBottomInset
 import software.ralf.storymile.theme.AppTheme
@@ -23,21 +23,19 @@ import software.ralf.storymile.theme.appLayerShadow
 class PlaybackRenderer : ComposeRenderer<PlaybackPresenterImpl.Model>() {
   @Composable
   override fun Compose(model: PlaybackPresenterImpl.Model, modifier: Modifier) {
-    BoxWithConstraints(modifier.fillMaxWidth()) {
-      val expanded = ScreenSize.from(maxWidth, maxHeight).category == ScreenSize.Category.TABLET
-      val shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-      Surface(
-        modifier = Modifier.fillMaxWidth().testTag("playback").appLayerShadow(shape),
-        shape = shape,
-        color = AppTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, AppTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
-      ) {
-        Box(
-          Modifier.padding(bottom = LocalPlaybackBottomInset.current)
-            .fillMaxWidth()
-            .height(if (expanded) 96.dp else 64.dp)
-        )
-      }
+    val expanded = LocalScreenSize.current.category != ScreenSize.Category.PHONE
+    val shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    Surface(
+      modifier = modifier.fillMaxWidth().testTag("playback").appLayerShadow(shape),
+      shape = shape,
+      color = AppTheme.colorScheme.surface,
+      border = BorderStroke(1.dp, AppTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
+    ) {
+      Box(
+        Modifier.padding(bottom = LocalPlaybackBottomInset.current)
+          .fillMaxWidth()
+          .height(if (expanded) 96.dp else 64.dp)
+      )
     }
   }
 }
