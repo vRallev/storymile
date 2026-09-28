@@ -1,6 +1,5 @@
 package software.ralf.storymile.screen
 
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import assertk.assertThat
 import assertk.assertions.isEqualTo
@@ -8,26 +7,27 @@ import kotlin.test.Test
 
 class ScreenSizeTest {
   @Test
-  fun `landscape window below width threshold is a phone`() {
-    assertCategory(width = 599.dp, height = 400.dp, expected = ScreenSize.Category.PHONE)
+  fun `category boundaries apply to the shorter side in either orientation`() {
+    listOf(
+        599 to ScreenSize.Category.PHONE,
+        600 to ScreenSize.Category.TABLET_SMALL,
+        839 to ScreenSize.Category.TABLET_SMALL,
+        840 to ScreenSize.Category.TABLET_LARGE,
+      )
+      .forEach { (shortSide, category) ->
+        val portrait = ScreenSize.from(width = shortSide.dp, height = 1200.dp)
+        val landscape = ScreenSize.from(width = 1200.dp, height = shortSide.dp)
+
+        assertThat(portrait.category).isEqualTo(category)
+        assertThat(landscape.category).isEqualTo(category)
+        assertThat(portrait.orientation).isEqualTo(ScreenSize.Orientation.PORTRAIT)
+        assertThat(landscape.orientation).isEqualTo(ScreenSize.Orientation.LANDSCAPE)
+      }
   }
 
   @Test
-  fun `landscape window at width threshold is a tablet`() {
-    assertCategory(width = 600.dp, height = 599.dp, expected = ScreenSize.Category.TABLET)
-  }
-
-  @Test
-  fun `square window at width threshold is a tablet`() {
-    assertCategory(width = 600.dp, height = 600.dp, expected = ScreenSize.Category.TABLET)
-  }
-
-  @Test
-  fun `portrait window at width threshold is a tablet`() {
-    assertCategory(width = 600.dp, height = 900.dp, expected = ScreenSize.Category.TABLET)
-  }
-
-  private fun assertCategory(width: Dp, height: Dp, expected: ScreenSize.Category) {
-    assertThat(ScreenSize.from(width = width, height = height).category).isEqualTo(expected)
+  fun `square windows use portrait orientation`() {
+    assertThat(ScreenSize.from(width = 600.dp, height = 600.dp).orientation)
+      .isEqualTo(ScreenSize.Orientation.PORTRAIT)
   }
 }
