@@ -388,7 +388,7 @@ class AppTemplateRenderer(
               }
             }
         ) {
-          expandedContent?.let { Render(it, Modifier.fillMaxSize()) }
+          Render(expandedContent, Modifier.fillMaxSize())
         }
       }
     }
