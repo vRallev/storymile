@@ -1,5 +1,12 @@
 package software.ralf.storymile
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.input.key.Key
@@ -15,9 +22,13 @@ import dev.zacsweers.metro.createGraphFactory
 import java.awt.Taskbar
 import javax.imageio.ImageIO
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
+import software.ralf.storymile.theme.LocalDarkThemeOverride
 import software.ralf.storymile.util.Platform
 
-/** Launches the Desktop application. Press Command/Ctrl+S to toggle phone and tablet sizes. */
+/**
+ * Launches the Desktop application. Command/Ctrl+S toggles phone and tablet sizes; Command/Ctrl+D
+ * toggles light and dark themes.
+ */
 fun main(args: Array<String>) {
 
   val initialSize =
@@ -36,6 +47,8 @@ fun main(args: Array<String>) {
     val phoneSize = DesktopWindowSizes.phone
     val tabletSize = DesktopWindowSizes.tablet
     val windowState = rememberWindowState(width = initialSize.width, height = initialSize.height)
+    var darkThemeOverride by remember { mutableStateOf<Boolean?>(null) }
+    var systemDarkTheme by remember { mutableStateOf(false) }
 
     Window(
       onCloseRequest = {
@@ -45,12 +58,20 @@ fun main(args: Array<String>) {
       onPreviewKeyEvent = { keyEvent ->
         if (
           keyEvent.type == KeyEventType.KeyDown &&
-            (keyEvent.isMetaPressed || keyEvent.isCtrlPressed) &&
-            keyEvent.key == Key.S
+            (keyEvent.isMetaPressed || keyEvent.isCtrlPressed)
         ) {
-          windowState.size =
-            if (DesktopWindowSizes.isTablet(windowState.size)) phoneSize else tabletSize
-          true
+          when (keyEvent.key) {
+            Key.S -> {
+              windowState.size =
+                if (DesktopWindowSizes.isTablet(windowState.size)) phoneSize else tabletSize
+              true
+            }
+            Key.D -> {
+              darkThemeOverride = !(darkThemeOverride ?: systemDarkTheme)
+              true
+            }
+            else -> false
+          }
         } else {
           false
         }
@@ -59,7 +80,12 @@ fun main(args: Array<String>) {
       icon = windowIcon,
       title = "Storymile",
     ) {
-      desktopApp.renderTemplates()
+      // Desktop supplies live system appearance updates inside the window's composition.
+      val currentSystemDarkTheme = isSystemInDarkTheme()
+      SideEffect { systemDarkTheme = currentSystemDarkTheme }
+      CompositionLocalProvider(LocalDarkThemeOverride provides darkThemeOverride) {
+        desktopApp.renderTemplates()
+      }
     }
   }
 }
