@@ -20,6 +20,10 @@ Use the matching skill for detailed guidance:
 - [Scopes](.agents/skills/app-platform-scope/SKILL.md): lifetimes, coroutines, and Metro graphs.
 - [Testing](.agents/skills/app-platform-testing/SKILL.md): fakes, unit tests, robots, and integration tests.
 
+The current presenter tree is documented in [Presenter hierarchy](docs/presenter-hierarchy.md).
+Update `docs/presenter-hierarchy.md` whenever you create a presenter. Also update it when presenter
+composition, navigation, or template slots change.
+
 ## Development
 
 - Use Desktop for most development and testing because it is the fastest.
