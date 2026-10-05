@@ -14,7 +14,7 @@ class StorymileReleaseTest {
   @get:Rule val failureArtifacts = FailureArtifactsRule()
 
   @Test
-  fun showsEmptyLibrary() = uiAutomator {
+  fun showsEmptyAppContainers() = uiAutomator {
     assertEquals("Success", device.executeShellCommand("pm clear $APP_PACKAGE").trim())
     device.pressHome()
     val context = InstrumentationRegistry.getInstrumentation().context
@@ -23,13 +23,10 @@ class StorymileReleaseTest {
       intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
     )
 
-    onElement(timeoutMs = 10_000) {
-      packageName?.toString() == APP_PACKAGE && isVisibleToUser && text?.toString() == "Library"
-    }
-    onElement(timeoutMs = 10_000) {
-      packageName?.toString() == APP_PACKAGE &&
-        isVisibleToUser &&
-        text?.toString() == "Your library is empty."
+    listOf("library", "tabs", "playback").forEach { tag ->
+      onElement(timeoutMs = 10_000) {
+        packageName?.toString() == APP_PACKAGE && isVisibleToUser && viewIdResourceName == tag
+      }
     }
   }
 

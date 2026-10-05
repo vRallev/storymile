@@ -1,7 +1,7 @@
 import XCTest
 
 final class LaunchTests: XCTestCase {
-    func testLaunchShowsEmptyLibrary() {
+    func testLaunchShowsEmptyAppContainers() {
         continueAfterFailure = false
         let app = XCUIApplication()
         addTeardownBlock { [self] in
@@ -21,14 +21,12 @@ final class LaunchTests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 15))
 
-        let emptyLibrary = app.descendants(matching: .any)["libraryEmpty"]
-        XCTAssertTrue(emptyLibrary.waitForExistence(timeout: 15))
-        XCTAssertEqual(emptyLibrary.label, "Your library is empty.")
-        XCTAssertTrue(emptyLibrary.isHittable)
-
-        let title = app.staticTexts["Library"]
-        XCTAssertTrue(title.waitForExistence(timeout: 15))
-        XCTAssertTrue(title.isHittable)
+        for tag in ["library", "tabs", "playback"] {
+            let container = app.descendants(matching: .any)[tag]
+            XCTAssertTrue(container.waitForExistence(timeout: 15), "Missing \(tag) container")
+            XCTAssertFalse(container.frame.isEmpty)
+            XCTAssertEqual(container.staticTexts.count, 0)
+        }
         XCTAssertEqual(app.state, .runningForeground)
     }
 }

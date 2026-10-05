@@ -15,9 +15,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -102,49 +103,62 @@ class AppTemplateRenderer(
     template: AppTemplate.AdaptiveTemplate,
     tabPlacement: TabPlacement,
   ) {
-    // Keep each slot in the same composition position when tabs move between bar and rail.
-    Layout(
-      modifier = Modifier.fillMaxSize(),
-      content = {
-        Box(propagateMinConstraints = true) { Render(template.content, Modifier.fillMaxSize()) }
-        Box(propagateMinConstraints = true) {
-          CompositionLocalProvider(LocalTabPlacement provides tabPlacement) {
-            template.tabs?.let { Render(it) }
-          }
-        }
-        Box(propagateMinConstraints = true) { template.playback?.let { Render(it) } }
-      },
-    ) { measurables, constraints ->
+    // Stable slot keys preserve renderer state when layers move or change drawing order.
+    SubcomposeLayout(Modifier.fillMaxSize()) { constraints ->
       val width = constraints.maxWidth
       val height = constraints.maxHeight
-      val playback =
-        measurables[2].measure(
-          if (template.playback == null) Constraints.fixed(0, 0)
-          else Constraints(minWidth = width, maxWidth = width, maxHeight = height)
-        )
-      val remainingHeight = height - playback.height
       val tabsAtStart = tabPlacement == TabPlacement.START
       val tabs =
-        measurables[1].measure(
-          when {
-            template.tabs == null -> Constraints.fixed(0, 0)
-            tabsAtStart ->
-              Constraints(
-                maxWidth = width,
-                minHeight = remainingHeight,
-                maxHeight = remainingHeight,
-              )
-            else -> Constraints(minWidth = width, maxWidth = width, maxHeight = remainingHeight)
+        subcompose("tabs") {
+            Box(propagateMinConstraints = true) {
+              CompositionLocalProvider(LocalTabPlacement provides tabPlacement) {
+                template.tabs?.let { Render(it) }
+              }
+            }
           }
-        )
+          .single()
+          .measure(
+            when {
+              template.tabs == null -> Constraints.fixed(0, 0)
+              tabsAtStart ->
+                // Continue the rail behind playback, including its rounded corners.
+                Constraints(maxWidth = width, minHeight = height, maxHeight = height)
+              else -> Constraints(minWidth = width, maxWidth = width, maxHeight = height)
+            }
+          )
+      val playbackBottomInset = if (tabsAtStart) 0.dp else tabs.height.toDp()
+      val playback =
+        subcompose("playback") {
+            Box(propagateMinConstraints = true) {
+              CompositionLocalProvider(LocalPlaybackBottomInset provides playbackBottomInset) {
+                template.playback?.let { Render(it) }
+              }
+            }
+          }
+          .single()
+          .measure(
+            if (template.playback == null) Constraints.fixed(0, 0)
+            else Constraints(minWidth = width, maxWidth = width, maxHeight = height)
+          )
       val contentWidth = width - if (tabsAtStart) tabs.width else 0
-      val contentHeight = remainingHeight - if (tabsAtStart) 0 else tabs.height
-      val content = measurables[0].measure(Constraints.fixed(contentWidth, contentHeight))
+      val contentHeight =
+        height - if (tabsAtStart) playback.height else maxOf(playback.height, tabs.height)
+      val content =
+        subcompose("content") {
+            Box(propagateMinConstraints = true) { Render(template.content, Modifier.fillMaxSize()) }
+          }
+          .single()
+          .measure(Constraints.fixed(contentWidth, contentHeight))
 
       layout(width, height) {
         content.placeRelative(if (tabsAtStart) tabs.width else 0, 0)
-        tabs.placeRelative(0, if (tabsAtStart) 0 else height - tabs.height)
-        playback.placeRelative(0, contentHeight)
+        if (tabsAtStart) {
+          tabs.placeRelative(0, 0)
+          playback.placeRelative(0, height - playback.height)
+        } else {
+          playback.placeRelative(0, height - playback.height)
+          tabs.placeRelative(0, height - tabs.height)
+        }
       }
     }
   }

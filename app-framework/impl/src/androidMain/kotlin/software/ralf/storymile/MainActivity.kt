@@ -5,8 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import software.ralf.app.platform.renderer.ComposeAndroidRendererFactory
 import software.ralf.app.platform.renderer.renderCompose
 import software.ralf.storymile.util.rootScopeProvider
@@ -24,7 +29,10 @@ class MainActivity : ComponentActivity() {
 
     setContent {
       val template by viewModel.templates.collectAsState()
-      rendererFactory.renderCompose(template)
+      // The Android interop renderer does not forward the root modifier.
+      Box(Modifier.fillMaxSize().semantics { testTagsAsResourceId = true }) {
+        rendererFactory.renderCompose(template)
+      }
     }
   }
 }
