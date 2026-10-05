@@ -22,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -34,12 +36,15 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpRect
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import app.cash.turbine.test
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import kotlin.reflect.KClass
 import kotlin.test.Test
+import kotlinx.coroutines.test.runTest as runCoroutineTest
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.compose.backgesture.BackGestureDispatcherPresenter
 import software.ralf.app.platform.renderer.ComposeRenderer
@@ -47,6 +52,8 @@ import software.ralf.app.platform.renderer.LocalRendererFactory
 import software.ralf.app.platform.renderer.Renderer
 import software.ralf.app.platform.renderer.RendererFactory
 import software.ralf.storymile.screen.DefaultScreenSizeProvider
+import software.ralf.storymile.screen.ScreenSize
+import software.ralf.storymile.screen.ScreenSizeProvider
 
 class AppTemplateRendererTest {
   @Test
@@ -118,19 +125,19 @@ class AppTemplateRendererTest {
   @Test
   fun `resizing preserves child state and delivers updated model callbacks`() =
     runDesktopComposeUiTest(width = 800, height = 900) {
-      val fixture = Fixture()
-      var width by mutableStateOf(599.dp)
+      val windowInfo = TestWindowInfo(DpSize(599.dp, 900.dp))
+      val fixture = Fixture(windowInfo)
       var originalClicks = 0
       val latestClicks = mutableListOf<String>()
       var model by mutableStateOf(template { originalClicks++ })
-      setContent { fixture.Render(model, Modifier.size(width, 900.dp)) }
+      setContent { fixture.Render(model, Modifier.size(windowInfo.containerDpSize)) }
 
       listOf("content", "tabs", "playback").forEach {
         onNodeWithTag(it).performTouchInput { click(Offset(center.x, 32f)) }
       }
       runOnIdle {
         assertThat(originalClicks).isEqualTo(3)
-        width = 600.dp
+        windowInfo.containerDpSize = DpSize(600.dp, 900.dp)
       }
 
       onNodeWithTag("content").assertTextEquals("content 1")
@@ -148,13 +155,48 @@ class AppTemplateRendererTest {
       runOnIdle {
         assertThat(originalClicks).isEqualTo(3)
         assertThat(latestClicks).isEqualTo(listOf("content", "tabs", "playback"))
-        width = 599.dp
+        windowInfo.containerDpSize = DpSize(599.dp, 900.dp)
       }
       onNodeWithTag("content").assertTextEquals("content 2")
       onNodeWithTag("tabs").assertTextEquals("tabs 2 BOTTOM")
       onNodeWithTag("playback").assertTextEquals("playback 2")
       assertBounds("content", left = 0, top = 0, right = 599, bottom = 756)
       assertBounds("playback", left = 0, top = 756, right = 599, bottom = 900)
+    }
+
+  @Test
+  fun `window resizing and rotation reach observers and update tab placement`() =
+    runDesktopComposeUiTest(width = 1200, height = 1200) {
+      val windowInfo = TestWindowInfo(DpSize(400.dp, 900.dp))
+      val fixture = Fixture(windowInfo)
+
+      runCoroutineTest {
+        fixture.screenSizeProvider.screenSize.test {
+          assertThat(awaitItem()).isEqualTo(ScreenSize.Zero)
+          setContent { fixture.Render(template(), Modifier.size(windowInfo.containerDpSize)) }
+          waitForIdle()
+          assertThat(awaitItem()).isEqualTo(ScreenSize.from(400.dp, 900.dp))
+
+          listOf(
+              DpSize(900.dp, 400.dp),
+              DpSize(600.dp, 900.dp),
+              DpSize(700.dp, 900.dp),
+              DpSize(900.dp, 700.dp),
+              DpSize(840.dp, 1200.dp),
+              DpSize(1200.dp, 840.dp),
+              DpSize(400.dp, 900.dp),
+            )
+            .forEach { size ->
+              runOnIdle { windowInfo.containerDpSize = size }
+              waitForIdle()
+              val screenSize = awaitItem()
+              assertThat(screenSize).isEqualTo(ScreenSize.from(size.width, size.height))
+              val placement =
+                if (screenSize.category == ScreenSize.Category.PHONE) "BOTTOM" else "START"
+              onNodeWithTag("tabs").assertTextEquals("tabs 0 $placement")
+            }
+        }
+      }
     }
 
   @Test
@@ -195,11 +237,18 @@ class AppTemplateRendererTest {
 
   private data class SlotModel(val name: String, val onClick: () -> Unit = {}) : BaseModel
 
-  private class Fixture : RendererFactory {
+  private class TestWindowInfo(initialSize: DpSize) : WindowInfo {
+    override val isWindowFocused = true
+    override var containerDpSize by mutableStateOf(initialSize)
+  }
+
+  private class Fixture(private val windowInfo: WindowInfo? = null) : RendererFactory {
+    private val mutableScreenSizeProvider = DefaultScreenSizeProvider()
+    val screenSizeProvider: ScreenSizeProvider = mutableScreenSizeProvider
     private val templateRenderer =
       AppTemplateRenderer(
         BackGestureDispatcherPresenter.createNewInstance(),
-        DefaultScreenSizeProvider(),
+        mutableScreenSizeProvider,
       )
     private val slotRenderer = SlotRenderer()
 
@@ -213,6 +262,7 @@ class AppTemplateRendererTest {
         LocalRendererFactory provides this,
         LocalDensity provides Density(1f),
         LocalLayoutDirection provides layoutDirection,
+        LocalWindowInfo provides (windowInfo ?: LocalWindowInfo.current),
       ) {
         Box(modifier) { templateRenderer.renderCompose(template) }
       }
