@@ -21,10 +21,15 @@ sealed interface AppTemplate : Template {
      */
     val tabs: BaseModel? = null,
     /**
-     * Persistent playback above bottom tabs or across the expanded bottom edge. Its renderer
-     * provides the height, including [LocalPlaybackBottomInset]; the template fills the width.
+     * Persistent bottom sheet above bottom tabs or across the expanded bottom edge. The template
+     * measures this content, adds space for bottom tabs, and controls sheet interactions.
      */
     val playback: BaseModel? = null,
+    /**
+     * Content shown when [playback] expands. It fills the sheet and covers content and tabs. When
+     * absent, the playback bar stays collapsed.
+     */
+    val expandedPlayback: BaseModel? = null,
     /**
      * Foreground layer above all other slots. Its renderer owns modality, scrims, focus, dismissal,
      * and back handling.

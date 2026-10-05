@@ -25,14 +25,19 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpRect
@@ -44,6 +49,10 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import kotlin.reflect.KClass
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest as runCoroutineTest
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.compose.backgesture.BackGestureDispatcherPresenter
@@ -69,9 +78,9 @@ class AppTemplateRendererTest {
 
       onNodeWithTag("tabs").performTouchInput { click(center) }
       onNodeWithTag("tabs").assertTextEquals("tabs 1 BOTTOM")
-      onNodeWithTag("playback").assertTextEquals("playback 0")
-      onNodeWithTag("playback").performTouchInput { click(Offset(center.x, 32f)) }
-      onNodeWithTag("playback").assertTextEquals("playback 1")
+      onNodeWithTag("playback-content").assertTextEquals("playback-content 0")
+      onNodeWithTag("playback-content").performTouchInput { click(Offset(center.x, 32f)) }
+      onNodeWithTag("playback-content").assertTextEquals("playback-content 1")
     }
 
   @Test
@@ -85,8 +94,8 @@ class AppTemplateRendererTest {
       assertBounds("playback", left = 0, top = 836, right = 600, bottom = 900)
       onNodeWithTag("tabs").assertTextEquals("tabs 0 START")
 
-      onNodeWithTag("playback").performTouchInput { click(Offset(48f, center.y)) }
-      onNodeWithTag("playback").assertTextEquals("playback 1")
+      onNodeWithTag("playback-content").performTouchInput { click(Offset(48f, center.y)) }
+      onNodeWithTag("playback-content").assertTextEquals("playback-content 1")
       onNodeWithTag("tabs").assertTextEquals("tabs 0 START")
     }
 
@@ -123,6 +132,29 @@ class AppTemplateRendererTest {
     }
 
   @Test
+  fun `playback stays collapsed without expanded content and returns when it is removed`() =
+    runDesktopComposeUiTest(width = 400, height = 900) {
+      val fixture = Fixture()
+      var model by mutableStateOf(template().copy(expandedPlayback = null))
+      setContent { fixture.Render(model) }
+
+      onNodeWithTag("playback")
+        .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.Expand))
+        .performTouchInput { swipeUp(startY = 32f, endY = -400f, durationMillis = 500) }
+      onNodeWithTag("playback-screen").assertDoesNotExist()
+      assertBounds("playback", left = 0, top = 756, right = 400, bottom = 900)
+
+      runOnIdle { model = model.copy(expandedPlayback = SlotModel("expanded-content")) }
+      onNodeWithTag("playback").performSemanticsAction(SemanticsActions.Expand) { it() }
+      assertBounds("playback-screen", left = 0, top = 0, right = 400, bottom = 900)
+
+      runOnIdle { model = model.copy(expandedPlayback = null) }
+      onNodeWithTag("playback-screen").assertDoesNotExist()
+      assertBounds("playback", left = 0, top = 756, right = 400, bottom = 900)
+      assertBounds("content", left = 0, top = 0, right = 400, bottom = 756)
+    }
+
+  @Test
   fun `resizing preserves child state and delivers updated model callbacks`() =
     runDesktopComposeUiTest(width = 800, height = 900) {
       val windowInfo = TestWindowInfo(DpSize(599.dp, 900.dp))
@@ -132,7 +164,7 @@ class AppTemplateRendererTest {
       var model by mutableStateOf(template { originalClicks++ })
       setContent { fixture.Render(model, Modifier.size(windowInfo.containerDpSize)) }
 
-      listOf("content", "tabs", "playback").forEach {
+      listOf("content", "tabs", "playback-content").forEach {
         onNodeWithTag(it).performTouchInput { click(Offset(center.x, 32f)) }
       }
       runOnIdle {
@@ -142,16 +174,16 @@ class AppTemplateRendererTest {
 
       onNodeWithTag("content").assertTextEquals("content 1")
       onNodeWithTag("tabs").assertTextEquals("tabs 1 START")
-      onNodeWithTag("playback").assertTextEquals("playback 1")
+      onNodeWithTag("playback-content").assertTextEquals("playback-content 1")
 
       runOnIdle { model = template { latestClicks += it } }
-      listOf("content", "tabs", "playback").forEach {
+      listOf("content", "tabs", "playback-content").forEach {
         onNodeWithTag(it).performTouchInput { click(Offset(center.x, 32f)) }
       }
 
       onNodeWithTag("content").assertTextEquals("content 2")
       onNodeWithTag("tabs").assertTextEquals("tabs 2 START")
-      onNodeWithTag("playback").assertTextEquals("playback 2")
+      onNodeWithTag("playback-content").assertTextEquals("playback-content 2")
       runOnIdle {
         assertThat(originalClicks).isEqualTo(3)
         assertThat(latestClicks).isEqualTo(listOf("content", "tabs", "playback"))
@@ -159,7 +191,7 @@ class AppTemplateRendererTest {
       }
       onNodeWithTag("content").assertTextEquals("content 2")
       onNodeWithTag("tabs").assertTextEquals("tabs 2 BOTTOM")
-      onNodeWithTag("playback").assertTextEquals("playback 2")
+      onNodeWithTag("playback-content").assertTextEquals("playback-content 2")
       assertBounds("content", left = 0, top = 0, right = 599, bottom = 756)
       assertBounds("playback", left = 0, top = 756, right = 599, bottom = 900)
     }
@@ -216,15 +248,44 @@ class AppTemplateRendererTest {
 
       onNodeWithTag("overlay").assertTextEquals("overlay 3")
       onNodeWithTag("content").assertTextEquals("content 0")
-      onNodeWithTag("playback").assertTextEquals("playback 0")
+      onNodeWithTag("playback-content").assertTextEquals("playback-content 0")
       onNodeWithTag("tabs").assertTextEquals("tabs 0 BOTTOM")
+    }
+
+  @Test
+  fun `expanded playback survives rotation and cancelled back before returning to its bar`() =
+    runDesktopComposeUiTest(width = 1200, height = 1200) {
+      val windowInfo = TestWindowInfo(DpSize(400.dp, 900.dp))
+      val fixture = Fixture(windowInfo)
+      setContent { fixture.Render(template(), Modifier.size(windowInfo.containerDpSize)) }
+      onNodeWithTag("content").performClick()
+      onNodeWithTag("playback-content").performClick()
+      onNodeWithTag("playback").performSemanticsAction(SemanticsActions.Expand) { it() }
+      assertBounds("playback-screen", left = 0, top = 0, right = 400, bottom = 900)
+      onNodeWithTag("expanded-content").assertTextEquals("expanded-content 0")
+
+      runOnIdle { windowInfo.containerDpSize = DpSize(900.dp, 700.dp) }
+      assertBounds("playback-screen", left = 0, top = 0, right = 900, bottom = 700)
+      runCoroutineTest {
+        assertFailsWith<CancellationException> {
+          fixture.backGestureDispatcher.onPredictiveBack(flow { throw CancellationException() })
+        }
+      }
+      assertBounds("playback-screen", left = 0, top = 0, right = 900, bottom = 700)
+
+      runCoroutineTest { fixture.backGestureDispatcher.onPredictiveBack(emptyFlow()) }
+      onNodeWithTag("playback-screen").assertDoesNotExist()
+      assertBounds("playback", left = 0, top = 636, right = 900, bottom = 700)
+      onNodeWithTag("content").assertTextEquals("content 1")
+      onNodeWithTag("playback-content").assertTextEquals("playback-content 1")
     }
 
   private fun template(onClick: (String) -> Unit = {}): AppTemplate.AdaptiveTemplate =
     AppTemplate.AdaptiveTemplate(
       content = SlotModel("content") { onClick("content") },
       tabs = SlotModel("tabs") { onClick("tabs") },
-      playback = SlotModel("playback") { onClick("playback") },
+      playback = SlotModel("playback-content") { onClick("playback") },
+      expandedPlayback = SlotModel("expanded-content") { onClick("expanded") },
     )
 
   private fun ComposeUiTest.assertBounds(
@@ -248,9 +309,10 @@ class AppTemplateRendererTest {
   private class Fixture(private val windowInfo: WindowInfo? = null) : RendererFactory {
     private val mutableScreenSizeProvider = DefaultScreenSizeProvider()
     val screenSizeProvider: ScreenSizeProvider = mutableScreenSizeProvider
+    val backGestureDispatcher = BackGestureDispatcherPresenter.createNewInstance()
     private val templateRenderer =
       AppTemplateRenderer(
-        BackGestureDispatcherPresenter.createNewInstance(),
+        backGestureDispatcher,
         mutableScreenSizeProvider,
       )
     private val slotRenderer = SlotRenderer()
@@ -290,8 +352,7 @@ class AppTemplateRendererTest {
       val placement = LocalTabPlacement.current
       val slotSize =
         when {
-          model.name == "playback" ->
-            Modifier.fillMaxWidth().height(64.dp + LocalPlaybackBottomInset.current)
+          model.name == "playback-content" -> Modifier.fillMaxWidth().height(64.dp)
           model.name == "tabs" && placement == TabPlacement.BOTTOM ->
             Modifier.fillMaxWidth().height(80.dp)
           model.name == "tabs" ->
