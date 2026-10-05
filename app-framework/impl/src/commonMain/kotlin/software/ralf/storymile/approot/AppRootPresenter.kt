@@ -15,10 +15,13 @@ class AppRootPresenter(
   private val playbackPresenter: PlaybackPresenter,
 ) : ComposePresenter<Unit, AppTemplate> {
   @Composable
-  override fun present(input: Unit): AppTemplate =
-    AppTemplate.AdaptiveTemplate(
+  override fun present(input: Unit): AppTemplate {
+    val playback = playbackPresenter.present(Unit)
+    return AppTemplate.AdaptiveTemplate(
       content = libraryPresenter.present(Unit),
       tabs = tabsPresenter.present(Unit),
-      playback = playbackPresenter.present(Unit),
+      playback = playback.collapsed,
+      expandedPlayback = playback.expanded,
     )
+  }
 }

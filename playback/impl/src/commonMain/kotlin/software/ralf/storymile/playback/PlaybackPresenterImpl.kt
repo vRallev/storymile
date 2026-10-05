@@ -9,7 +9,11 @@ import software.ralf.app.platform.presenter.BaseModel
 @Inject
 @ContributesBinding(AppScope::class)
 class PlaybackPresenterImpl : PlaybackPresenter {
-  @Composable override fun present(input: Unit): Model = Model
+  @Composable
+  override fun present(input: Unit): PlaybackPresenter.Model =
+    PlaybackPresenter.Model(collapsed = BarModel, expanded = ScreenModel)
 
-  data object Model : BaseModel
+  data object BarModel : BaseModel
+
+  data object ScreenModel : BaseModel
 }

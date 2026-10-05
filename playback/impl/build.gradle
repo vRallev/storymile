@@ -10,5 +10,4 @@ storymile {
 
 dependencies {
   commonMainImplementation project(':templates:public')
-  commonMainImplementation project(':theme:public')
 }

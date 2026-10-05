@@ -18,7 +18,8 @@ class StorymileDesktopHeadlessTest {
         AppTemplate.AdaptiveTemplate(
           content = LibraryPresenterImpl.Model,
           tabs = TabsPresenterImpl.Model,
-          playback = PlaybackPresenterImpl.Model,
+          playback = PlaybackPresenterImpl.BarModel,
+          expandedPlayback = PlaybackPresenterImpl.ScreenModel,
         )
       )
   }

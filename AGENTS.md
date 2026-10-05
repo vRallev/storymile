@@ -142,6 +142,25 @@ Android Lint checks the app and shared KMP code.
 ## Design
 
 - Use Material 3 components and color roles from `AppTheme` in `:theme:public`.
+- Preserve existing Material 3 components when changing UI. Prefer Material 3 components over
+  custom components. Use supported Material 3 APIs to adjust styling and behavior.
+
+### Adaptive layouts
+
+Follow the [adaptive app guidance](https://developer.android.com/develop/adaptive-apps/guides/get-started-with-adaptive-apps)
+and [canonical layouts](https://developer.android.com/develop/adaptive-apps/guides/canonical-layouts).
+
+- Use the available app window size for layout decisions. Use width for sidebar expansion and
+  column counts. Check height separately when vertical space matters. Use `ScreenSize.category`
+  only as a broad classification.
+- Prefer canonical feed, list-detail, and supporting-pane layouts when they fit the content.
+  Use Material 3 adaptive scaffolds when they simplify these layouts.
+- During resizing, rotation, or folding, preserve the current destination, selection, scroll
+  position, and playback state.
+- Account for foldable posture and separating hinges when placing content. Support larger font
+  sizes, keyboard input, and mouse input.
+- Verify layout changes at width breakpoints, including short wide and tall narrow windows.
+  Follow the platform verification rules in [Verify](#verify).
 
 ## CI
 
