@@ -23,7 +23,9 @@ import software.ralf.storymile.theme.appLayerShadow
 class TabsRenderer : ComposeRenderer<TabsPresenterImpl.Model>() {
   @Composable
   override fun Compose(model: TabsPresenterImpl.Model, modifier: Modifier) {
-    val atBottom = LocalTabPlacement.current == TabPlacement.BOTTOM
+    val placement = LocalTabPlacement.current
+    val atBottom = placement == TabPlacement.BOTTOM
+    val expanded = placement == TabPlacement.START_EXPANDED
     val shape =
       if (atBottom) RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp) else RectangleShape
     Surface(
@@ -31,7 +33,7 @@ class TabsRenderer : ComposeRenderer<TabsPresenterImpl.Model>() {
         modifier
           .then(
             if (atBottom) Modifier.fillMaxWidth().height(80.dp).appLayerShadow(shape)
-            else Modifier.width(96.dp).fillMaxHeight()
+            else Modifier.width(if (expanded) 280.dp else 96.dp).fillMaxHeight()
           )
           .testTag("tabs"),
       shape = shape,
