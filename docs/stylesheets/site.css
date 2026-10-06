@@ -1,0 +1,273 @@
+/* Match the app's Paper Tide and Harbor Night color roles. */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #365f7d;
+  --md-primary-fg-color--light: #5b6e79;
+  --md-primary-fg-color--dark: #233b50;
+  --md-primary-bg-color: #fffdf8;
+  --md-primary-bg-color--light: #f7f3eb;
+  --md-accent-fg-color: #765832;
+  --md-accent-fg-color--transparent: #d6ba8e33;
+  --md-default-bg-color: #f7f3eb;
+  --md-default-fg-color: #233b50;
+  --md-default-fg-color--light: #4b5d68;
+  --md-default-fg-color--lighter: #71818a;
+  --md-default-fg-color--lightest: #c4cdcf;
+  --md-typeset-a-color: #365f7d;
+  --md-code-bg-color: #ebe7df;
+  --md-code-fg-color: #233b50;
+  --storymile-surface: #fffdf8;
+  --storymile-outline: #c4cdcf;
+  --storymile-selection: #dce8ee;
+  --storymile-selection-text: #233b50;
+  --storymile-shadow: #233b5014;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-hue: 207;
+  --md-primary-fg-color: #182f40;
+  --md-primary-fg-color--light: #294c63;
+  --md-primary-fg-color--dark: #0a1924;
+  --md-primary-bg-color: #f4efe5;
+  --md-primary-bg-color--light: #afbfca;
+  --md-accent-fg-color: #e4c79d;
+  --md-accent-fg-color--transparent: #e4c79d33;
+  --md-default-bg-color: #0f202d;
+  --md-default-fg-color: #f4efe5;
+  --md-default-fg-color--light: #afbfca;
+  --md-default-fg-color--lighter: #899ca9;
+  --md-default-fg-color--lightest: #405664;
+  --md-typeset-a-color: #acc9dc;
+  --md-code-bg-color: #203748;
+  --md-code-fg-color: #f4efe5;
+  --storymile-surface: #182f40;
+  --storymile-outline: #405664;
+  --storymile-selection: #294c63;
+  --storymile-selection-text: #f4efe5;
+  --storymile-shadow: #00000033;
+}
+
+.md-grid {
+  max-width: 80rem;
+}
+
+body:has([data-app-preview]) .md-grid {
+  /* Fit the 1440px app, stage padding, border, and page margins. */
+  max-width: calc(1440px + 3.1rem + 2px + 1.6rem);
+}
+
+.md-header__button.md-logo img {
+  border-radius: 0.3rem;
+}
+
+.md-typeset h1 {
+  color: var(--md-default-fg-color);
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+
+.storymile-intro {
+  display: flow-root;
+  max-width: 48rem;
+  margin-bottom: 2rem;
+}
+
+.md-typeset .storymile-intro__icon {
+  float: left;
+  width: 8rem;
+  margin: 0 1.5rem 1rem 0;
+  border-radius: 1.25rem;
+}
+
+.app-preview {
+  margin-top: 1.5rem;
+  border: 1px solid var(--storymile-outline);
+  border-radius: 0.9rem;
+  background: var(--storymile-surface);
+  overflow: hidden;
+}
+
+.app-preview__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid var(--storymile-outline);
+}
+
+.app-preview__presets {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.2rem;
+  border: 1px solid var(--storymile-outline);
+  border-radius: 0.6rem;
+}
+
+.app-preview__preset {
+  padding: 0.35rem 0.8rem;
+  border-radius: 0.4rem;
+  color: var(--md-default-fg-color);
+  font: inherit;
+  cursor: pointer;
+}
+
+.app-preview__preset[aria-pressed="true"] {
+  background: var(--storymile-selection);
+  color: var(--storymile-selection-text);
+}
+
+.app-preview__preset:hover {
+  background: var(--md-accent-fg-color--transparent);
+}
+
+.app-preview__size {
+  color: var(--md-default-fg-color--light);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.app-preview__open {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.app-preview__stage {
+  padding: 1.5rem 2rem 1.5rem 1.1rem;
+  background: var(--md-default-bg-color);
+}
+
+.app-preview__container {
+  position: relative;
+  width: min(480px, 100%);
+  height: 840px;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 0 1px var(--storymile-outline), 0 0.4rem 1.5rem var(--storymile-shadow);
+}
+
+.app-preview__frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: inherit;
+  background: var(--md-default-bg-color);
+}
+
+.app-preview__handle {
+  position: absolute;
+  top: calc(50% - 2.2rem);
+  right: -1.6rem;
+  display: flex;
+  width: 1.3rem;
+  height: 4.4rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--storymile-outline);
+  border-radius: 0.65rem;
+  background: var(--storymile-surface);
+  cursor: ew-resize;
+  touch-action: none;
+  user-select: none;
+}
+
+.app-preview__handle::after {
+  width: 0.15rem;
+  height: 1.2rem;
+  border-radius: 1rem;
+  background: var(--md-default-fg-color--lighter);
+  content: "";
+}
+
+.app-preview__handle:hover,
+.app-preview--resizing .app-preview__handle {
+  border-color: var(--md-typeset-a-color);
+  background: var(--storymile-selection);
+}
+
+.app-preview__preset:focus-visible,
+.app-preview__handle:focus-visible {
+  outline: 3px solid var(--md-typeset-a-color);
+  outline-offset: 3px;
+}
+
+.app-preview--resizing .app-preview__frame {
+  pointer-events: none;
+}
+
+.app-preview--resizing {
+  user-select: none;
+}
+
+.md-typeset .mermaid {
+  padding: 1rem;
+  border: 1px solid var(--storymile-outline);
+  border-radius: 0.75rem;
+  background: var(--storymile-surface);
+  overflow-x: auto;
+  text-align: center;
+}
+
+body:has(.design-research-frame) {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body:has(.design-research-frame) .md-header {
+  flex-shrink: 0;
+}
+
+body:has(.design-research-frame) .md-container,
+body:has(.design-research-frame) .md-main,
+body:has(.design-research-frame) .md-main__inner {
+  flex: 1;
+  min-height: 0;
+}
+
+body:has(.design-research-frame) .md-main {
+  display: flex;
+}
+
+body:has(.design-research-frame) .md-main__inner {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  margin: 0;
+}
+
+body:has(.design-research-frame) .md-top {
+  display: none;
+}
+
+.design-research-content {
+  display: flex;
+  min-height: 0;
+}
+
+.design-research-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--storymile-surface);
+}
+
+@media (max-width: 600px) {
+  .md-typeset .storymile-intro__icon {
+    width: 5rem;
+    margin-right: 1rem;
+  }
+
+  .app-preview__toolbar {
+    padding: 0.6rem;
+    gap: 0.5rem;
+  }
+
+  .app-preview__stage {
+    padding-left: 0.6rem;
+    padding-right: 1.9rem;
+  }
+}

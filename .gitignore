@@ -6,6 +6,15 @@ build/
 local.properties
 /reports/
 
+# Documentation builds
+/.venv-docs/
+/site/
+/docs/assets/
+/docs/web/
+/docs/design-research/gallery/
+/docs/design-research/images/
+__pycache__/
+
 # Web smoke tests
 /app/web/e2e/node_modules/
 /app/web/e2e/playwright-report/
@@ -28,4 +37,3 @@ local.properties
 
 # Steve Jobs
 .DS_Store
-

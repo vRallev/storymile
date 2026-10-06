@@ -21,8 +21,12 @@ Use the matching skill for detailed guidance:
 - [Testing](.agents/skills/app-platform-testing/SKILL.md): fakes, unit tests, robots, and integration tests.
 
 The current presenter tree is documented in [Presenter hierarchy](docs/presenter-hierarchy.md).
-Update `docs/presenter-hierarchy.md` whenever you create a presenter. Also update it when presenter
-composition, navigation, or template slots change.
+When you create a presenter, update `docs/presenter-hierarchy.md`.
+When presenter composition, navigation, or template slots change, update the hierarchy page.
+Keep the diagram and source links current.
+If phone and tablet layouts use different presenter trees, document the conditional branches.
+Keep the page focused on presenter composition and rendering roles.
+Use source links for model details and layout rules.
 
 ## Development
 
@@ -99,6 +103,33 @@ open app/ios/iosApp.xcodeproj
 In Xcode, select the `iosApp` scheme and an ARM64 iOS simulator. Device builds need your
 team ID in `app/ios/Configuration/Config.xcconfig`.
 
+### Documentation site
+
+The [Storymile site](https://vrallev.github.io/storymile/) uses Material for MkDocs.
+Home shows the project overview and live web app.
+The other tabs show the presenter hierarchy and design research.
+Keep `docs/presenter-hierarchy.md` as the source for the hierarchy tab.
+The build checks repository source links and converts them to GitHub links.
+
+Use Python 3.10 or newer. Create the documentation environment and install its dependencies:
+
+```sh
+python3 -m venv .venv-docs
+.venv-docs/bin/python -m pip install -r requirements-docs.txt
+```
+
+Build the production web app. Then build and preview the site:
+
+```sh
+./gradlew --quiet -Pstorymile.enableWasm=true --no-isolated-projects :app:web:wasmJsBrowserDistribution
+.venv-docs/bin/python scripts/docs/build.py
+.venv-docs/bin/python scripts/docs/serve.py
+```
+
+Open `http://127.0.0.1:4174/storymile/`. Rebuild the site after changing its source files.
+The build copies the web distribution, existing app icons, and design gallery into generated
+directories under `docs/`. Do not edit those copies. Edit `design-research/` to update the gallery.
+
 ## Verify
 
 Run `./scripts/ktfmt.sh` to format tracked Kotlin files, including `buildSrc`. CI checks formatting
@@ -172,6 +203,15 @@ and [canonical layouts](https://developer.android.com/develop/adaptive-apps/guid
 Every push to `main` runs CI without canceling earlier runs. New PR pushes cancel older
 runs for that PR.
 
+The `build-mkdocs` job uses the tested distribution from `build-web-release`.
+It builds the complete site with strict link validation and runs its browser checks.
+Pull requests upload the site as the `wiki` artifact for review.
+The `CI passed` check requires the documentation build to pass.
+
+After all CI checks pass on `main`, `deploy-mkdocs` publishes the site to GitHub Pages.
+Manual runs can deploy only from `main`. Deployments use the `github-pages` environment and run
+one at a time. In repository settings, select **GitHub Actions** as the Pages source.
+
 The optional `GRADLE_ENCRYPTION_KEY` repository secret enables Gradle configuration-cache caching.
 
 The source code is public. Store secrets and sensitive keys in GitHub Actions secrets;
@@ -192,6 +232,10 @@ of the release APK, signed with the debug key and shrunk by R8 without obfuscati
 
 Use the `build-web-release` job in [CI](.github/workflows/ci.yml) as the source of truth
 for setup and test commands.
+
+The `build-mkdocs` job checks the published project path, app embedding, preview presets,
+resizing, themes, Mermaid diagrams, and source links. Use its steps as the source of truth
+for documentation browser checks.
 
 #### iOS
 

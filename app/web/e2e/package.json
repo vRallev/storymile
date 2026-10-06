@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "playwright test",
+    "test:docs": "playwright test --config playwright.docs.config.mjs",
     "update-snapshots": "playwright test --update-snapshots"
   },
   "engines": {
