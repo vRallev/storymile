@@ -367,9 +367,7 @@ jobs:
     if: ${{ github.repository == 'vRallev/storymile' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs:
-      - build-mkdocs
-      - ci-passed
+    needs: build-mkdocs
     permissions:
       pages: write
       id-token: write

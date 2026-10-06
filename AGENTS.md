@@ -208,7 +208,7 @@ It builds the complete site with strict link validation and runs its browser che
 Pull requests upload the site as the `wiki` artifact for review.
 The `CI passed` check requires the documentation build to pass.
 
-After all CI checks pass on `main`, `deploy-mkdocs` publishes the site to GitHub Pages.
+After `build-mkdocs` passes on `main`, `deploy-mkdocs` publishes the site to GitHub Pages.
 Manual runs can deploy only from `main`. Deployments use the `github-pages` environment and run
 one at a time. In repository settings, select **GitHub Actions** as the Pages source.
 
