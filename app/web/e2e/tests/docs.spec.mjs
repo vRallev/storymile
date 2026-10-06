@@ -51,12 +51,15 @@ test('loads the embedded production app under the project path', async ({ page }
   const localAssetPaths = [];
   page.on('pageerror', error => errors.push(error.stack ?? error.message));
   page.on('requestfailed', request => {
+    if (new URL(request.url()).origin !== 'http://127.0.0.1:4174') return;
     errors.push(`${request.method()} ${request.url()}: ${request.failure()?.errorText}`);
   });
   page.on('response', response => {
-    if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`);
     const url = new URL(response.url());
-    if (url.origin === 'http://127.0.0.1:4174') localAssetPaths.push(url.pathname);
+    // Material's optional GitHub release metadata can return 404 for an unreleased app.
+    if (url.origin !== 'http://127.0.0.1:4174') return;
+    if (response.status() >= 400) errors.push(`${response.status()} ${url}`);
+    localAssetPaths.push(url.pathname);
   });
 
   try {
