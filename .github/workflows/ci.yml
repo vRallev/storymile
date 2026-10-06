@@ -45,6 +45,7 @@ jobs:
       - build-desktop
       - build-web-release
       - build-ios-release
+      - build-mkdocs
     steps:
       - name: Verify all jobs passed
         env:
@@ -299,6 +300,12 @@ jobs:
       - name: Verify Wasm app launch
         working-directory: app/web/e2e
         run: npm test
+      - name: Upload Wasm distribution
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-release
+          path: app/web/build/dist/wasmJs/productionExecutable/
+          if-no-files-found: error
       - name: Upload browser test results
         uses: actions/upload-artifact@v7
         if: ${{ failure() }}
@@ -307,6 +314,83 @@ jobs:
           path: |
             app/web/e2e/playwright-report/
             app/web/e2e/test-results/
+
+  build-mkdocs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    needs: build-web-release
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: web-release
+          path: app/web/build/dist/wasmJs/productionExecutable/
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements-docs.txt
+      - name: Install documentation dependencies
+        run: python3 -m pip install -r requirements-docs.txt
+      - name: Build documentation
+        run: python3 scripts/docs/build.py
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/web/e2e/package-lock.json
+      - name: Install browser tests
+        working-directory: app/web/e2e
+        run: npm ci
+      - name: Install Chromium
+        working-directory: app/web/e2e
+        run: npx playwright install --with-deps chromium
+      - name: Verify documentation and embedded app
+        working-directory: app/web/e2e
+        run: npm run test:docs
+      - name: Upload documentation site
+        uses: actions/upload-artifact@v7
+        with:
+          name: wiki
+          path: site/
+          if-no-files-found: error
+      - name: Upload documentation test results
+        uses: actions/upload-artifact@v7
+        if: ${{ failure() }}
+        with:
+          name: test-results-${{ github.job }}
+          path: |
+            app/web/e2e/playwright-report/
+            app/web/e2e/test-results/
+
+  deploy-mkdocs:
+    if: ${{ github.repository == 'vRallev/storymile' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs:
+      - build-mkdocs
+      - ci-passed
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/configure-pages@v6
+      - uses: actions/download-artifact@v8
+        with:
+          name: wiki
+          path: site/
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site/
+      - name: Deploy documentation
+        id: deployment
+        uses: actions/deploy-pages@v5
 
   build-ios-release:
     if: ${{ github.ref == 'refs/heads/main' }}

@@ -10,6 +10,9 @@ episodes in your library. Built with Kotlin Multiplatform and
 
 <br clear="left" />
 
+Try the web app and read the presenter hierarchy on the
+[Storymile site](https://vrallev.github.io/storymile/).
+
 ## Contributing
 
 See [AGENTS.md](AGENTS.md) for project structure, setup, and testing.

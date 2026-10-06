@@ -3,10 +3,32 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="light dark">
   <title>Storymile / Design research</title>
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const parentBody = window.frameElement?.ownerDocument.body;
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+      const updateTheme = () => {
+        const scheme = parentBody?.getAttribute('data-md-color-scheme');
+        root.dataset.theme = scheme === 'slate' ? 'dark'
+          : scheme === 'default' ? 'light'
+          : systemTheme.matches ? 'dark' : 'light';
+      };
+      updateTheme();
+      systemTheme.addEventListener('change', updateTheme);
+      if (parentBody) {
+        new MutationObserver(updateTheme).observe(parentBody, {
+          attributes: true,
+          attributeFilter: ['data-md-color-scheme'],
+        });
+      }
+    })();
+  </script>
   <style>
-    :root { color-scheme:light; --paper:#f7f3eb; --surface:#fffdf8; --ink:#233b50; --muted:#5b6e79; --line:#d7ddd9; --blue:#365f7d; --selected:#dce8ee; }
+    :root { color-scheme:light; --paper:#f7f3eb; --surface:#fffdf8; --ink:#233b50; --muted:#5b6e79; --line:#d7ddd9; --blue:#365f7d; --selected:#dce8ee; --tab-background:#233b50; --tab-text:#fffdf8; --image-outline:#233b501c; --backdrop:#0f202ddd; }
+    :root[data-theme="dark"] { color-scheme:dark; --paper:#0f202d; --surface:#182f40; --ink:#f4efe5; --muted:#afbfca; --line:#405664; --blue:#acc9dc; --selected:#294c63; --tab-background:#294c63; --tab-text:#f4efe5; --image-outline:#405664; --backdrop:#0a1924e8; }
     * { box-sizing:border-box; }
     [hidden] { display:none!important; }
     body { margin:0; background:var(--paper); color:var(--ink); font:14px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
@@ -18,11 +40,13 @@
     .masthead { position:sticky; top:0; z-index:10; background:var(--paper); border-bottom:1px solid var(--line); }
     .topline { min-height:62px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
     .brand { display:inline-flex; align-items:center; gap:9px; color:var(--ink); text-decoration:none; font-size:18px; font-weight:700; letter-spacing:-.4px; white-space:nowrap; }
-    .brand img { display:block; width:46px; height:34px; object-fit:contain; }
+    .brand img { display:block; width:46px; height:34px; object-fit:cover; }
+    .brand .brand-icon--dark,:root[data-theme="dark"] .brand .brand-icon--light { display:none; }
+    :root[data-theme="dark"] .brand .brand-icon--dark { display:block; }
     .brand span { font-size:14px; font-weight:400; color:var(--muted); letter-spacing:0; }
     .tabs { display:flex; gap:5px; }
     .tab,.control { border:1px solid transparent; border-radius:7px; padding:8px 13px; color:var(--muted); background:transparent; white-space:nowrap; }
-    .tab[aria-selected="true"] { background:var(--ink); color:var(--surface); }
+    .tab[aria-selected="true"] { background:var(--tab-background); color:var(--tab-text); }
     .filterbar { display:flex; align-items:center; flex-wrap:wrap; min-height:43px; gap:8px 20px; padding-bottom:9px; }
     .filter-group { display:flex; flex-wrap:wrap; align-items:center; gap:8px 20px; }
     .filter-group + .filter-group { padding-left:20px; border-left:1px solid var(--line); }
@@ -52,13 +76,13 @@
     .device-pair { display:grid; grid-template-columns:repeat(var(--theme-count),minmax(0,1fr)); align-items:center; gap:8px; min-width:0; }
     .screen { min-width:0; }
     .preview { display:flex; align-items:center; justify-content:center; height:var(--preview-height,50vh); }
-    .image-button { position:relative; display:block; width:calc(var(--preview-height,50vh)*var(--aspect-ratio)); height:var(--preview-height,50vh); flex-shrink:0; border:0; padding:0; background:var(--surface); box-shadow:0 0 0 1px #233b501c; }
+    .image-button { position:relative; display:block; width:calc(var(--preview-height,50vh)*var(--aspect-ratio)); height:var(--preview-height,50vh); flex-shrink:0; border:0; padding:0; background:var(--surface); box-shadow:0 0 0 1px var(--image-outline); }
     .image-button img { display:block; width:100%; height:100%; }
     .image-button:not([data-load-state="loaded"]) img,.image-stage img:not([data-load-state="loaded"]) { visibility:hidden; }
     .image-state { position:absolute; inset:0; display:grid; place-items:center; color:var(--muted); font-size:11px; }
     .image-button[data-load-state="loaded"] .image-state { display:none; }
     .image-button[data-load-state="error"] { background:var(--selected); }
-    .animated-preview { position:fixed; z-index:2; pointer-events:none; transform-origin:top left; box-shadow:0 0 0 1px #233b501c; will-change:transform,opacity; }
+    .animated-preview { position:fixed; z-index:2; pointer-events:none; transform-origin:top left; box-shadow:0 0 0 1px var(--image-outline); will-change:transform,opacity; }
     .screen-placeholder { height:var(--preview-height,50vh); }
     .pair-scroll,.flow-scroll { overflow-x:auto; padding:3px 3px 12px; }
     .pair { display:grid; grid-template-columns:var(--columns); gap:28px; width:max-content; margin:auto; align-items:start; }
@@ -69,7 +93,7 @@
     .footer { border-top:1px solid var(--line); padding:18px 0 26px; font-size:12px; }
     .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
     dialog { width:calc(100vw - 28px); height:calc(100dvh - 28px); max-width:1800px; max-height:none; padding:0; margin:auto; border:1px solid var(--line); border-radius:12px; background:var(--paper); color:var(--ink); overflow:hidden; }
-    dialog::backdrop { background:#0f202ddd; }
+    dialog::backdrop { background:var(--backdrop); }
     .viewer { display:flex; flex-direction:column; height:100%; }
     .viewer-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; flex-shrink:0; padding:12px 16px; border-bottom:1px solid var(--line); background:var(--surface); }
     .viewer-header h2 { font-size:15px; line-height:1.3; font-weight:600; }
@@ -95,7 +119,7 @@
   <header class="masthead">
     <div class="wrap">
       <div class="topline">
-        <a class="brand" href="#"><img src="boat-icon.png" alt="" width="46" height="34">Storymile <span>/ Design research</span></a>
+        <a class="brand" href="#"><img class="brand-icon--light" src="../images/icon-light.svg" alt="" width="46" height="34"><img class="brand-icon--dark" src="../images/icon-dark.svg" alt="" width="46" height="34">Storymile <span>/ Design research</span></a>
         <div class="tabs" role="tablist" aria-label="Design views">
           <button class="tab" id="tab-themes" role="tab" type="button" aria-selected="true" aria-controls="gallery" tabindex="0" data-view="themes">Themes</button>
           <button class="tab" id="tab-platforms" role="tab" type="button" aria-selected="false" aria-controls="gallery" tabindex="-1" data-view="platforms">Android / iOS</button>
