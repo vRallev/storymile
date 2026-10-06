@@ -270,6 +270,9 @@ docsHostTest('renders the presenter diagram, source links, and both documentatio
   await expect(diagram).toBeVisible();
 
   await page.setViewportSize({ width: 375, height: 812 });
+  // Reload to discard the delayed drawer reset from the earlier anchor navigation.
+  await page.reload();
+  await expect.poll(async () => (await diagram.boundingBox())?.height ?? 0).toBeGreaterThan(200);
   await page.locator('.md-header label[for="__drawer"]').click();
   await expect(page.locator('#__drawer')).toBeChecked();
   await page.locator('.md-sidebar--primary label.md-nav__link[for="__toc"]').click();
