@@ -7,6 +7,10 @@ storymile {
   enableMetro true
 }
 
+dependencies {
+  commonMainImplementation libs.compose.multiplatform.ui
+}
+
 // Compose shares its system-theme API across the Skiko targets.
 kotlin {
   applyDefaultHierarchyTemplate { hierarchy ->
