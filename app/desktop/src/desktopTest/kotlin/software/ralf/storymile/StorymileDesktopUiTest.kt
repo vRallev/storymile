@@ -2,6 +2,7 @@
 
 package software.ralf.storymile
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toPixelMap
@@ -39,6 +40,31 @@ import software.ralf.storymile.tabs.TabsPresenter
 
 class StorymileDesktopUiTest {
   private val uiTestRule = DesktopUiTestRule()
+
+  @Test
+  fun `logo follows app theme changes without losing the selected tab`() {
+    val darkTheme = mutableStateOf<Boolean?>(false)
+    uiTestRule.runRobotTest(windowSize = DesktopWindowSizes.tablet, darkTheme = darkTheme) {
+      composeRobot<AppShellRobot> {
+        seeBranding(visible = true)
+        selectTab(TabsPresenter.Tab.DOWNLOADS)
+      }
+      val logoColor = {
+        val pixels = onNodeWithTag("storymile-logo").captureToImage().toPixelMap()
+        // The center is opaque, so changes in the surface color cannot affect this pixel.
+        pixels[pixels.width / 2, pixels.height / 2]
+      }
+      val lightLogo = logoColor()
+
+      runOnIdle { darkTheme.value = true }
+      assertThat(logoColor()).isNotEqualTo(lightLogo)
+      composeRobot<AppShellRobot> { seeSelectedTab(TabsPresenter.Tab.DOWNLOADS) }
+
+      runOnIdle { darkTheme.value = false }
+      assertThat(logoColor()).isEqualTo(lightLogo)
+      composeRobot<AppShellRobot> { seeSelectedTab(TabsPresenter.Tab.DOWNLOADS) }
+    }
+  }
 
   @Test
   fun `tabs select content in bottom rail and expanded navigation`() {

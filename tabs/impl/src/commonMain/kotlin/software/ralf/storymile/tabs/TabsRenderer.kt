@@ -36,7 +36,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
@@ -48,8 +47,7 @@ import software.ralf.storymile.tabs.impl.generated.resources.downloads
 import software.ralf.storymile.tabs.impl.generated.resources.home
 import software.ralf.storymile.tabs.impl.generated.resources.library
 import software.ralf.storymile.tabs.impl.generated.resources.storymile
-import software.ralf.storymile.tabs.impl.generated.resources.storymile_logo_dark
-import software.ralf.storymile.tabs.impl.generated.resources.storymile_logo_light
+import software.ralf.storymile.tabs.impl.generated.resources.storymile_logo
 import software.ralf.storymile.templates.LocalTabPlacement
 import software.ralf.storymile.templates.TabPlacement
 import software.ralf.storymile.theme.AppTheme
@@ -128,15 +126,9 @@ class TabsRenderer : ComposeRenderer<TabsPresenter.Model>() {
 
   @Composable
   private fun Brand(expanded: Boolean) {
-    val logo =
-      if (AppTheme.colorScheme.surfaceContainer.luminance() < 0.5f) {
-        Res.drawable.storymile_logo_dark
-      } else {
-        Res.drawable.storymile_logo_light
-      }
     val content: @Composable () -> Unit = {
       Image(
-        painter = painterResource(logo),
+        painter = painterResource(Res.drawable.storymile_logo),
         contentDescription = null,
         modifier = Modifier.size(80.dp).testTag("storymile-logo"),
       )

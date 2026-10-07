@@ -80,6 +80,7 @@ import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.StorymileTheme
+import software.ralf.storymile.theme.ThemeEnvironment
 import software.ralf.storymile.theme.appLayerShadow
 
 /**
@@ -93,6 +94,7 @@ import software.ralf.storymile.theme.appLayerShadow
 class AppTemplateRenderer(
   private val backGestureDispatcherPresenter: BackGestureDispatcherPresenter,
   private val screenSizeProvider: DefaultScreenSizeProvider,
+  private val themeEnvironment: ThemeEnvironment,
 ) : ComposeRenderer<AppTemplate>() {
   @Composable
   override fun Compose(model: AppTemplate, modifier: Modifier) {
@@ -100,7 +102,7 @@ class AppTemplateRenderer(
     ReportScreenSize()
 
     CompositionLocalProvider(LocalScreenSize provides screenSize) {
-      StorymileTheme {
+      StorymileTheme(environment = themeEnvironment) {
         Surface(
           modifier = modifier.fillMaxSize(),
           color = AppTheme.colorScheme.background,

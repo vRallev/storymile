@@ -35,17 +35,20 @@ private val storymileTypographyLarge =
 
 /**
  * Applies Paper Tide or Harbor Night around [content], using [LocalDarkThemeOverride] or the system
- * appearance by default.
+ * appearance by default. Theme-qualified Compose resources follow the same appearance.
  */
 @Composable
 fun StorymileTheme(
+  environment: ThemeEnvironment,
   darkTheme: Boolean = LocalDarkThemeOverride.current ?: isSystemInDarkTheme(),
   content: @Composable () -> Unit,
 ) {
-  MaterialTheme(
-    colorScheme =
-      if (darkTheme) StorymileColorSchemes.harborNight else StorymileColorSchemes.paperTide,
-    typography = storymileTypography,
-    content = content,
-  )
+  environment.Provide(darkTheme) {
+    MaterialTheme(
+      colorScheme =
+        if (darkTheme) StorymileColorSchemes.harborNight else StorymileColorSchemes.paperTide,
+      typography = storymileTypography,
+      content = content,
+    )
+  }
 }

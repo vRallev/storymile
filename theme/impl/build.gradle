@@ -1,0 +1,21 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  enableComposeUi true
+  enableMetro true
+}
+
+// Compose shares its system-theme API across the Skiko targets.
+kotlin {
+  applyDefaultHierarchyTemplate { hierarchy ->
+    hierarchy.common { common ->
+      common.group('skiko') { skiko ->
+        skiko.withJvm()
+        skiko.withIos()
+        skiko.withWasmJs()
+      }
+    }
+  }
+}

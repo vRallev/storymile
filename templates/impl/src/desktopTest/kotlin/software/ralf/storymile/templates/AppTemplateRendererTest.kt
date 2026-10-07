@@ -63,6 +63,7 @@ import software.ralf.app.platform.renderer.RendererFactory
 import software.ralf.storymile.screen.DefaultScreenSizeProvider
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.screen.ScreenSizeProvider
+import software.ralf.storymile.theme.ThemeEnvironment
 
 class AppTemplateRendererTest {
   @Test
@@ -314,6 +315,12 @@ class AppTemplateRendererTest {
       AppTemplateRenderer(
         backGestureDispatcher,
         mutableScreenSizeProvider,
+        object : ThemeEnvironment {
+          @Composable
+          override fun Provide(darkTheme: Boolean, content: @Composable () -> Unit) {
+            content()
+          }
+        },
       )
     private val slotRenderer = SlotRenderer()
 
