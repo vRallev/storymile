@@ -6,13 +6,18 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
@@ -23,24 +28,55 @@ import assertk.assertions.isEqualTo
 import dev.zacsweers.metro.AppScope
 import software.ralf.app.platform.inject.robot.ContributesRobot
 import software.ralf.app.platform.robot.ComposeRobot
+import software.ralf.storymile.tabs.TabsPresenter
 
 /** Checks the visible app containers through the production renderer graph. */
 @ContributesRobot(AppScope::class)
 class AppShellRobot : ComposeRobot() {
-  /** Checks that all three containers are visible and have no content. */
-  fun seeEmptyLayers() {
-    listOf("library", "tabs", "playback").forEach {
+  /** Checks the initial destination, navigation items, and playback container. */
+  fun seeAppLayers() {
+    listOf("tab-content", "tabs", "playback").forEach {
       compose.onNodeWithTag(it).assertIsDisplayed()
     }
-    listOf("library", "playback").forEach {
-      compose.onNodeWithTag(it).onChildren().assertCountEquals(0)
-    }
+    compose.onNodeWithTag("playback").onChildren().assertCountEquals(0)
     compose
       .onAllNodes(
         hasAnyAncestor(hasTestTag("tabs")) and
           SemanticsMatcher.keyIsDefined(SemanticsProperties.Selected)
       )
-      .assertCountEquals(0)
+      .assertCountEquals(3)
+    seeSelectedTab(TabsPresenter.Tab.HOME)
+  }
+
+  /** Chooses a destination through the visible navigation item. */
+  fun selectTab(tab: TabsPresenter.Tab) {
+    compose.onNodeWithTag("tab-${tab.name.lowercase()}").performClick()
+  }
+
+  /** Checks that exactly one navigation item is selected and its content is visible. */
+  fun seeSelectedTab(tab: TabsPresenter.Tab) {
+    TabsPresenter.Tab.entries.forEach {
+      val item = compose.onNodeWithTag("tab-${it.name.lowercase()}").assertIsDisplayed()
+      if (it == tab) item.assertIsSelected() else item.assertIsNotSelected()
+    }
+    val label = tab.name.lowercase().replaceFirstChar { it.titlecase() }
+    compose
+      .onNodeWithTag("selected-tab")
+      .assertIsDisplayed()
+      .assertTextEquals("$label tab selected")
+  }
+
+  /** Checks that side navigation includes the app's logo and title. */
+  fun seeBranding(visible: Boolean) {
+    val logo = compose.onNodeWithTag("storymile-logo")
+    val title = compose.onNodeWithText("Storymile")
+    if (visible) {
+      logo.assertIsDisplayed()
+      title.assertIsDisplayed()
+    } else {
+      logo.assertDoesNotExist()
+      title.assertDoesNotExist()
+    }
   }
 
   /** Drags the persistent playback bar to the expanded screen. */
@@ -73,8 +109,8 @@ class AppShellRobot : ComposeRobot() {
 
   /** Checks that playback starts below content and extends behind bottom tabs. */
   fun seeCompactLayout() {
-    seeEmptyLayers()
-    val content = compose.onNodeWithTag("library").getUnclippedBoundsInRoot()
+    seeAppLayers()
+    val content = compose.onNodeWithTag("tab-content").getUnclippedBoundsInRoot()
     val playback = compose.onNodeWithTag("playback").getUnclippedBoundsInRoot()
     val tabs = compose.onNodeWithTag("tabs").getUnclippedBoundsInRoot()
     assertThat(content.bottom).isEqualTo(playback.top)
@@ -86,9 +122,9 @@ class AppShellRobot : ComposeRobot() {
   }
 
   /** Checks the tabs width and that the tabs extend behind playback, which spans both columns. */
-  fun seeExpandedLayout(tabWidth: Dp = 96.dp) {
-    seeEmptyLayers()
-    val content = compose.onNodeWithTag("library").getUnclippedBoundsInRoot()
+  fun seeExpandedLayout(tabWidth: Dp = 80.dp) {
+    seeAppLayers()
+    val content = compose.onNodeWithTag("tab-content").getUnclippedBoundsInRoot()
     val playback = compose.onNodeWithTag("playback").getUnclippedBoundsInRoot()
     val tabs = compose.onNodeWithTag("tabs").getUnclippedBoundsInRoot()
     assertThat(tabs.right - tabs.left).isEqualTo(tabWidth)

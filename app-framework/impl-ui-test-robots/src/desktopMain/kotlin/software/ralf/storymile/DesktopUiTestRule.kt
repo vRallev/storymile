@@ -3,6 +3,8 @@
 package software.ralf.storymile
 
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
@@ -35,6 +37,15 @@ class DesktopUiTestRule {
     darkTheme: Boolean? = null,
     block: ComposeUiTest.() -> Unit,
   ) {
+    runRobotTest(windowSize, mutableStateOf(darkTheme), block)
+  }
+
+  /** Runs [block] at [windowSize] and reacts to changes in the app's [darkTheme] override. */
+  fun runRobotTest(
+    windowSize: DpSize,
+    darkTheme: State<Boolean?>,
+    block: ComposeUiTest.() -> Unit,
+  ) {
     val desktopApp = DesktopApp {
       createGraphFactory<TestDesktopAppGraph.Factory>().create(it)
     }
@@ -46,7 +57,7 @@ class DesktopUiTestRule {
         height = windowSize.height.value.roundToInt(),
       ) {
         setContent {
-          CompositionLocalProvider(LocalDarkThemeOverride provides darkTheme) {
+          CompositionLocalProvider(LocalDarkThemeOverride provides darkTheme.value) {
             desktopApp.renderTemplates()
           }
         }

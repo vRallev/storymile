@@ -1,0 +1,9 @@
+<resources>
+  <string name="home">Home</string>
+  <string name="library">Library</string>
+  <string name="downloads">Downloads</string>
+  <string name="storymile">Storymile</string>
+  <string name="home_selected">Home tab selected</string>
+  <string name="library_selected">Library tab selected</string>
+  <string name="downloads_selected">Downloads tab selected</string>
+</resources>

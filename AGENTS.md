@@ -177,6 +177,8 @@ Android Lint checks the app and shared KMP code.
 ## Design
 
 - Use Material 3 components and color roles from `AppTheme` in `:theme:public`.
+- Use the shared Storymile typography for text sizes. Set sizes in `StorymileTheme`; do not add
+  custom text components to enlarge standard Material components.
 - Preserve existing Material 3 components when changing UI. Prefer Material 3 components over
   custom components. Use supported Material 3 APIs to adjust styling and behavior.
 

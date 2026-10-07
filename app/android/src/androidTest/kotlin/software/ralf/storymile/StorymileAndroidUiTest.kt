@@ -10,9 +10,9 @@ class StorymileAndroidUiTest {
   @get:Rule val uiTestRule = AndroidUiTestRule()
 
   @Test
-  fun shows_empty_app_containers() = uiTestRule.runRobotTest {
-    waitUntilCatching("empty app containers displayed", timeout = 5.seconds) {
-      composeRobot<AppShellRobot> { seeEmptyLayers() }
+  fun shows_app_navigation_and_content() = uiTestRule.runRobotTest {
+    waitUntilCatching("app navigation and content displayed", timeout = 5.seconds) {
+      composeRobot<AppShellRobot> { seeAppLayers() }
     }
   }
 }

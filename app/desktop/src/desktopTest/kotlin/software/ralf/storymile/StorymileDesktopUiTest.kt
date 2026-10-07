@@ -2,6 +2,7 @@
 
 package software.ralf.storymile
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toPixelMap
@@ -35,12 +36,58 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.app.platform.robot.waitUntilCatching
+import software.ralf.storymile.tabs.TabsPresenter
 
 class StorymileDesktopUiTest {
   private val uiTestRule = DesktopUiTestRule()
 
   @Test
-  fun `phone shows empty content playback and bottom tabs`() {
+  fun `logo follows app theme changes without losing the selected tab`() {
+    val darkTheme = mutableStateOf<Boolean?>(false)
+    uiTestRule.runRobotTest(windowSize = DesktopWindowSizes.tablet, darkTheme = darkTheme) {
+      composeRobot<AppShellRobot> {
+        seeBranding(visible = true)
+        selectTab(TabsPresenter.Tab.DOWNLOADS)
+      }
+      val logoColor = {
+        val pixels = onNodeWithTag("storymile-logo").captureToImage().toPixelMap()
+        // The center is opaque, so changes in the surface color cannot affect this pixel.
+        pixels[pixels.width / 2, pixels.height / 2]
+      }
+      val lightLogo = logoColor()
+
+      runOnIdle { darkTheme.value = true }
+      assertThat(logoColor()).isNotEqualTo(lightLogo)
+      composeRobot<AppShellRobot> { seeSelectedTab(TabsPresenter.Tab.DOWNLOADS) }
+
+      runOnIdle { darkTheme.value = false }
+      assertThat(logoColor()).isEqualTo(lightLogo)
+      composeRobot<AppShellRobot> { seeSelectedTab(TabsPresenter.Tab.DOWNLOADS) }
+    }
+  }
+
+  @Test
+  fun `tabs select content in bottom rail and expanded navigation`() {
+    listOf(DesktopWindowSizes.phone, DesktopWindowSizes.tablet, DpSize(1440.dp, 900.dp)).forEach {
+      size ->
+      listOf(false, true).forEach { darkTheme ->
+        uiTestRule.runRobotTest(windowSize = size, darkTheme = darkTheme) {
+          composeRobot<AppShellRobot> {
+            seeAppLayers()
+            seeBranding(visible = size != DesktopWindowSizes.phone)
+            listOf(TabsPresenter.Tab.DOWNLOADS, TabsPresenter.Tab.LIBRARY, TabsPresenter.Tab.HOME)
+              .forEach { tab ->
+                selectTab(tab)
+                seeSelectedTab(tab)
+              }
+          }
+        }
+      }
+    }
+  }
+
+  @Test
+  fun `phone shows selected tab content playback and bottom tabs`() {
     listOf(false, true).forEach { darkTheme ->
       uiTestRule.runPhoneRobotTest(darkTheme = darkTheme) {
         waitUntilCatching("compact app containers displayed", timeout = 3.seconds) {
@@ -52,7 +99,7 @@ class StorymileDesktopUiTest {
   }
 
   @Test
-  fun `tablet shows empty content side tabs and full width playback`() {
+  fun `tablet shows selected tab content side tabs and full width playback`() {
     listOf(false, true).forEach { darkTheme ->
       uiTestRule.runTabletRobotTest(darkTheme = darkTheme) {
         waitUntilCatching("expanded app containers displayed", timeout = 3.seconds) {
@@ -66,11 +113,11 @@ class StorymileDesktopUiTest {
   @Test
   fun `sidebar expansion follows width instead of height`() {
     listOf(
-        DpSize(1440.dp, 900.dp) to 280.dp,
-        DpSize(1199.dp, 900.dp) to 96.dp,
-        DpSize(1200.dp, 900.dp) to 280.dp,
-        DpSize(1200.dp, 500.dp) to 280.dp,
-        DpSize(900.dp, 1440.dp) to 96.dp,
+        DpSize(1440.dp, 900.dp) to 360.dp,
+        DpSize(1199.dp, 900.dp) to 80.dp,
+        DpSize(1200.dp, 900.dp) to 360.dp,
+        DpSize(1200.dp, 500.dp) to 360.dp,
+        DpSize(900.dp, 1440.dp) to 80.dp,
       )
       .forEach { (size, tabWidth) ->
         listOf(false, true).forEach { darkTheme ->
@@ -93,7 +140,7 @@ class StorymileDesktopUiTest {
         uiTestRule.runRobotTest(windowSize = size, darkTheme = darkTheme) {
           val phone = size == DesktopWindowSizes.phone
           composeRobot<AppShellRobot> {
-            seeEmptyLayers()
+            seeAppLayers()
             dragPlaybackUp()
           }
           waitUntilCatching("playback screen expanded", timeout = 3.seconds) {
@@ -105,7 +152,7 @@ class StorymileDesktopUiTest {
           waitUntilCatching("playback bar restored", timeout = 3.seconds) {
             composeRobot<AppShellRobot> {
               if (phone) seeCompactLayout()
-              else seeExpandedLayout(if (size.width >= 1200.dp) 280.dp else 96.dp)
+              else seeExpandedLayout(if (size.width >= 1200.dp) 360.dp else 80.dp)
             }
           }
         }
@@ -166,7 +213,7 @@ class StorymileDesktopUiTest {
           }
           waitUntilCatching("rounded playback bar restored", timeout = 3.seconds) {
             composeRobot<AppShellRobot> {
-              if (phone) seeCompactLayout() else seeExpandedLayout(tabWidth = 280.dp)
+              if (phone) seeCompactLayout() else seeExpandedLayout(tabWidth = 360.dp)
             }
             assertThat(playbackCornerGaps()).isEqualTo(originalCorners)
           }

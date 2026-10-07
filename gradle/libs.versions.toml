@@ -49,6 +49,7 @@ compose-gradle-plugin = { module = "org.jetbrains.compose:compose-gradle-plugin"
 compose-hot-reload-gradle-plugin = { module = "org.jetbrains.compose.hot-reload:org.jetbrains.compose.hot-reload.gradle.plugin", version.ref = "compose-hot-reload" }
 compose-material = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
 compose-material-icons = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose-material-icons" }
+compose-multiplatform-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
 compose-multiplatform-ui-test-junit4 = { module = "org.jetbrains.compose.ui:ui-test-junit4", version.ref = "compose-multiplatform" }
 compose-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
 compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose-android" }

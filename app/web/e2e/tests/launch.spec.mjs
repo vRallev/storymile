@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('launches into empty app containers', async ({ page }, testInfo) => {
+test('launches into app navigation and selected tab content', async ({ page }, testInfo) => {
   const errors = [];
   const consoleMessages = [];
   page.on('pageerror', error => errors.push(error.stack ?? error.message));
@@ -20,9 +20,8 @@ test('launches into empty app containers', async ({ page }, testInfo) => {
     await page.goto('/');
     await expect(page).toHaveTitle('Storymile');
     // Compose exposes test tags as accessibility DOM IDs; pixels are checked separately.
-    for (const tag of ['library', 'tabs', 'playback']) {
+    for (const tag of ['tab-content', 'selected-tab', 'tabs', 'tab-home', 'tab-library', 'tab-downloads', 'playback']) {
       await expect(page.locator(`[id="${tag}"]`)).toBeAttached();
-      await expect(page.locator(`[id="${tag}"]`)).toHaveText('');
     }
     await expect(page).toHaveScreenshot('empty-shell.png');
     expect(errors, 'Browser errors during startup').toEqual([]);
