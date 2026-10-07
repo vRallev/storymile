@@ -103,7 +103,7 @@ class AppShellRobot : ComposeRobot() {
   fun seePlaybackScreen(phone: Boolean) {
     val playback = compose.onNodeWithTag("playback-screen").assertIsDisplayed()
     assertThat(playback.getUnclippedBoundsInRoot())
-      .isEqualTo(compose.onRoot().getUnclippedBoundsInRoot())
+      .isEqualTo(compose.onNodeWithTag("app-shell").getUnclippedBoundsInRoot())
     if (phone) compose.onNodeWithTag("tabs").assertIsNotDisplayed()
   }
 

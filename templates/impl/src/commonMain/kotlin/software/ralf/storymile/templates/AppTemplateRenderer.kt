@@ -1,9 +1,8 @@
 package software.ralf.storymile.templates
 
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.indication
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -31,7 +29,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -39,10 +36,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -60,7 +67,6 @@ import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
 import dev.zacsweers.metro.Inject
@@ -171,13 +177,23 @@ class AppTemplateRenderer(
     }
 
     // Stable slot keys preserve renderer state when layers move or change drawing order.
-    SubcomposeLayout(Modifier.fillMaxSize().clipToBounds()) { constraints ->
+    SubcomposeLayout(Modifier.fillMaxSize().clipToBounds().testTag("app-shell")) { constraints ->
       val width = constraints.maxWidth
       val height = constraints.maxHeight
       val tabsAtStart = tabPlacement != TabPlacement.BOTTOM
+      val collapsedOffset = height - playbackPeekHeight.toPx()
+      val cornerRadius = { playbackCornerRadius(sheetState, collapsedOffset) }
       val tabs =
         subcompose("tabs") {
-            Box(propagateMinConstraints = true) {
+            Box(
+              modifier =
+                Modifier.clipBehindPlayback(
+                  sheetState,
+                  tabsAtStart && template.playback != null,
+                  cornerRadius,
+                ),
+              propagateMinConstraints = true,
+            ) {
               CompositionLocalProvider(LocalTabPlacement provides tabPlacement) {
                 template.tabs?.let { Render(it) }
               }
@@ -201,6 +217,8 @@ class AppTemplateRenderer(
               peekHeight = peekHeight,
               contentStart = if (tabsAtStart) tabs.width.toDp() else 0.dp,
               playbackBottomInset = playbackBottomInset,
+              collapsedOffset = collapsedOffset,
+              cornerRadius = cornerRadius,
               onPeekHeightChanged = { playbackPeekHeight = it },
             )
           }
@@ -246,24 +264,19 @@ class AppTemplateRenderer(
     peekHeight: Dp,
     contentStart: Dp,
     playbackBottomInset: Dp,
+    collapsedOffset: Float,
+    cornerRadius: () -> Dp,
     onPeekHeightChanged: (Dp) -> Unit,
   ) {
     val sheetState = scaffoldState.bottomSheetState
-    var height by remember { mutableIntStateOf(0) }
-    val collapsedOffset = with(LocalDensity.current) { height - peekHeight.toPx() }
-    val cornerRadius =
-      if (sheetState.hasExpandedState && collapsedOffset > 0f) {
-        // Follow the sheet during both a held drag and its settling animation.
-        24.dp * (sheetState.requireOffset() / collapsedOffset).coerceIn(0f, 1f)
-      } else 24.dp
-    val shape = RoundedCornerShape(topStart = cornerRadius, topEnd = cornerRadius)
     BottomSheetScaffold(
-      modifier = Modifier.fillMaxSize().onSizeChanged { height = it.height },
+      modifier = Modifier.fillMaxSize(),
       scaffoldState = scaffoldState,
       sheetPeekHeight = peekHeight,
       sheetMaxWidth = Dp.Unspecified,
-      sheetShape = shape,
-      sheetContainerColor = AppTheme.colorScheme.surface,
+      sheetShape = RectangleShape,
+      sheetContainerColor = Color.Transparent,
+      sheetContentColor = AppTheme.colorScheme.onSurface,
       sheetTonalElevation = 0.dp,
       sheetShadowElevation = 0.dp,
       sheetDragHandle = null,
@@ -277,7 +290,7 @@ class AppTemplateRenderer(
               expandedContent = template.expandedPlayback,
               bottomInset = playbackBottomInset,
               sheetState = sheetState,
-              shape = shape,
+              cornerRadius = cornerRadius,
               onPeekHeightChanged = onPeekHeightChanged,
             )
           }
@@ -288,6 +301,7 @@ class AppTemplateRenderer(
         Render(
           template.content,
           Modifier.fillMaxSize()
+            .clipBehindPlayback(sheetState, template.playback != null, cornerRadius)
             .padding(
               start = contentStart,
               bottom =
@@ -296,18 +310,44 @@ class AppTemplateRenderer(
             ),
         )
         if (template.playback != null) {
-          // Draw the theme's soft shadow behind Material's moving sheet.
+          // Only the top shadow is visible. Cache a short, fixed outline and move its layer.
           Spacer(
-            Modifier.fillMaxSize()
-              .offset {
-                IntOffset(
-                  0,
-                  scaffoldState.bottomSheetState.requireOffset().roundToInt(),
-                )
+            Modifier.fillMaxWidth()
+              .height(48.dp)
+              .graphicsLayer {
+                // Compose can query layer semantics before Material initializes the anchors.
+                translationY =
+                  if (sheetState.hasPartiallyExpandedState) sheetState.requireOffset()
+                  else collapsedOffset
+                alpha = cornerRadius() / 24.dp
+                compositingStrategy = CompositingStrategy.ModulateAlpha
               }
-              .appLayerShadow(shape),
+              .appLayerShadow(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
           )
         }
+      }
+    }
+  }
+
+  @OptIn(ExperimentalMaterial3Api::class)
+  private fun playbackCornerRadius(sheetState: SheetState, collapsedOffset: Float): Dp =
+    if (sheetState.hasExpandedState && collapsedOffset > 0f) {
+      24.dp * (sheetState.requireOffset() / collapsedOffset).coerceIn(0f, 1f)
+    } else 24.dp
+
+  @OptIn(ExperimentalMaterial3Api::class)
+  private fun Modifier.clipBehindPlayback(
+    sheetState: SheetState,
+    enabled: Boolean,
+    cornerRadius: () -> Dp,
+  ): Modifier {
+    if (!enabled) {
+      return this
+    }
+    return drawWithContent {
+      val bottom = sheetState.requireOffset().coerceAtLeast(0f) + cornerRadius().toPx()
+      if (bottom > 0f) {
+        clipRect(bottom = bottom) { this@drawWithContent.drawContent() }
       }
     }
   }
@@ -319,7 +359,7 @@ class AppTemplateRenderer(
     expandedContent: BaseModel?,
     bottomInset: Dp,
     sheetState: SheetState,
-    shape: Shape,
+    cornerRadius: () -> Dp,
     onPeekHeightChanged: (Dp) -> Unit,
   ) {
     val coroutineScope = rememberCoroutineScope()
@@ -330,7 +370,8 @@ class AppTemplateRenderer(
     val onExpand: () -> Unit = { coroutineScope.launch { sheetState.expand() } }
     val onCollapse: () -> Unit = { coroutineScope.launch { sheetState.partialExpand() } }
     val density = LocalDensity.current
-    val border = BorderStroke(1.dp, AppTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+    val surfaceColor = AppTheme.colorScheme.surface
+    val borderColor = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
     val interactionSource = remember { MutableInteractionSource() }
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(expanded) {
@@ -339,7 +380,31 @@ class AppTemplateRenderer(
     Box(
       Modifier.fillMaxSize()
         .testTag("playback-sheet")
-        .border(border, shape)
+        // Keep per-frame position reads out of composition and measurement.
+        .graphicsLayer {
+          val radius = cornerRadius()
+          shape = RoundedCornerShape(topStart = radius, topEnd = radius)
+          clip = true
+        }
+        .background(surfaceColor)
+        .drawWithCache {
+          val path = Path()
+          val stroke = Stroke(1.dp.toPx())
+          val inset = stroke.width / 2f
+          onDrawWithContent {
+            drawContent()
+            val radius = CornerRadius((cornerRadius().toPx() - inset).coerceAtLeast(0f))
+            path.reset()
+            path.addRoundRect(
+              RoundRect(
+                rect = Rect(inset, inset, size.width - inset, size.height - inset),
+                topLeft = radius,
+                topRight = radius,
+              ),
+            )
+            drawPath(path, borderColor, style = stroke)
+          }
+        }
         .indication(interactionSource, LocalIndication.current),
     ) {
       Box(

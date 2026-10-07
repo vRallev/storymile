@@ -42,6 +42,18 @@ class StorymileDesktopUiTest {
   private val uiTestRule = DesktopUiTestRule()
 
   @Test
+  fun `phone navigation keeps its shadow above the container bounds`() {
+    listOf(false, true).forEach { darkTheme ->
+      uiTestRule.runRobotTest(windowSize = DesktopWindowSizes.phone, darkTheme = darkTheme) {
+        val top = onNodeWithTag("tabs").fetchSemanticsNode().boundsInRoot.top.roundToInt()
+        val pixels = onRoot().captureToImage().toPixelMap()
+        val x = pixels.width / 2
+        assertThat(pixels[x, top - 2]).isNotEqualTo(pixels[x, top - 24])
+      }
+    }
+  }
+
+  @Test
   fun `logo follows app theme changes without losing the selected tab`() {
     val darkTheme = mutableStateOf<Boolean?>(false)
     uiTestRule.runRobotTest(windowSize = DesktopWindowSizes.tablet, darkTheme = darkTheme) {
