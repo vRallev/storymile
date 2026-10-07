@@ -10,6 +10,7 @@ storymile {
 
 dependencies {
   commonMainApi project(':library:impl-robots')
+  commonMainApi project(':tabs:public')
 
   androidMainImplementation libs.androidx.test.junit
   androidMainImplementation libs.androidx.test.rules
