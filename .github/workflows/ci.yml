@@ -54,7 +54,7 @@ jobs:
           printf '%s\n' "$NEEDS_RESULTS" | jq -e '
             all(to_entries[];
               .value.result == "success" or
-              (.key == "build-ios-release" and .value.result == "skipped" and env.GITHUB_REF != "refs/heads/main")
+              ((.key == "test-ios" or .key == "build-ios-release") and .value.result == "skipped" and env.GITHUB_REF != "refs/heads/main")
             )'
 
   check-build-src:
@@ -214,6 +214,7 @@ jobs:
         run: ./gradlew $GRADLE_ARGS -Pstorymile.enableWasm=true --no-isolated-projects wasmJsTest
 
   test-ios:
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: macos-latest
     timeout-minutes: 30
     steps:
