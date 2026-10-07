@@ -22,6 +22,7 @@ coroutines = "1.11.0"
 detekt = "2.0.0-alpha.6"
 jvm-buildsrc = "21"
 jvm-target = "11"
+kermit = "2.1.0"
 kotlin = "2.4.21"
 ktfmt = "0.64"
 metro = "1.4.5"
@@ -59,6 +60,7 @@ coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", ve
 coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 detekt-gradle-plugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 metro-gradle-plugin = { module = "dev.zacsweers.metro:gradle-plugin", version.ref = "metro" }
 sort-dependencies-gradle-plugin = { module = "com.squareup:sort-dependencies-gradle-plugin", version.ref = "sort-dependencies" }
