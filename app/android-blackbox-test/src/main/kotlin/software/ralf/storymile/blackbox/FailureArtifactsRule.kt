@@ -14,7 +14,7 @@ class FailureArtifactsRule : TestWatcher() {
       val screenshot = reporter.addNewFile("${description.methodName}.png", "Screenshot")
       check(device.takeScreenshot(screenshot)) { "Could not capture the failure screenshot" }
       device.dumpWindowHierarchy(
-        reporter.addNewFile("${description.methodName}.xml", "UI hierarchy")
+        reporter.addNewFile("${description.methodName}.xml", "UI hierarchy"),
       )
       reporter
         .addNewFile("${description.methodName}-logcat.txt", "Logcat")

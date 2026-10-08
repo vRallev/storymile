@@ -182,6 +182,6 @@ class TabsRenderer : ComposeRenderer<TabsPresenter.Model>() {
         TabsPresenter.Tab.HOME -> Res.string.home
         TabsPresenter.Tab.LIBRARY -> Res.string.library
         TabsPresenter.Tab.DOWNLOADS -> Res.string.downloads
-      }
+      },
     )
 }

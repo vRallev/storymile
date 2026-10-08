@@ -371,7 +371,7 @@ class AppTemplateRendererTest {
         modifier.then(slotSize).testTag(model.name).clickable {
           clicks++
           model.onClick()
-        }
+        },
       ) {
         val suffix = if (model.name == "tabs") " ${placement.name}" else ""
         Text("${model.name} $clicks$suffix")

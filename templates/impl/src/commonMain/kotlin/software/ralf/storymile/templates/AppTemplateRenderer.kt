@@ -164,7 +164,7 @@ class AppTemplateRenderer(
         sheetState.targetValue == SheetValue.Expanded
     CollapseWithoutExpandedContent(template, sheetState)
     backGestureDispatcherPresenter.PredictiveBackHandlerPresenter(
-      enabled = template.playback != null && expanded
+      enabled = template.playback != null && expanded,
     ) { progress ->
       progress.collect { /* Wait for the back gesture to complete. */ }
       coroutineScope.launch { sheetState.partialExpand() }
@@ -189,7 +189,7 @@ class AppTemplateRenderer(
               template.tabs == null -> Constraints.fixed(0, 0)
               tabsAtStart -> Constraints(maxWidth = width, minHeight = height, maxHeight = height)
               else -> Constraints(minWidth = width, maxWidth = width, maxHeight = height)
-            }
+            },
           )
       val playbackBottomInset = if (tabsAtStart) 0.dp else tabs.height.toDp()
       val peekHeight = if (template.playback == null) 0.dp else playbackPeekHeight
@@ -305,7 +305,7 @@ class AppTemplateRenderer(
                   scaffoldState.bottomSheetState.requireOffset().roundToInt(),
                 )
               }
-              .appLayerShadow(shape)
+              .appLayerShadow(shape),
           )
         }
       }
@@ -340,7 +340,7 @@ class AppTemplateRenderer(
       Modifier.fillMaxSize()
         .testTag("playback-sheet")
         .border(border, shape)
-        .indication(interactionSource, LocalIndication.current)
+        .indication(interactionSource, LocalIndication.current),
     ) {
       Box(
         Modifier.fillMaxWidth()
@@ -367,7 +367,7 @@ class AppTemplateRenderer(
                 true
               }
           }
-          .padding(bottom = bottomInset)
+          .padding(bottom = bottomInset),
       ) {
         Render(collapsedContent)
       }
@@ -388,7 +388,7 @@ class AppTemplateRenderer(
                 onCollapse()
                 true
               }
-            }
+            },
         ) {
           Render(expandedContent, Modifier.fillMaxSize())
         }
