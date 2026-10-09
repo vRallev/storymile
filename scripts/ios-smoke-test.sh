@@ -44,8 +44,8 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 
 xcrun simctl bootstatus "$SIMULATOR_ID" -b
-export GRADLE_ARGS="${GRADLE_ARGS:-} --quiet"
-xcodebuild -quiet \
+export GRADLE_ARGS="${GRADLE_ARGS:-} --console=plain"
+xcodebuild \
   -project app/ios/iosApp.xcodeproj \
   -scheme iosApp \
   -configuration Release \
