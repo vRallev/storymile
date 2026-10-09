@@ -74,6 +74,11 @@ maintenance cost. Prefer meaningful logic, edge cases, and regressions. Skip tri
 wrappers, dependency behavior, and tests that mirror the implementation. Coverage
 percentage is not a goal.
 
+If the class under test has an interface, test its documented API through an
+interface-typed instance by default. Follow the
+[unit-test guidance](.agents/skills/app-platform-testing/SKILL.md#unit-tests) for the
+full rules and the presenter-model exception.
+
 ### Icons
 
 After changing `images/icon.png`, run `./scripts/app-icon/generate-icons.sh` on macOS to update

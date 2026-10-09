@@ -46,13 +46,25 @@ class FakeLocationProvider(
 
 Construct the unit directly with real values and fakes. Drive its public inputs and assert its public outputs instead of private calls or collaborator call order.
 
+If the class under test implements an interface, use only that interface's API. Verify the behavior documented by the interface. Declare the interface type when you construct the implementation:
+
+```kotlin
+val abc: Abc = AbcImpl()
+```
+
+Keep this type throughout the test. Do not cast the instance to its implementation. Do not assert implementation-only members or model types. If a test needs a specific behavior, define it in the interface API or its KDoc. Expose only the contract needed by callers.
+
+This rule applies only to classes with an interface. Do not add redundant interfaces for tests. A class that stays in an `:impl` module and has no API in a `:public` module can be tested directly. Keeping the API surface small takes priority.
+
+For renderer-only presenter model fields, see the [presenter exception](../app-platform-presenters/SKILL.md#tests).
+
 Use `runTest` for coroutine code and its scheduler for delays. Use Turbine when a `Flow` changes over time. Do not use wall-clock sleeps.
 
 ```kotlin
 @Test
 fun routeChangesWithLocation() = runTest {
   val locations = FakeLocationProvider(start)
-  val repository = RoutingRepository(locations)
+  val repository: RoutingRepository = RoutingRepositoryImpl(locations)
 
   repository.route.test {
     assertThat(awaitItem()).isEqualTo(startRoute)
@@ -68,7 +80,8 @@ For `ComposePresenter`, pass the current `TestScope` to the App Platform `test` 
 ```kotlin
 @Test
 fun incrementUpdatesTheModel() = runTest {
-  CounterPresenter().test(this) {
+  val presenter: CounterPresenter = CounterPresenterImpl()
+  presenter.test(this) {
     val initial = awaitItem()
     assertThat(initial.count).isEqualTo(0)
 
