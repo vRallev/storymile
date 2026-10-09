@@ -279,11 +279,14 @@ The presenter option does not set Android's `isReturnDefaultValues`. Configure i
 
 Prefer `commonTest`, fakes, and fast, deterministic dependencies. Call `runTest` directly and pass its scope to `presenter.test`:
 
+When the presenter has an interface, declare the instance with that interface type. Test only its API and documented behavior. Do not cast to the implementation or assert implementation-only model types. Follow the [unit-test guidance](../app-platform-testing/SKILL.md#unit-tests). Do not add an interface only to test an implementation-only presenter.
+
 ```kotlin
 class CounterPresenterTest {
   @Test
   fun incrementUpdatesTheModel() = runTest {
-    CounterPresenterImpl().test(this) {
+    val presenter: CounterPresenter = CounterPresenterImpl()
+    presenter.test(this) {
       val initial = awaitItem()
       assertEquals(0, initial.count)
       initial.onIncrement()
