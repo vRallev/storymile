@@ -56,6 +56,8 @@ Keep this type throughout the test. Do not cast the instance to its implementati
 
 This rule applies only to classes with an interface. Do not add redundant interfaces for tests. A class that stays in an `:impl` module and has no API in a `:public` module can be tested directly. Keeping the API surface small takes priority.
 
+For renderer-only presenter model fields, see the [presenter exception](../app-platform-presenters/SKILL.md#tests).
+
 Use `runTest` for coroutine code and its scheduler for delays. Use Turbine when a `Flow` changes over time. Do not use wall-clock sleeps.
 
 ```kotlin

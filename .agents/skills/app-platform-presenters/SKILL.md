@@ -279,7 +279,9 @@ The presenter option does not set Android's `isReturnDefaultValues`. Configure i
 
 Prefer `commonTest`, fakes, and fast, deterministic dependencies. Call `runTest` directly and pass its scope to `presenter.test`:
 
-When the presenter has an interface, declare the instance with that interface type. Test only its API and documented behavior. Do not cast to the implementation or assert implementation-only model types. Follow the [unit-test guidance](../app-platform-testing/SKILL.md#unit-tests). Do not add an interface only to test an implementation-only presenter.
+For presenter contract tests, follow the [unit-test guidance](../app-platform-testing/SKILL.md#unit-tests). Do not add an interface only to test an implementation-only presenter.
+
+Exception: if a presenter returns a concrete model with renderer-only fields hidden by its public model interface, tests in `:impl` may verify those fields. Declare the concrete presenter type at construction and use a helper that preserves its model type. Do not downcast later. Document this behavior in the model's KDoc. Keep these fields out of the public API.
 
 ```kotlin
 class CounterPresenterTest {
