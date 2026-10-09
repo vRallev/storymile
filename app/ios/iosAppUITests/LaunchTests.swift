@@ -1,7 +1,7 @@
 import XCTest
 
 final class LaunchTests: XCTestCase {
-    func testLaunchShowsEmptyAppContainers() {
+    func testLaunchShowsHomeAndNavigation() {
         continueAfterFailure = false
         let app = XCUIApplication()
         addTeardownBlock { [self] in
@@ -21,12 +21,22 @@ final class LaunchTests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 15))
 
-        for tag in ["library", "tabs", "playback"] {
+        for tag in ["tab-content", "tabs", "playback"] {
             let container = app.descendants(matching: .any)[tag]
             XCTAssertTrue(container.waitForExistence(timeout: 15), "Missing \(tag) container")
             XCTAssertFalse(container.frame.isEmpty)
-            XCTAssertEqual(container.staticTexts.count, 0)
         }
+
+        let selectedTab = app.staticTexts["selected-tab"]
+        XCTAssertTrue(selectedTab.waitForExistence(timeout: 15))
+        XCTAssertEqual(selectedTab.label, "Home tab selected")
+
+        for tag in ["tab-home", "tab-library", "tab-downloads"] {
+            let tab = app.buttons[tag]
+            XCTAssertTrue(tab.waitForExistence(timeout: 15), "Missing \(tag) button")
+            XCTAssertTrue(tab.isHittable)
+        }
+        XCTAssertTrue(app.buttons["tab-home"].isSelected)
         XCTAssertEqual(app.state, .runningForeground)
     }
 }
