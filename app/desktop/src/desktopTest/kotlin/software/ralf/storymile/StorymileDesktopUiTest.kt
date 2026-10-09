@@ -9,13 +9,21 @@ import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpRect
@@ -81,6 +89,90 @@ class StorymileDesktopUiTest {
                 seeSelectedTab(tab)
               }
           }
+        }
+      }
+    }
+  }
+
+  @Test
+  fun `phone tab titles appear on long press without selecting the tab`() {
+    listOf(false, true).forEach { darkTheme ->
+      uiTestRule.runPhoneRobotTest(darkTheme = darkTheme) {
+        TabsPresenter.Tab.entries.forEach { tab ->
+          val title = tab.name.lowercase().replaceFirstChar { it.titlecase() }
+          val item = onNodeWithTag("tab-${tab.name.lowercase()}")
+          item.assertContentDescriptionEquals(title)
+          onNodeWithText(title).assertDoesNotExist()
+          item.performTouchInput { longClick() }
+          onNodeWithText(title).assertIsDisplayed()
+          onNodeWithTag("tab-home").assertIsSelected()
+          saveScreenshot(
+            "phone-tooltip-${tab.name.lowercase()}-${if (darkTheme) "dark" else "light"}",
+          )
+          composeRobot<AppShellRobot> {
+            selectTab(tab)
+            seeSelectedTab(tab)
+            selectTab(TabsPresenter.Tab.HOME)
+          }
+        }
+      }
+    }
+  }
+
+  @Test
+  fun `phone pill edges show the selected tab title on long press`() {
+    listOf(false, true).forEach { darkTheme ->
+      listOf(Offset(-0.3f, 0f), Offset(0.3f, 0f), Offset(0f, -0.25f), Offset(0f, 0.25f)).forEach {
+        edge ->
+        uiTestRule.runPhoneRobotTest(darkTheme = darkTheme) {
+          onNodeWithText("Home").assertDoesNotExist()
+          onNodeWithTag("tab-home").performTouchInput {
+            longClick(Offset(center.x + width * edge.x, center.y + height * edge.y))
+          }
+          onNodeWithText("Home").assertIsDisplayed()
+          onNodeWithTag("tab-home").assertIsSelected()
+          if (!darkTheme && edge.x < 0f) {
+            saveScreenshot("phone-tooltip-pill-home-light")
+          }
+        }
+      }
+    }
+  }
+
+  @Test
+  fun `phone tooltip waits for hover and cancels when the pointer leaves`() {
+    uiTestRule.runPhoneRobotTest {
+      mainClock.autoAdvance = false
+      try {
+        val item = onNodeWithTag("tab-library")
+        item.performMouseInput { moveTo(center) }
+        mainClock.advanceTimeBy(300)
+        onNodeWithText("Library").assertDoesNotExist()
+
+        item.performMouseInput { moveTo(Offset(center.x, -height.toFloat())) }
+        mainClock.advanceTimeBy(700)
+        onNodeWithText("Library").assertDoesNotExist()
+
+        item.performMouseInput { moveTo(center) }
+        mainClock.advanceTimeBy(300)
+        onNodeWithText("Library").assertDoesNotExist()
+        mainClock.advanceTimeBy(400)
+        onNodeWithText("Library").assertIsDisplayed()
+        onNodeWithTag("tab-home").assertIsSelected()
+      } finally {
+        mainClock.autoAdvance = true
+      }
+    }
+  }
+
+  @Test
+  fun `side navigation keeps tab titles without long press tooltips`() {
+    listOf(DesktopWindowSizes.tablet, DpSize(1440.dp, 900.dp)).forEach { size ->
+      uiTestRule.runRobotTest(windowSize = size) {
+        TabsPresenter.Tab.entries.forEach { tab ->
+          val title = tab.name.lowercase().replaceFirstChar { it.titlecase() }
+          onNodeWithTag("tab-${tab.name.lowercase()}").performTouchInput { longClick() }
+          onNodeWithText(title).assertIsDisplayed()
         }
       }
     }
@@ -343,6 +435,7 @@ class StorymileDesktopUiTest {
   private fun ComposeUiTest.saveScreenshot(name: String) {
     val file = File("build/reports/screenshots/empty-shell-$name.png")
     file.parentFile.mkdirs()
-    ImageIO.write(onRoot().captureToImage().toAwtImage(), "png", file)
+    val appRoot = onNode(isRoot() and hasAnyDescendant(hasTestTag("tabs")))
+    ImageIO.write(appRoot.captureToImage().toAwtImage(), "png", file)
   }
 }
