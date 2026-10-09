@@ -74,21 +74,10 @@ maintenance cost. Prefer meaningful logic, edge cases, and regressions. Skip tri
 wrappers, dependency behavior, and tests that mirror the implementation. Coverage
 percentage is not a goal.
 
-If the class under test implements an interface, test only that interface's API.
-Verify the behavior documented by the interface. Declare the interface type when you
-construct the class under test:
-
-```kotlin
-val abc: Abc = AbcImpl()
-```
-
-Do not cast the instance to its implementation later. Do not use implementation-only
-members or model types in assertions. If a test needs a specific behavior, define it in
-the interface API or its KDoc. Expose only the contract needed by callers.
-
-This rule applies only to classes with an interface. Do not add redundant interfaces
-for tests, such as for a class that stays in an `:impl` module and has no API in a
-`:public` module. Keeping the API surface small takes priority.
+If the class under test has an interface, test its documented API through an
+interface-typed instance by default. Follow the
+[unit-test guidance](.agents/skills/app-platform-testing/SKILL.md#unit-tests) for the
+full rules and the presenter-model exception.
 
 ### Icons
 
