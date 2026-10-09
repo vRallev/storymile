@@ -20,7 +20,7 @@ class StorymileReleaseTest {
     val context = InstrumentationRegistry.getInstrumentation().context
     val intent = requireNotNull(context.packageManager.getLaunchIntentForPackage(APP_PACKAGE))
     context.startActivity(
-      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
     )
 
     listOf("tab-content", "tabs", "playback").forEach { tag ->

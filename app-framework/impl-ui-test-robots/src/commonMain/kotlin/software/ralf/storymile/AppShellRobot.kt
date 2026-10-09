@@ -42,7 +42,7 @@ class AppShellRobot : ComposeRobot() {
     compose
       .onAllNodes(
         hasAnyAncestor(hasTestTag("tabs")) and
-          SemanticsMatcher.keyIsDefined(SemanticsProperties.Selected)
+          SemanticsMatcher.keyIsDefined(SemanticsProperties.Selected),
       )
       .assertCountEquals(3)
     seeSelectedTab(TabsPresenter.Tab.HOME)

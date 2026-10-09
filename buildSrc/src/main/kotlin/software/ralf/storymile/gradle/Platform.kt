@@ -57,7 +57,7 @@ internal sealed interface Platform {
       }
       project.kmpExtension.sourceSets.getByName("desktopTest").dependencies {
         implementation(
-          project.libs.findLibrary("compose-multiplatform-ui-test-junit4").get().get().toString()
+          project.libs.findLibrary("compose-multiplatform-ui-test-junit4").get().get().toString(),
         )
         implementation(desktopArtifact)
       }

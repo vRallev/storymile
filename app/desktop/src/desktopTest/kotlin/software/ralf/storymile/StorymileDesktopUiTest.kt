@@ -248,7 +248,7 @@ class StorymileDesktopUiTest {
             onNodeWithTag("tabs").assertIsDisplayed()
             assertTabTravel(originalTabs, originalPlaybackTop, phone)
             saveScreenshot(
-              "tabs-drag-${if (phone) "phone" else "tablet"}-${if (darkTheme) "dark" else "light"}"
+              "tabs-drag-${if (phone) "phone" else "tablet"}-${if (darkTheme) "dark" else "light"}",
             )
 
             onRoot().performTouchInput { moveBy(Offset(0f, 12f)) }

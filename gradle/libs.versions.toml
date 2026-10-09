@@ -23,7 +23,7 @@ detekt = "2.0.0-alpha.6"
 jvm-buildsrc = "21"
 jvm-target = "11"
 kotlin = "2.4.21"
-ktfmt = "0.64"
+ktfmt = "0.65"
 metro = "1.4.5"
 sort-dependencies = "0.21.0"
 
