@@ -10,11 +10,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -76,7 +79,7 @@ class TabsRenderer : ComposeRenderer<TabsPresenter.Model>() {
   @OptIn(ExperimentalMaterial3Api::class)
   override fun Compose(model: TabsPresenter.Model, modifier: Modifier) {
     val colors = AppTheme.colorScheme
-    val insets = WindowInsets(0, 0, 0, 0)
+    val insets = WindowInsets.safeDrawing
     val containerModifier = modifier.testTag("tabs")
     when (LocalTabPlacement.current) {
       TabPlacement.BOTTOM -> {
@@ -85,7 +88,7 @@ class TabsRenderer : ComposeRenderer<TabsPresenter.Model>() {
           modifier = containerModifier.fillMaxWidth().appLayerShadow(shape).clip(shape),
           containerColor = colors.surface,
           tonalElevation = 0.dp,
-          windowInsets = insets,
+          windowInsets = insets.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom),
         ) {
           TabsPresenter.Tab.entries.forEach { tab ->
             val title = tab.label()
@@ -127,7 +130,7 @@ class TabsRenderer : ComposeRenderer<TabsPresenter.Model>() {
         NavigationRail(
           modifier = containerModifier.fillMaxHeight(),
           containerColor = colors.surfaceContainer,
-          windowInsets = insets,
+          windowInsets = insets.only(WindowInsetsSides.Start + WindowInsetsSides.Vertical),
           header = { Brand(expanded = false) },
         ) {
           TabsPresenter.Tab.entries.forEach { tab ->
@@ -145,7 +148,7 @@ class TabsRenderer : ComposeRenderer<TabsPresenter.Model>() {
           modifier = containerModifier.fillMaxHeight(),
           drawerContainerColor = colors.surfaceContainer,
           drawerTonalElevation = 0.dp,
-          windowInsets = insets,
+          windowInsets = insets.only(WindowInsetsSides.Start + WindowInsetsSides.Vertical),
         ) {
           Column(Modifier.verticalScroll(rememberScrollState())) {
             Brand(expanded = true)

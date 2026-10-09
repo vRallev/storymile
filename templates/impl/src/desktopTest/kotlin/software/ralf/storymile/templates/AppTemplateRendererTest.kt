@@ -1,15 +1,20 @@
-@file:OptIn(ExperimentalTestApi::class)
+@file:OptIn(ExperimentalTestApi::class, InternalComposeUiApi::class)
 
 package software.ralf.storymile.templates
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -18,11 +23,15 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalPlatformWindowInsets
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.PlatformInsets
+import androidx.compose.ui.platform.PlatformWindowInsets
 import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsActions
@@ -66,6 +75,53 @@ import software.ralf.storymile.screen.ScreenSizeProvider
 import software.ralf.storymile.theme.ThemeEnvironment
 
 class AppTemplateRendererTest {
+  @Test
+  fun `phone surfaces reach the edges while controls avoid cutouts and system bars`() =
+    runDesktopComposeUiTest(width = 900, height = 400) {
+      val fixture =
+        Fixture(
+          insets = PlatformInsets(left = 32, top = 24, right = 16, bottom = 32),
+          forwardModifiers = false,
+        )
+      setContent { fixture.Render(template()) }
+
+      assertBounds("tabs", left = 0, top = 288, right = 900, bottom = 400)
+      assertBounds("playback", left = 0, top = 224, right = 900, bottom = 400)
+      assertBounds("content", left = 32, top = 24, right = 884, bottom = 224)
+      assertBounds("playback-content", left = 32, top = 224, right = 884, bottom = 288)
+
+      onNodeWithTag("playback").performSemanticsAction(SemanticsActions.Expand) { it() }
+      assertBounds("playback-screen", left = 0, top = 0, right = 900, bottom = 400)
+      assertBounds("expanded-content", left = 32, top = 24, right = 884, bottom = 368)
+
+      onNodeWithTag("playback-screen").performSemanticsAction(SemanticsActions.Collapse) { it() }
+      assertBounds("playback-content", left = 32, top = 224, right = 884, bottom = 288)
+    }
+
+  @Test
+  fun `side navigation consumes its inset once and optional chrome keeps content safe`() =
+    runDesktopComposeUiTest(width = 1000, height = 600) {
+      val fixture =
+        Fixture(
+          insets = PlatformInsets(left = 32, top = 24, right = 16, bottom = 32),
+          forwardModifiers = false,
+        )
+      var model by mutableStateOf(template().copy(overlay = SlotModel("overlay")))
+      setContent { fixture.Render(model) }
+
+      assertBounds("tabs", left = 0, top = 0, right = 128, bottom = 600)
+      assertBounds("content", left = 128, top = 24, right = 984, bottom = 504)
+      assertBounds("playback-content", left = 32, top = 504, right = 984, bottom = 568)
+      assertBounds("overlay", left = 32, top = 24, right = 984, bottom = 568)
+
+      runOnIdle { model = model.copy(tabs = null, overlay = null) }
+      assertBounds("content", left = 32, top = 24, right = 984, bottom = 504)
+      assertBounds("playback-content", left = 32, top = 504, right = 984, bottom = 568)
+
+      runOnIdle { model = model.copy(playback = null) }
+      assertBounds("content", left = 32, top = 24, right = 984, bottom = 568)
+    }
+
   @Test
   fun `phone layers bottom tabs over playback while reserving content space`() =
     runDesktopComposeUiTest(width = 400, height = 900) {
@@ -307,7 +363,15 @@ class AppTemplateRendererTest {
     override var containerDpSize by mutableStateOf(initialSize)
   }
 
-  private class Fixture(private val windowInfo: WindowInfo? = null) : RendererFactory {
+  private class Fixture(
+    private val windowInfo: WindowInfo? = null,
+    insets: PlatformInsets = PlatformInsets.Zero,
+    forwardModifiers: Boolean = true,
+  ) : RendererFactory {
+    private val windowInsets =
+      object : PlatformWindowInsets {
+        override val systemBars = insets
+      }
     private val mutableScreenSizeProvider = DefaultScreenSizeProvider()
     val screenSizeProvider: ScreenSizeProvider = mutableScreenSizeProvider
     val backGestureDispatcher = BackGestureDispatcherPresenter.createNewInstance()
@@ -322,7 +386,7 @@ class AppTemplateRendererTest {
           }
         },
       )
-    private val slotRenderer = SlotRenderer()
+    private val slotRenderer = SlotRenderer(forwardModifiers)
 
     @Composable
     fun Render(
@@ -334,6 +398,7 @@ class AppTemplateRendererTest {
         LocalRendererFactory provides this,
         LocalDensity provides Density(1f),
         LocalLayoutDirection provides layoutDirection,
+        LocalPlatformWindowInsets provides windowInsets,
         LocalWindowInfo provides (windowInfo ?: LocalWindowInfo.current),
       ) {
         Box(modifier) { templateRenderer.renderCompose(template) }
@@ -352,7 +417,7 @@ class AppTemplateRendererTest {
     ): Renderer<T> = createRenderer(modelType)
   }
 
-  private class SlotRenderer : ComposeRenderer<SlotModel>() {
+  private class SlotRenderer(private val forwardModifiers: Boolean) : ComposeRenderer<SlotModel>() {
     @Composable
     override fun Compose(model: SlotModel, modifier: Modifier) {
       var clicks by remember { mutableIntStateOf(0) }
@@ -368,13 +433,27 @@ class AppTemplateRendererTest {
           else -> Modifier.fillMaxSize()
         }
       Box(
-        modifier.then(slotSize).testTag(model.name).clickable {
+        (if (forwardModifiers) modifier else Modifier).testTag(model.name).clickable {
           clicks++
           model.onClick()
         },
       ) {
-        val suffix = if (model.name == "tabs") " ${placement.name}" else ""
-        Text("${model.name} $clicks$suffix")
+        val insets =
+          if (model.name == "tabs") {
+            WindowInsets.safeDrawing.only(
+              if (placement == TabPlacement.BOTTOM) {
+                WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
+              } else {
+                WindowInsetsSides.Start + WindowInsetsSides.Vertical
+              },
+            )
+          } else {
+            WindowInsets(0, 0, 0, 0)
+          }
+        Box(Modifier.windowInsetsPadding(insets).then(slotSize)) {
+          val suffix = if (model.name == "tabs") " ${placement.name}" else ""
+          Text("${model.name} $clicks$suffix")
+        }
       }
     }
   }

@@ -8,11 +8,15 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -141,7 +145,7 @@ class AppTemplateRenderer(
 
   @Composable
   private fun AdaptiveTemplateContent(template: AppTemplate.AdaptiveTemplate) {
-    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+    Box(Modifier.fillMaxSize()) {
       val screenSize = LocalScreenSize.current
       val tabPlacement =
         when {
@@ -151,7 +155,11 @@ class AppTemplateRenderer(
         }
 
       AppShell(template, tabPlacement)
-      template.overlay?.let { Render(it, Modifier.matchParentSize()) }
+      template.overlay?.let {
+        Box(Modifier.matchParentSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+          Render(it, Modifier.fillMaxSize())
+        }
+      }
     }
   }
 
@@ -297,18 +305,24 @@ class AppTemplateRenderer(
         }
       },
     ) { padding ->
+      val contentPadding =
+        PaddingValues(
+          start = contentStart,
+          bottom =
+            if (template.playback == null) playbackBottomInset
+            else padding.calculateBottomPadding(),
+        )
       Box(Modifier.fillMaxSize()) {
-        Render(
-          template.content,
+        // The Android renderer bridge does not forward modifiers to child renderers.
+        Box(
           Modifier.fillMaxSize()
             .clipBehindPlayback(sheetState, template.playback != null, cornerRadius)
-            .padding(
-              start = contentStart,
-              bottom =
-                if (template.playback == null) playbackBottomInset
-                else padding.calculateBottomPadding(),
-            ),
-        )
+            .padding(contentPadding)
+            .consumeWindowInsets(contentPadding)
+            .windowInsetsPadding(WindowInsets.safeDrawing),
+        ) {
+          Render(template.content, Modifier.fillMaxSize())
+        }
         if (template.playback != null) {
           // Only the top shadow is visible. Cache a short, fixed outline and move its layer.
           Spacer(
@@ -432,7 +446,11 @@ class AppTemplateRenderer(
                 true
               }
           }
-          .padding(bottom = bottomInset),
+          .padding(bottom = bottomInset)
+          .consumeWindowInsets(PaddingValues(bottom = bottomInset))
+          .windowInsetsPadding(
+            WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom),
+          ),
       ) {
         Render(collapsedContent)
       }
@@ -455,7 +473,9 @@ class AppTemplateRenderer(
               }
             },
         ) {
-          Render(expandedContent, Modifier.fillMaxSize())
+          Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+            Render(expandedContent, Modifier.fillMaxSize())
+          }
         }
       }
     }
