@@ -147,19 +147,23 @@ prepare_android() {
 }
 
 run_android() {
+  local build_type=Debug
   require_command python3
   prepare_android
-  ./gradlew --quiet :app:android:assembleDebug
-  python3 - "$ROOT_DIR" > "$WORK_DIR/apk" <<'PY'
+  choose "Which Android build should be installed?" 1 Debug Release
+  [[ "$SELECTION" == 0 ]] || build_type=Release
+  ./gradlew --quiet ":app:android:assemble$build_type"
+  python3 - "$ROOT_DIR" "$build_type" > "$WORK_DIR/apk" <<'PY'
 import json
 import pathlib
 import sys
 
-directory = pathlib.Path(sys.argv[1]) / "app/android/build/outputs/apk/debug"
+variant = sys.argv[2].lower()
+directory = pathlib.Path(sys.argv[1]) / "app/android/build/outputs/apk" / variant
 metadata = json.loads((directory / "output-metadata.json").read_text())
 apks = metadata["elements"]
 if len(apks) != 1:
-    sys.exit("Expected one debug APK; split APKs need a matching device configuration.")
+    sys.exit(f"Expected one {variant} APK; split APKs need a matching device configuration.")
 print(metadata["applicationId"])
 print(directory / apks[0]["outputFile"])
 PY
