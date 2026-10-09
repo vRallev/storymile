@@ -3,7 +3,11 @@ package software.ralf.storymile.tabs
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 
-/** Presents the app's tabs layer. */
+/**
+ * Presents the app's tabs layer.
+ *
+ * Starts with [Tab.HOME] selected.
+ */
 interface TabsPresenter : ComposePresenter<Unit, TabsPresenter.Model> {
   /** Destinations available in every adaptive navigation layout. */
   enum class Tab {
