@@ -122,7 +122,7 @@ class AppShellRobot : ComposeRobot() {
   }
 
   /** Checks the tabs width and that the tabs extend behind playback, which spans both columns. */
-  fun seeExpandedLayout(tabWidth: Dp = 80.dp) {
+  fun seeExpandedLayout(tabWidth: Dp = 112.dp) {
     seeAppLayers()
     val content = compose.onNodeWithTag("tab-content").getUnclippedBoundsInRoot()
     val playback = compose.onNodeWithTag("playback").getUnclippedBoundsInRoot()
