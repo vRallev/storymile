@@ -1,9 +1,7 @@
 package software.ralf.storymile.playback
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,9 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
@@ -37,8 +33,6 @@ import software.ralf.storymile.playback.impl.generated.resources.collapse_player
 import software.ralf.storymile.playback.impl.generated.resources.more_options
 import software.ralf.storymile.playback.impl.generated.resources.now_playing
 import software.ralf.storymile.playback.impl.generated.resources.profile
-import software.ralf.storymile.playback.impl.generated.resources.storymile
-import software.ralf.storymile.playback.impl.generated.resources.storymile_logo
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.templates.LocalCollapsePlayback
@@ -49,15 +43,11 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
   @Composable
   override fun Compose(model: PlaybackPresenterImpl.ScreenModel, modifier: Modifier) {
     val screenSize = LocalScreenSize.current
-    val desktop = screenSize.width >= 1200.dp
     val tablet = screenSize.width >= 600.dp
     Column(modifier.fillMaxSize()) {
-      if (desktop) {
-        BrandHeader()
-      }
       PlayerHeader(
         tablet = tablet,
-        showProfile = screenSize.category != ScreenSize.Category.PHONE && !desktop,
+        showProfile = screenSize.category != ScreenSize.Category.PHONE,
         landscape = screenSize.width > screenSize.height,
       )
       Spacer(Modifier.height(if (screenSize.height < 600.dp) 8.dp else 24.dp))
@@ -79,29 +69,6 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
             .testTag("playback-artwork-expanded"),
         )
       }
-    }
-  }
-
-  @Composable
-  private fun BrandHeader() {
-    Row(
-      modifier = Modifier.fillMaxWidth().height(80.dp).padding(horizontal = 24.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Image(
-        painter = painterResource(Res.drawable.storymile_logo),
-        contentDescription = null,
-        modifier = Modifier.size(48.dp),
-      )
-      Text(
-        text = stringResource(Res.string.storymile),
-        modifier = Modifier.padding(start = 8.dp),
-        style = AppTheme.typography.titleLarge,
-        fontFamily = FontFamily.Serif,
-        color = AppTheme.colorScheme.onSurface,
-      )
-      Spacer(Modifier.weight(1f))
-      ProfilePlaceholder()
     }
   }
 
