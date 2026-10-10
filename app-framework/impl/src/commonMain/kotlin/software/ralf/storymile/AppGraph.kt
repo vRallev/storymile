@@ -6,6 +6,7 @@ import dev.zacsweers.metro.ForScope
 import dev.zacsweers.metro.Multibinds
 import software.ralf.app.platform.scope.Scoped
 import software.ralf.app.platform.scope.coroutine.CoroutineScopeScoped
+import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.util.Platform
 
 /**
@@ -16,6 +17,9 @@ import software.ralf.storymile.util.Platform
 interface AppGraph {
   /** Platform used by the running application. */
   val platform: Platform
+
+  /** Preferences, files, and caches owned by the app scope. */
+  @ForScope(AppScope::class) val storage: Storage
 
   /** All [Scoped] instances that share the application lifecycle. */
   @ForScope(AppScope::class) @Multibinds(allowEmpty = true) val appScopedInstances: Set<Scoped>

@@ -1,0 +1,12 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  addPublicModuleDependencies true
+}
+
+dependencies {
+  commonMainApi libs.androidx.datastore.core
+  commonMainApi libs.androidx.datastore.preferences.core
+}

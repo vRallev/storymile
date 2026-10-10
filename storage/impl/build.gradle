@@ -1,0 +1,13 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  enableMetro true
+}
+
+dependencies {
+  commonMainImplementation project(':util:public')
+  commonMainImplementation libs.androidx.datastore.core.okio
+  commonMainImplementation libs.okio
+}
