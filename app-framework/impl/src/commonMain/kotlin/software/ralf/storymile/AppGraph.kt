@@ -6,6 +6,7 @@ import dev.zacsweers.metro.ForScope
 import dev.zacsweers.metro.Multibinds
 import software.ralf.app.platform.scope.Scoped
 import software.ralf.app.platform.scope.coroutine.CoroutineScopeScoped
+import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.util.Platform
 
@@ -15,6 +16,9 @@ import software.ralf.storymile.util.Platform
  */
 @ContributesTo(AppScope::class)
 interface AppGraph {
+  /** Data source selected for this application. */
+  val runtimeModeController: RuntimeModeController
+
   /** Platform used by the running application. */
   val platform: Platform
 

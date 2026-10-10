@@ -119,6 +119,32 @@ open app/ios/iosApp.xcodeproj
 In Xcode, select the `iosApp` scheme and an ARM64 iOS simulator. Device builds need your
 team ID in `app/ios/Configuration/Config.xcconfig`.
 
+### Fake mode
+
+Storymile has `Real` and `Fake` runtime modes. `Real` is the default.
+The shared `RuntimeModeController` restores and saves the selection asynchronously in the application scope.
+The app-scoped `Storage` uses the `runtime-mode` preferences store.
+An explicit selection at startup takes precedence over the saved mode.
+On Desktop, press Command/Ctrl+F to switch modes. The window title shows `(Fake)` in fake mode.
+To select a mode at launch, pass `--runtime-mode=fake` or `--runtime-mode=real`:
+
+```sh
+./gradlew :app:desktop:run --args="--runtime-mode=fake"
+```
+
+When the mode changes, the app root resets feature presenters and cancels their effects.
+Runtime mode does not recreate the application scope.
+Storymile does not have network services yet. When adding a service, put its real, fake,
+and delegating implementations in the owning `:impl` module.
+Inject `RuntimeModeController` from `:runtime-mode:public` into the delegating service.
+For each operation, call `modeImplementation(realImpl = { ... }, fakeImpl = { ... })`.
+Use lazy factories so fake mode does not create network clients.
+Keep test-only fakes in `:testing` modules.
+
+Integration-test graphs use an in-memory mode controller and start in fake mode.
+Use `RuntimeModeRobot` to change modes in a test. Tests do not change the saved application mode.
+If persistent storage is unavailable, the selected mode lasts only for that session.
+
 ### Documentation site
 
 The [Storymile site](https://vrallev.github.io/storymile/) uses Material for MkDocs.

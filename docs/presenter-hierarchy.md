@@ -13,9 +13,11 @@ flowchart TD
   TabContent["TabsPresenterImpl.ContentModel\nselected tab placeholder"]
   TabsPresenter["TabsPresenterImpl\ntabs"]
   PlaybackPresenter["PlaybackPresenterImpl\ncollapsed and expanded playback"]
+  RuntimeMode["RuntimeModeController\nReal or Fake"]
 
   TemplateProvider -->|launches| AppTemplatePresenter
   AppTemplatePresenter --> AppRootPresenter
+  RuntimeMode -.->|resets feature presenters| AppRootPresenter
   AppRootPresenter --> TabsPresenter
   TabsPresenter -->|content model| TabContent
   AppRootPresenter --> PlaybackPresenter
@@ -38,6 +40,11 @@ It starts with Home.
 shows only the selected tab's name until feature screens are added.
 The app root places these models in the content, navigation, and playback slots of
 [AppTemplate](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/AppTemplate.kt).
+
+The root observes
+[RuntimeModeController](../runtime-mode/public/src/commonMain/kotlin/software/ralf/storymile/runtimemode/RuntimeModeController.kt).
+When the mode changes, it creates new feature presenters and resets their Compose state.
+It cancels the old presenters' effects. The application scope stays active.
 
 ## Adaptive rendering
 

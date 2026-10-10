@@ -1,0 +1,12 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  enableMetro true
+}
+
+dependencies {
+  commonMainImplementation project(':logging:public')
+  commonMainImplementation project(':storage:public')
+}
