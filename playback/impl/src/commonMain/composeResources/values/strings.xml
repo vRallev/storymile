@@ -1,0 +1,8 @@
+<resources>
+  <string name="now_playing">Now playing</string>
+  <string name="collapse_player">Collapse player</string>
+  <string name="more_options">More options</string>
+  <string name="profile">Profile</string>
+  <string name="storymile">Storymile</string>
+  <string name="preview_artwork">The Quiet Current cover</string>
+</resources>

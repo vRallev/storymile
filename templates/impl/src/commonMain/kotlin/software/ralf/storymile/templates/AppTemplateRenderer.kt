@@ -474,7 +474,9 @@ class AppTemplateRenderer(
             },
         ) {
           Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-            Render(expandedContent, Modifier.fillMaxSize())
+            CompositionLocalProvider(LocalCollapsePlayback provides onCollapse) {
+              Render(expandedContent, Modifier.fillMaxSize())
+            }
           }
         }
       }

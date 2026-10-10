@@ -288,6 +288,84 @@ class StorymileDesktopUiTest {
   }
 
   @Test
+  fun `player header collapses to the selected destination on phone tablet and desktop`() {
+    listOf(DesktopWindowSizes.phone, DesktopWindowSizes.tablet, DpSize(1440.dp, 900.dp)).forEach {
+      size ->
+      listOf(false, true).forEach { darkTheme ->
+        uiTestRule.runRobotTest(windowSize = size, darkTheme = darkTheme) {
+          composeRobot<AppShellRobot> {
+            selectTab(TabsPresenter.Tab.DOWNLOADS)
+            openPlayback()
+          }
+          waitUntilCatching("player header and preview displayed", timeout = 3.seconds) {
+            composeRobot<AppShellRobot> {
+              seePlaybackScreen(phone = size.width < 600.dp)
+            }
+          }
+          composeRobot<AppShellRobot> { collapsePlayback() }
+          waitUntilCatching("selected destination and preview restored", timeout = 3.seconds) {
+            composeRobot<AppShellRobot> { seeSelectedTab(TabsPresenter.Tab.DOWNLOADS) }
+            onNodeWithTag("playback-artwork-collapsed", useUnmergedTree = true).assertIsDisplayed()
+            onNodeWithTag("playback-screen").assertDoesNotExist()
+          }
+        }
+      }
+    }
+  }
+
+  @Test
+  fun `player artwork stays square and fits narrow tall and short wide windows`() {
+    listOf(
+        DpSize(320.dp, 640.dp),
+        DpSize(480.dp, 1000.dp),
+        DpSize(800.dp, 360.dp),
+        DpSize(839.dp, 1200.dp),
+        DpSize(840.dp, 600.dp),
+        DpSize(1200.dp, 500.dp),
+        DpSize(1440.dp, 900.dp),
+      )
+      .forEach { size ->
+        uiTestRule.runRobotTest(windowSize = size, darkTheme = false) {
+          val collapsed =
+            onNodeWithTag("playback-artwork-collapsed", useUnmergedTree = true)
+              .assertIsDisplayed()
+              .getUnclippedBoundsInRoot()
+          val collapsedSize = if (DesktopWindowSizes.isTablet(size)) 72.dp else 40.dp
+          assertThat((collapsed.right - collapsed.left)).isEqualTo(collapsedSize)
+          assertThat((collapsed.bottom - collapsed.top)).isEqualTo(collapsedSize)
+
+          composeRobot<AppShellRobot> { openPlayback() }
+          waitUntilCatching("player preview displayed", timeout = 3.seconds) {
+            composeRobot<AppShellRobot> {
+              seePlaybackScreen(phone = size.width < 600.dp)
+            }
+          }
+          val artwork = onNodeWithTag("playback-artwork-expanded").getUnclippedBoundsInRoot()
+          val window = onNodeWithTag("app-shell").getUnclippedBoundsInRoot()
+          assertThat((artwork.right - artwork.left)).isEqualTo((artwork.bottom - artwork.top))
+          assertThat((artwork.right - artwork.left)).isGreaterThan(0.dp)
+          assertTrue(artwork.left >= window.left + 24.dp)
+          assertTrue(artwork.right <= window.right - 24.dp)
+          assertTrue(artwork.top >= window.top)
+          assertTrue(artwork.bottom <= window.bottom)
+
+          if (size.width >= 600.dp && size.width > size.height) {
+            assertThat(artwork.left).isEqualTo(32.dp)
+          } else {
+            assertTrue(abs((artwork.left + artwork.right - window.left - window.right).value) <= 2f)
+            if (size.width < 600.dp) {
+              assertThat((artwork.right - artwork.left)).isEqualTo(size.width - 48.dp)
+            } else {
+              assertTrue(abs(((artwork.right - artwork.left) - size.width * 0.7f).value) <= 1f)
+            }
+          }
+          val dimensions = "${size.width.value.toInt()}x${size.height.value.toInt()}"
+          saveScreenshot("playback-preview-$dimensions-light")
+        }
+      }
+  }
+
+  @Test
   fun `playback corners flatten during drag and fill the expanded screen`() {
     listOf(DesktopWindowSizes.phone, DpSize(1440.dp, 900.dp)).forEach { size ->
       listOf(false, true).forEach { darkTheme ->
