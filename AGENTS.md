@@ -89,6 +89,7 @@ Bind that instance to the scope-qualified `Storage` and `Scoped` set.
 Do not reuse the app handle for user data. Scope exit cancels storage work and preserves saved data.
 Delete files explicitly. Keep preference keys in the owning feature.
 Use `Storage.cache` for data the system can remove.
+Integration-test graphs must use a new `InMemoryStorageFactory` for each graph.
 
 ### Icons
 
