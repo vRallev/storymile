@@ -56,3 +56,5 @@ shows the player header and preview artwork. Its collapse button calls the templ
 [collapse action](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/LocalCollapsePlayback.kt).
 [PlaybackBarRenderer](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackBarRenderer.kt)
 shows the same artwork in the collapsed bar.
+[PlaybackTransition](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/PlaybackTransition.kt)
+moves and scales the artwork with the sheet, while other controls fade.

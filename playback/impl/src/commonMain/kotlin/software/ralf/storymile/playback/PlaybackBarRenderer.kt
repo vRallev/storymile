@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
@@ -25,8 +24,7 @@ class PlaybackBarRenderer : ComposeRenderer<PlaybackPresenterImpl.BarModel>() {
       contentAlignment = Alignment.CenterStart,
     ) {
       PlaybackArtwork(
-        modifier =
-          Modifier.size(if (tablet) 72.dp else 40.dp).testTag("playback-artwork-collapsed"),
+        modifier = Modifier.size(if (tablet) 72.dp else 40.dp),
         thumbnail = true,
       )
     }

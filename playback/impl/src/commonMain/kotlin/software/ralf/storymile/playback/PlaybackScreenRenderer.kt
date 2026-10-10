@@ -36,6 +36,7 @@ import software.ralf.storymile.playback.impl.generated.resources.profile
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.templates.LocalCollapsePlayback
+import software.ralf.storymile.templates.LocalPlaybackTransition
 import software.ralf.storymile.theme.AppTheme
 
 @ContributesRenderer
@@ -65,8 +66,7 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
         PlaybackArtwork(
           Modifier.align(if (landscape) Alignment.TopStart else Alignment.TopCenter)
             .padding(start = if (landscape) padding else 0.dp)
-            .size(artworkSize)
-            .testTag("playback-artwork-expanded"),
+            .size(artworkSize),
         )
       }
     }
@@ -76,6 +76,8 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
   @Composable
   private fun PlayerHeader(tablet: Boolean, showProfile: Boolean, landscape: Boolean) {
     val onCollapse = LocalCollapsePlayback.current
+    val transition = LocalPlaybackTransition.current
+    val fade = with(transition) { if (this == null) Modifier else Modifier.fade(expanded = true) }
     TopAppBar(
       title = {
         Text(
@@ -115,7 +117,7 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
           ProfilePlaceholder()
         }
       },
-      modifier = Modifier.padding(horizontal = if (tablet) 16.dp else 0.dp),
+      modifier = fade.padding(horizontal = if (tablet) 16.dp else 0.dp).testTag("playback-header"),
       colors =
         TopAppBarDefaults.topAppBarColors(
           containerColor = AppTheme.colorScheme.surface,
