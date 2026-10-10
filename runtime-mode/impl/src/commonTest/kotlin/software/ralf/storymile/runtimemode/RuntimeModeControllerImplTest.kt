@@ -1,16 +1,28 @@
 package software.ralf.storymile.runtimemode
 
+import androidx.datastore.core.DataStore
 import androidx.datastore.core.IOException
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.stringPreferencesKey
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import kotlin.test.Test
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.buildTestScope
 import software.ralf.app.platform.scope.register
 import software.ralf.app.platform.scope.runTestWithScope
+import software.ralf.storymile.storage.FileStorage
+import software.ralf.storymile.storage.Storage
 
 class RuntimeModeControllerImplTest {
   @Test
@@ -18,7 +30,7 @@ class RuntimeModeControllerImplTest {
     listOf(null, "removed-mode").forEach { savedMode ->
       runTestWithScope { scope ->
         val controller: RuntimeModeController =
-          RuntimeModeControllerImpl(InMemoryStore(savedMode)).also { scope.register(it) }
+          RuntimeModeControllerImpl(InMemoryStorage(savedMode)).also { scope.register(it) }
         runCurrent()
         assertThat(controller.mode.value).isEqualTo(RuntimeMode.Real)
       }
@@ -27,15 +39,15 @@ class RuntimeModeControllerImplTest {
 
   @Test
   fun `mode selection survives controller recreation`() = runTest {
-    val store = InMemoryStore()
+    val storage = InMemoryStorage()
     val firstScope = Scope.buildTestScope(this)
     try {
       val controller: RuntimeModeController =
-        RuntimeModeControllerImpl(store).also { firstScope.register(it) }
+        RuntimeModeControllerImpl(storage).also { firstScope.register(it) }
       runCurrent()
       controller.switchMode(RuntimeMode.Fake)
       runCurrent()
-      assertThat(store.modeName).isEqualTo("Fake")
+      assertThat(storage.modeName).isEqualTo("Fake")
     } finally {
       firstScope.destroy()
     }
@@ -43,12 +55,12 @@ class RuntimeModeControllerImplTest {
     val restoredScope = Scope.buildTestScope(this)
     try {
       val controller: RuntimeModeController =
-        RuntimeModeControllerImpl(store).also { restoredScope.register(it) }
+        RuntimeModeControllerImpl(storage).also { restoredScope.register(it) }
       runCurrent()
       assertThat(controller.mode.value).isEqualTo(RuntimeMode.Fake)
       controller.switchMode(RuntimeMode.Real)
       runCurrent()
-      assertThat(store.modeName).isEqualTo("Real")
+      assertThat(storage.modeName).isEqualTo("Real")
     } finally {
       restoredScope.destroy()
     }
@@ -58,7 +70,7 @@ class RuntimeModeControllerImplTest {
   fun `fake mode never creates the real service and selection follows mode changes`() =
     runTestWithScope { scope ->
       val controller: RuntimeModeController =
-        RuntimeModeControllerImpl(InMemoryStore("Fake")).also { scope.register(it) }
+        RuntimeModeControllerImpl(InMemoryStorage("Fake")).also { scope.register(it) }
       runCurrent()
       assertThat(
           controller.modeImplementation(
@@ -85,67 +97,105 @@ class RuntimeModeControllerImplTest {
   @Test
   fun `startup selection takes precedence over delayed restoration`() = runTestWithScope { scope ->
     val readGate = CompletableDeferred<Unit>()
-    val store = InMemoryStore("Fake", readGate)
+    val storage = InMemoryStorage("Fake", readGate)
     val controller: RuntimeModeController =
-      RuntimeModeControllerImpl(store).also { scope.register(it) }
+      RuntimeModeControllerImpl(storage).also { scope.register(it) }
     runCurrent()
-    assertThat(store.writes).isEqualTo(emptyList())
+    assertThat(storage.writes).isEqualTo(emptyList())
 
     controller.switchMode(RuntimeMode.Real)
     readGate.complete(Unit)
     runCurrent()
     assertThat(controller.mode.value).isEqualTo(RuntimeMode.Real)
-    assertThat(store.writes).isEqualTo(listOf("Real"))
+    assertThat(storage.writes).isEqualTo(listOf("Real"))
   }
 
   @Test
   fun `restoration does not overwrite a saved fake mode with the default`() =
     runTestWithScope { scope ->
-      val store = InMemoryStore("Fake")
+      val storage = InMemoryStorage("Fake")
       val controller: RuntimeModeController =
-        RuntimeModeControllerImpl(store).also { scope.register(it) }
+        RuntimeModeControllerImpl(storage).also { scope.register(it) }
       runCurrent()
       assertThat(controller.mode.value).isEqualTo(RuntimeMode.Fake)
-      assertThat(store.writes).isEqualTo(listOf("Fake"))
+      assertThat(storage.writes).isEqualTo(listOf("Fake"))
     }
 
   @Test
-  fun `unavailable persistence keeps mode selection usable`() = runTestWithScope { scope ->
-    val controller: RuntimeModeController =
-      RuntimeModeControllerImpl(
-          object : RuntimeModeStore {
-            override suspend fun readModeName(): String? =
-              throw IOException("Storage is unavailable.")
+  fun `unavailable persistence keeps mode selection usable and recovers`() =
+    runTestWithScope { scope ->
+      val storage = InMemoryStorage().apply { available = false }
+      val controller: RuntimeModeController =
+        RuntimeModeControllerImpl(storage).also { scope.register(it) }
+      runCurrent()
+      controller.switchMode(RuntimeMode.Fake)
+      runCurrent()
+      assertThat(controller.mode.value).isEqualTo(RuntimeMode.Fake)
 
-            override suspend fun writeModeName(modeName: String) {
-              throw IOException("Storage is unavailable.")
-            }
-          },
-        )
-        .also { scope.register(it) }
-    runCurrent()
-    controller.switchMode(RuntimeMode.Fake)
-    runCurrent()
-    assertThat(controller.mode.value).isEqualTo(RuntimeMode.Fake)
-    controller.switchMode(RuntimeMode.Real)
-    runCurrent()
-    assertThat(controller.mode.value).isEqualTo(RuntimeMode.Real)
-  }
-
-  private class InMemoryStore(
-    var modeName: String? = null,
-    private val readGate: CompletableDeferred<Unit>? = null,
-  ) : RuntimeModeStore {
-    val writes = mutableListOf<String>()
-
-    override suspend fun readModeName(): String? {
-      readGate?.await()
-      return modeName
+      storage.available = true
+      controller.switchMode(RuntimeMode.Real)
+      runCurrent()
+      assertThat(controller.mode.value).isEqualTo(RuntimeMode.Real)
+      assertThat(storage.modeName).isEqualTo("Real")
     }
 
-    override suspend fun writeModeName(modeName: String) {
-      writes += modeName
-      this.modeName = modeName
+  private class InMemoryStorage(
+    initialModeName: String? = null,
+    private val readGate: CompletableDeferred<Unit>? = null,
+  ) : Storage {
+    private val modeKey = stringPreferencesKey("mode")
+    private val mutex = Mutex()
+    private val preferences =
+      MutableStateFlow<Preferences>(
+        emptyPreferences()
+          .toMutablePreferences()
+          .apply {
+            if (initialModeName != null) {
+              this[modeKey] = initialModeName
+            }
+          }
+          .toPreferences(),
+      )
+
+    private val dataStore =
+      object : DataStore<Preferences> {
+        override val data: Flow<Preferences> = flow {
+          readGate?.await()
+          checkAvailability()
+          emitAll(preferences)
+        }
+
+        override suspend fun updateData(
+          transform: suspend (t: Preferences) -> Preferences,
+        ): Preferences = mutex.withLock {
+          checkAvailability()
+          transform(preferences.value).also {
+            preferences.value = it
+            writes += it[modeKey]
+          }
+        }
+      }
+
+    var available = true
+    val writes = mutableListOf<String?>()
+    val modeName: String?
+      get() = preferences.value[modeKey]
+
+    override val files: FileStorage
+      get() = error("File storage is not used by runtime mode.")
+
+    override val cache: FileStorage
+      get() = error("Cache storage is not used by runtime mode.")
+
+    override suspend fun preferences(name: String): DataStore<Preferences> {
+      require(name == "runtime-mode")
+      return dataStore
+    }
+
+    private fun checkAvailability() {
+      if (!available) {
+        throw IOException("Storage is unavailable.")
+      }
     }
   }
 }
