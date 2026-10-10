@@ -137,7 +137,9 @@ class TabsRenderer : ComposeRenderer<TabsPresenter.Model>() {
               onClick = { model.onSelectTab(tab) },
               icon = { TabIcon(tab, model.selectedTab == tab) },
               label = { Text(tab.label()) },
-              modifier = Modifier.padding(vertical = 4.dp).testTag("tab-${tab.name.lowercase()}"),
+              modifier =
+                Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                  .testTag("tab-${tab.name.lowercase()}"),
             )
           }
         }
@@ -191,7 +193,7 @@ class TabsRenderer : ComposeRenderer<TabsPresenter.Model>() {
       )
     } else {
       Column(
-        modifier = Modifier.padding(top = 8.dp, bottom = 16.dp),
+        modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
         content = { content() },

@@ -224,10 +224,10 @@ class StorymileDesktopUiTest {
   fun `sidebar expansion follows width instead of height`() {
     listOf(
         DpSize(1440.dp, 900.dp) to 360.dp,
-        DpSize(1199.dp, 900.dp) to 80.dp,
+        DpSize(1199.dp, 900.dp) to 112.dp,
         DpSize(1200.dp, 900.dp) to 360.dp,
         DpSize(1200.dp, 500.dp) to 360.dp,
-        DpSize(900.dp, 1440.dp) to 80.dp,
+        DpSize(900.dp, 1440.dp) to 112.dp,
       )
       .forEach { (size, tabWidth) ->
         listOf(false, true).forEach { darkTheme ->
@@ -262,7 +262,7 @@ class StorymileDesktopUiTest {
           waitUntilCatching("playback bar restored", timeout = 3.seconds) {
             composeRobot<AppShellRobot> {
               if (phone) seeCompactLayout()
-              else seeExpandedLayout(if (size.width >= 1200.dp) 360.dp else 80.dp)
+              else seeExpandedLayout(if (size.width >= 1200.dp) 360.dp else 112.dp)
             }
           }
         }
