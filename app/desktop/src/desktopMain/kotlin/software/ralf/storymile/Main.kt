@@ -79,6 +79,7 @@ fun main(args: Array<String>) {
       state = windowState,
       icon = windowIcon,
       title = "Storymile",
+      alwaysOnTop = true,
     ) {
       // Desktop supplies live system appearance updates inside the window's composition.
       val currentSystemDarkTheme = isSystemInDarkTheme()
