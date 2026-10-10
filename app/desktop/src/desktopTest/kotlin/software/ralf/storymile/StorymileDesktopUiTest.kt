@@ -4,6 +4,7 @@ package software.ralf.storymile
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.input.key.Key
@@ -288,6 +289,165 @@ class StorymileDesktopUiTest {
   }
 
   @Test
+  fun `player header collapses to the selected destination on phone tablet and desktop`() {
+    listOf(DesktopWindowSizes.phone, DesktopWindowSizes.tablet, DpSize(1440.dp, 900.dp)).forEach {
+      size ->
+      listOf(false, true).forEach { darkTheme ->
+        uiTestRule.runRobotTest(windowSize = size, darkTheme = darkTheme) {
+          composeRobot<AppShellRobot> {
+            selectTab(TabsPresenter.Tab.DOWNLOADS)
+            openPlayback()
+          }
+          waitUntilCatching("player header and preview displayed", timeout = 3.seconds) {
+            composeRobot<AppShellRobot> {
+              seePlaybackScreen(phone = size.width < 600.dp)
+            }
+          }
+          composeRobot<AppShellRobot> { collapsePlayback() }
+          waitUntilCatching("selected destination and preview restored", timeout = 3.seconds) {
+            composeRobot<AppShellRobot> { seeSelectedTab(TabsPresenter.Tab.DOWNLOADS) }
+            onNodeWithTag("playback-artwork-collapsed", useUnmergedTree = true).assertIsDisplayed()
+            onNodeWithTag("playback-screen").assertDoesNotExist()
+          }
+        }
+      }
+    }
+  }
+
+  @Test
+  fun `player artwork stays square and fits narrow tall and short wide windows`() {
+    listOf(
+        DpSize(320.dp, 640.dp),
+        DpSize(480.dp, 1000.dp),
+        DpSize(800.dp, 360.dp),
+        DpSize(839.dp, 1200.dp),
+        DpSize(840.dp, 600.dp),
+        DpSize(1200.dp, 500.dp),
+        DpSize(1440.dp, 900.dp),
+      )
+      .forEach { size ->
+        uiTestRule.runRobotTest(windowSize = size, darkTheme = false) {
+          val collapsed =
+            onNodeWithTag("playback-artwork-collapsed", useUnmergedTree = true)
+              .assertIsDisplayed()
+              .getUnclippedBoundsInRoot()
+          val collapsedSize = if (DesktopWindowSizes.isTablet(size)) 72.dp else 40.dp
+          assertThat((collapsed.right - collapsed.left)).isEqualTo(collapsedSize)
+          assertThat((collapsed.bottom - collapsed.top)).isEqualTo(collapsedSize)
+
+          composeRobot<AppShellRobot> { openPlayback() }
+          waitUntilCatching("player preview displayed", timeout = 3.seconds) {
+            composeRobot<AppShellRobot> {
+              seePlaybackScreen(phone = size.width < 600.dp)
+            }
+          }
+          val artwork = onNodeWithTag("playback-artwork-expanded").getUnclippedBoundsInRoot()
+          val window = onNodeWithTag("app-shell").getUnclippedBoundsInRoot()
+          assertThat((artwork.right - artwork.left)).isEqualTo((artwork.bottom - artwork.top))
+          assertThat((artwork.right - artwork.left)).isGreaterThan(0.dp)
+          assertTrue(artwork.left >= window.left + 24.dp)
+          assertTrue(artwork.right <= window.right - 24.dp)
+          assertTrue(artwork.top >= window.top)
+          assertTrue(artwork.bottom <= window.bottom)
+
+          if (size.width >= 600.dp && size.width > size.height) {
+            assertThat(artwork.left).isEqualTo(32.dp)
+          } else {
+            assertTrue(
+              abs((artwork.left + artwork.right - window.left - window.right).value) <= 2f,
+            )
+            if (size.width < 600.dp) {
+              assertThat((artwork.right - artwork.left)).isEqualTo(size.width - 48.dp)
+            } else {
+              assertTrue(abs(((artwork.right - artwork.left) - size.width * 0.7f).value) <= 1f)
+            }
+          }
+          val dimensions = "${size.width.value.toInt()}x${size.height.value.toInt()}"
+          saveScreenshot("playback-preview-$dimensions-light")
+        }
+      }
+  }
+
+  @Test
+  fun `player artwork follows the sheet through a partial drag and reversal`() {
+    listOf(DesktopWindowSizes.phone, DesktopWindowSizes.tablet, DpSize(1440.dp, 900.dp)).forEach {
+      size ->
+      uiTestRule.runRobotTest(windowSize = size, darkTheme = false) {
+        val collapsed = playbackArtworkBounds(expanded = false)
+        val collapsedSheetTop =
+          onNodeWithTag("playback-sheet").fetchSemanticsNode().boundsInRoot.top
+        composeRobot<AppShellRobot> { openPlayback() }
+        val expanded = playbackArtworkBounds(expanded = true)
+        composeRobot<AppShellRobot> { collapsePlayback() }
+        assertThat(playbackArtworkBounds(expanded = false)).isEqualTo(collapsed)
+
+        mainClock.autoAdvance = false
+        try {
+          onNodeWithTag("playback").performTouchInput { down(Offset(center.x, 32f)) }
+          onRoot().performTouchInput { moveBy(Offset(0f, -collapsedSheetTop / 2)) }
+          mainClock.advanceTimeByFrame()
+          val halfway = assertPlaybackArtworkTransition(collapsed, expanded, collapsedSheetTop)
+          assertTrue(halfway in 0.25f..0.75f)
+          val dimensions = "${size.width.value.toInt()}x${size.height.value.toInt()}"
+          saveScreenshot("playback-transition-$dimensions-light")
+
+          onRoot().performTouchInput { moveBy(Offset(0f, collapsedSheetTop / 4)) }
+          mainClock.advanceTimeByFrame()
+          val reversed = assertPlaybackArtworkTransition(collapsed, expanded, collapsedSheetTop)
+          assertThat(reversed).isGreaterThan(0f)
+          assertThat(reversed).isLessThan(halfway)
+
+          onRoot().performTouchInput { moveBy(Offset(0f, collapsedSheetTop)) }
+        } finally {
+          onRoot().performTouchInput {
+            advanceEventTime(100)
+            up()
+          }
+          mainClock.autoAdvance = true
+        }
+        assertThat(playbackArtworkBounds(expanded = false)).isEqualTo(collapsed)
+      }
+    }
+  }
+
+  @Test
+  fun `player buttons animate artwork from its current bounds in both directions`() {
+    listOf(DesktopWindowSizes.phone, DesktopWindowSizes.tablet, DpSize(1440.dp, 900.dp)).forEach {
+      size ->
+      uiTestRule.runRobotTest(windowSize = size, darkTheme = false) {
+        val collapsed = playbackArtworkBounds(expanded = false)
+        val collapsedSheetTop =
+          onNodeWithTag("playback-sheet").fetchSemanticsNode().boundsInRoot.top
+
+        mainClock.autoAdvance = false
+        try {
+          composeRobot<AppShellRobot> { openPlayback() }
+          val (firstProgress, firstArtwork) = firstPlaybackExpansionFrame(collapsedSheetTop)
+          advancePlaybackToIntermediate(collapsedSheetTop)
+          val opening = playbackExpansionProgress(collapsedSheetTop)
+          val openingArtwork = playbackArtworkBounds(expanded = true)
+          assertTrue(opening in 0.05f..0.95f)
+
+          mainClock.autoAdvance = true
+          val expanded = playbackArtworkBounds(expanded = true)
+          assertPlaybackArtworkBounds(collapsed, expanded, firstProgress, firstArtwork)
+          assertPlaybackArtworkBounds(collapsed, expanded, opening, openingArtwork)
+          mainClock.autoAdvance = false
+          composeRobot<AppShellRobot> { collapsePlayback() }
+          mainClock.advanceTimeByFrame()
+          assertPlaybackArtworkTransition(collapsed, expanded, collapsedSheetTop)
+          advancePlaybackToIntermediate(collapsedSheetTop)
+          val closing = assertPlaybackArtworkTransition(collapsed, expanded, collapsedSheetTop)
+          assertTrue(closing in 0.05f..0.95f)
+        } finally {
+          mainClock.autoAdvance = true
+        }
+        assertThat(playbackArtworkBounds(expanded = false)).isEqualTo(collapsed)
+      }
+    }
+  }
+
+  @Test
   fun `playback corners flatten during drag and fill the expanded screen`() {
     listOf(DesktopWindowSizes.phone, DpSize(1440.dp, 900.dp)).forEach { size ->
       listOf(false, true).forEach { darkTheme ->
@@ -420,6 +580,81 @@ class StorymileDesktopUiTest {
         }
       }
     }
+  }
+
+  private fun ComposeUiTest.playbackArtworkBounds(expanded: Boolean): Rect {
+    val tag = if (expanded) "playback-artwork-expanded" else "playback-artwork-collapsed"
+    return onNodeWithTag(tag, useUnmergedTree = true)
+      .assertIsDisplayed()
+      .fetchSemanticsNode()
+      .boundsInRoot
+  }
+
+  private fun ComposeUiTest.playbackExpansionProgress(collapsedSheetTop: Float): Float {
+    val sheetTop = onNodeWithTag("playback-sheet").fetchSemanticsNode().boundsInRoot.top
+    return 1f - sheetTop / collapsedSheetTop
+  }
+
+  private fun ComposeUiTest.assertPlaybackArtworkTransition(
+    collapsed: Rect,
+    expanded: Rect,
+    collapsedSheetTop: Float,
+  ): Float {
+    val progress = playbackExpansionProgress(collapsedSheetTop)
+    val artwork = playbackArtworkBounds(expanded = progress > 0f)
+    assertPlaybackArtworkBounds(collapsed, expanded, progress, artwork)
+    return progress
+  }
+
+  private fun assertPlaybackArtworkBounds(
+    collapsed: Rect,
+    expanded: Rect,
+    progress: Float,
+    artwork: Rect,
+  ) {
+    val expected =
+      Rect(
+        left = collapsed.left + (expanded.left - collapsed.left) * progress,
+        top = collapsed.top + (expanded.top - collapsed.top) * progress,
+        right = collapsed.right + (expanded.right - collapsed.right) * progress,
+        bottom = collapsed.bottom + (expanded.bottom - collapsed.bottom) * progress,
+      )
+    listOf(
+        artwork.left to expected.left,
+        artwork.top to expected.top,
+        artwork.right to expected.right,
+        artwork.bottom to expected.bottom,
+      )
+      .forEach { (actual, target) ->
+        assertTrue(
+          abs(actual - target) <= 1f,
+          "Expected artwork $expected at $progress, got $artwork",
+        )
+      }
+    assertTrue(abs(artwork.width - artwork.height) <= 1f)
+  }
+
+  private fun ComposeUiTest.firstPlaybackExpansionFrame(
+    collapsedSheetTop: Float,
+  ): Pair<Float, Rect> {
+    repeat(60) {
+      mainClock.advanceTimeByFrame()
+      val progress = playbackExpansionProgress(collapsedSheetTop)
+      if (progress > 0f) {
+        return progress to playbackArtworkBounds(expanded = true)
+      }
+    }
+    error("Playback did not start expanding")
+  }
+
+  private fun ComposeUiTest.advancePlaybackToIntermediate(collapsedSheetTop: Float) {
+    repeat(60) {
+      if (playbackExpansionProgress(collapsedSheetTop) in 0.05f..0.95f) {
+        return
+      }
+      mainClock.advanceTimeByFrame()
+    }
+    error("Playback animation did not render an intermediate frame")
   }
 
   private fun ComposeUiTest.playbackCornerGaps(): List<Int> {
