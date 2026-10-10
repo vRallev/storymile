@@ -79,6 +79,17 @@ interface-typed instance by default. Follow the
 [unit-test guidance](.agents/skills/app-platform-testing/SKILL.md#unit-tests) for the
 full rules and the presenter-model exception.
 
+### Storage
+
+Use `:storage:public` for preferences, files, and caches. App assembly selects `:storage:impl`.
+Inject `@ForScope(AppScope::class) storage: Storage` for app data.
+For future scopes, inject `ScopedStorage.Factory` in the owning module's binding container.
+Create one `ScopedStorage` with a dedicated scope coroutine owner and stable `user-<id>` namespace.
+Bind that instance to the scope-qualified `Storage` and `Scoped` set.
+Do not reuse the app handle for user data. Scope exit cancels storage work and preserves saved data.
+Delete files explicitly. Keep preference keys in the owning feature.
+Use `Storage.cache` for data the system can remove.
+
 ### Icons
 
 After changing `images/icon.png`, run `./scripts/app-icon/generate-icons.sh` on macOS to update
