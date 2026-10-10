@@ -9,14 +9,17 @@ import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithTag
@@ -107,16 +110,17 @@ class StorymileDesktopUiTest {
   }
 
   @Test
-  fun `phone tab titles appear on long press without selecting the tab`() {
+  fun `phone tab titles stay visible and long press shows tooltips without selecting the tab`() {
     listOf(false, true).forEach { darkTheme ->
       uiTestRule.runPhoneRobotTest(darkTheme = darkTheme) {
         TabsPresenter.Tab.entries.forEach { tab ->
           val title = tab.name.lowercase().replaceFirstChar { it.titlecase() }
           val item = onNodeWithTag("tab-${tab.name.lowercase()}")
-          item.assertContentDescriptionEquals(title)
-          onNodeWithText(title).assertDoesNotExist()
-          item.performTouchInput { longClick() }
+          item.assertTextEquals(title)
           onNodeWithText(title).assertIsDisplayed()
+          onNode(hasText(title) and hasAnyAncestor(isPopup())).assertDoesNotExist()
+          item.performTouchInput { longClick() }
+          onNode(hasText(title) and hasAnyAncestor(isPopup())).assertIsDisplayed()
           onNodeWithTag("tab-home").assertIsSelected()
           saveScreenshot(
             "phone-tooltip-${tab.name.lowercase()}-${if (darkTheme) "dark" else "light"}",
@@ -124,6 +128,7 @@ class StorymileDesktopUiTest {
           composeRobot<AppShellRobot> {
             selectTab(tab)
             seeSelectedTab(tab)
+            item.assertTextEquals(title)
             selectTab(TabsPresenter.Tab.HOME)
           }
         }
@@ -137,11 +142,12 @@ class StorymileDesktopUiTest {
       listOf(Offset(-0.3f, 0f), Offset(0.3f, 0f), Offset(0f, -0.25f), Offset(0f, 0.25f)).forEach {
         edge ->
         uiTestRule.runPhoneRobotTest(darkTheme = darkTheme) {
-          onNodeWithText("Home").assertDoesNotExist()
+          onNodeWithText("Home").assertIsDisplayed()
+          onNode(isPopup()).assertDoesNotExist()
           onNodeWithTag("tab-home").performTouchInput {
             longClick(Offset(center.x + width * edge.x, center.y + height * edge.y))
           }
-          onNodeWithText("Home").assertIsDisplayed()
+          onNode(hasText("Home") and hasAnyAncestor(isPopup())).assertIsDisplayed()
           onNodeWithTag("tab-home").assertIsSelected()
           if (!darkTheme && edge.x < 0f) {
             saveScreenshot("phone-tooltip-pill-home-light")
@@ -159,17 +165,17 @@ class StorymileDesktopUiTest {
         val item = onNodeWithTag("tab-library")
         item.performMouseInput { moveTo(center) }
         mainClock.advanceTimeBy(300)
-        onNodeWithText("Library").assertDoesNotExist()
+        onNode(isPopup()).assertDoesNotExist()
 
         item.performMouseInput { moveTo(Offset(center.x, -height.toFloat())) }
         mainClock.advanceTimeBy(700)
-        onNodeWithText("Library").assertDoesNotExist()
+        onNode(isPopup()).assertDoesNotExist()
 
         item.performMouseInput { moveTo(center) }
         mainClock.advanceTimeBy(300)
-        onNodeWithText("Library").assertDoesNotExist()
+        onNode(isPopup()).assertDoesNotExist()
         mainClock.advanceTimeBy(400)
-        onNodeWithText("Library").assertIsDisplayed()
+        onNode(hasText("Library") and hasAnyAncestor(isPopup())).assertIsDisplayed()
         onNodeWithTag("tab-home").assertIsSelected()
       } finally {
         mainClock.autoAdvance = true
