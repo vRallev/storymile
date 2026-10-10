@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package software.ralf.storymile.runtimemode
 
 import androidx.datastore.core.DataStore
@@ -9,6 +11,7 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import kotlin.test.Test
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emitAll
