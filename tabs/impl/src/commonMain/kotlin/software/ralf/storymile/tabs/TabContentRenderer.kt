@@ -15,7 +15,6 @@ import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.storymile.tabs.impl.generated.resources.Res
 import software.ralf.storymile.tabs.impl.generated.resources.downloads_selected
-import software.ralf.storymile.tabs.impl.generated.resources.home_selected
 import software.ralf.storymile.tabs.impl.generated.resources.library_selected
 import software.ralf.storymile.theme.AppTheme
 
@@ -26,7 +25,7 @@ class TabContentRenderer : ComposeRenderer<TabsPresenterImpl.ContentModel>() {
   override fun Compose(model: TabsPresenterImpl.ContentModel, modifier: Modifier) {
     val message =
       when (model.selectedTab) {
-        TabsPresenter.Tab.HOME -> Res.string.home_selected
+        TabsPresenter.Tab.HOME -> error("Home has its own presenter and renderer.")
         TabsPresenter.Tab.LIBRARY -> Res.string.library_selected
         TabsPresenter.Tab.DOWNLOADS -> Res.string.downloads_selected
       }

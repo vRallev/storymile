@@ -17,6 +17,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
 import dev.zacsweers.metro.createGraphFactory
@@ -48,25 +49,29 @@ class DesktopUiTestRule(private val withEpisodes: Boolean = false) {
 
   /**
    * Runs [block] at [windowSize], optionally overriding the system theme with [darkTheme].
-   * [contentSize] changes the app's live bounds within the test surface.
+   * [contentSize] changes the app's live bounds within the test surface. [fontScale] sets the text
+   * scale.
    */
   fun runRobotTest(
     windowSize: DpSize,
     darkTheme: Boolean? = null,
     contentSize: State<DpSize>? = null,
+    fontScale: Float = 1f,
     block: ComposeUiTest.() -> Unit,
   ) {
-    runRobotTest(windowSize, mutableStateOf(darkTheme), contentSize, block)
+    runRobotTest(windowSize, mutableStateOf(darkTheme), contentSize, fontScale, block)
   }
 
   /**
    * Runs [block] at [windowSize] and reacts to changes in the app's [darkTheme] override.
-   * [contentSize] changes the app's live bounds within the test surface.
+   * [contentSize] changes the app's live bounds within the test surface. [fontScale] sets the text
+   * scale.
    */
   fun runRobotTest(
     windowSize: DpSize,
     darkTheme: State<Boolean?>,
     contentSize: State<DpSize>? = null,
+    fontScale: Float = 1f,
     block: ComposeUiTest.() -> Unit,
   ) {
     val desktopApp = DesktopApp {
@@ -84,7 +89,10 @@ class DesktopUiTestRule(private val withEpisodes: Boolean = false) {
           composeRobot<PlaylistRobot> { addPlayablePlaylist() }
         }
         setContent {
-          CompositionLocalProvider(LocalDarkThemeOverride provides darkTheme.value) {
+          CompositionLocalProvider(
+            LocalDarkThemeOverride provides darkTheme.value,
+            LocalDensity provides Density(LocalDensity.current.density, fontScale),
+          ) {
             if (contentSize == null) {
               desktopApp.renderTemplates()
             } else {

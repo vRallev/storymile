@@ -68,7 +68,7 @@ test('loads the embedded production app under the project path', async ({ page }
     await expect(iframe).toHaveCount(1);
     await expect(iframe).toHaveAttribute('src', 'web/index.html');
     const app = page.frameLocator('iframe[title="Storymile app"]');
-    for (const tag of ['tab-content', 'selected-tab', 'tabs', 'tab-home', 'tab-library', 'tab-downloads']) {
+    for (const tag of ['tab-content', 'home-welcome', 'home-search', 'home-discover', 'tabs', 'tab-home', 'tab-library', 'tab-downloads']) {
       await expect(app.locator(`[id="${tag}"]`)).toBeAttached();
     }
     await expect(app.locator('[id="playback"]')).not.toBeAttached();

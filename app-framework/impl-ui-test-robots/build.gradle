@@ -18,6 +18,7 @@ dependencies {
   androidMainImplementation libs.compose.ui.test.junit4.android
 
   commonMainImplementation project(':app-framework:impl')
+  commonMainImplementation project(':home:impl')
   commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':playlist:impl')
   commonMainImplementation project(':playlist:impl-robots')
