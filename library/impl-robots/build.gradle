@@ -1,8 +1,0 @@
-plugins {
-  id 'software.ralf.storymile.library.kmp'
-}
-
-storymile {
-  enableComposeUi true
-  enableMetro true
-}
