@@ -7,13 +7,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.Provider
 import software.ralf.app.platform.presenter.BaseModel
+import software.ralf.storymile.downloads.DownloadsPresenter
 import software.ralf.storymile.home.HomePresenter
 import software.ralf.storymile.user.UserScope
 
 @Inject
 @ContributesBinding(UserScope::class)
-class TabsPresenterImpl(private val homePresenter: HomePresenter<*>) : TabsPresenter {
+class TabsPresenterImpl(
+  private val homePresenter: HomePresenter<*>,
+  private val downloadsPresenter: Provider<DownloadsPresenter<*>>,
+) : TabsPresenter {
   @Composable
   override fun present(input: Unit): TabsPresenter.Model {
     var selectedTab by remember { mutableStateOf(TabsPresenter.Tab.HOME) }
@@ -22,13 +27,13 @@ class TabsPresenterImpl(private val homePresenter: HomePresenter<*>) : TabsPrese
       content =
         when (selectedTab) {
           TabsPresenter.Tab.HOME -> homePresenter.present(Unit)
-          TabsPresenter.Tab.LIBRARY,
-          TabsPresenter.Tab.DOWNLOADS -> ContentModel(selectedTab)
+          TabsPresenter.Tab.LIBRARY -> ContentModel(selectedTab)
+          TabsPresenter.Tab.DOWNLOADS -> remember { downloadsPresenter() }.present(Unit)
         },
       onSelectTab = { selectedTab = it },
     )
   }
 
-  // Temporary content model until each tab has its own presenter and renderer.
+  // Temporary content model for Library.
   data class ContentModel(val selectedTab: TabsPresenter.Tab) : BaseModel
 }

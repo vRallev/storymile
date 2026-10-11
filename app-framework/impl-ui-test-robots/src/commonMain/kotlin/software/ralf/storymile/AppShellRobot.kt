@@ -70,6 +70,9 @@ class AppShellRobot : ComposeRobot() {
     }
     if (tab == TabsPresenter.Tab.HOME) {
       compose.onNodeWithTag("home-screen").assertIsDisplayed()
+    } else if (tab == TabsPresenter.Tab.DOWNLOADS) {
+      compose.onNodeWithTag("downloads-screen").assertIsDisplayed()
+      compose.onNodeWithText("Listen anywhere").assertIsDisplayed()
     } else {
       val label = tab.name.lowercase().replaceFirstChar { it.titlecase() }
       compose
