@@ -1,7 +1,6 @@
 package software.ralf.storymile.storage
 
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,7 +10,7 @@ import kotlinx.coroutines.sync.withLock
 
 internal class InMemoryStoragePlatform : StoragePlatform() {
   private val preferences =
-    MutableStateFlow<Map<PreferencesKey, InMemoryPreferencesStorage>>(emptyMap())
+    MutableStateFlow<Map<PreferencesKey, InMemoryPreferencesDataStore>>(emptyMap())
   private val filesMutex = Mutex()
   private val files = mutableMapOf<FileKey, ByteArray>()
 
@@ -21,13 +20,11 @@ internal class InMemoryStoragePlatform : StoragePlatform() {
     coroutineScope: CoroutineScope,
   ): DataStore<Preferences> {
     val key = PreferencesKey(namespace, name)
-    val storage =
-      preferences
-        .updateAndGet { stores ->
-          if (key in stores) stores else stores + (key to InMemoryPreferencesStorage())
-        }
-        .getValue(key)
-    return PreferenceDataStoreFactory.create(storage = storage, scope = coroutineScope)
+    return preferences
+      .updateAndGet { stores ->
+        if (key in stores) stores else stores + (key to InMemoryPreferencesDataStore())
+      }
+      .getValue(key)
   }
 
   override suspend fun readFile(

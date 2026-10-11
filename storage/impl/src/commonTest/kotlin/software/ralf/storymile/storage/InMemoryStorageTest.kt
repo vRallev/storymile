@@ -2,11 +2,13 @@ package software.ralf.storymile.storage
 
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.mutablePreferencesOf
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlinx.coroutines.CancellationException
@@ -15,6 +17,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.coroutine.coroutineScope
@@ -108,10 +111,12 @@ class InMemoryStorageTest {
       val storage: Storage = scope.storage(InMemoryStorageFactory())
       val preferences = storage.preferences("settings")
       val key = intPreferencesKey("count")
+      var transforms = 0
 
       List(20) {
           async {
             preferences.edit {
+              transforms++
               val previous = it[key] ?: 0
               yield()
               it[key] = previous + 1
@@ -120,6 +125,7 @@ class InMemoryStorageTest {
         }
         .awaitAll()
       assertEquals(20, preferences.data.first()[key])
+      assertEquals(20, transforms)
 
       assertFailsWith<IllegalStateException> {
         preferences.edit {
@@ -131,6 +137,46 @@ class InMemoryStorageTest {
       preferences.edit { it[key] = 21 }
       assertEquals(21, preferences.data.first()[key])
     }
+
+  @Test
+  fun `preferences retain immutable snapshots of caller-owned values`() =
+    runTestWithScope { scope ->
+      val storage: Storage = scope.storage(InMemoryStorageFactory())
+      val preferences = storage.preferences("settings")
+      val key = stringPreferencesKey("theme")
+      val submitted = mutablePreferencesOf(key to "dark")
+
+      val returned = preferences.updateData { submitted }
+      submitted[key] = "light"
+
+      assertEquals("dark", returned[key])
+      assertEquals("dark", preferences.data.first()[key])
+    }
+
+  @Test
+  fun `nested updates reject the same store and allow another store`() = runTestWithScope { scope ->
+    val storage: Storage = scope.storage(InMemoryStorageFactory())
+    val preferences = storage.preferences("settings")
+    val other = storage.preferences("other")
+    val key = stringPreferencesKey("theme")
+
+    val failure =
+      assertFailsWith<IllegalStateException> {
+        withTimeout(1000) {
+          preferences.edit {
+            other.edit { preferences.updateData { it } }
+          }
+        }
+      }
+    assertFalse(failure is CancellationException)
+
+    preferences.edit { settings ->
+      other.edit { it[key] = "light" }
+      settings[key] = "dark"
+    }
+    assertEquals("dark", preferences.data.first()[key])
+    assertEquals("light", other.data.first()[key])
+  }
 
   @Test
   fun `scope exit cancels a preference edit and reopening keeps the last committed value`() =
@@ -147,7 +193,7 @@ class InMemoryStorageTest {
           preferences.edit {
             it[key] = "light"
             editStarted.complete(Unit)
-            awaitCancellation()
+            runCatching { awaitCancellation() }
           }
         }
       }
