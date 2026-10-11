@@ -15,7 +15,6 @@ import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.playback.impl.generated.resources.Res
 import software.ralf.storymile.playback.impl.generated.resources.preview_artwork
 import software.ralf.storymile.playback.impl.generated.resources.quiet_current_placeholder
-import software.ralf.storymile.templates.LocalPlaybackTransition
 
 @Composable
 internal fun PlaybackArtwork(modifier: Modifier = Modifier, thumbnail: Boolean = false) {

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalTestApi::class, ExperimentalSharedTransitionApi::class)
 
-package software.ralf.storymile.templates
+package software.ralf.storymile.playback
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
@@ -48,6 +48,7 @@ import assertk.assertions.isLessThanOrEqualTo
 import assertk.assertions.isNotEmpty
 import kotlin.math.abs
 import kotlin.test.Test
+import software.ralf.storymile.templates.LocalSharedTransitionScope
 
 class PlaybackTransitionTest {
   @Test

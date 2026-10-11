@@ -59,7 +59,6 @@ import software.ralf.storymile.playback.impl.generated.resources.play
 import software.ralf.storymile.playback.impl.generated.resources.playback_position
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize
-import software.ralf.storymile.templates.LocalPlaybackTransition
 import software.ralf.storymile.theme.AppTheme
 
 internal object PlaybackControls {

@@ -3,5 +3,10 @@ plugins {
 }
 
 storymile {
+  enableComposeUi true
   enableComposePresenters true
+}
+
+dependencies {
+  commonMainImplementation project(':templates:public')
 }
