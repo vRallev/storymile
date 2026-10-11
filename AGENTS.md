@@ -129,7 +129,7 @@ team ID in `app/ios/Configuration/Config.xcconfig`.
 
 Storymile has `Real` and `Fake` runtime modes. `Real` is the default.
 The shared `RuntimeModeController` restores and saves the selection asynchronously in the application scope.
-The mode choice uses the persistent `runtime-mode` preferences store.
+The controller stores its choice in the `runtime-mode` storage namespace.
 Call `setInitialMode()` before entering the application scope to override the saved mode.
 On Desktop, press Command/Ctrl+F to switch modes. The window title shows `(Fake)` in fake mode.
 To select a mode at launch, pass `--runtime-mode=fake` or `--runtime-mode=real`:
@@ -142,9 +142,10 @@ Switching modes saves the selection, then calls `ApplicationRestarter` to destro
 scope and restart. Android and Desktop start a new process. Web reloads. On iOS, reopen the app.
 Restoring a saved mode or selecting the current mode does not restart.
 If saving fails, the app keeps its current mode.
-In fake mode, app and scoped feature storage use `InMemoryStorageFactory` for preferences, files,
-and caches. Fake data resets on restart. Real data stays separate. Storage waits for mode restoration before
-accessing feature data. Only runtime-mode settings use `@PersistentStorage`.
+App assembly waits for mode restoration, then selects the storage backend once.
+In fake mode, app and user preferences, files, and caches use `InMemoryStorageFactory`.
+Fake data resets on restart. Real data stays separate.
+The controller uses ordinary scoped storage to save the mode across restarts.
 Storymile does not have network services yet. When adding a service, put its real, fake,
 and delegating implementations in the owning `:impl` module.
 Inject `RuntimeModeController` from `:runtime-mode:public` into the delegating service.

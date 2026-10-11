@@ -45,9 +45,10 @@ import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.restart.DesktopProcessRestarter
 import software.ralf.storymile.restart.ProcessRestarter
 import software.ralf.storymile.runtimemode.RuntimeMode
+import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.storage.DesktopStoragePlatform
 import software.ralf.storymile.storage.OkioStoragePlatform
-import software.ralf.storymile.storage.PersistentStorage
+import software.ralf.storymile.storage.ScopedStorage
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.storage.StoragePlatform
 import software.ralf.storymile.user.UserManager
@@ -118,6 +119,8 @@ class RuntimeModeStorageTest {
       withApplication(platform) { graph, _, restarter ->
         val userStorage =
           graph.userManager.userScope.value.metroDependencyGraph<UserBindings>().storage
+        assertThat(graph.storage.files.read("book")).isNull()
+        assertThat(userStorage.cache.read("cover")).isNull()
         graph.storage.assertContent(null, null)
         userStorage.assertContent(null, null)
         assertThat(graph.runtimeModeController.mode.value).isEqualTo(RuntimeMode.Fake)
@@ -172,14 +175,17 @@ class RuntimeModeStorageTest {
 
   private suspend fun Graph.awaitSavedMode(mode: RuntimeMode) {
     val key = stringPreferencesKey("mode")
-    val saved = persistentStorage.preferences("runtime-mode").data.first { it[key] == mode.name }
+    val saved = modeStorage.preferences("runtime-mode").data.first { it[key] == mode.name }
     assertThat(saved[key]).isEqualTo(mode.name)
   }
 
   private fun Path.featureFiles(): Map<Path, ByteString> {
-    val modeFile = "${"runtime-mode".encodeUtf8().hex()}.preferences_pb"
+    val modeNamespace = "runtime-mode".encodeUtf8().hex()
     return FileSystem.SYSTEM.listRecursively(this)
-      .filter { FileSystem.SYSTEM.metadata(it).isRegularFile && it.name != modeFile }
+      .filter {
+        FileSystem.SYSTEM.metadata(it).isRegularFile &&
+          it.relativeTo(this).segments.first() != modeNamespace
+      }
       .associateWith { FileSystem.SYSTEM.read(it) { readByteString() } }
   }
 
@@ -235,7 +241,7 @@ class RuntimeModeStorageTest {
       ],
   )
   interface Graph : AppGraph {
-    @PersistentStorage val persistentStorage: Storage
+    @ForScope(RuntimeModeController::class) val modeStorage: ScopedStorage
 
     val userManager: UserManager
 

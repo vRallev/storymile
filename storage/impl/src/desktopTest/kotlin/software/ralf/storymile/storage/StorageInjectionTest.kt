@@ -11,7 +11,6 @@ import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotInstanceOf
 import assertk.assertions.isNotNull
-import assertk.assertions.isNull
 import assertk.assertions.isSameInstanceAs
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
@@ -32,9 +31,6 @@ import software.ralf.app.platform.scope.buildTestScope
 import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.register
 import software.ralf.app.platform.scope.runTestWithScope
-import software.ralf.storymile.runtimemode.RuntimeMode
-import software.ralf.storymile.runtimemode.RuntimeModeController
-import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 
 class StorageInjectionTest {
   @Test
@@ -80,10 +76,8 @@ class StorageInjectionTest {
 
   @Test
   fun `public factory creates storage owned by a separate scope`() = runTestWithScope { scope ->
-    val runtimeModeController: RuntimeModeController = FakeRuntimeModeController(RuntimeMode.Real)
     val graph =
-      createGraphFactory<Graph.Factory>()
-        .create(InMemoryStoragePlatform(), scope.coroutineScope(), runtimeModeController)
+      createGraphFactory<Graph.Factory>().create(InMemoryStoragePlatform(), scope.coroutineScope())
     val factory: ScopedStorage.Factory = graph.storageFactory
     val userScope = Scope.buildTestScope(this)
     val user: ScopedStorage = factory.create("user-alice", userScope.coroutineScope())
@@ -92,19 +86,6 @@ class StorageInjectionTest {
 
     graph.storage.files.write("file", byteArrayOf(1))
     user.files.write("file", byteArrayOf(2))
-    assertThat(graph.storage.files.read("file")).isNotNull().isEqualTo(byteArrayOf(1))
-    assertThat(user.files.read("file")).isNotNull().isEqualTo(byteArrayOf(2))
-
-    runtimeModeController.switchMode(RuntimeMode.Fake)
-
-    assertThat(graph.storage.files.read("file")).isNull()
-    assertThat(user.files.read("file")).isNull()
-    user.files.write("file", byteArrayOf(3))
-    assertThat(graph.storage.files.read("file")).isNull()
-    assertThat(user.files.read("file")).isNotNull().isEqualTo(byteArrayOf(3))
-
-    runtimeModeController.switchMode(RuntimeMode.Real)
-
     assertThat(graph.storage.files.read("file")).isNotNull().isEqualTo(byteArrayOf(1))
     assertThat(user.files.read("file")).isNotNull().isEqualTo(byteArrayOf(2))
 
@@ -154,11 +135,10 @@ class StorageInjectionTest {
     @ForScope(AppScope::class) val scopedInstances: Set<Scoped>
 
     @DependencyGraph.Factory
-    interface Factory {
+    fun interface Factory {
       fun create(
         @Provides platform: StoragePlatform,
         @Provides @ForScope(AppScope::class) coroutineScope: CoroutineScope,
-        @Provides runtimeModeController: RuntimeModeController = FakeRuntimeModeController(),
       ): Graph
     }
   }

@@ -3,7 +3,6 @@ plugins {
 }
 
 storymile {
-  enableMetro true
   addPublicModuleDependencies true
 }
 

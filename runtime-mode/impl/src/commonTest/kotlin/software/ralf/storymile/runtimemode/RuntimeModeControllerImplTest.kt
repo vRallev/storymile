@@ -30,7 +30,7 @@ import software.ralf.app.platform.scope.register
 import software.ralf.app.platform.scope.runTestWithScope
 import software.ralf.storymile.restart.ApplicationRestarter
 import software.ralf.storymile.storage.FileStorage
-import software.ralf.storymile.storage.Storage
+import software.ralf.storymile.storage.ScopedStorage
 
 class RuntimeModeControllerImplTest {
   @Test
@@ -351,7 +351,7 @@ class RuntimeModeControllerImplTest {
     initialModeName: String? = null,
     private val readGate: CompletableDeferred<Unit>? = null,
     private val writeGate: CompletableDeferred<Unit>? = null,
-  ) : Storage {
+  ) : ScopedStorage {
     private val modeKey = stringPreferencesKey("mode")
     private val mutex = Mutex()
     private val preferences =

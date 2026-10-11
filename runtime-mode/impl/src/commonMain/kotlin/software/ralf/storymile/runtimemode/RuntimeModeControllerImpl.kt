@@ -4,6 +4,7 @@ import androidx.datastore.core.IOException
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ForScope
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
@@ -14,15 +15,15 @@ import software.ralf.app.platform.inject.metro.ContributesScoped
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.Scoped
 import software.ralf.app.platform.scope.coroutine.launch
+import software.ralf.app.platform.scope.register
 import software.ralf.storymile.logging.Logger.Companion.logger
 import software.ralf.storymile.restart.ApplicationRestarter
-import software.ralf.storymile.storage.PersistentStorage
-import software.ralf.storymile.storage.Storage
+import software.ralf.storymile.storage.ScopedStorage
 
 @SingleIn(AppScope::class)
 @ContributesScoped(AppScope::class)
 class RuntimeModeControllerImpl(
-  @PersistentStorage private val storage: Storage,
+  @ForScope(RuntimeModeController::class) private val storage: ScopedStorage,
   private val applicationRestarter: ApplicationRestarter,
 ) : RuntimeModeController, Scoped {
   private val modeKey = stringPreferencesKey("mode")
@@ -36,6 +37,7 @@ class RuntimeModeControllerImpl(
 
   override fun onEnterScope(scope: Scope) {
     enteredScope = true
+    scope.register(storage)
     scope
       .launch {
         val startupMode = initialMode

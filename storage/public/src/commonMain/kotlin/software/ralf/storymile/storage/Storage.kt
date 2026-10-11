@@ -8,11 +8,6 @@ import androidx.datastore.preferences.core.Preferences
  * app data. Each namespace has separate preferences, files, and caches. Scope exit stops access and
  * preserves saved data.
  *
- * The injected storage uses memory in fake runtime mode. Existing handles follow mode changes. Fake
- * data is discarded when the app restarts after a mode switch. Storage operations wait for the
- * initial mode to load before selecting a backend. A mode change can cancel an in-flight operation.
- * Operations are not retried in the other backend.
- *
  * Android, Desktop, and iOS store preferences in DataStore files:
  * - Android: preferences and files use private `filesDir`; caches use `cacheDir`.
  * - Desktop: preferences and files use `~/.storymile/storage`; caches use the OS cache directory.

@@ -130,7 +130,6 @@ class DefaultStorage(
   }
 
   @AssistedFactory
-  @PersistentStorage
   @ContributesBinding(AppScope::class, binding = binding<ScopedStorage.Factory>())
   interface Factory : ScopedStorage.Factory {
     override fun create(namespace: String, coroutineScope: CoroutineScope): DefaultStorage

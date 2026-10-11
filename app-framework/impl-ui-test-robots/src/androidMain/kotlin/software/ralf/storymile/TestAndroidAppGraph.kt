@@ -19,7 +19,12 @@ import software.ralf.storymile.storage.DefaultStorage
  */
 @DependencyGraph(
   AppScope::class,
-  excludes = [DefaultStorage.Factory::class, RuntimeModeControllerImpl::class],
+  excludes =
+    [
+      DefaultStorage.Factory::class,
+      RuntimeModeStorageFactory::class,
+      RuntimeModeControllerImpl::class,
+    ],
 )
 interface TestAndroidAppGraph {
   /** Factory for an Android test graph. */

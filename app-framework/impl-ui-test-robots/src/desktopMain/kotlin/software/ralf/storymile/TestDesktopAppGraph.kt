@@ -18,7 +18,12 @@ import software.ralf.storymile.storage.DefaultStorage
  */
 @DependencyGraph(
   AppScope::class,
-  excludes = [DefaultStorage.Factory::class, RuntimeModeControllerImpl::class],
+  excludes =
+    [
+      DefaultStorage.Factory::class,
+      RuntimeModeStorageFactory::class,
+      RuntimeModeControllerImpl::class,
+    ],
 )
 interface TestDesktopAppGraph {
   /** Factory for a Desktop test graph. */
