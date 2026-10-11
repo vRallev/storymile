@@ -9,6 +9,5 @@ plugins {
 }
 
 dependencies {
-  commonMainImplementation project(':playback:public')
   commonMainImplementation project(':theme:public')
 }

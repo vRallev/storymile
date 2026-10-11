@@ -88,7 +88,6 @@ import software.ralf.app.platform.presenter.compose.backgesture.BackGestureDispa
 import software.ralf.app.platform.presenter.compose.backgesture.ForwardBackPressEventsToPresenters
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.app.platform.renderer.Render
-import software.ralf.storymile.playback.LocalCollapsePlayback
 import software.ralf.storymile.screen.DefaultScreenSizeProvider
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize

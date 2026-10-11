@@ -53,7 +53,7 @@ Window resizing changes the navigation layout without changing the selected dest
 
 [PlaybackScreenRenderer](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackScreenRenderer.kt)
 shows artwork, episode details, playback controls, and chapters. Its collapse button calls the template's
-[collapse action](../playback/public/src/commonMain/kotlin/software/ralf/storymile/playback/LocalCollapsePlayback.kt).
+[collapse action](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/LocalCollapsePlayback.kt).
 [PlaybackBarRenderer](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackBarRenderer.kt)
 shows artwork and compact controls. Both layouts share fake playback state from the playback presenter.
 [PlaybackTransition](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/PlaybackTransition.kt)
