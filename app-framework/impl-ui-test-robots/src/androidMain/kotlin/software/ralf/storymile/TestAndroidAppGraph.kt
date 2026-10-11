@@ -5,6 +5,9 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import software.ralf.app.platform.scope.RootScopeProvider
+import software.ralf.storymile.runtimemode.RuntimeModeController
+import software.ralf.storymile.runtimemode.RuntimeModeControllerImpl
+import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 import software.ralf.storymile.storage.DefaultStorage
 
 /**
@@ -14,7 +17,10 @@ import software.ralf.storymile.storage.DefaultStorage
  * The graph is compiled in the robot fixture module so Metro can discover robots that are absent
  * from the production application classpath.
  */
-@DependencyGraph(AppScope::class, excludes = [DefaultStorage.Factory::class])
+@DependencyGraph(
+  AppScope::class,
+  excludes = [DefaultStorage.Factory::class, RuntimeModeControllerImpl::class],
+)
 interface TestAndroidAppGraph {
   /** Factory for an Android test graph. */
   @DependencyGraph.Factory
@@ -23,6 +29,7 @@ interface TestAndroidAppGraph {
     fun create(
       @Provides application: Application,
       @Provides rootScopeProvider: RootScopeProvider,
+      @Provides runtimeModeController: RuntimeModeController = FakeRuntimeModeController(),
     ): TestAndroidAppGraph
   }
 }

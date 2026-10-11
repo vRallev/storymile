@@ -12,6 +12,7 @@ storymile {
 dependencies {
   commonMainImplementation project(':app-framework:impl')
   commonMainImplementation project(':restart:impl')
+  commonMainImplementation project(':runtime-mode:public')
   commonMainImplementation project(':theme:public')
   commonMainImplementation project(':util:public')
 

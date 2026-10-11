@@ -19,6 +19,7 @@ interface ScopedStorage : Storage, Scoped {
      * shared. Reopening waits for the previous owner's storage work to finish.
      *
      * [coroutineScope] must be a dedicated child of the owning scope. Storage cancels it on exit.
+     * The injected factory keeps fake runtime-mode data in memory, separate from persistent data.
      */
     fun create(namespace: String, coroutineScope: CoroutineScope): ScopedStorage
   }

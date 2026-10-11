@@ -25,8 +25,13 @@ import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.coroutine.launch
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
+import software.ralf.storymile.runtimemode.RuntimeMode
+import software.ralf.storymile.runtimemode.RuntimeModeController
+import software.ralf.storymile.runtimemode.RuntimeModeControllerImpl
+import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.InMemoryStorageFactory
+import software.ralf.storymile.storage.PersistentStorage
 import software.ralf.storymile.storage.ScopedStorage
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.user.User
@@ -174,16 +179,24 @@ class UserScopeTest {
 
   @DependencyGraph(
     AppScope::class,
-    excludes = [DefaultStorage.Factory::class, TestStorageBindings::class],
+    excludes =
+      [
+        DefaultStorage.Factory::class,
+        TestStorageBindings::class,
+        RuntimeModeControllerImpl::class,
+      ],
   )
   interface Graph : AppGraph {
     val userManager: UserManager
 
     @DependencyGraph.Factory
-    fun interface Factory {
+    interface Factory {
       fun create(
         @Provides rootScopeProvider: RootScopeProvider,
-        @Provides storageFactory: ScopedStorage.Factory,
+        @Provides @PersistentStorage storageFactory: ScopedStorage.Factory,
+        // Real mode uses the supplied memory factory as persistent storage across test graphs.
+        @Provides
+        runtimeModeController: RuntimeModeController = FakeRuntimeModeController(RuntimeMode.Real),
       ): Graph
     }
   }

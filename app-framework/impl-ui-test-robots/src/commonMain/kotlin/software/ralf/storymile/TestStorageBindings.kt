@@ -6,6 +6,7 @@ import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.SingleIn
 import software.ralf.storymile.storage.InMemoryStorageFactory
+import software.ralf.storymile.storage.PersistentStorage
 import software.ralf.storymile.storage.ScopedStorage
 
 /** Gives each integration-test graph its own in-memory storage. */
@@ -15,6 +16,7 @@ interface TestStorageBindings {
   companion object {
     @Provides
     @SingleIn(AppScope::class)
+    @PersistentStorage
     fun storageFactory(): ScopedStorage.Factory = InMemoryStorageFactory()
   }
 }

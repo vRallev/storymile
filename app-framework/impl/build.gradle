@@ -20,6 +20,8 @@ dependencies {
   commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':presenter-navigation:impl')
   commonMainImplementation project(':restart:impl')
+  commonMainImplementation project(':runtime-mode:impl')
+  commonMainImplementation project(':runtime-mode:public')
   commonMainImplementation project(':storage:impl')
   commonMainImplementation project(':tabs:impl')
   commonMainImplementation project(':templates:impl')
@@ -27,4 +29,7 @@ dependencies {
   commonMainImplementation project(':theme:public')
   commonMainImplementation project(':user:impl')
   commonMainImplementation project(':util:impl')
+
+  commonTestImplementation project(':runtime-mode:testing')
+  commonTestImplementation libs.okio
 }

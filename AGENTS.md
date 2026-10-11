@@ -125,6 +125,36 @@ open app/ios/iosApp.xcodeproj
 In Xcode, select the `iosApp` scheme and an ARM64 iOS simulator. Device builds need your
 team ID in `app/ios/Configuration/Config.xcconfig`.
 
+### Fake mode
+
+Storymile has `Real` and `Fake` runtime modes. `Real` is the default.
+The shared `RuntimeModeController` restores and saves the selection asynchronously in the application scope.
+The mode choice uses the persistent `runtime-mode` preferences store.
+Call `setInitialMode()` before entering the application scope to override the saved mode.
+On Desktop, press Command/Ctrl+F to switch modes. The window title shows `(Fake)` in fake mode.
+To select a mode at launch, pass `--runtime-mode=fake` or `--runtime-mode=real`:
+
+```sh
+./gradlew :app:desktop:run --args="--runtime-mode=fake"
+```
+
+Switching modes saves the selection, then calls `ApplicationRestarter` to destroy the application
+scope and restart. Android and Desktop start a new process. Web reloads. On iOS, reopen the app.
+Restoring a saved mode or selecting the current mode does not restart.
+If saving fails, the app keeps its current mode.
+In fake mode, app and scoped feature storage use `InMemoryStorageFactory` for preferences, files,
+and caches. Fake data resets on restart. Real data stays separate. Storage waits for mode restoration before
+accessing feature data. Only runtime-mode settings use `@PersistentStorage`.
+Storymile does not have network services yet. When adding a service, put its real, fake,
+and delegating implementations in the owning `:impl` module.
+Inject `RuntimeModeController` from `:runtime-mode:public` into the delegating service.
+For each operation, call `modeImplementation(realImpl = { ... }, fakeImpl = { ... })`.
+Use lazy factories so fake mode does not create network clients.
+Keep test-only fakes in `:testing` modules.
+
+Integration-test graphs use an in-memory mode controller and start in fake mode.
+Use `RuntimeModeRobot` to change modes in a test without restarting or saving the application mode.
+
 ### Documentation site
 
 The [Storymile site](https://vrallev.github.io/storymile/) uses Material for MkDocs.

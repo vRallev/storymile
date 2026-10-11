@@ -16,6 +16,10 @@ import software.ralf.app.platform.scope.Scoped
 @BindingContainer
 interface AppStorageBindings {
   @Binds
+  @PersistentStorage
+  fun persistentStorage(@PersistentStorage instance: ScopedStorage): Storage
+
+  @Binds
   @ForScope(AppScope::class)
   fun storage(@ForStorageLifecycle instance: ScopedStorage): Storage
 
@@ -29,7 +33,16 @@ interface AppStorageBindings {
     @SingleIn(AppScope::class)
     @ForStorageLifecycle
     fun appStorage(
-      factory: ScopedStorage.Factory,
+      factory: RuntimeModeStorageFactory,
+      @PersistentStorage persistent: ScopedStorage,
+      @ForScope(AppScope::class) coroutineScope: CoroutineScope,
+    ): ScopedStorage = factory.wrap("app", coroutineScope, persistent)
+
+    @Provides
+    @SingleIn(AppScope::class)
+    @PersistentStorage
+    fun persistentAppStorage(
+      @PersistentStorage factory: ScopedStorage.Factory,
       @ForScope(AppScope::class) coroutineScope: CoroutineScope,
     ): ScopedStorage = factory.create("app", coroutineScope)
   }
