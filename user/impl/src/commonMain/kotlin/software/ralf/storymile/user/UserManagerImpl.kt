@@ -14,30 +14,20 @@ import software.ralf.app.platform.scope.register
 @SingleIn(AppScope::class)
 @ContributesScoped(AppScope::class)
 class UserManagerImpl(private val userGraphFactory: UserGraph.Factory) : UserManager, Scoped {
-  private var userScopeOrNull: Scope? = null
+  private val guestUser = GuestUser()
 
   override val user: StateFlow<User>
-    field = MutableStateFlow<User>(GuestUser)
-
-  override val userScope: Scope
-    get() = checkNotNull(userScopeOrNull) { "The application must be running to access UserScope." }
+    field = MutableStateFlow<User>(guestUser)
 
   override fun onEnterScope(scope: Scope) {
-    check(userScopeOrNull == null) { "UserScope has already started." }
-    val currentUser = user.value
-    val graph = userGraphFactory.createUserGraph(currentUser)
+    val graph = userGraphFactory.createUserGraph(guestUser)
     val child =
-      scope.buildChild("user-${currentUser.id}") {
+      scope.buildChild("user-${guestUser.id}") {
         addMetroDependencyGraph(graph)
         addCoroutineScopeScoped(graph.coroutineOwner)
       }
 
-    userScopeOrNull = child
+    child.register(guestUser)
     child.register(graph.userScopedInstances)
-  }
-
-  override fun onExitScope() {
-    // The parent destroys its children before invoking this callback.
-    userScopeOrNull = null
   }
 }
