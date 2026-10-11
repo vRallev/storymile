@@ -12,6 +12,7 @@ import okio.Path.Companion.toPath
 import software.ralf.app.platform.scope.coroutine.IoCoroutineDispatcher
 
 /** Stores durable data and cache files in the application's private directories. */
+@PersistentStorage
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class, binding = binding<StoragePlatform>())
 class AndroidStoragePlatform(

@@ -14,9 +14,27 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
+import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.storage.Storage
 
 class IntegrationStorageTest {
+  @Test
+  fun `test applications cannot leave fake mode`() = runTest {
+    val application = KmpApplication()
+    val graph = createGraphFactory<TestDesktopAppGraph.Factory>().create(application)
+    application.create(graph)
+    try {
+      val controller = graph.runtimeModeController
+      assertThat(controller.mode()).isEqualTo(RuntimeMode.Fake)
+      controller.switchMode(RuntimeMode.Fake)
+      assertFailure { controller.switchMode(RuntimeMode.Real) }
+        .isInstanceOf<IllegalStateException>()
+      assertThat(controller.mode()).isEqualTo(RuntimeMode.Fake)
+    } finally {
+      application.destroy()
+    }
+  }
+
   @Test
   fun `test applications keep preferences files and caches isolated`() = runTest {
     val key = stringPreferencesKey("theme")

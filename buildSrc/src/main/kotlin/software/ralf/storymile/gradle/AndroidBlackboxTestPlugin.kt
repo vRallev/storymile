@@ -26,12 +26,12 @@ public open class AndroidBlackboxTestPlugin : Plugin<Project> {
       targetSdk = androidTargetSdk
       testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    android.buildTypes.create("release") {
+    android.buildTypes.create("fakeRelease") {
       it.isDebuggable = true
       it.signingConfig = android.signingConfigs.getByName("debug")
     }
     extensions.getByType(TestAndroidComponentsExtension::class.java).beforeVariants {
-      it.enable = it.buildType == "release"
+      it.enable = it.buildType == "fakeRelease"
     }
     android.compileOptions {
       sourceCompatibility = javaVersion
@@ -40,6 +40,6 @@ public open class AndroidBlackboxTestPlugin : Plugin<Project> {
     configureAndroidPackaging(android.packaging)
     // ATD images disable rendering, which produces blank failure screenshots.
     configureAndroidEmulator(android.testOptions, systemImageSource = "google")
-    releaseTask.configure { it.dependsOn("assembleRelease") }
+    releaseTask.configure { it.dependsOn("assembleFakeRelease") }
   }
 }

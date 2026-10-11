@@ -17,6 +17,7 @@ import software.ralf.app.platform.scope.coroutine.IoCoroutineDispatcher
 
 /** Stores durable data in Application Support and cache files in Caches within the app sandbox. */
 @OptIn(ExperimentalForeignApi::class)
+@PersistentStorage
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class, binding = binding<StoragePlatform>())
 class IosStoragePlatform(@IoCoroutineDispatcher ioDispatcher: CoroutineDispatcher) :

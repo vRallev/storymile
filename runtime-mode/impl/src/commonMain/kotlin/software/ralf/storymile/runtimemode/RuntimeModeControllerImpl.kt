@@ -5,7 +5,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.ForScope
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
@@ -20,7 +19,7 @@ import software.ralf.storymile.storage.Storage
 @SingleIn(AppScope::class)
 @ContributesScoped(AppScope::class)
 class RuntimeModeControllerImpl(
-  @ForScope(AppScope::class) private val storage: Storage,
+  @ForRuntimeMode private val storage: Storage,
   private val applicationRestarter: ApplicationRestarter,
 ) : RuntimeModeController, Scoped {
   private val mutex = Mutex()

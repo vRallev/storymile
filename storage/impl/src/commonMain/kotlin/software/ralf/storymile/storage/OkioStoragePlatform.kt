@@ -30,7 +30,7 @@ abstract class OkioStoragePlatform(
   /** Returns an absolute cache directory reserved for Storymile. */
   protected abstract fun cacheDirectory(): Path
 
-  internal final override fun createPreferences(
+  internal final override suspend fun createPreferences(
     namespace: String,
     name: String,
     coroutineScope: CoroutineScope,

@@ -95,6 +95,8 @@ Do not reuse the app handle for user data. Scope exit cancels storage work and p
 Delete files explicitly. Keep preference keys in the owning feature.
 Use `Storage.cache` for data the system can remove.
 Integration-test graphs must use a new `InMemoryStorageFactory` for each graph.
+Fake mode keeps app and user data in memory. Only the runtime-mode setting stays persistent.
+Instrumentation tests are locked to fake mode.
 
 ### Icons
 
@@ -249,8 +251,8 @@ Desktop tests include rendered and headless application smoke tests.
 
 #### Android
 
-Android UI tests use a managed Pixel 3 emulator. The blackbox test checks the initial screen
-of the release APK, signed with the debug key and shrunk by R8 without obfuscation.
+Android UI tests use a managed Pixel 3 emulator. The blackbox test checks `fakeRelease` in fake mode.
+It uses release settings, debug signing, and R8 without obfuscation.
 
 #### Web
 

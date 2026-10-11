@@ -208,7 +208,7 @@ class StorageTest {
     val finishWrite = CompletableDeferred<Unit>()
     private val files = mutableMapOf<Triple<String, FileStorageArea, String>, ByteArray>()
 
-    override fun createPreferences(
+    override suspend fun createPreferences(
       namespace: String,
       name: String,
       coroutineScope: CoroutineScope,

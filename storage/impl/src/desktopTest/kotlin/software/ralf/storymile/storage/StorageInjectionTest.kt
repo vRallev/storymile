@@ -124,7 +124,15 @@ class StorageInjectionTest {
     assertThat(sibling.files.read("chapter")).isNotNull().isEqualTo(byteArrayOf(2))
   }
 
-  @DependencyGraph(AppScope::class, excludes = [DesktopStoragePlatform::class])
+  @DependencyGraph(
+    AppScope::class,
+    excludes =
+      [
+        DesktopStoragePlatform::class,
+        RuntimeModeStoragePlatform::class,
+        RuntimeModeStorageBindings::class,
+      ],
+  )
   interface Graph {
     val consumer: Consumer
 

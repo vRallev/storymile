@@ -25,7 +25,7 @@ abstract class StoragePlatform {
     namespaceOwners[namespace] = owner
   }
 
-  internal abstract fun createPreferences(
+  internal abstract suspend fun createPreferences(
     namespace: String,
     name: String,
     coroutineScope: CoroutineScope,

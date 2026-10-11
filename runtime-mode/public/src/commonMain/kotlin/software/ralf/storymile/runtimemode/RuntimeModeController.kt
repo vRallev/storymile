@@ -12,7 +12,8 @@ interface RuntimeModeController {
   /**
    * Saves [mode] for the next app start, then requests an application restart. Selecting the saved
    * mode does not restart, including while the initial value is loading. Storage failures propagate
-   * to the caller without requesting a restart.
+   * to the caller without requesting a restart. Test applications stay in [RuntimeMode.Fake] and
+   * reject [RuntimeMode.Real].
    */
   suspend fun switchMode(mode: RuntimeMode)
 }

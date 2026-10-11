@@ -14,7 +14,7 @@ internal class InMemoryStoragePlatform : StoragePlatform() {
   private val filesMutex = Mutex()
   private val files = mutableMapOf<FileKey, ByteArray>()
 
-  override fun createPreferences(
+  override suspend fun createPreferences(
     namespace: String,
     name: String,
     coroutineScope: CoroutineScope,

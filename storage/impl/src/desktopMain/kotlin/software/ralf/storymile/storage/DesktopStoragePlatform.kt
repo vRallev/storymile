@@ -14,6 +14,7 @@ import software.ralf.storymile.util.Platform
 /**
  * Stores durable data beneath the user's home directory and cache files in the OS cache directory.
  */
+@PersistentStorage
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class, binding = binding<StoragePlatform>())
 class DesktopStoragePlatform(

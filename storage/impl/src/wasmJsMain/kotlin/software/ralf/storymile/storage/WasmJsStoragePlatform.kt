@@ -26,12 +26,13 @@ import kotlinx.coroutines.withContext
 
 /** Stores preferences in browser local storage and files in origin-private storage. */
 @OptIn(ExperimentalWasmJsInterop::class)
+@PersistentStorage
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
 class WasmJsStoragePlatform : StoragePlatform() {
   private val files = createBrowserFileStorage()
 
-  internal override fun createPreferences(
+  internal override suspend fun createPreferences(
     namespace: String,
     name: String,
     coroutineScope: CoroutineScope,

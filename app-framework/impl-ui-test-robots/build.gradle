@@ -9,6 +9,7 @@ storymile {
 }
 
 dependencies {
+  commonMainApi project(':runtime-mode:public')
   commonMainApi project(':tabs:public')
 
   androidMainImplementation libs.androidx.test.junit
@@ -20,6 +21,7 @@ dependencies {
   commonMainImplementation project(':app-framework:impl')
   commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':presenter-navigation:impl')
+  commonMainImplementation project(':runtime-mode:impl')
   commonMainImplementation project(':storage:impl')
   commonMainImplementation project(':tabs:impl')
   commonMainImplementation project(':templates:impl')
@@ -28,4 +30,7 @@ dependencies {
   commonMainImplementation project(':user:impl')
   commonMainImplementation project(':user:public')
   commonMainImplementation project(':util:impl')
+
+  commonTestImplementation project(':restart:impl')
+  commonTestImplementation libs.okio
 }

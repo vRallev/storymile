@@ -12,12 +12,14 @@ internal class BaseAndroidPlugin : Plugin<Project> {
   private fun Project.configureAndroid() {
     val android = extensions.getByType(ApplicationExtension::class.java)
     android.compileSdk = androidCompileSdk
+    android.buildFeatures.buildConfig = true
     android.defaultConfig {
       applicationId = "software.ralf.storymile"
       minSdk = androidMinSdk
       targetSdk = androidTargetSdk
       versionCode = 1
       versionName = this@configureAndroid.versionName
+      buildConfigField("boolean", "FAKE_MODE", "false")
     }
 
     android.compileOptions {
@@ -29,6 +31,11 @@ internal class BaseAndroidPlugin : Plugin<Project> {
       it.isDebuggable = false
       // Use local debug signing until a release signing key is configured.
       it.signingConfig = android.signingConfigs.getByName("debug")
+    }
+    android.buildTypes.create("fakeRelease") {
+      it.initWith(android.buildTypes.getByName("release"))
+      it.matchingFallbacks.add("release")
+      it.buildConfigField("boolean", "FAKE_MODE", "true")
     }
     android.testOptions.unitTests {
       isIncludeAndroidResources = false
