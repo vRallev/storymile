@@ -14,6 +14,8 @@ import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.Scoped
 import software.ralf.app.platform.scope.coroutine.launch
 import software.ralf.storymile.logging.Logger.Companion.logger
+import software.ralf.storymile.runtimemode.RuntimeMode
+import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.user.UserScope
 
@@ -31,6 +33,7 @@ import software.ralf.storymile.user.UserScope
 @ContributesScoped(UserScope::class)
 class PlaylistRepositoryImpl(
   @ForScope(UserScope::class) storage: Storage,
+  private val runtimeModeController: RuntimeModeController,
 ) : PlaylistRepository, Scoped {
   override val playlists: StateFlow<List<Playlist>>
     field = MutableStateFlow(emptyList())
@@ -135,11 +138,27 @@ class PlaylistRepositoryImpl(
 
   private suspend fun load() {
     if (!loaded) {
-      val saved = files.read(fileName)?.let { document.decode(it) } ?: emptyList()
+      val saved = files.read(fileName)?.let { document.decode(it) } ?: defaultPlaylists()
       currentCoroutineContext().ensureActive()
       playlists.value = saved
       loaded = true
     }
+  }
+
+  private suspend fun defaultPlaylists(): List<Playlist> {
+    if (runtimeModeController.mode() != RuntimeMode.Fake) {
+      return emptyList()
+    }
+    val defaults =
+      listOf(
+        Playlist(
+          PlaylistId("storymile-test-episodes"),
+          PlaylistName("Storymile test episodes"),
+          (1..3).map { EpisodeId("test-episode-$it") },
+        ),
+      )
+    files.write(fileName, document.encode(defaults))
+    return defaults
   }
 
   private suspend fun reportFailure(block: suspend () -> Unit) {
