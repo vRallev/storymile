@@ -23,7 +23,7 @@ dependencies {
   commonMainImplementation project(':playlist:public')
   commonMainImplementation project(':presenter-navigation:impl')
   commonMainImplementation project(':restart:impl')
-  commonMainImplementation project(':runtime-mode:impl')
+  commonMainImplementation project(':runtime-mode:impl-robots')
   commonMainImplementation project(':runtime-mode:public')
   commonMainImplementation project(':storage:impl')
   commonMainImplementation project(':tabs:impl')
@@ -35,4 +35,5 @@ dependencies {
   commonMainImplementation project(':util:impl')
 
   commonTestImplementation project(':restart:public')
+  commonTestImplementation project(':runtime-mode:impl')
 }
