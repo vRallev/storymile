@@ -4,6 +4,7 @@
 
 - `app`: Android, Desktop, iOS, and Wasm launchers.
 - `app-framework`: application lifecycle, dependency graphs, and integration-test fixtures.
+- `user`: the active user, guest startup, and user scope.
 - `templates`, `theme`, `presenter-navigation`: shared UI infrastructure.
 - `buildSrc`: Gradle conventions, platform targets, module checks, and test setup.
 
@@ -85,6 +86,8 @@ Use assertk for value and exception assertions.
 
 Use `:storage:public` for preferences, files, and caches. App assembly selects `:storage:impl`.
 Inject `@ForScope(AppScope::class) storage: Storage` for app data.
+Inject `@ForScope(UserScope::class) storage: Storage` for user data, including guest data.
+`UserManager` starts a guest user and owns its child scope. Guest data uses `user-guest`.
 For future scopes, inject `ScopedStorage.Factory` in the owning module's binding container.
 Create one `ScopedStorage` with a dedicated scope coroutine owner and stable `user-<id>` namespace.
 Bind that instance to the scope-qualified `Storage` and `Scoped` set.

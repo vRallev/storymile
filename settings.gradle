@@ -41,6 +41,8 @@ include ':templates:impl'
 include ':templates:public'
 include ':theme:impl'
 include ':theme:public'
+include ':user:impl'
+include ':user:public'
 include ':util:impl'
 include ':util:public'
 
