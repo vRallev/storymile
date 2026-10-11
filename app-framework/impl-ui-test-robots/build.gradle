@@ -9,7 +9,6 @@ storymile {
 }
 
 dependencies {
-  commonMainApi project(':library:impl-robots')
   commonMainApi project(':tabs:public')
 
   androidMainImplementation libs.androidx.test.junit
@@ -19,7 +18,6 @@ dependencies {
   androidMainImplementation libs.compose.ui.test.junit4.android
 
   commonMainImplementation project(':app-framework:impl')
-  commonMainImplementation project(':library:impl')
   commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':presenter-navigation:impl')
   commonMainImplementation project(':storage:impl')
