@@ -1815,6 +1815,443 @@
         "screens/ios-tablet-landscape-settings-light.png",
         "screens/android-tablet-landscape-settings-dark.png"
       ]
+    },
+    {
+      "id": "android-phone-home-empty-light",
+      "file": "screens/android-phone-home-empty-light.png",
+      "prompt": "Use case: ui-mockup. Generate ONE polished flat Android phone portrait screenshot, canvas ratio 412:916 (about 1024x2277 pixels), full bleed, no device frame or outside margin. Input 1 is the style/layout reference for existing Storymile, input 2 is exact faceted blue origami boat identity. Design Home for a completely new guest: top Android status 10:30, centered round punch hole, wifi cellular battery; below small boat and Storymile wordmark on left, circular guest avatar at upper right. Header 'Welcome to Storymile' in balanced two lines if needed, Roboto sans. Search field 'Podcasts and episodes'. Center the empty content area around a modest faceted paper boat floating on three gentle stylized blue waves, elegant restrained illustration. Below it bold 'Find your first podcast', two-line description 'Explore topics and find a story worth listening to.' Prominent rounded filled blue 'Discover podcasts' button. Small muted 'Listen without an account' below. Bottom navigation fixed with large rounded upper corners and icons/labels Home (active blue oval), Library, Downloads. Android gesture handle below. No mini-player, no Continue listening, no followed shows, no history, no recommendations or other activity. Paper Tide palette: background #F7F3EB, surfaces #FFFDF8, ink #233B50, primary #365F7D, selection #DCE8EE, subtle gold #D6BA8E. Match existing professional Material 3 visual language and generous spacing. Sharp legible UI typography. Only screenshot, no annotations.",
+      "references": [
+        "screens/android-phone-home-light.png",
+        "boat-icon.png"
+      ]
+    },
+    {
+      "id": "android-phone-home-empty-dark",
+      "file": "screens/android-phone-home-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Edit the supplied Storymile Home empty-state phone portrait screenshot into its Harbor Night DARK counterpart. Preserve every element's exact position, size, wording, boat shape, search, circular top-right avatar, illustration, button, rounded upper corners of bottom bar, active Home navigation, Android statusbar/punch hole and gesture handle. Preserve portrait aspect 412:916 and same full bleed single screenshot. Change only theme colors: background #0F202D, surface #182F40, primary text #F4EFE5, secondary #AFBFCA, button and active icon #ACC9DC with dark #0F202D text, selected oval #294C63, subtle gold #E4C79D. Recolor waves to muted light blue and retain blue faceted boat. No mini player, no activity. Sharp Roboto typography. Opaque background.",
+      "references": [
+        "screens/android-phone-home-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-phone-landscape-home-empty-light",
+      "file": "screens/android-phone-landscape-home-empty-light.png",
+      "prompt": "Use case: ui-mockup. Adapt image1 new-user Storymile Home empty state to ONE Android PHONE LANDSCAPE screenshot with 916:412 aspect ratio, about 1870x841px. Image2 is reference ONLY for landscape navigation rail, top statusbar and visual scale, not its content. Full bleed canvas, no device frame, no margins. Left compact Material3 navigation rail with small exact blue boat, Storymile and icons with labels Home(active), Library, Downloads. Status10:30 left, Android wifi/cellular/battery right. Main pane top 'Welcome to Storymile', circular guest avatar top right. Under header search 'Podcasts and episodes'. In remaining wide short space use two balanced columns: faceted blue boat on gentle blue waves illustration on left; right has bold 'Find your first podcast', 'Explore topics and find a story worth listening to.', blue rounded filled 'Discover podcasts' button, muted 'Listen without an account'. Keep all text and illustration visible without overlap. No mini-player or playback, no Continue listening or Your shows or episode cards. Paper Tide light palette bg#F7F3EB surface#FFFDF8 ink#233B50 primary#365F7D selected#DCE8EE. Roboto sans, crisp Material symbols, professional existing aesthetic. Home active only. Slim Android gesture handle bottom center. Exact landscape ratio mandatory.",
+      "references": [
+        "screens/android-phone-home-empty-light.png",
+        "screens/android-phone-landscape-home-light.png"
+      ]
+    },
+    {
+      "id": "android-phone-landscape-home-empty-dark",
+      "file": "screens/android-phone-landscape-home-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Edit this exact Storymile Home empty-state Android phone landscape screenshot to Harbor Night DARK mode. Preserve exact geometry, aspect 916:412, all text, positions, sizes, faceted boat illustration and identity, left navigation rail Home active/Library/Downloads, top-right circular guest avatar, statusbar and gesture handle. Change only theme: background #0F202D, surface #182F40, primary text #F4EFE5, secondary #AFBFCA, button pale blue #ACC9DC and button text #0F202D, selection #294C63, sun gold #E4C79D, muted pale blue waves/clouds. Keep boat blue facets. Full bleed single screenshot, no frame or margins. No mini-player or activity. Same sharp Roboto sans typography.",
+      "references": [
+        "screens/android-phone-landscape-home-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-portrait-home-empty-light",
+      "file": "screens/android-tablet-portrait-home-empty-light.png",
+      "prompt": "Use case: ui-mockup. Adapt first reference Storymile Home empty state to ONE Android TABLET PORTRAIT screenshot, aspect800:1280 (about992x1586px). Second reference is tablet style and narrow rail structure only. Full bleed flat screenshot, no device frame or extra margins. Left narrow Material3 rail icons and labels Home active blue oval, Library, Downloads. Header small blue faceted boat Storymile wordmark, circular avatar top right. Android status10:30 and wireless battery at top; no phone camera notch. Main pane 'Welcome to Storymile' and search field 'Podcasts and episodes'. Calm centered empty state: blue faceted origami boat on pale blue waves with small clouds/gold sun, then bold 'Find your first podcast', 'Explore topics and find a story worth listening to.', filled rounded blue 'Discover podcasts' button and muted 'Listen without an account'. Keep content restrained and centered in large available vertical main pane. Do not copy activity content from reference2: no mini player, no Continue listening, no shows, no episodes. Paper Tide palette bg#F7F3EB surface#FFFDF8 ink#233B50 primary#365F7D selected#DCE8EE. Roboto sans and native Material icon scale. Bottom slim Android gesture handle. Single portrait tablet screenshot.",
+      "references": [
+        "screens/android-phone-home-empty-light.png",
+        "screens/android-tablet-portrait-home-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-portrait-home-empty-dark",
+      "file": "screens/android-tablet-portrait-home-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Create Harbor Night DARK theme counterpart of this exact Storymile Home empty-state tablet portrait screenshot. Preserve aspect800:1280 and all element geometry, relative sizes, words, navigation rail Home active Library Downloads, top-right avatar, faceted blue origami boat art, Android status icons and gesture handle. Only recolor background#0F202D surface#182F40 primary text#F4EFE5 secondary#AFBFCA button#ACC9DC with dark#0F202D label, active oval#294C63, gold sun#E4C79D, waves/clouds muted blue. No additions, no playback or mini player. Exact same composition full bleed without frame or external margin. Crisp Roboto sans UI.",
+      "references": [
+        "screens/android-tablet-portrait-home-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-landscape-home-empty-light",
+      "file": "screens/android-tablet-landscape-home-empty-light.png",
+      "prompt": "Use case: ui-mockup. Adapt reference1 Storymile new-user Home empty state to ONE Android TABLET LANDSCAPE screenshot, exact1280:800 ratio, about1586x992px. Reference2 shows existing tablet landscape rail, header, avatar and UI scale; omit all its populated activity. Full bleed single flat screenshot, no physical frame or margin. Left compact rail has small blue faceted boat and Storymile label, Home(active pale-blue oval), Library, Downloads icons with labels. Android status10:30/wifi/battery top edge no phone camera. Main pane top 'Welcome to Storymile' and circular gray guest avatar upper right, search 'Podcasts and episodes' below. Wide main area below search uses centered two-column empty state: left illustration exact blue faceted origami boat on three gentle pale-blue waves, small clouds and warm gold sun; right 'Find your first podcast' heading, 'Explore topics and find a story worth listening to.', prominent rounded filled 'Discover podcasts' button, muted 'Listen without an account'. Quiet generous space but contents balanced and touch-sized. Absolutely no mini-player, fake listening history, Your shows, Continue listening or episode cards. Paper Tide light bg#F7F3EB surface#FFFDF8 ink#233B50 primary#365F7D selected#DCE8EE. Roboto sans, Material icons. Slim bottom gesture handle. Preserve exact words.",
+      "references": [
+        "screens/android-phone-home-empty-light.png",
+        "screens/android-tablet-landscape-home-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-landscape-home-empty-dark",
+      "file": "screens/android-tablet-landscape-home-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Change this exact Home empty-state Android tablet landscape screenshot to Harbor Night DARK mode. Retain1280:800 aspect, identical spacing, type sizes, wordings, left rail Home active Library Downloads, avatar, boat illustration, status icons and gesture handle. Recolor only: background#0F202D, surface#182F40, text#F4EFE5, secondary#AFBFCA, button#ACC9DC with#0F202D label, selection#294C63, gold sun#E4C79D, subtle blue waves and clouds. Keep blue faceted origami boat. Same full bleed single flat screenshot without frame, outside margin, mini-player or activity. Crisp Roboto and Material icons.",
+      "references": [
+        "screens/android-tablet-landscape-home-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-foldable-home-empty-light",
+      "file": "screens/android-foldable-home-empty-light.png",
+      "prompt": "Use case: ui-mockup. Adapt reference1 Home empty state to ONE unfolded Android FOLDABLE inner display, full bleed ratio841:701 (roughly1373x1145px). Reference2 shows only existing rail structure and foldable proportions. Preserve faceted blue boat identity and Material3 Roboto typography. Left narrow rail Home active, Library, Downloads. Main header boat+Storymile, circular gray account avatar at upper right, 'Welcome to Storymile' heading below, search 'Podcasts and episodes'. Beneath header split empty content into two balanced supporting panes with clear central hinge gutter: left pane contains only a compact blue faceted paper boat on gentle pale-blue waves/clouds/gold sun; right pane centered text 'Find your first podcast', description 'Explore topics and find a story worth listening to.', blue rounded filled 'Discover podcasts' button, 'Listen without an account'. Keep important artwork, text and buttons away from central vertical fold gutter; no actual hardware frame or black hinge. Short lines fit in right pane. Android10:30/wifi/battery status, gesture handle bottom. No mini player, activity, shows or episode cards. Paper Tide light bg#F7F3EB surface#FFFDF8 ink#233B50 primary#365F7D selected#DCE8EE. Exact single screenshot not composite or marketing poster.\n\nFinal refinement:\nUse case: ui-mockup. Targeted correction of this Storymile foldable Home empty-state screenshot: all essential content must stay off the central vertical fold at x=half canvas. Keep same841:701 aspect, left nav rail, light palette, avatar, no playback, boat illustration and all exact words. Make heading in LEFT pane only, split into three compact lines 'Welcome to' / 'Storymile' as two lines if it fits, reducing heading size to fit within left pane between rail and center gutter. Search field also LEFT pane only under heading; it may use a smaller type size but retains 'Podcasts and episodes'. RIGHT pane retains centered Find your first podcast, description, Discover podcasts button and Listen without an account, all entirely right of fold. Scale left boat/waves/clouds slightly smaller so artwork wholly fits left of center with24px gutter. Preserve spacious balance. No element other than background spans the center fold. Full bleed screenshot, no device frame. Keep all other colors, text, avatar and nav unchanged.",
+      "references": [
+        "screens/android-tablet-landscape-home-empty-light.png",
+        "screens/android-foldable-home-light.png"
+      ]
+    },
+    {
+      "id": "android-foldable-home-empty-dark",
+      "file": "screens/android-foldable-home-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Edit exact Storymile foldable Home empty-state screenshot into Harbor Night DARK theme. Preserve full canvas841:701 and exact geometry, all text, left rail Home active Library Downloads, search and two-line Welcome to Storymile confined to left pane, boat art left, CTA content entirely right of central fold gutter, top-right avatar and Android status. Only colors change: bg#0F202D surface#182F40 text#F4EFE5 secondary#AFBFCA primary button#ACC9DC with#0F202D label selected#294C63 sun#E4C79D waves/clouds muted blue. Keep origami boat facets blue. No mini player or activity. Full bleed single screenshot no device frame or external margins. Sharp Roboto.",
+      "references": [
+        "screens/android-foldable-home-empty-light.png"
+      ]
+    },
+    {
+      "id": "desktop-home-empty-light",
+      "file": "screens/desktop-home-empty-light.png",
+      "prompt": "Use case: ui-mockup. Generate ONE Storymile DESKTOP Home empty-state screenshot1600:900 aspect16:9 (roughly1672x941px). Input1 is new-user content and artwork reference, input2 is existing desktop sidebar style/scale only. Flat full bleed app content no OS titlebar/browser chrome/device frame, no phone statusbar/camera/gesture bar. Left full-height expanded sidebar with faceted blue boat+Storymile wordmark and three icon+inline-label rows Home(active light blue rounded rectangle), Library, Downloads. Main top 'Welcome to Storymile' and circular guest avatar top right, search field 'Podcasts and episodes'. Beneath, center a spacious two-column welcome composition: left modest blue faceted origami boat on three gentle pale blue waves and small clouds/gold sun; right bold 'Find your first podcast', 'Explore topics and find a story worth listening to.', primary rounded blue 'Discover podcasts' button, muted 'Listen without an account'. Correct desktop hierarchy, restrained font sizes, generous calm margins within main pane. Do not reproduce any populated content from reference2: no mini-player, shows, episodes, Continue listening or history. Paper Tide bg#F7F3EB surfaces#FFFDF8 ink#233B50 primary#365F7D selected#DCE8EE. Roboto sans/Material symbols. Exact same meaningful content as input1.",
+      "references": [
+        "screens/android-tablet-landscape-home-empty-light.png",
+        "screens/desktop-home-light.png"
+      ]
+    },
+    {
+      "id": "desktop-home-empty-dark",
+      "file": "screens/desktop-home-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Change exact supplied Storymile desktop Home empty-state screenshot to Harbor Night DARK mode. Preserve1600:900 ratio, positions, sizes, all words, expanded left sidebar Home(active) Library Downloads, top-right circular avatar, boat illustration and full bleed single screenshot. Color changes only: background#0F202D surface#182F40 main text#F4EFE5 secondary#AFBFCA button#ACC9DC with#0F202D text selection#294C63 sun#E4C79D pale muted blue clouds/waves. Keep boat blue facets. No camera/statusbar/gesture handle/OS chrome, no mini player or activity. Sharp Roboto type and Material icons. Do not add outer margin or device frame.",
+      "references": [
+        "screens/desktop-home-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-phone-library-empty-light",
+      "file": "screens/android-phone-library-empty-light.png",
+      "prompt": "Use case: ui-mockup. Create a high fidelity Storymile podcast app Library EMPTY state for a new user. Reference image is style and navigation reference, not content to retain. One individual flat app screenshot fills canvas edge to edge, no physical device frame, no exterior margin, no caption, no montage. Match existing blue faceted origami boat and Storymile brand, Android Material 3 components and Roboto text. Top right circular gray guest avatar. Header \"Library\"; directly below a compact Episodes / Shows segmented control, Episodes selected with check. Remove all populated episode lists, cover art, saved counts, sort controls, detail panes and miniplayer. No playback yet. Main content is one elegant modest empty-book/bookmark illustration in soft blue, headline \"Your library starts here\", body \"Save episodes or follow shows to find them here.\", filled pill button \"Discover podcasts\". Center this single message within available main content while retaining realistic app UI spacing and crisp readable type. Primary navigation exactly \"Home\", \"Library\", \"Downloads\", Library selected. Light palette background #F7F3EB, surfaces #FFFDF8, ink #233B50, primary #365F7D, secondary #5B6E79, selection #DCE8EE. Text exactly as quoted. No other text, recommendations, disabled controls or fabricated content. Phone portrait viewport412x916, output approximately840x1872 (same aspect ratio). Android status10:30 left, centered small round camera punchhole, right WiFi/cellular/battery, system gesture bar bottom. Brand at upper left, avatar upper right, Library heading and segmented tabs below. Navigation fixed along bottom with 32dp rounded upper corners and pale blue selected Library pill. Keep content modest and center between tabs and navigation.",
+      "references": [
+        "screens/android-phone-library-light.png"
+      ]
+    },
+    {
+      "id": "android-phone-library-empty-dark",
+      "file": "screens/android-phone-library-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Edit target is attached Storymile phone portrait Library empty state. Change ONLY theme to Harbor Night dark. Preserve exact canvas aspect, navigation, spacing, typography, illustration and every text exactly. Background #0F202D, surface #182F40, main text #F4EFE5, secondary #AFBFCA, primary/buttons #ACC9DC with dark #0F202D label, selection #294C63. Recolor empty-book illustration to pale blue and navy, keep blue faceted boat. Status icons and gesture bar light, camera black. No new content or extra player. Output same portrait resolution about840x1872.",
+      "references": [
+        "screens/android-phone-library-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-phone-landscape-library-empty-light",
+      "file": "screens/android-phone-landscape-library-empty-light.png",
+      "prompt": "Use case: ui-mockup. Create a high fidelity Storymile podcast app Library EMPTY state for a new user. Reference image is style and navigation reference, not content to retain. One individual flat app screenshot fills canvas edge to edge, no physical device frame, no exterior margin, no caption, no montage. Match existing blue faceted origami boat and Storymile brand, Android Material 3 components and Roboto text. Top right circular gray guest avatar. Header \"Library\"; directly below a compact Episodes / Shows segmented control, Episodes selected with check. Remove all populated episode lists, cover art, saved counts, sort controls, detail panes and miniplayer. No playback yet. Main content is one elegant modest empty-book/bookmark illustration in soft blue, headline \"Your library starts here\", body \"Save episodes or follow shows to find them here.\", filled pill button \"Discover podcasts\". Center this single message within available main content while retaining realistic app UI spacing and crisp readable type. Primary navigation exactly \"Home\", \"Library\", \"Downloads\", Library selected. Light palette background #F7F3EB, surfaces #FFFDF8, ink #233B50, primary #365F7D, secondary #5B6E79, selection #DCE8EE. Text exactly as quoted. No other text, recommendations, disabled controls or fabricated content. Phone LANDSCAPE viewport916x412, output1872x842 approximately, aspect916:412. Input1 existing landscape navigation reference. Input2 same empty state portrait content/illustration reference. Short-wide adaptive layout: compact left navigation rail with brand boat and Home/Library/Downloads, top-left main heading Library and compact segmented controls. Top-right avatar. Main empty state fits without scrolling using small book illustration left of headline/copy/button, a centered horizontally arranged group. Android status10:30 left and right WiFi/cellular/battery, system gesture handle bottom. All content fits screen with good space, no huge portrait empty margins and no list/detail split.",
+      "references": [
+        "screens/android-phone-landscape-library-light.png",
+        "screens/android-phone-library-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-phone-landscape-library-empty-dark",
+      "file": "screens/android-phone-landscape-library-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Edit target is the attached Storymile Library empty state light screenshot. Change ONLY theme to Harbor Night dark. Preserve exact canvas aspect ratio, dimensions, navigation, spacing, typography, illustration and every text exactly. Background #0F202D, surface #182F40, main text #F4EFE5, secondary #AFBFCA, primary/buttons #ACC9DC with dark #0F202D label, selection #294C63. Recolor empty-book illustration to pale blue and navy, keep blue faceted boat shape. Status icons and system gesture bar light if present. No new content or extra player. Output at same aspect and dimensions.  Phone landscape916:412, approximately1872x842.",
+      "references": [
+        "screens/android-phone-landscape-library-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-portrait-library-empty-light",
+      "file": "screens/android-tablet-portrait-library-empty-light.png",
+      "prompt": "Use case: ui-mockup. Create a high fidelity Storymile podcast app Library EMPTY state for a new user. Reference image is style and navigation reference, not content to retain. One individual flat app screenshot fills canvas edge to edge, no physical device frame, no exterior margin, no caption, no montage. Match existing blue faceted origami boat and Storymile brand, Android Material 3 components and Roboto text. Top right circular gray guest avatar. Header \"Library\"; directly below a compact Episodes / Shows segmented control, Episodes selected with check. Remove all populated episode lists, cover art, saved counts, sort controls, detail panes and miniplayer. No playback yet. Main content is one elegant modest empty-book/bookmark illustration in soft blue, headline \"Your library starts here\", body \"Save episodes or follow shows to find them here.\", filled pill button \"Discover podcasts\". Center this single message within available main content while retaining realistic app UI spacing and crisp readable type. Primary navigation exactly \"Home\", \"Library\", \"Downloads\", Library selected. Light palette background #F7F3EB, surfaces #FFFDF8, ink #233B50, primary #365F7D, secondary #5B6E79, selection #DCE8EE. Text exactly as quoted. No other text, recommendations, disabled controls or fabricated content. Tablet PORTRAIT viewport800x1280 output992x1586 approximately aspect10:16. Input1 existing tablet portrait navigation reference. Input2 phone empty state content and illustration reference. Preserve tablet compact left navigation rail with Home/Library/Downloads Library active; blueboat+Storymile top main header, avatar upperright. Header Library then Episodes/Shows at top main panel. Center book/headline/copy/button vertically in generous main area. Status10:30 left right WiFi/cellular/battery, systemgesturehandlebottom. No bottom navigation or miniplayer, no phone camera hole. The whole screen is app UI.",
+      "references": [
+        "screens/android-tablet-portrait-library-light.png",
+        "screens/android-phone-library-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-portrait-library-empty-dark",
+      "file": "screens/android-tablet-portrait-library-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Edit target is the attached Storymile Library empty state light screenshot. Change ONLY theme to Harbor Night dark. Preserve exact canvas aspect ratio, dimensions, navigation, spacing, typography, illustration and every text exactly. Background #0F202D, surface #182F40, main text #F4EFE5, secondary #AFBFCA, primary/buttons #ACC9DC with dark #0F202D label, selection #294C63. Recolor empty-book illustration to pale blue and navy, keep blue faceted boat shape. Status icons and system gesture bar light if present. No new content or extra player. Output at same aspect and dimensions.  Tablet portrait10:16, approximately992x1586.",
+      "references": [
+        "screens/android-tablet-portrait-library-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-landscape-library-empty-light",
+      "file": "screens/android-tablet-landscape-library-empty-light.png",
+      "prompt": "Use case: ui-mockup. Create a high fidelity Storymile podcast app Library EMPTY state for a new user. Reference image is style and navigation reference, not content to retain. One individual flat app screenshot fills canvas edge to edge, no physical device frame, no exterior margin, no caption, no montage. Match existing blue faceted origami boat and Storymile brand, Android Material 3 components and Roboto text. Top right circular gray guest avatar. Header \"Library\"; directly below a compact Episodes / Shows segmented control, Episodes selected with check. Remove all populated episode lists, cover art, saved counts, sort controls, detail panes and miniplayer. No playback yet. Main content is one elegant modest empty-book/bookmark illustration in soft blue, headline \"Your library starts here\", body \"Save episodes or follow shows to find them here.\", filled pill button \"Discover podcasts\". Center this single message within available main content while retaining realistic app UI spacing and crisp readable type. Primary navigation exactly \"Home\", \"Library\", \"Downloads\", Library selected. Light palette background #F7F3EB, surfaces #FFFDF8, ink #233B50, primary #365F7D, secondary #5B6E79, selection #DCE8EE. Text exactly as quoted. No other text, recommendations, disabled controls or fabricated content. Tablet LANDSCAPE viewport1280x800 output1586x992 approximately aspect16:10. Input1 existing tablet landscape navigation reference. Input2 phone empty state content and illustration reference. Left compact navigation rail with blueboat+Storymile above Home/Library/Downloads Library active. Avatar top right. Library then Episodes/Shows at top main area. Unlike populated reference the EMPTY main content is one wide undivided panel. Center the vertical book/headline/copy/button group within this main area. Status10:30 top left and right WiFi/cellular/battery, systemgesturehandlebottom. No bottom navigation or miniplayer, no phone camera hole. Avoid unexplained split panes.",
+      "references": [
+        "screens/android-tablet-landscape-library-light.png",
+        "screens/android-phone-library-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-landscape-library-empty-dark",
+      "file": "screens/android-tablet-landscape-library-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Edit target is the attached Storymile Library empty state light screenshot. Change ONLY theme to Harbor Night dark. Preserve exact canvas aspect ratio, dimensions, navigation, spacing, typography, illustration and every text exactly. Background #0F202D, surface #182F40, main text #F4EFE5, secondary #AFBFCA, primary/buttons #ACC9DC with dark #0F202D label, selection #294C63. Recolor empty-book illustration to pale blue and navy, keep blue faceted boat shape. Status icons and system gesture bar light if present. No new content or extra player. Output at same aspect and dimensions.  Tablet landscape16:10, approximately1586x992.",
+      "references": [
+        "screens/android-tablet-landscape-library-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-foldable-library-empty-light",
+      "file": "screens/android-foldable-library-empty-light.png",
+      "prompt": "Use case: ui-mockup. Create a high fidelity Storymile podcast app Library EMPTY state for a new user. Reference image is style and navigation reference, not content to retain. One individual flat app screenshot fills canvas edge to edge, no physical device frame, no exterior margin, no caption, no montage. Match existing blue faceted origami boat and Storymile brand, Android Material 3 components and Roboto text. Top right circular gray guest avatar. Header \"Library\"; directly below a compact Episodes / Shows segmented control, Episodes selected with check. Remove all populated episode lists, cover art, saved counts, sort controls, detail panes and miniplayer. No playback yet. Main content is one elegant modest empty-book/bookmark illustration in soft blue, headline \"Your library starts here\", body \"Save episodes or follow shows to find them here.\", filled pill button \"Discover podcasts\". Center this single message within available main content while retaining realistic app UI spacing and crisp readable type. Primary navigation exactly \"Home\", \"Library\", \"Downloads\", Library selected. Light palette background #F7F3EB, surfaces #FFFDF8, ink #233B50, primary #365F7D, secondary #5B6E79, selection #DCE8EE. Text exactly as quoted. No other text, recommendations, disabled controls or fabricated content. Unfolded Android FOLDABLE viewport841x701 output1374x1145 approximately aspect841:701. Input1 existing foldable navigation reference. Input2 phone empty state content/illustration reference. Flat unfolded continuous usable display, no separating physical hinge visible. Compact left rail with boat icon and Home/Library/Downloads Library active. Main panel brand Storymile at top left and avatar top right. Header Library and Episodes/Shows at top. Main empty content in ONE unified area, vertical book/headline/copy/button group centered right of rail. Do not retain list/detail separation from populated reference. Android status10:30 top left and WiFi/cellular/battery top right, subtle system gesturehandlebottom. No miniplayer or bottom nav. Reasonably sized typography and controls with breathing room.",
+      "references": [
+        "screens/android-foldable-library-light.png",
+        "screens/android-phone-library-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-foldable-library-empty-dark",
+      "file": "screens/android-foldable-library-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Edit target is the attached Storymile Library empty state light screenshot. Change ONLY theme to Harbor Night dark. Preserve exact canvas aspect ratio, dimensions, navigation, spacing, typography, illustration and every text exactly. Background #0F202D, surface #182F40, main text #F4EFE5, secondary #AFBFCA, primary/buttons #ACC9DC with dark #0F202D label, selection #294C63. Recolor empty-book illustration to pale blue and navy, keep blue faceted boat shape. Status icons and system gesture bar light if present. No new content or extra player. Output at same aspect and dimensions.  Unfolded Android foldable841:701, approximately1374x1145.",
+      "references": [
+        "screens/android-foldable-library-empty-light.png"
+      ]
+    },
+    {
+      "id": "desktop-library-empty-light",
+      "file": "screens/desktop-library-empty-light.png",
+      "prompt": "Use case: ui-mockup. Create a high fidelity Storymile podcast app Library EMPTY state for a new user. Reference image is style and navigation reference, not content to retain. One individual flat app screenshot fills canvas edge to edge, no physical device frame, no exterior margin, no caption, no montage. Match existing blue faceted origami boat and Storymile brand, Android Material 3 components and Roboto text. Top right circular gray guest avatar. Header \"Library\"; directly below a compact Episodes / Shows segmented control, Episodes selected with check. Remove all populated episode lists, cover art, saved counts, sort controls, detail panes and miniplayer. No playback yet. Main content is one elegant modest empty-book/bookmark illustration in soft blue, headline \"Your library starts here\", body \"Save episodes or follow shows to find them here.\", filled pill button \"Discover podcasts\". Center this single message within available main content while retaining realistic app UI spacing and crisp readable type. Primary navigation exactly \"Home\", \"Library\", \"Downloads\", Library selected. Light palette background #F7F3EB, surfaces #FFFDF8, ink #233B50, primary #365F7D, secondary #5B6E79, selection #DCE8EE. Text exactly as quoted. No other text, recommendations, disabled controls or fabricated content. Desktop app viewport1600x900 output1672x941 approximately aspect16:9. Input1 existing desktop navigation reference. Input2 phone empty state content/illustration reference. Wide left sidebar with boat+Storymile heading and icons WITH INLINE LABELS Home Library Downloads, Library active. Main panel title Library at top left then Episodes/Shows control. Avatar top right. Main content area is ONE undivided empty area: vertically centered book/headline/copy/button group, no list/detail panes. No phone statusbar, no camera, no OS chrome, no gesturehandle, no bottomnavigation or miniplayer. Main content should remain a comfortable bounded width for readable text rather than stretched out across monitor.",
+      "references": [
+        "screens/desktop-library-light.png",
+        "screens/android-phone-library-empty-light.png"
+      ]
+    },
+    {
+      "id": "desktop-library-empty-dark",
+      "file": "screens/desktop-library-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Edit target is the attached Storymile Library empty state light screenshot. Change ONLY theme to Harbor Night dark. Preserve exact canvas aspect ratio, dimensions, navigation, spacing, typography, illustration and every text exactly. Background #0F202D, surface #182F40, main text #F4EFE5, secondary #AFBFCA, primary/buttons #ACC9DC with dark #0F202D label, selection #294C63. Recolor empty-book illustration to pale blue and navy, keep blue faceted boat shape. Status icons and system gesture bar light if present. No new content or extra player. Output at same aspect and dimensions.  Desktop16:9, approximately1672x941. No OS statusbar or gesture handle.",
+      "references": [
+        "screens/desktop-library-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-phone-downloads-empty-light",
+      "file": "screens/android-phone-downloads-empty-light.png",
+      "prompt": "Use case: ui-mockup. Generate one production-quality Storymile Android phone portrait screenshot at 848×1888 pixels, aspect412:916. Reference1 is the current Downloads screen style and shell. Reference2 is the blue faceted origami boat icon, preserve its shape. Adapt reference1 to a new user's EMPTY Downloads destination. Keep top Android 10:30 status bar, center circular camera hole, right Android systemicons; Storymile boat and wordmark top left and circular guest avatar top right. Large 'Downloads' heading, small '0 episodes · 0 B'. Remove all existing episode rows, manage storage link, progress bars and mini-player. In the main space center a restrained blue outlined download arrow into tray on a pale-blue circular field, then headline 'Listen anywhere', two lines 'Download episodes to listen without a connection.', filled rounded 'Discover podcasts' button and smaller 'Use the download icon on any episode.' Plenty of balanced space but content comfortably readable. Bottom navigation with rounded upper corners fixed at bottom: Home, Library, Downloads; Downloads selected pale blue pill. Android gesture handle. Roboto sans-serif and Material3 icons. Light palette background#F7F3EB surface#FFFDF8 text#233B50 primary#365F7D selection#DCE8EE. Entire canvas is only the screenshot, straight flat edges, no phone frame, outer margins, poster, annotations, grid, or watermark. Crisp readable UI.",
+      "references": [
+        "screens/android-phone-downloads-light.png",
+        "boat-icon.png"
+      ]
+    },
+    {
+      "id": "android-phone-downloads-empty-dark",
+      "file": "screens/android-phone-downloads-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Edit the supplied Storymile Android portrait screenshot into Harbor Night dark mode. Preserve EXACT all geometry, aspect ratio 412:916, size, text, icons, navigation, spacing, origami blue boat shape, avatar and empty-state content. Change only theme colors: main background#0F202D, surfaces#182F40, primarytext#F4EFE5, secondarytext#AFBFCA, action#ACC9DC with#0F202D buttontext, selection#294C63. Bottom bar darksurface, selectedDownloads pale blue. Status andgestureiconslight, camerapunchhole black. Crisp flat screenshot, no frame/margin. No extra content.",
+      "references": [
+        "screens/android-phone-downloads-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-phone-landscape-downloads-empty-light",
+      "file": "screens/android-phone-landscape-downloads-empty-light.png",
+      "prompt": "Use case: ui-mockup. Generate ONE Storymile Android PHONE LANDSCAPE empty Downloads screenshot, aspect916:412, approx1888×848px. Reference1 specifies landscape navigation shell, Reference2 specifies exact empty-state content and visual identity; adapt responsively, not stretch. Light background#F7F3EB surfaces#FFFDF8 text#233B50 primary#365F7D selection#DCE8EE. Slim Android 10:30 status top, rightsystemicons, no iOS hardware. Narrow LEFT navrail with blue origami boat and Home, Library, Downloads icons+labels, Downloads active. Content top-left 'Downloads' with '0 episodes · 0 B' below; guest circularavatar at far top-right. Below the heading, compact centered supporting composition with pale bluecircle download-to-tray icon at left and title 'Listen anywhere', copy 'Download episodes to listen without a connection.', rounded filled 'Discover podcasts' button and small 'Use the download icon on any episode.' at right. Keep allcontent within short windowheight and comfortable margins, good whitespace. Full main area undivided. No episode rows, storage management, mini-player or playback controls, no bottomnav (railreplacesit), no emptydetailpane. Use consistent Material3 Roboto sans and sharpicons. Entirecanvas is UI screenshot, flatstraightedges, no physicaldevice, outsidepadding, caption, watermark, or collage.",
+      "references": [
+        "screens/android-phone-landscape-downloads-light.png",
+        "screens/android-phone-downloads-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-phone-landscape-downloads-empty-dark",
+      "file": "screens/android-phone-landscape-downloads-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Edit supplied Storymile Android landscape screenshot into Harbor Night dark mode. Preserve EXACT geometry, landscapeaspect916:412, alltext, icons, navigation, spacing, origami blueboat, avatar and empty-state content. Theme colors ONLY: mainbackground#0F202D, surfaces#182F40, text#F4EFE5, secondary#AFBFCA, action#ACC9DC with#0F202D buttontext, selection#294C63. Rail darksurface, Downloadsselectedbluepill. Status iconslight. Crisp flat screenshot, noframe/margin/addedcontent.",
+      "references": [
+        "screens/android-phone-landscape-downloads-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-portrait-downloads-empty-light",
+      "file": "screens/android-tablet-portrait-downloads-empty-light.png",
+      "prompt": "Use case: ui-mockup. Generate ONE Storymile Android TABLET PORTRAIT empty Downloads screenshot, aspect800:1280, approx1000×1600px. Reference1 specifies existing tabletportrait shell. Reference2 gives exact empty-state content and style. Adapt responsively without stretching. Light background#F7F3EB surfaces#FFFDF8 text#233B50 primary#365F7D selection#DCE8EE. Slim Android 10:30 status top rightsystemicons; no phonecamera hardware. Narrow LEFT navrail with Home Library Downloads, Downloads active lightbluepill. Maincontent header blue origami boat+Storymile top-left and circularguestavatar top-right. 'Downloads' heading with '0 episodes · 0 B' below. In available mainarea, centered pale blue circular field containing outlined downarrow-to-tray, headline 'Listen anywhere', copy 'Download episodes to listen without a connection.', rounded filledbutton 'Discover podcasts', smallhelper 'Use the download icon on any episode.'. Composition centered in mainpane notwholecanvas. Comfortabletypography, balancednegative space, Roboto sans andMaterial3 icons. Atverybottom Androidgesture handle. NO episode rows, playbackcontrols, miniplayer, storedbytesotherthan0, managestoragelink, extra pane, bottom navigation. Entirecanvas UI screenshot only, no physicaldeviceframe/margins/caption/grid.",
+      "references": [
+        "screens/android-tablet-portrait-downloads-light.png",
+        "screens/android-phone-downloads-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-portrait-downloads-empty-dark",
+      "file": "screens/android-tablet-portrait-downloads-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Edit supplied Storymile tablet portrait empty Downloads screenshot into Harbor Night dark mode. Preserve EXACT geometry, aspect800:1280, alltext, icon positions, rail, origami boat shape, guestavatar and empty-state content. Colors ONLY: mainbackground#0F202D, surfaces#182F40, primarytext#F4EFE5, secondary#AFBFCA, action#ACC9DC with#0F202D buttontext, selection#294C63. Dark navrail, Downloads selected. Status and gestureiconslight. Crisp screenshot, noframe/margin/extra content.",
+      "references": [
+        "screens/android-tablet-portrait-downloads-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-landscape-downloads-empty-light",
+      "file": "screens/android-tablet-landscape-downloads-empty-light.png",
+      "prompt": "Use case: ui-mockup. Generate ONE Storymile Android TABLET LANDSCAPE empty Downloads screenshot, aspect1280:800, approx1600×1000px. Reference1 specifies current tabletlandscape shell. Reference2 specifies exact empty-state content and design. Responsive re-layout, not stretch. Light background#F7F3EB surfaces#FFFDF8 text#233B50 primary#365F7D selection#DCE8EE. Slim Android 10:30 statusbar top with Androidsystemicons at right; no phonecamera. Narrowleftnavrail origami blueboat Storymile and Home Library Downloads, Downloads selectedlightbluepill. Mainpane 'Downloads' heading top-left with '0 episodes · 0 B' below; circularguestavatar far top-right. REMOVE all original rows, storagepane, divider, miniplayer. Mainpane now undivided, center a moderate palebluecircle with downarrow-to-tray, title 'Listen anywhere', copy 'Download episodes to listen without a connection.', rounded filledbutton 'Discover podcasts', helper 'Use the download icon on any episode.'. Balancedspace and readable natural tablettypography, Roboto sans and Material3icons. Bottom Androidgesturehandle. NO fakeepisodes, playingmedia, storageused, progress, detailpane, bottomnav. Canvas entirely flat UI screenshot, no frame/margins/poster/grid/watermark.",
+      "references": [
+        "screens/android-tablet-landscape-downloads-light.png",
+        "screens/android-tablet-portrait-downloads-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-landscape-downloads-empty-dark",
+      "file": "screens/android-tablet-landscape-downloads-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Edit supplied Storymile tablet landscape empty Downloads screenshot into Harbor Night dark mode. Preserve EXACT geometry, aspect1280:800, alltext, iconpositions, rail, origami blueboat, avatar, empty-state content and layout. Colors ONLY: mainbackground#0F202D, surfaces#182F40, primarytext#F4EFE5, secondary#AFBFCA, action#ACC9DC with#0F202D buttontext, selection#294C63. Darknavrail, Downloadsselectedbluepill. Status+gestureiconslight. Crispflat screenshot, noframe/margin/extra content.",
+      "references": [
+        "screens/android-tablet-landscape-downloads-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-foldable-downloads-empty-light",
+      "file": "screens/android-foldable-downloads-empty-light.png",
+      "prompt": "Use case: ui-mockup. EDIT THIS IMAGE, preserve its exact canvas dimensions1373×1145 and aspect841:701 (approximately1.20:1, nearlysquare unfoldedphone). Do not output wide tablet16:10or16:9. Newuser EMPTY Downloads state. Keep original narrowleftnavrail with blueorigamiboat, Home Library Downloads selected; Androidstatusbar10:30systemicons, guestavatartopright, bottomgesturehandle. REMOVE all episode rows, episodeart, playbackcontrols, storedcontent and verticaldetailpanedivider. The rightcontentarea becomes a single undividedmainpane. Heading 'Downloads' with '0 episodes · 0 B' beneath. Center in mainpane a palebluecirclewith downarrow-to-tray; headline 'Listen anywhere'; two-linecopy 'Download episodes to listen without a connection.'; filledroundedbutton 'Discover podcasts'; smallhelper 'Use the download icon on any episode.'. Lightbackground#F7F3EB surface#FFFDF8 text#233B50 primary#365F7D selection#DCE8EE. Roboto sans, Material3 consistentwithsource. Keep contentclearlyreadable andcentered withbalancedspace. NoextraUI,paddingoutsidecanvas,frame,poster,montage. Canvasratio is critical:1373×1145.",
+      "references": [
+        "screens/android-foldable-downloads-light.png"
+      ]
+    },
+    {
+      "id": "android-foldable-downloads-empty-dark",
+      "file": "screens/android-foldable-downloads-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Edit supplied nearlysquarefoldable Storymile empty Downloads screenshot into Harbor Night dark mode. Preserve EXACT canvas1373×1145, aspect841:701 (1.20:1), geometry, alltext, iconpositions, rail, origami blueboat, avatar andempty-state layout. Theme colors ONLY: mainbackground#0F202D, surfaces#182F40, primarytext#F4EFE5, secondary#AFBFCA, action#ACC9DC with#0F202D buttontext, selection#294C63. Darknavrail, Downloadsselectedbluepill. Status+gestureiconslight. No frame/margin/newcontent.",
+      "references": [
+        "screens/android-foldable-downloads-empty-light.png"
+      ]
+    },
+    {
+      "id": "desktop-downloads-empty-light",
+      "file": "screens/desktop-downloads-empty-light.png",
+      "prompt": "Use case: ui-mockup. EDIT THIS Storymile desktop Downloads screenshot into EMPTY state, preservecanvas1672×941, aspect1600:900. Existing widleftsidebar with bluefaceted origami boat Storymile, inlineicon+label Home Library Downloads withDownloads selected. Guestavatartopright. NO OSstatusbar, phonecamera, gesturehandle, phoneframe. Remove all episoderows, artwork, storagemanagement link, progressbars and bottomplayer. Maincontent header 'Downloads' and '0 episodes · 0 B'. Center in availablemainpane a simple downarrow-to-tray on pale bluecircle, headline 'Listen anywhere', copy 'Download episodes to listen without a connection.', rounded filledbutton 'Discover podcasts', smallhelper 'Use the download icon on any episode.'. Elegant balanced desktopemptyspace, naturalreadable text size, Material3Roboto sans, squarefullcanvas. Lightbg#F7F3EB surfaces#FFFDF8 text#233B50 primary#365F7D selection#DCE8EE. No newlists, fakecontent, emptydetailpane, playbackcontrols, bottomnav, frame, outsidepadding, poster, captions.",
+      "references": [
+        "screens/desktop-downloads-light.png"
+      ]
+    },
+    {
+      "id": "desktop-downloads-empty-dark",
+      "file": "screens/desktop-downloads-empty-dark.png",
+      "prompt": "Use case: ui-mockup. Edit supplied Storymile desktop empty Downloads screenshot into Harbor Night dark mode. Preserve EXACT canvas1672×941 aspect1600:900, geometry, alltext, icons, wideleftsidebar, origami blueboat, avatar, centeredempty-state layout. Theme colors ONLY: mainbackground#0F202D, surfaces#182F40, primarytext#F4EFE5, secondary#AFBFCA, action#ACC9DC with#0F202D buttontext, selection#294C63. Darksidebar, Downloadsselectedbluepill. No Androidstatusbar/gesturehandle/camera, no frame/margin/newcontent. Crispflat screenshot.",
+      "references": [
+        "screens/desktop-downloads-empty-light.png"
+      ]
+    },
+    {
+      "id": "android-phone-discover-light",
+      "file": "screens/android-phone-discover-light.png",
+      "prompt": "Use case: ui-mockup. Create ONE high-fidelity Android phone portrait screenshot for Storymile, the podcast app. Input image 1 is the existing Home screenshot for the design system and artwork; image 2 is the boat brand mark. Draw a NEW 'Discover podcasts' browsing screen for a new user. Canvas aspect ratio exactly 412:916, render around 1236x2748 or equivalent high resolution. Interface fills canvas edge to edge; no exterior, phone frame, border, caption, montage, mockup board, or perspective.\nKeep warm Paper Tide light palette: #F7F3EB background, #FFFDF8 surfaces, #233B50 text, #365F7D buttons, #DCE8EE selected fills, fine gray blue dividers. Roboto sans-serif and Material 3 rounded controls. Android status 10:30 top left, small circular centered camera hole, connection and battery icons top right. Top app row: back arrow, title 'Discover podcasts', circular account avatar at right. Search field: 'Podcasts and episodes'. Below it compact heading 'Browse topics' with two rows of clear outlined pill buttons: 'Nature', 'Science', 'Culture', 'Technology'. Nature should be plainly tappable but not yet selected.\nNext section 'Featured podcasts': two side-by-side square art covers with labels 'The Quiet Current' (blue sea and coast), 'Small Wonders' (yellow flowers), short metadata 'Nature' and 'Everyday stories'. Below, section 'Episodes to try': two compact rows with thumbnail, episode title, show name, duration, circular play button. Row 1 'The art of slowing down' / 'The Quiet Current · 42 min'; row 2 'A small act of wonder' / 'Small Wonders · 31 min'. Keep all content legible and comfortable without huge empty spaces. This is browsing public recommendations; user has no history and nothing playing.\nBottom navigation has rounded upper corners and EXACTLY Home, Library, Downloads. Home is selected with blue icon on pale blue pill. Android gesture handle at bottom. No mini-player, no progress bars, no followed state, no personalized 'For you' claim. Preserve blue origami boat wherever branded. Match the existing screenshot's typography and density, improve sans-serif consistency. All text spelled accurately.",
+      "references": [
+        "screens/android-phone-home-light.png",
+        "boat-icon.png"
+      ]
+    },
+    {
+      "id": "android-phone-discover-dark",
+      "file": "screens/android-phone-discover-dark.png",
+      "prompt": "Use case: ui-mockup. Convert this exact Storymile Android Discover podcasts screenshot to Harbor Night dark mode, preserving all layout, font, text, art, navigation, resolution and the412:916 canvas. UI colors: background #0F202D, surfaces #182F40, text #F4EFE5, secondary #AFBFCA, primary #ACC9DC, on-primary #0F202D, selected navigation #294C63, dividers #405664. Leave photographs/artwork in original colors. The center circular camera hole is hardware and MUST remain pure BLACK #000000, not blue or white. Android status symbols and bottom gesture handle light. Top-right avatar unchanged position. Home selected in rounded-upper-corner bottom bar. No miniplayer. Single screenshot, no external frame, no new content.",
+      "references": [
+        "screens/android-phone-discover-light.png"
+      ]
+    },
+    {
+      "id": "android-phone-topic-nature-light",
+      "file": "screens/android-phone-topic-nature-light.png",
+      "prompt": "Use case: ui-mockup. Edit the referenced Storymile Discover podcasts screen into the next screen reached by tapping Nature. Keep identical Android phone portrait aspect412:916, full canvas screenshot, same resolution, Roboto sans type, Paper Tide colors, top-right avatar, status10:30 black circularcamera, rounded uppercorner bottomnav Home Library Downloads with Home active. No miniplayer, history or current playback. Top bar back arrow + 'Nature'. Beneath it one line 'Stories from the natural world'. A topic chip row with 'All nature' selected, 'Oceans', 'Outdoors'. Main heading 'Podcasts to explore'. Two horizontal show rows: first has square ocean artwork and 'The Quiet Current', caption 'Stories from the coast', chevron to show details; second mountainart and 'Field Notes', caption 'Journeys into the wild', chevron. These are not followed; no following badges. Below heading 'Episodes to try', two compact episode rows with art thumb, text, duration and circular triangular play button: 'The art of slowing down' / 'The Quiet Current · 42 min'; 'The paths we take' / 'Field Notes · 56 min'. All content fits comfortably, titles readable, no tiny lorem ipsum. Same plain clean polished app design. Whitewarm#F7F3EB bg #FFFDF8 surfaces #233B50 text #365F7D controls #DCE8EEselected. Do notadd externalframingor captions. One screenshot only.",
+      "references": [
+        "screens/android-phone-discover-light.png"
+      ]
+    },
+    {
+      "id": "android-phone-topic-nature-dark",
+      "file": "screens/android-phone-topic-nature-dark.png",
+      "prompt": "Use case: ui-mockup. Edit this exact Storymile Android Nature topic screenshot into Harbor Night dark mode. Preserve canvas412:916 and resolution, typography/geometry, all text, controls, natural cover artwork, avatar and selected Home navigation. Change UI colors only: bg#0F202D, surfaces#182F40, text#F4EFE5, secondary#AFBFCA, primarybuttonsandicons#ACC9DC, onprimary#0F202D, selection#294C63, divider#405664. Dark roundeduppercorner bottomnav with lightgesturehandle. Androidstatusicons light BUT keep center circular camera cutout BLACK #000000 as it is hardware. No mini-player or other changes. One screenshot fillscanvas.",
+      "references": [
+        "screens/android-phone-topic-nature-light.png"
+      ]
+    },
+    {
+      "id": "android-phone-show-preview-light",
+      "file": "screens/android-phone-show-preview-light.png",
+      "prompt": "Use case: ui-mockup. Create the next screen in the referenced Storymile Android Nature browse flow: the user opened The Quiet Current, a podcast they have NOT followed yet. Use input screenshot for exact design system, consistent ocean artwork, phone portrait aspect 412:916 and crisp high resolution. Full canvas single app screenshot, no external frame. Paper Tide light colors #F7F3EB, #FFFDF8, #233B50, #365F7D, #DCE8EE. Roboto sans type and Material3. Android status10:30, black center circular camera hole, status icons; topbar back arrow with 'Nature' and circular guest avatar right. Main show header has beautiful square ocean/coast artwork occupying about top third, compact cover type 'The Quiet Current' and small 'Stories from the coast', with the tiny origami boat brand. Under artwork, title 'The Quiet Current', subtitle 'Nature · Stories from the coast'. Prominent blue button with plus icon labeled 'Follow' (NOT Following). Two-line description 'Slow down with stories of the sea, the shore, and the people who call them home.' Then heading 'Episodes', small sort 'Newest first'. Three episode rows with thumbnail, title and duration and triangular play button: 'The art of slowing down' / '42 min'; 'Listening to the shoreline' / '36 min'; 'Tides of change' / '28 min'. No row is highlighted as playing, no progress bars, no miniplayer. Bottomnav rounded upper corners, Home active, Library, Downloads, Android gesture handle. Keep all important content readable and inside safe area. Follow button must be visually clear. This is a brand-new user browsing the public catalog, no account required.",
+      "references": [
+        "screens/android-phone-topic-nature-light.png",
+        "boat-icon.png"
+      ]
+    },
+    {
+      "id": "android-phone-show-preview-dark",
+      "file": "screens/android-phone-show-preview-dark.png",
+      "prompt": "Use case: ui-mockup. Edit this exact Storymile Android show detail screenshot into Harbor Night dark mode. Preserve canvas 412:916, high resolution, geometry, text, typography, all controls, avatar and Home selected navigation. This user has NOT followed the show: button must stay '+ Follow'. No playback or mini-player. Change UI colors only: background #0F202D, surface #182F40, text #F4EFE5, secondary #AFBFCA, primary #ACC9DC, on-primary #0F202D, selection #294C63, subtle dividers #405664. Artwork stays identical natural colors. Bottom bar dark with rounded upper corners, light gesture handle. Android status icons light, circular center camera cutout BLACK #000000. No other change.",
+      "references": [
+        "screens/android-phone-show-preview-light.png"
+      ]
+    },
+    {
+      "id": "android-phone-show-followed-light",
+      "file": "screens/android-phone-show-followed-light.png",
+      "prompt": "Use case: ui-mockup. Edit this exact Storymile Android podcast detail screenshot to show the immediate successful result after the user taps Follow. Preserve the same 412:916 canvas, resolution, light Paper Tide palette, artwork, top bar, avatar, typography, all episode controls, and bottom navigation with Home active. Change the '+ Follow' button to an outlined pale-blue pill with checkmark and the exact label 'Following'. Replace ONLY the two-line show description beneath this button with a concise pale-blue success message: checkmark 'Added to Library' and an underlined action 'View Library' on its right. Keep the same available vertical area and episode list positions. No mini-player or playback progress; following does not start playback. Everything else stays in place. Clear polished UI and correctly spelled labels. One full-canvas screenshot, no captions.",
+      "references": [
+        "screens/android-phone-show-preview-light.png"
+      ]
+    },
+    {
+      "id": "android-phone-show-followed-dark",
+      "file": "screens/android-phone-show-followed-dark.png",
+      "prompt": "Use case: ui-mockup. Change this exact Storymile Android show-followed screenshot to Harbor Night dark mode. Preserve the exact 412:916 canvas, resolution, layout, all text and artwork, top-right avatar, Home selected nav, checkmarked 'Following' pill and 'Added to Library' / 'View Library' success message. This is only a theme variation. Background #0F202D, surface #182F40, text #F4EFE5, secondary #AFBFCA, primary controls #ACC9DC with #0F202D on-primary icons, selection #294C63, dividers #405664. Keep natural artwork colors and BLACK #000000 center camera cutout. Status icons and bottom gesture handle light. No miniplayer or playback progress, no frame or padding.",
+      "references": [
+        "screens/android-phone-show-followed-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-landscape-discover-light",
+      "file": "screens/android-tablet-landscape-discover-light.png",
+      "prompt": "Use case: ui-mockup. Generate ONE Storymile Android TABLET LANDSCAPE discovery screenshot. Canvas MUST 1586×992, aspect1280:800 (1.6:1), no portrait. Reference1 tabletlandscape defines canvas/navrail; Reference2 phone defines exactcontent/art. Re-layout responsively. Keep slimleftnavrail with origamiblueboat/Storymile and Home active, Library,Downloads; guestavatarupperright; Android10:30statuswith wifi/cellular/battery, no camera hole. Mainarea backarrow+title 'Discover podcasts', fullwidth search 'Podcasts and episodes'. 'Browse topics' with pills Nature Science Culture Technology. Belowthis use two useful columns: left 'Featured podcasts' with two artworkcards sidebyside The Quiet Current (Nature) oceanart and Small Wonders (Everyday stories) botanicalart; right 'Episodes to try' two stacked rows with smallmatchingcovers/playbuttons: 'The art of slowing down' 'The Quiet Current · 42 min'; 'A small act of wonder' 'Small Wonders · 31 min'. Matchreference2 art andcopy. No personalhistory, Yourshows, Continue listening, miniplayer or activeplayingpausebuttons. CrispMaterial3Roboto sans; lightbackground#F7F3EB surfaces#FFFDF8 text#233B50 primary#365F7D selection#DCE8EE. Tablet appropriatefonts balancedwhitespace, bottomAndroidgesturehandle only. Flat screenshotfillscanvas, noframe/margins/poster/captions/grid.",
+      "references": [
+        "screens/android-tablet-landscape-home-light.png",
+        "screens/android-phone-discover-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-landscape-discover-dark",
+      "file": "screens/android-tablet-landscape-discover-dark.png",
+      "prompt": "Use case: ui-mockup. Edit supplied Storymile tablet landscape Discover podcasts screenshot into Harbor Night dark mode. Preserve EXACT canvas1586×992 aspect1280:800, allgeometry, text, covers/artwork originalcolors, rail, origamiboat, guestavatar, topicchips andepisodeplaybuttons. Change themeonly: mainbackground#0F202D surfaces#182F40 text#F4EFE5 secondary#AFBFCA primaryaction#ACC9DC with#0F202D buttonicons, selection#294C63. Navrail darksurface, Home active, lightstatusicons+gesturehandle. No phonecamera orframes, no extra UI/content/miniplayer. Crisp screenshot.",
+      "references": [
+        "screens/android-tablet-landscape-discover-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-landscape-topic-nature-light",
+      "file": "screens/android-tablet-landscape-topic-nature-light.png",
+      "prompt": "Use case: ui-mockup. Generate ONE Storymile Android TABLET LANDSCAPE Nature-topic screenshot canvas1586×992 aspect1280:800 precisely. Reference1 currenttablet Discoverpage determines landscapegeometry,shell,palette. Reference2 phoneNature definesall exact content/art. Keep leftnavrailorigamiboatStorymile, Homeactive, Library, Downloads; guestavatarupperright; Android10:30statussystemicons no phonecamera. Headerbackarrow and 'Nature', subtitle 'Stories from the natural world'. Chiprow 'All nature' active, 'Oceans', 'Outdoors'. Responsive useful2columncontent: left 'Podcasts to explore' with two verticallystacked rows featuring mediumartwork,left,text+chevronright: ocean 'The Quiet Current', 'Stories from the coast'; mountain 'Field Notes', 'Journeys into the wild'. Right 'Episodes to try': oceanthumbrow 'The art of slowing down', 'The Quiet Current · 42 min' with playbutton; mountainthumbrow 'The paths we take', 'Field Notes · 56 min' with playbutton. Match reference2 artwork. No miniplayer, personalhistory, alreadyfollowing, pauses. Material3Roboto sans, lightbackground#F7F3EB surface#FFFDF8 text#233B50 primary#365F7D selection#DCE8EE. Natural tablettextsizes, balanced space, bottomAndroidgesturehandle. One flat UI fullcanvas, no frame,outermargins,montage,caption.",
+      "references": [
+        "screens/android-tablet-landscape-discover-light.png",
+        "screens/android-phone-topic-nature-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-landscape-topic-nature-dark",
+      "file": "screens/android-tablet-landscape-topic-nature-dark.png",
+      "prompt": "Use case: ui-mockup. Edit supplied Storymile tablet landscape Nature-topic screenshot into Harbor Night darkmode. Preserve EXACT canvas1586×992 aspect1280:800, allgeometry,text,originalcovercolors/artwork, rail, origamiboat, guestavatar, chips, podcastrows andepisodeplaybuttons. Change theme ONLY: background#0F202D surfaces#182F40 text#F4EFE5 secondary#AFBFCA primary#ACC9DC with#0F202D buttonicons, selection#294C63. Homeactive darknavrail, lightstatus+gestureicons. No camera,noextraUI,no miniplayer,no frame.",
+      "references": [
+        "screens/android-tablet-landscape-topic-nature-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-landscape-show-preview-light",
+      "file": "screens/android-tablet-landscape-show-preview-light.png",
+      "prompt": "Use case: ui-mockup. Generate ONE Storymile Android TABLET LANDSCAPE preview-show screenshot canvas1586×992 aspect1280:800. Reference1 tabletNaturedefinescanvas/shell/art; reference2 phonepreviewdefinesdetailcontent/artworkexactly. Adaptive LIST-DETAIL: narrowleftnavigationrail origamiboatStorymile Homeactive Library Downloads. Android10:30status, no phonecamera, avatarfarupperright, bottomgesturehandle. Maincontent topbackarrow 'Nature'. Leftlist pane about32%remainingwidth: 'Podcasts to explore', The Quiet Current selectedlightblue row with oceanthumbnail+Storiesfromthecoast; below FieldNotes mountainthumbnail+Journeysintothewild. Rightdetailpane 68%: top row squareocean showcover withboat andtitle fromphone atleft, right title'The Quiet Current', subtitle'Nature · Stories from the coast', prominent filled '+ Follow' button, description 'Slow down with stories of the sea, the shore, and the people who call them home.'. Below rightpane 'Episodes' plus 'Newest first'; 3 compact rows matchingphone withcoverthumbnail,playbutton,nopauses: 'The art of slowing down' '42 min'; 'Listening to the shoreline' '36 min'; 'Tides of change' '28 min'. Layoutfitsnaturally withno overlaps, detailartmodest enough for3episoderows. Newusernotyetfollowed, no playback/miniplayer/history. Material3Roboto sans, lightbackground#F7F3EB surfaces#FFFDF8 text#233B50 primary#365F7D selection#DCE8EE. FullcanvasflatUI noframe,margins,posters,annotations,collage. Sharptext.",
+      "references": [
+        "screens/android-tablet-landscape-topic-nature-light.png",
+        "screens/android-phone-show-preview-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-landscape-show-preview-dark",
+      "file": "screens/android-tablet-landscape-show-preview-dark.png",
+      "prompt": "Use case: ui-mockup. Edit supplied Storymile tabletlandscape Nature list-detail show-preview screenshot into Harbor Night dark mode. EXACTLY preservecanvas1586×992 aspect1280:800, geometry, alltext, coverartoriginalcolors, origamiboat, selectedpodcast, '+ Follow' button, 3episodeplayrows, statusicons, avatarandnavrail. Themeonly: background#0F202D surface#182F40 text#F4EFE5 secondary#AFBFCA primary#ACC9DC with#0F202D buttontext/icons, selection#294C63. Darkrail Homeactive, lightAndroidstatusandgesture. No phonecamera,nominiplayer,nomargins,nonewcontent.",
+      "references": [
+        "screens/android-tablet-landscape-show-preview-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-landscape-show-followed-light",
+      "file": "screens/android-tablet-landscape-show-followed-light.png",
+      "prompt": "Use case: ui-mockup. Precise edit of reference1 Storymile tabletlandscape showpreview to FOLLOWED confirmation. Reference2 phone definesconfirmation only; preserve reference1's exact1586×992 canvas,landscape1280:800,fullgeometry,allcovers/art,navrail,selectedshow,leftNaturepane,right3episoderows,textpositions andstyles. Change ONLY twoareas inrightshowdetail: replace '+ Follow' filledbutton with paleoutlined pill '✓ Following' sameposition/size. Replace description below it with compact successline checkcircle and exact 'Added to Library', plus actionable underlined 'View Library' on nextline ifneeded. Retainexactlayoutand episodepositionsfromref1. Lighttheme unchanged#F7F3EB/#FFFDF8/#233B50/#365F7D/#DCE8EE. No miniplayer, playback starts, extra content, phonecamera/frame/margins. Following state visibly clear without overlay blockingepisodes.",
+      "references": [
+        "screens/android-tablet-landscape-show-preview-light.png",
+        "screens/android-phone-show-followed-light.png"
+      ]
+    },
+    {
+      "id": "android-tablet-landscape-show-followed-dark",
+      "file": "screens/android-tablet-landscape-show-followed-dark.png",
+      "prompt": "Use case: ui-mockup. Edit supplied Storymile tabletlandscape Nature list-detail FOLLOWED screenshot into Harbor Night darkmode. EXACTLY preservecanvas1586×992 aspect1280:800, geometry, alltext, coverartoriginalcolors, origamiboat, selectedpodcast, '✓ Following' pill, 'Added to Library' and 'View Library', 3episodeplayrows, avatarandnavrail. ThemeONLY: background#0F202D surface#182F40 text#F4EFE5 secondary#AFBFCA primary#ACC9DC with#0F202D buttonicons, selection#294C63. Followingpilloutlinepaleblue,darkfill; successcheckandViewLibrarypaleblue. Darkrail Homeactive, lightAndroidstatusandgesture. No phonecamera,miniplayer,margins,extraUI.",
+      "references": [
+        "screens/android-tablet-landscape-show-followed-light.png"
+      ]
     }
   ]
 }
