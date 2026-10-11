@@ -25,6 +25,7 @@ import software.ralf.storymile.playback.impl.generated.resources.Res
 import software.ralf.storymile.playback.impl.generated.resources.speed
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize
+import software.ralf.storymile.templates.LocalPlaybackTransition
 import software.ralf.storymile.theme.AppTheme
 
 internal object PlaybackSpeed {

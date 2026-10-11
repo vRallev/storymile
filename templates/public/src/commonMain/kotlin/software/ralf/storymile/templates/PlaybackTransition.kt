@@ -1,4 +1,4 @@
-package software.ralf.storymile.playback
+package software.ralf.storymile.templates
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Box
@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import kotlin.math.ceil
-import software.ralf.storymile.templates.LocalSharedTransitionScope
 
 /** Animates playback content with the sheet's [progress], from collapsed (0) to expanded (1). */
 @Stable

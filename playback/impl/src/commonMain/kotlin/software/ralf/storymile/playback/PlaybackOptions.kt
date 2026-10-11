@@ -54,6 +54,7 @@ import software.ralf.storymile.playback.impl.generated.resources.sleep_off
 import software.ralf.storymile.playback.impl.generated.resources.sleep_timer
 import software.ralf.storymile.playback.impl.generated.resources.speed
 import software.ralf.storymile.playback.impl.generated.resources.up_next
+import software.ralf.storymile.templates.LocalPlaybackTransition
 import software.ralf.storymile.theme.AppTheme
 
 internal object PlaybackOptions {
