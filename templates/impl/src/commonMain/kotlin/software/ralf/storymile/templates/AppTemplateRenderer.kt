@@ -32,10 +32,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
@@ -66,6 +68,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.collapse
 import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.semantics
@@ -383,14 +386,12 @@ class AppTemplateRenderer(
           sheetState.targetValue == SheetValue.Expanded)
     val onExpand: () -> Unit = { coroutineScope.launch { sheetState.expand() } }
     val onCollapse: () -> Unit = { coroutineScope.launch { sheetState.partialExpand() } }
+    val currentCornerRadius by rememberUpdatedState(cornerRadius)
+    val transition = remember { PlaybackTransition { 1f - currentCornerRadius() / 24.dp } }
     val density = LocalDensity.current
     val surfaceColor = AppTheme.colorScheme.surface
     val borderColor = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
     val interactionSource = remember { MutableInteractionSource() }
-    val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(expanded) {
-      if (expanded) focusRequester.requestFocus()
-    }
     Box(
       Modifier.fillMaxSize()
         .testTag("playback-sheet")
@@ -424,13 +425,7 @@ class AppTemplateRenderer(
       Box(
         Modifier.fillMaxWidth()
           .onSizeChanged { onPeekHeightChanged(with(density) { it.height.toDp() }) }
-          .layout { measurable, constraints ->
-            val bar = measurable.measure(constraints)
-            layout(bar.width, bar.height) {
-              // Keep measuring while expanded, but do not draw or expose the bar to input.
-              if (!expanded) bar.placeRelative(0, 0)
-            }
-          }
+          .then(with(transition) { Modifier.fade(expanded = false) })
           .testTag("playback")
           .clickable(
             enabled = !expanded && expandedContent != null,
@@ -449,33 +444,71 @@ class AppTemplateRenderer(
           .padding(bottom = bottomInset)
           .consumeWindowInsets(PaddingValues(bottom = bottomInset))
           .windowInsetsPadding(
-            WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom),
+            WindowInsets.safeDrawing.only(
+              WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+            ),
           ),
       ) {
-        Render(collapsedContent)
+        CompositionLocalProvider(LocalPlaybackTransition provides transition) {
+          Render(collapsedContent)
+        }
       }
-      if (expanded) {
-        Box(
-          Modifier.fillMaxSize()
-            .testTag("playback-screen")
-            .focusRequester(focusRequester)
-            .onPreviewKeyEvent {
-              if (it.key == Key.Escape && it.type == KeyEventType.KeyUp) {
-                onCollapse()
-                true
-              } else false
+      if (expandedContent != null) {
+        ExpandedPlaybackContent(expandedContent, transition, expanded, onCollapse)
+      }
+    }
+  }
+
+  @Composable
+  private fun ExpandedPlaybackContent(
+    content: BaseModel,
+    transition: PlaybackTransition,
+    expanded: Boolean,
+    onCollapse: () -> Unit,
+  ) {
+    val visible by remember(transition) { derivedStateOf { transition.fraction > 0f } }
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(expanded, visible) {
+      if (expanded && visible) {
+        focusRequester.requestFocus()
+      }
+    }
+    Box(
+      Modifier.fillMaxSize()
+        .then(
+          if (visible) Modifier.testTag("playback-screen") else Modifier.clearAndSetSemantics {},
+        )
+        .layout { measurable, constraints ->
+          val content = measurable.measure(constraints)
+          layout(content.width, content.height) {
+            if (transition.fraction > 0f) {
+              content.placeRelative(0, 0)
             }
-            .focusable()
-            .semantics {
-              collapse {
-                onCollapse()
-                true
-              }
-            },
-        ) {
-          Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-            Render(expandedContent, Modifier.fillMaxSize())
           }
+        }
+        .focusRequester(focusRequester)
+        .onPreviewKeyEvent {
+          if (it.key == Key.Escape && it.type == KeyEventType.KeyUp) {
+            onCollapse()
+            true
+          } else false
+        }
+        .focusable(enabled = visible)
+        .semantics {
+          if (visible) {
+            collapse {
+              onCollapse()
+              true
+            }
+          }
+        },
+    ) {
+      Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+        CompositionLocalProvider(
+          LocalCollapsePlayback provides onCollapse,
+          LocalPlaybackTransition provides transition,
+        ) {
+          Render(content, Modifier.fillMaxSize())
         }
       }
     }

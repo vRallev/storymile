@@ -1,0 +1,31 @@
+<!--
+Copyright 2024 The Android Open Source Project
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Adapted from Material Replay10 and Replay5: replace the zero with a five.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path android:fillColor="#FF000000"
+        android:pathData="M11.99,5 V1 l-5,5 l5,5 V7 c3.31,0,6,2.69,6,6 s-2.69,6,-6,6 s-6,-2.69,-6,-6 h-2 c0,4.42,3.58,8,8,8 s8,-3.58,8,-8 S16.41,5,11.99,5 Z" />
+    <path android:fillColor="#FF000000"
+        android:pathData="M10.89,16 h-0.85 v-3.26 l-1.01,0.31 v-0.69 l1.77,-0.63 h0.09 V16 Z" />
+    <group android:translateX="1.7">
+        <path android:fillColor="#FF000000"
+            android:pathData="M10.69,13.9 l0.25,-2.17 h2.39 v0.71 h-1.7 l-0.11,0.92 c0.03,-0.02,0.07,-0.03,0.11,-0.05 s0.09,-0.04,0.15,-0.05 s0.12,-0.03,0.18,-0.04 s0.13,-0.02,0.2,-0.02 c0.21,0,0.39,0.03,0.55,0.1 s0.3,0.16,0.41,0.28 s0.2,0.27,0.25,0.45 s0.09,0.38,0.09,0.6 c0,0.19,-0.03,0.37,-0.09,0.54 s-0.15,0.32,-0.27,0.45 s-0.27,0.24,-0.45,0.31 s-0.39,0.12,-0.64,0.12 c-0.18,0,-0.36,-0.03,-0.53,-0.08 s-0.32,-0.14,-0.46,-0.24 s-0.24,-0.24,-0.32,-0.39 s-0.13,-0.33,-0.13,-0.53 h0.84 c0.02,0.18,0.08,0.32,0.19,0.41 s0.25,0.15,0.42,0.15 c0.11,0,0.2,-0.02,0.27,-0.06 s0.14,-0.1,0.18,-0.17 s0.08,-0.15,0.11,-0.25 s0.03,-0.2,0.03,-0.31 s-0.01,-0.21,-0.04,-0.31 s-0.07,-0.17,-0.13,-0.24 s-0.13,-0.12,-0.21,-0.15 s-0.19,-0.05,-0.3,-0.05 c-0.08,0,-0.15,0.01,-0.2,0.02 s-0.11,0.03,-0.15,0.05 s-0.08,0.05,-0.12,0.07 s-0.07,0.06,-0.1,0.09 L10.69,13.9 Z" />
+    </group>
+</vector>

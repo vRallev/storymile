@@ -2,6 +2,7 @@
 
 package software.ralf.storymile.templates
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -26,6 +27,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalPlatformWindowInsets
@@ -40,9 +43,11 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
@@ -56,9 +61,14 @@ import androidx.compose.ui.unit.dp
 import app.cash.turbine.test
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isGreaterThan
+import assertk.assertions.isLessThan
+import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
@@ -72,6 +82,7 @@ import software.ralf.app.platform.renderer.RendererFactory
 import software.ralf.storymile.screen.DefaultScreenSizeProvider
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.screen.ScreenSizeProvider
+import software.ralf.storymile.theme.LocalDarkThemeOverride
 import software.ralf.storymile.theme.ThemeEnvironment
 
 class AppTemplateRendererTest {
@@ -210,6 +221,70 @@ class AppTemplateRendererTest {
       assertBounds("playback", left = 0, top = 756, right = 400, bottom = 900)
       assertBounds("content", left = 0, top = 0, right = 400, bottom = 756)
     }
+
+  @Test
+  fun `playback corners flatten during drag and fill the expanded screen`() {
+    listOf(400, 1440).forEach { width ->
+      listOf(false, true).forEach { darkTheme ->
+        runDesktopComposeUiTest(width = width, height = 900) {
+          val fixture = Fixture()
+          setContent {
+            CompositionLocalProvider(LocalDarkThemeOverride provides darkTheme) {
+              fixture.Render(
+                AppTemplate.AdaptiveTemplate(
+                  content = SlotModel("content", Color.Blue),
+                  tabs = SlotModel("tabs", Color.Blue),
+                  playback = SlotModel("playback-content", Color.Green),
+                  expandedPlayback = SlotModel("expanded-content", Color.Green),
+                ),
+              )
+            }
+          }
+
+          val originalTop = onNodeWithTag("playback-sheet").fetchSemanticsNode().boundsInRoot.top
+          val originalCorners = playbackCornerGaps()
+          originalCorners.forEach { assertThat(it).isGreaterThan(1) }
+          mainClock.autoAdvance = false
+          try {
+            onNodeWithTag("playback").performTouchInput { down(Offset(center.x, 32f)) }
+            mainClock.advanceTimeBy(1000)
+            onRoot().performTouchInput { moveBy(Offset(0f, -originalTop / 2)) }
+            mainClock.advanceTimeByFrame()
+            val halfExpandedCorners = playbackCornerGaps()
+            halfExpandedCorners.zip(originalCorners).forEach { (current, original) ->
+              assertThat(current).isGreaterThan(1)
+              assertThat(current).isLessThan(original)
+            }
+
+            onRoot().performTouchInput { moveBy(Offset(0f, originalTop / 4)) }
+            mainClock.advanceTimeByFrame()
+            playbackCornerGaps().zip(halfExpandedCorners).forEach { (current, previous) ->
+              assertThat(current).isGreaterThan(previous)
+            }
+            onRoot().performTouchInput { moveBy(Offset(0f, originalTop / 2)) }
+          } finally {
+            onRoot().performTouchInput {
+              advanceEventTime(100)
+              up()
+            }
+            mainClock.autoAdvance = true
+          }
+          playbackCornerGaps().zip(originalCorners).forEach { (current, original) ->
+            assertTrue(abs(current - original) <= 1)
+          }
+
+          onNodeWithTag("playback").performSemanticsAction(SemanticsActions.Expand) { it() }
+          playbackCornerGaps().forEach { assertTrue(it <= 1) }
+          onNodeWithTag("playback-screen").performSemanticsAction(SemanticsActions.Collapse) {
+            it()
+          }
+          playbackCornerGaps().zip(originalCorners).forEach { (current, original) ->
+            assertTrue(abs(current - original) <= 1)
+          }
+        }
+      }
+    }
+  }
 
   @Test
   fun `resizing preserves child state and delivers updated model callbacks`() =
@@ -356,7 +431,26 @@ class AppTemplateRendererTest {
       .isEqualTo(DpRect(left.dp, top.dp, right.dp, bottom.dp))
   }
 
-  private data class SlotModel(val name: String, val onClick: () -> Unit = {}) : BaseModel
+  private fun ComposeUiTest.playbackCornerGaps(): List<Int> {
+    val top = onNodeWithTag("playback-sheet").fetchSemanticsNode().boundsInRoot.top
+    val pixels = onRoot().captureToImage().toPixelMap()
+    val y = ceil(top).toInt() + 3
+    // Detect slot coverage, allowing for the border, antialiasing, and pressed ripple.
+    fun covered(x: Int): Boolean {
+      val color = pixels[x, y]
+      return color.green > color.red + 0.25f && color.green > color.blue + 0.25f
+    }
+    return listOf(
+      (0 until pixels.width / 2).first { covered(it) },
+      (0 until pixels.width / 2).first { covered(pixels.width - 1 - it) },
+    )
+  }
+
+  private data class SlotModel(
+    val name: String,
+    val color: Color? = null,
+    val onClick: () -> Unit = {},
+  ) : BaseModel
 
   private class TestWindowInfo(initialSize: DpSize) : WindowInfo {
     override val isWindowFocused = true
@@ -450,9 +544,15 @@ class AppTemplateRendererTest {
           } else {
             WindowInsets(0, 0, 0, 0)
           }
-        Box(Modifier.windowInsetsPadding(insets).then(slotSize)) {
-          val suffix = if (model.name == "tabs") " ${placement.name}" else ""
-          Text("${model.name} $clicks$suffix")
+        Box(
+          Modifier.windowInsetsPadding(insets)
+            .then(slotSize)
+            .then(model.color?.let { Modifier.background(it) } ?: Modifier),
+        ) {
+          if (model.color == null) {
+            val suffix = if (model.name == "tabs") " ${placement.name}" else ""
+            Text("${model.name} $clicks$suffix")
+          }
         }
       }
     }
