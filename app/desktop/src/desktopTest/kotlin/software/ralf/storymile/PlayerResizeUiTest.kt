@@ -25,7 +25,7 @@ import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
 
 class PlayerResizeUiTest {
-  private val uiTestRule = DesktopUiTestRule()
+  private val uiTestRule = DesktopUiTestRule(withEpisodes = true)
 
   @Test
   fun `expanded speed remains visible through live window preset changes`() {

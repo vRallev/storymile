@@ -23,7 +23,7 @@ import software.ralf.app.platform.robot.composeRobot
 import software.ralf.app.platform.robot.waitUntilCatching
 
 class PlayerTransitionInputUiTest {
-  private val uiTestRule = DesktopUiTestRule()
+  private val uiTestRule = DesktopUiTestRule(withEpisodes = true)
 
   @Test
   fun `short wide windows show a usable speed control without a collapsed counterpart`() {

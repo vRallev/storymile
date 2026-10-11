@@ -4,6 +4,7 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
+import assertk.assertions.isNull
 import kotlin.test.Test
 import software.ralf.storymile.tabs.TabsPresenter
 import software.ralf.storymile.templates.AppTemplate
@@ -16,8 +17,8 @@ class StorymileDesktopHeadlessTest {
     assertThat(awaitItem()).isInstanceOf<AppTemplate.AdaptiveTemplate>().given { initial ->
       val playback = initial.playback
       val expandedPlayback = initial.expandedPlayback
-      assertThat(playback).isNotNull()
-      assertThat(expandedPlayback).isNotNull()
+      assertThat(playback).isNull()
+      assertThat(expandedPlayback).isNull()
       assertThat(initial.tabs).isNotNull().isInstanceOf<TabsPresenter.Model>().given { initialTabs
         ->
         var tabs = initialTabs

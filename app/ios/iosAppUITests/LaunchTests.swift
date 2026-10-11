@@ -21,7 +21,7 @@ final class LaunchTests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 15))
 
-        for tag in ["tab-content", "tabs", "playback"] {
+        for tag in ["tab-content", "tabs"] {
             let container = app.descendants(matching: .any)[tag]
             XCTAssertTrue(container.waitForExistence(timeout: 15), "Missing \(tag) container")
             XCTAssertFalse(container.frame.isEmpty)
@@ -37,6 +37,7 @@ final class LaunchTests: XCTestCase {
             XCTAssertTrue(tab.isHittable)
         }
         XCTAssertTrue(app.buttons["tab-home"].isSelected)
+        XCTAssertFalse(app.descendants(matching: .any)["playback"].exists)
         XCTAssertEqual(app.state, .runningForeground)
     }
 }

@@ -28,7 +28,7 @@ import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
 
 class PlayerSecondaryTransitionUiTest {
-  private val uiTestRule = DesktopUiTestRule()
+  private val uiTestRule = DesktopUiTestRule(withEpisodes = true)
 
   @Test
   fun `seek time skip and speed controls move from the first click frame in both directions`() {

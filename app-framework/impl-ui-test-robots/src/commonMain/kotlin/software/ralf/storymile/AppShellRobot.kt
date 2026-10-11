@@ -34,11 +34,19 @@ import software.ralf.storymile.tabs.TabsPresenter
 @ContributesRobot(AppScope::class)
 class AppShellRobot : ComposeRobot() {
   /** Checks the initial destination, navigation items, and playback container. */
-  fun seeAppLayers() {
-    listOf("tab-content", "tabs", "playback").forEach {
+  fun seeAppLayers(playbackVisible: Boolean = true) {
+    listOf("tab-content", "tabs").forEach {
       compose.onNodeWithTag(it).assertIsDisplayed()
     }
-    compose.onNodeWithTag("playback-artwork-collapsed", useUnmergedTree = true).assertIsDisplayed()
+    if (playbackVisible) {
+      compose.onNodeWithTag("playback").assertIsDisplayed()
+      compose
+        .onNodeWithTag("playback-artwork-collapsed", useUnmergedTree = true)
+        .assertIsDisplayed()
+    } else {
+      compose.onNodeWithTag("playback").assertDoesNotExist()
+      compose.onNodeWithTag("playback-screen").assertDoesNotExist()
+    }
     compose
       .onAllNodes(
         hasAnyAncestor(hasTestTag("tabs")) and

@@ -15,11 +15,13 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
 import dev.zacsweers.metro.createGraphFactory
 import kotlin.math.roundToInt
+import software.ralf.app.platform.robot.composeRobot
 import software.ralf.app.platform.robot.internal.RobotInternals
 import software.ralf.storymile.theme.LocalDarkThemeOverride
 
@@ -27,9 +29,10 @@ import software.ralf.storymile.theme.LocalDarkThemeOverride
  * Desktop integration-test fixture that renders the production application at a controlled size.
  *
  * A fresh application, root scope, Metro graph, and Compose presenter stream are created for each
- * test and destroyed after the Compose test scene closes.
+ * test and destroyed after the Compose test scene closes. [withEpisodes] saves a playlist with one
+ * episode and waits for playback before running the test.
  */
-class DesktopUiTestRule {
+class DesktopUiTestRule(private val withEpisodes: Boolean = false) {
   /** Runs [block] in the phone preset, optionally overriding the system theme with [darkTheme]. */
   fun runPhoneRobotTest(darkTheme: Boolean? = null, block: ComposeUiTest.() -> Unit) {
     runRobotTest(windowSize = DesktopWindowSizes.phone, darkTheme = darkTheme, block = block)
@@ -73,6 +76,9 @@ class DesktopUiTestRule {
         width = windowSize.width.value.roundToInt(),
         height = windowSize.height.value.roundToInt(),
       ) {
+        if (withEpisodes) {
+          composeRobot<PlaylistRobot> { addPlayablePlaylist() }
+        }
         setContent {
           CompositionLocalProvider(LocalDarkThemeOverride provides darkTheme.value) {
             if (contentSize == null) {
@@ -102,6 +108,11 @@ class DesktopUiTestRule {
                 }
               }
             }
+          }
+        }
+        if (withEpisodes) {
+          waitUntil(timeoutMillis = 5_000) {
+            onAllNodes(hasTestTag("playback")).fetchSemanticsNodes().isNotEmpty()
           }
         }
         block()

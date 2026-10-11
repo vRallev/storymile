@@ -3,9 +3,11 @@ package software.ralf.storymile.blackbox
 import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
 import androidx.test.uiautomator.uiAutomator
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,11 +26,12 @@ class StorymileReleaseTest {
       intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
     )
 
-    listOf("tab-content", "tabs", "playback").forEach { tag ->
+    listOf("tab-content", "tabs").forEach { tag ->
       onElement(timeoutMs = 10_000) {
         packageName?.toString() == APP_PACKAGE && isVisibleToUser && viewIdResourceName == tag
       }
     }
+    assertThat(device.hasObject(By.res("playback"))).isFalse()
   }
 
   private companion object {

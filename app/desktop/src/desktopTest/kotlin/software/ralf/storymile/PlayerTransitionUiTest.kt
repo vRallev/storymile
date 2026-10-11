@@ -26,7 +26,7 @@ import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
 
 class PlayerTransitionUiTest {
-  private val uiTestRule = DesktopUiTestRule()
+  private val uiTestRule = DesktopUiTestRule(withEpisodes = true)
 
   @Test
   fun `shared player controls follow a drag and reversal on phone tablet and desktop`() {

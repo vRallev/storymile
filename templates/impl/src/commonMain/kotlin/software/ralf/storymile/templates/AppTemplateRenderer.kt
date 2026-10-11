@@ -1,6 +1,9 @@
 package software.ralf.storymile.templates
 
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -172,14 +175,23 @@ class AppTemplateRenderer(
     template: AppTemplate.AdaptiveTemplate,
     tabPlacement: TabPlacement,
   ) {
+    val hasPlayback = template.playback != null
     val scaffoldState = rememberBottomSheetScaffoldState()
     val sheetState = scaffoldState.bottomSheetState
     val coroutineScope = rememberCoroutineScope()
     var playbackPeekHeight by remember { mutableStateOf(0.dp) }
+    val playbackVisibility = remember { Animatable(0f) }
+    val renderedTemplate =
+      rememberPlaybackTemplate(
+        template,
+        sheetState,
+        playbackVisibility,
+        playbackPeekHeight > 0.dp,
+      )
     val expanded =
       sheetState.currentValue == SheetValue.Expanded ||
         sheetState.targetValue == SheetValue.Expanded
-    CollapseWithoutExpandedContent(template, sheetState)
+    CollapseWithoutExpandedContent(renderedTemplate, sheetState)
     backGestureDispatcherPresenter.PredictiveBackHandlerPresenter(
       enabled = template.playback != null && expanded,
     ) { progress ->
@@ -194,13 +206,17 @@ class AppTemplateRenderer(
       val tabsAtStart = tabPlacement != TabPlacement.BOTTOM
       val collapsedOffset = height - playbackPeekHeight.toPx()
       val cornerRadius = { playbackCornerRadius(sheetState, collapsedOffset) }
+      val playbackOffset = {
+        val sheetOffset = sheetState.offsetOr(collapsedOffset)
+        sheetOffset + (height - sheetOffset) * (1f - playbackVisibility.value)
+      }
       val tabs =
         subcompose("tabs") {
             Box(
               modifier =
                 Modifier.clipBehindPlayback(
-                  sheetState,
-                  tabsAtStart && template.playback != null,
+                  playbackOffset,
+                  tabsAtStart && renderedTemplate.playback != null,
                   cornerRadius,
                 ),
               propagateMinConstraints = true,
@@ -219,17 +235,19 @@ class AppTemplateRenderer(
             },
           )
       val playbackBottomInset = if (tabsAtStart) 0.dp else tabs.height.toDp()
-      val peekHeight = if (template.playback == null) 0.dp else playbackPeekHeight
+      val peekHeight = if (renderedTemplate.playback == null) 0.dp else playbackPeekHeight
       val body =
         subcompose("body") {
             PlaybackScaffold(
-              template = template,
+              template = renderedTemplate,
+              playbackEnabled = hasPlayback,
               scaffoldState = scaffoldState,
               peekHeight = peekHeight,
               contentStart = if (tabsAtStart) tabs.width.toDp() else 0.dp,
               playbackBottomInset = playbackBottomInset,
               collapsedOffset = collapsedOffset,
               cornerRadius = cornerRadius,
+              playbackOffset = playbackOffset,
               onPeekHeightChanged = { playbackPeekHeight = it },
             )
           }
@@ -241,12 +259,47 @@ class AppTemplateRenderer(
         body.placeRelative(0, 0)
         if (!tabsAtStart) {
           val playbackTravel =
-            if (template.playback == null) 0f
-            else (height - peekHeight.toPx() - sheetState.requireOffset()).coerceAtLeast(0f)
+            if (renderedTemplate.playback == null) 0f
+            else (height - peekHeight.toPx() - playbackOffset()).coerceAtLeast(0f)
           tabs.placeRelative(0, height - tabs.height + playbackTravel.roundToInt())
         }
       }
     }
+  }
+
+  @OptIn(ExperimentalMaterial3Api::class)
+  @Composable
+  private fun rememberPlaybackTemplate(
+    template: AppTemplate.AdaptiveTemplate,
+    sheetState: SheetState,
+    playbackVisibility: Animatable<Float, AnimationVector1D>,
+    measured: Boolean,
+  ): AppTemplate.AdaptiveTemplate {
+    val hasPlayback = template.playback != null
+    var retainedPlayback by remember { mutableStateOf(template.playback) }
+    var retainedExpandedPlayback by remember { mutableStateOf(template.expandedPlayback) }
+    if (hasPlayback) {
+      retainedPlayback = template.playback
+      retainedExpandedPlayback = template.expandedPlayback
+    }
+    LaunchedEffect(hasPlayback, measured) {
+      if (hasPlayback) {
+        if (measured) {
+          playbackVisibility.animateTo(1f, tween(250))
+        }
+      } else {
+        playbackVisibility.animateTo(0f, tween(250))
+        if (
+          sheetState.currentValue == SheetValue.Expanded ||
+            sheetState.targetValue == SheetValue.Expanded
+        ) {
+          sheetState.partialExpand()
+        }
+        retainedPlayback = null
+        retainedExpandedPlayback = null
+      }
+    }
+    return template.copy(playback = retainedPlayback, expandedPlayback = retainedExpandedPlayback)
   }
 
   @OptIn(ExperimentalMaterial3Api::class)
@@ -271,12 +324,14 @@ class AppTemplateRenderer(
   @Composable
   private fun PlaybackScaffold(
     template: AppTemplate.AdaptiveTemplate,
+    playbackEnabled: Boolean,
     scaffoldState: BottomSheetScaffoldState,
     peekHeight: Dp,
     contentStart: Dp,
     playbackBottomInset: Dp,
     collapsedOffset: Float,
     cornerRadius: () -> Dp,
+    playbackOffset: () -> Float,
     onPeekHeightChanged: (Dp) -> Unit,
   ) {
     val sheetState = scaffoldState.bottomSheetState
@@ -291,10 +346,16 @@ class AppTemplateRenderer(
       sheetTonalElevation = 0.dp,
       sheetShadowElevation = 0.dp,
       sheetDragHandle = null,
-      sheetSwipeEnabled = template.playback != null && template.expandedPlayback != null,
+      sheetSwipeEnabled = playbackEnabled && template.expandedPlayback != null,
       containerColor = Color.Transparent,
       sheetContent = {
-        Box(if (template.playback == null) Modifier.height(0.dp) else Modifier.fillMaxSize()) {
+        Box(
+          if (template.playback == null) Modifier.height(0.dp)
+          else
+            Modifier.fillMaxSize().graphicsLayer {
+              translationY = playbackOffset() - sheetState.offsetOr(collapsedOffset)
+            },
+        ) {
           template.playback?.let {
             PlaybackLayer(
               collapsedContent = it,
@@ -319,7 +380,7 @@ class AppTemplateRenderer(
         // The Android renderer bridge does not forward modifiers to child renderers.
         Box(
           Modifier.fillMaxSize()
-            .clipBehindPlayback(sheetState, template.playback != null, cornerRadius)
+            .clipBehindPlayback(playbackOffset, template.playback != null, cornerRadius)
             .padding(contentPadding)
             .consumeWindowInsets(contentPadding)
             .windowInsetsPadding(WindowInsets.safeDrawing),
@@ -332,10 +393,7 @@ class AppTemplateRenderer(
             Modifier.fillMaxWidth()
               .height(48.dp)
               .graphicsLayer {
-                // Compose can query layer semantics before Material initializes the anchors.
-                translationY =
-                  if (sheetState.hasPartiallyExpandedState) sheetState.requireOffset()
-                  else collapsedOffset
+                translationY = playbackOffset()
                 alpha = cornerRadius() / 24.dp
                 compositingStrategy = CompositingStrategy.ModulateAlpha
               }
@@ -347,14 +405,17 @@ class AppTemplateRenderer(
   }
 
   @OptIn(ExperimentalMaterial3Api::class)
+  private fun SheetState.offsetOr(fallback: Float): Float =
+    if (hasPartiallyExpandedState) requireOffset() else fallback
+
+  @OptIn(ExperimentalMaterial3Api::class)
   private fun playbackCornerRadius(sheetState: SheetState, collapsedOffset: Float): Dp =
     if (sheetState.hasExpandedState && collapsedOffset > 0f) {
       24.dp * (sheetState.requireOffset() / collapsedOffset).coerceIn(0f, 1f)
     } else 24.dp
 
-  @OptIn(ExperimentalMaterial3Api::class)
   private fun Modifier.clipBehindPlayback(
-    sheetState: SheetState,
+    playbackOffset: () -> Float,
     enabled: Boolean,
     cornerRadius: () -> Dp,
   ): Modifier {
@@ -362,7 +423,7 @@ class AppTemplateRenderer(
       return this
     }
     return drawWithContent {
-      val bottom = sheetState.requireOffset().coerceAtLeast(0f) + cornerRadius().toPx()
+      val bottom = playbackOffset().coerceAtLeast(0f) + cornerRadius().toPx()
       if (bottom > 0f) {
         clipRect(bottom = bottom) { this@drawWithContent.drawContent() }
       }
