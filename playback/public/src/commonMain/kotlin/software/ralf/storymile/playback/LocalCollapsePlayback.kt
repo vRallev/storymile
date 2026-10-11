@@ -1,4 +1,4 @@
-package software.ralf.storymile.templates
+package software.ralf.storymile.playback
 
 import androidx.compose.runtime.staticCompositionLocalOf
 
