@@ -13,7 +13,7 @@ internal class InMemoryStoragePlatform : StoragePlatform() {
   private val preferences =
     MutableStateFlow<Map<Pair<String, String>, InMemoryPreferencesStorage>>(emptyMap())
   private val filesMutex = Mutex()
-  private val files = mutableMapOf<Triple<String, FileStorageArea, String>, ByteArray>()
+  private val files = mutableMapOf<FileKey, ByteArray>()
 
   override fun createPreferences(
     namespace: String,
@@ -34,7 +34,7 @@ internal class InMemoryStoragePlatform : StoragePlatform() {
     namespace: String,
     area: FileStorageArea,
     name: String,
-  ): ByteArray? = filesMutex.withLock { files[Triple(namespace, area, name)]?.copyOf() }
+  ): ByteArray? = filesMutex.withLock { files[FileKey(namespace, area, name)]?.copyOf() }
 
   override suspend fun writeFile(
     namespace: String,
@@ -42,20 +42,22 @@ internal class InMemoryStoragePlatform : StoragePlatform() {
     name: String,
     content: ByteArray,
   ) {
-    filesMutex.withLock { files[Triple(namespace, area, name)] = content.copyOf() }
+    filesMutex.withLock { files[FileKey(namespace, area, name)] = content.copyOf() }
   }
 
   override suspend fun deleteFile(namespace: String, area: FileStorageArea, name: String) {
-    filesMutex.withLock { files.remove(Triple(namespace, area, name)) }
+    filesMutex.withLock { files.remove(FileKey(namespace, area, name)) }
   }
 
   override suspend fun deleteAllFiles(namespace: String, area: FileStorageArea, path: String) {
     filesMutex.withLock {
       files.keys.removeAll { key ->
-        key.first == namespace &&
-          key.second == area &&
-          (path.isEmpty() || key.third.startsWith("$path/"))
+        key.namespace == namespace &&
+          key.area == area &&
+          (path.isEmpty() || key.path.startsWith("$path/"))
       }
     }
   }
+
+  private data class FileKey(val namespace: String, val area: FileStorageArea, val path: String)
 }
