@@ -34,16 +34,18 @@ import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import assertk.assertThat
+import assertk.assertions.isBetween
+import assertk.assertions.isCloseTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
+import assertk.assertions.isGreaterThanOrEqualTo
 import assertk.assertions.isLessThan
+import assertk.assertions.isLessThanOrEqualTo
 import assertk.assertions.isNotEqualTo
 import java.io.File
 import javax.imageio.ImageIO
-import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.test.Test
-import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.app.platform.robot.waitUntilCatching
@@ -344,21 +346,21 @@ class StorymileDesktopUiTest {
           val window = onNodeWithTag("app-shell").getUnclippedBoundsInRoot()
           assertThat((artwork.right - artwork.left)).isEqualTo((artwork.bottom - artwork.top))
           assertThat((artwork.right - artwork.left)).isGreaterThan(0.dp)
-          assertTrue(artwork.left >= window.left + 24.dp)
-          assertTrue(artwork.right <= window.right - 24.dp)
-          assertTrue(artwork.top >= window.top)
-          assertTrue(artwork.bottom <= window.bottom)
+          assertThat(artwork.left).isGreaterThanOrEqualTo(window.left + 24.dp)
+          assertThat(artwork.right).isLessThanOrEqualTo(window.right - 24.dp)
+          assertThat(artwork.top).isGreaterThanOrEqualTo(window.top)
+          assertThat(artwork.bottom).isLessThanOrEqualTo(window.bottom)
 
           if (size.width >= 600.dp && size.width > size.height) {
             assertThat(artwork.left).isEqualTo(32.dp)
           } else {
-            assertTrue(
-              abs((artwork.left + artwork.right - window.left - window.right).value) <= 2f,
-            )
+            assertThat((artwork.left + artwork.right).value)
+              .isCloseTo((window.left + window.right).value, 2f)
             if (size.width < 600.dp) {
-              assertTrue(artwork.right - artwork.left <= size.width - 48.dp)
+              assertThat(artwork.right - artwork.left).isLessThanOrEqualTo(size.width - 48.dp)
             } else {
-              assertTrue(abs(((artwork.right - artwork.left) - size.width * 0.7f).value) <= 1f)
+              assertThat((artwork.right - artwork.left).value)
+                .isCloseTo((size.width * 0.7f).value, 1f)
             }
           }
           val dimensions = "${size.width.value.toInt()}x${size.height.value.toInt()}"
@@ -386,7 +388,7 @@ class StorymileDesktopUiTest {
           onRoot().performTouchInput { moveBy(Offset(0f, -collapsedSheetTop / 2)) }
           mainClock.advanceTimeByFrame()
           val halfway = assertPlaybackArtworkTransition(collapsed, expanded, collapsedSheetTop)
-          assertTrue(halfway in 0.25f..0.75f)
+          assertThat(halfway).isBetween(0.25f, 0.75f)
           val dimensions = "${size.width.value.toInt()}x${size.height.value.toInt()}"
           saveScreenshot("playback-transition-$dimensions-light")
 
@@ -425,7 +427,7 @@ class StorymileDesktopUiTest {
           advancePlaybackToIntermediate(collapsedSheetTop)
           val opening = playbackExpansionProgress(collapsedSheetTop)
           val openingArtwork = playbackArtworkBounds(expanded = true)
-          assertTrue(opening in 0.05f..0.95f)
+          assertThat(opening).isBetween(0.05f, 0.95f)
 
           mainClock.autoAdvance = true
           val expanded = playbackArtworkBounds(expanded = true)
@@ -437,7 +439,7 @@ class StorymileDesktopUiTest {
           assertPlaybackArtworkTransition(collapsed, expanded, collapsedSheetTop)
           advancePlaybackToIntermediate(collapsedSheetTop)
           val closing = assertPlaybackArtworkTransition(collapsed, expanded, collapsedSheetTop)
-          assertTrue(closing in 0.05f..0.95f)
+          assertThat(closing).isBetween(0.05f, 0.95f)
         } finally {
           mainClock.autoAdvance = true
         }
@@ -570,12 +572,10 @@ class StorymileDesktopUiTest {
         artwork.bottom to expected.bottom,
       )
       .forEach { (actual, target) ->
-        assertTrue(
-          abs(actual - target) <= 1f,
-          "Expected artwork $expected at $progress, got $artwork",
-        )
+        assertThat(actual, "Expected artwork $expected at $progress, got $artwork")
+          .isCloseTo(target, 1f)
       }
-    assertTrue(abs(artwork.width - artwork.height) <= 1f)
+    assertThat(artwork.width).isCloseTo(artwork.height, 1f)
   }
 
   private fun ComposeUiTest.firstPlaybackExpansionFrame(
@@ -612,7 +612,7 @@ class StorymileDesktopUiTest {
     assertThat(playbackTravel).isGreaterThan(0.dp)
     if (phone) {
       val tabTravel = tabs.top - originalTabs.top
-      assertTrue(abs((tabTravel - playbackTravel).value) <= 1f)
+      assertThat(tabTravel.value).isCloseTo(playbackTravel.value, 1f)
     } else {
       assertThat(tabs).isEqualTo(originalTabs)
     }

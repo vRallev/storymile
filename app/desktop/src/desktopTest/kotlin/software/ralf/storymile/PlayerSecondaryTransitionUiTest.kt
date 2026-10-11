@@ -15,11 +15,16 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import kotlin.math.abs
+import assertk.assertThat
+import assertk.assertions.isCloseTo
+import assertk.assertions.isFalse
+import assertk.assertions.isGreaterThan
+import assertk.assertions.isGreaterThanOrEqualTo
+import assertk.assertions.isLessThan
+import assertk.assertions.isLessThanOrEqualTo
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.test.Test
-import kotlin.test.assertTrue
 import software.ralf.app.platform.robot.composeRobot
 
 class PlayerSecondaryTransitionUiTest {
@@ -36,7 +41,7 @@ class PlayerSecondaryTransitionUiTest {
         try {
           composeRobot<AppShellRobot> { openPlayback() }
           val firstProgress = advanceToProgress(collapsedTop) { it > 0f }
-          assertTrue(firstProgress < 1f)
+          assertThat(firstProgress).isLessThan(1f)
           val first = snapshot(parts, expanded = true)
           val middleProgress = advanceToProgress(collapsedTop) { it in 0.3f..0.7f }
           val middle = snapshot(parts, expanded = true)
@@ -48,7 +53,7 @@ class PlayerSecondaryTransitionUiTest {
           mainClock.autoAdvance = false
           composeRobot<AppShellRobot> { collapsePlayback() }
           val closingStart = advanceToProgress(collapsedTop) { it < 1f }
-          assertTrue(closingStart > 0f)
+          assertThat(closingStart).isGreaterThan(0f)
           assertShared(collapsed, expanded, snapshot(parts, expanded = true), closingStart)
           val closing = advanceToProgress(collapsedTop) { it in 0.3f..0.7f }
           assertShared(collapsed, expanded, snapshot(parts, expanded = true), closing)
@@ -194,7 +199,8 @@ class PlayerSecondaryTransitionUiTest {
     val right = ceil(bounds.right).toInt().coerceAtMost(width)
     val top = floor(bounds.top).toInt().coerceAtLeast(0)
     val bottom = ceil(bounds.bottom).toInt().coerceAtMost(height)
-    assertTrue(right > left && bottom > top, "Control is outside the screenshot: $bounds")
+    assertThat(right, "Control is outside the screenshot: $bounds").isGreaterThan(left)
+    assertThat(bottom, "Control is outside the screenshot: $bounds").isGreaterThan(top)
     return (top until bottom).minOf { y -> (left until right).minOf { x -> this[x, y].red } }
   }
 
@@ -246,10 +252,8 @@ class PlayerSecondaryTransitionUiTest {
           arc.y * 4f * progress * (1f - progress),
         "$key top at $progress",
       )
-      assertTrue(
-        part.minimumRed <= maxOf(start.minimumRed, end.minimumRed) + 0.08f,
-        "$key must stay opaque at $progress",
-      )
+      assertThat(part.minimumRed, "$key must stay opaque at $progress")
+        .isLessThanOrEqualTo(maxOf(start.minimumRed, end.minimumRed) + 0.08f)
       if (
         key.endsWith("icon") || key.endsWith("button") || key == "seek-thumb" || key == "seek-track"
       ) {
@@ -281,10 +285,11 @@ class PlayerSecondaryTransitionUiTest {
     assertLabelsAvoidTransport(actual, expanded, progress)
     val position = actual.getValue("position").projectInk(expanded.getValue("position"))
     val subtitle = actual.getValue("subtitle").projectInk(expanded.getValue("subtitle"))
-    assertTrue(
-      !position.overlaps(subtitle),
-      "Elapsed time ink $position overlaps subtitle ink $subtitle at $progress",
-    )
+    assertThat(
+        position.overlaps(subtitle),
+        "Elapsed time ink $position overlaps subtitle ink $subtitle at $progress",
+      )
+      .isFalse()
   }
 
   private fun arcFor(key: String, wide: Boolean): Offset =
@@ -309,25 +314,24 @@ class PlayerSecondaryTransitionUiTest {
       val label = parts.getValue(key).projectInk(expanded.getValue(key))
       icons.forEach { icon ->
         val iconInk = parts.getValue(icon).projectInk(expanded.getValue(icon))
-        assertTrue(
-          !label.overlaps(iconInk),
-          "$key ink $label overlaps $icon ink $iconInk at $progress",
-        )
+        assertThat(
+            label.overlaps(iconInk),
+            "$key ink $label overlaps $icon ink $iconInk at $progress",
+          )
+          .isFalse()
       }
       val nearestX = play.center.x.coerceIn(label.left, label.right)
       val nearestY = play.center.y.coerceIn(label.top, label.bottom)
       val distanceSquared =
         (nearestX - play.center.x) * (nearestX - play.center.x) +
           (nearestY - play.center.y) * (nearestY - play.center.y)
-      assertTrue(
-        distanceSquared >= play.width * play.width / 4f,
-        "$key ink $label overlaps play/pause $play at $progress",
-      )
+      assertThat(distanceSquared, "$key ink $label overlaps play/pause $play at $progress")
+        .isGreaterThanOrEqualTo(play.width * play.width / 4f)
     }
   }
 
   private fun Part.projectInk(reference: Part): Rect {
-    assertTrue(!reference.ink.isEmpty, "Expected visible ink in the native endpoint")
+    assertThat(reference.ink.isEmpty, "Expected visible ink in the native endpoint").isFalse()
     val scaleX = bounds.width / reference.bounds.width
     val scaleY = bounds.height / reference.bounds.height
     return Rect(
@@ -370,7 +374,7 @@ class PlayerSecondaryTransitionUiTest {
     description: String,
     tolerance: Float = 1f,
   ) {
-    assertTrue(abs(actual - expected) <= tolerance, "$description: expected $expected, got $actual")
+    assertThat(actual, description).isCloseTo(expected, tolerance)
   }
 
   private data class Part(val bounds: Rect, val minimumRed: Float, val ink: Rect)

@@ -4,7 +4,8 @@ import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.uiAutomator
-import org.junit.Assert.assertEquals
+import assertk.assertThat
+import assertk.assertions.isEqualTo
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,7 +16,7 @@ class StorymileReleaseTest {
 
   @Test
   fun showsAppNavigationAndContent() = uiAutomator {
-    assertEquals("Success", device.executeShellCommand("pm clear $APP_PACKAGE").trim())
+    assertThat(device.executeShellCommand("pm clear $APP_PACKAGE").trim()).isEqualTo("Success")
     device.pressHome()
     val context = InstrumentationRegistry.getInstrumentation().context
     val intent = requireNotNull(context.packageManager.getLaunchIntentForPackage(APP_PACKAGE))

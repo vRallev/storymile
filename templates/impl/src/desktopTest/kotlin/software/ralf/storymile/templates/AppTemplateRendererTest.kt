@@ -59,16 +59,17 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import app.cash.turbine.test
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
+import assertk.assertions.isInstanceOf
 import assertk.assertions.isLessThan
+import assertk.assertions.isLessThanOrEqualTo
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.reflect.KClass
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
@@ -270,16 +271,16 @@ class AppTemplateRendererTest {
             mainClock.autoAdvance = true
           }
           playbackCornerGaps().zip(originalCorners).forEach { (current, original) ->
-            assertTrue(abs(current - original) <= 1)
+            assertThat(abs(current - original)).isLessThanOrEqualTo(1)
           }
 
           onNodeWithTag("playback").performSemanticsAction(SemanticsActions.Expand) { it() }
-          playbackCornerGaps().forEach { assertTrue(it <= 1) }
+          playbackCornerGaps().forEach { assertThat(it).isLessThanOrEqualTo(1) }
           onNodeWithTag("playback-screen").performSemanticsAction(SemanticsActions.Collapse) {
             it()
           }
           playbackCornerGaps().zip(originalCorners).forEach { (current, original) ->
-            assertTrue(abs(current - original) <= 1)
+            assertThat(abs(current - original)).isLessThanOrEqualTo(1)
           }
         }
       }
@@ -399,9 +400,10 @@ class AppTemplateRendererTest {
       runOnIdle { windowInfo.containerDpSize = DpSize(900.dp, 700.dp) }
       assertBounds("playback-screen", left = 0, top = 0, right = 900, bottom = 700)
       runCoroutineTest {
-        assertFailsWith<CancellationException> {
+        assertFailure {
           fixture.backGestureDispatcher.onPredictiveBack(flow { throw CancellationException() })
         }
+          .isInstanceOf<CancellationException>()
       }
       assertBounds("playback-screen", left = 0, top = 0, right = 900, bottom = 700)
 

@@ -17,12 +17,13 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import assertk.assertThat
+import assertk.assertions.isLessThan
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
 class PlayerSliderTransitionUiTest {
   private val uiTestRule = DesktopUiTestRule()
@@ -96,6 +97,6 @@ class PlayerSliderTransitionUiTest {
         abs(actual.green - expected.green),
         abs(actual.blue - expected.blue),
       )
-    assertTrue(difference < 0.025f, "$description: expected $expected, got $actual")
+    assertThat(difference, "$description: expected $expected, got $actual").isLessThan(0.025f)
   }
 }

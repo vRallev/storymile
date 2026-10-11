@@ -40,10 +40,14 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import assertk.assertThat
+import assertk.assertions.isBetween
+import assertk.assertions.isCloseTo
 import assertk.assertions.isEqualTo
+import assertk.assertions.isLessThan
+import assertk.assertions.isLessThanOrEqualTo
+import assertk.assertions.isNotEmpty
 import kotlin.math.abs
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
 class PlaybackTransitionTest {
   @Test
@@ -140,10 +144,11 @@ class PlaybackTransitionTest {
         val left = (160 * fraction).toInt()
         val top = (100 * fraction).toInt()
         val side = (20 + 20 * fraction).toInt()
-        assertTrue(
-          pixels[left + side / 2, top + side / 2].red < 0.01f,
-          "Expected an opaque shared control at step $index progress $fraction, got ${pixels[left + side / 2, top + side / 2]}",
-        )
+        assertThat(
+            pixels[left + side / 2, top + side / 2].red,
+            "Expected an opaque shared control at step $index progress $fraction, got ${pixels[left + side / 2, top + side / 2]}",
+          )
+          .isLessThan(0.01f)
         assertGrayscale(pixels[left + side + 2, top + side / 2], 1f)
         if (fraction == 0f) {
           assertGrayscale(pixels[180, 120], 1f)
@@ -226,10 +231,10 @@ class PlaybackTransitionTest {
       val pixels = onRoot().captureToImage().toPixelMap()
       val actual = ink(pixels, 40)
       val expected = ink(pixels, 120)
-      assertTrue(actual.minimum < 0.05f, "Shared glyphs must remain opaque during motion")
-      assertTrue(abs(actual.width - expected.width) <= 2)
-      assertTrue(abs(actual.height - expected.height) <= 2)
-      assertTrue(actual.coverage / expected.coverage in 0.85f..1.15f)
+      assertThat(actual.minimum, "Shared glyphs must remain opaque during motion").isLessThan(0.05f)
+      assertThat(abs(actual.width - expected.width)).isLessThanOrEqualTo(2)
+      assertThat(abs(actual.height - expected.height)).isLessThanOrEqualTo(2)
+      assertThat(actual.coverage / expected.coverage).isBetween(0.85f, 1.15f)
 
       runOnIdle { progress = 1f }
       assertGrayscale(onRoot().captureToImage().toPixelMap()[90, 45], 1f)
@@ -311,7 +316,7 @@ class PlaybackTransitionTest {
                   pixels[(160 * fraction).toInt() + dx, (40 * fraction).toInt() + dy].red
                 }
               }
-            assertTrue(abs(minimum - fraction) <= 0.02f)
+            assertThat(minimum).isCloseTo(fraction, 0.02f)
           } else {
             assertGrayscale(pixels[x, y], fraction)
           }
@@ -334,7 +339,7 @@ class PlaybackTransitionTest {
         }
       }
     }
-    assertTrue(points.isNotEmpty())
+    assertThat(points).isNotEmpty()
     return Ink(
       points.maxOf { it.first } - points.minOf { it.first },
       points.maxOf { it.second } - points.minOf { it.second },
@@ -345,7 +350,7 @@ class PlaybackTransitionTest {
 
   private fun assertGrayscale(color: Color, expected: Float) {
     listOf(color.red, color.green, color.blue).forEach {
-      assertTrue(abs(it - expected) <= 0.01f, "Expected gray $expected, got $color")
+      assertThat(it, "Expected gray $expected, got $color").isCloseTo(expected, 0.01f)
     }
     assertThat(color.alpha).isEqualTo(1f)
   }

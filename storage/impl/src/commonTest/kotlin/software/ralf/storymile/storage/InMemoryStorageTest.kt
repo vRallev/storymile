@@ -4,13 +4,14 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.mutablePreferencesOf
 import androidx.datastore.preferences.core.stringPreferencesKey
+import assertk.assertFailure
+import assertk.assertThat
+import assertk.assertions.isEqualTo
+import assertk.assertions.isInstanceOf
+import assertk.assertions.isNotInstanceOf
+import assertk.assertions.isNotNull
+import assertk.assertions.isNull
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
@@ -39,12 +40,14 @@ class InMemoryStorageTest {
       val reopened: Storage = scope.storage(factory)
       val fresh: Storage = scope.storage(InMemoryStorageFactory())
 
-      assertEquals("dark", reopened.preferences("settings").data.first()[key])
-      assertContentEquals(byteArrayOf(1), reopened.files.directory("books").read("chapter"))
-      assertContentEquals(byteArrayOf(2), reopened.cache.read("cover"))
-      assertNull(fresh.preferences("settings").data.first()[key])
-      assertNull(fresh.files.directory("books").read("chapter"))
-      assertNull(fresh.cache.read("cover"))
+      assertThat(reopened.preferences("settings").data.first()[key]).isEqualTo("dark")
+      assertThat(reopened.files.directory("books").read("chapter"))
+        .isNotNull()
+        .isEqualTo(byteArrayOf(1))
+      assertThat(reopened.cache.read("cover")).isNotNull().isEqualTo(byteArrayOf(2))
+      assertThat(fresh.preferences("settings").data.first()[key]).isNull()
+      assertThat(fresh.files.directory("books").read("chapter")).isNull()
+      assertThat(fresh.cache.read("cover")).isNull()
     }
 
   @Test
@@ -69,23 +72,25 @@ class InMemoryStorageTest {
 
       books.deleteAll()
 
-      assertNull(books.read("track"))
-      assertNull(chapters.read("track"))
-      assertContentEquals(byteArrayOf(0), app.files.read("track"))
-      assertContentEquals(byteArrayOf(3), app.files.directory("Books").read("track"))
-      assertContentEquals(byteArrayOf(4), app.files.directory("bookshelf").read("track"))
-      assertContentEquals(byteArrayOf(5), app.cache.directory("books").read("track"))
-      assertContentEquals(byteArrayOf(6), user.files.directory("books").read("track"))
-      assertEquals("dark", app.preferences("settings").data.first()[key])
-      assertEquals("system", app.preferences("Settings").data.first()[key])
-      assertEquals("light", user.preferences("settings").data.first()[key])
+      assertThat(books.read("track")).isNull()
+      assertThat(chapters.read("track")).isNull()
+      assertThat(app.files.read("track")).isNotNull().isEqualTo(byteArrayOf(0))
+      assertThat(app.files.directory("Books").read("track")).isNotNull().isEqualTo(byteArrayOf(3))
+      assertThat(app.files.directory("bookshelf").read("track"))
+        .isNotNull()
+        .isEqualTo(byteArrayOf(4))
+      assertThat(app.cache.directory("books").read("track")).isNotNull().isEqualTo(byteArrayOf(5))
+      assertThat(user.files.directory("books").read("track")).isNotNull().isEqualTo(byteArrayOf(6))
+      assertThat(app.preferences("settings").data.first()[key]).isEqualTo("dark")
+      assertThat(app.preferences("Settings").data.first()[key]).isEqualTo("system")
+      assertThat(user.preferences("settings").data.first()[key]).isEqualTo("light")
 
       chapters.write("track", byteArrayOf(7))
-      assertContentEquals(byteArrayOf(7), chapters.read("track"))
+      assertThat(chapters.read("track")).isNotNull().isEqualTo(byteArrayOf(7))
       app.files.deleteAll()
-      assertNull(chapters.read("track"))
-      assertNull(app.files.read("track"))
-      assertContentEquals(byteArrayOf(5), app.cache.directory("books").read("track"))
+      assertThat(chapters.read("track")).isNull()
+      assertThat(app.files.read("track")).isNull()
+      assertThat(app.cache.directory("books").read("track")).isNotNull().isEqualTo(byteArrayOf(5))
     }
 
   @Test
@@ -94,15 +99,14 @@ class InMemoryStorageTest {
     val content = byteArrayOf(1, 2, 3)
     storage.files.write("track", content)
     content[0] = 9
-    val read = assertNotNull(storage.files.read("track"))
-    read[1] = 9
+    assertThat(storage.files.read("track")).isNotNull().given { read -> read[1] = 9 }
 
-    assertContentEquals(byteArrayOf(1, 2, 3), storage.files.read("track"))
+    assertThat(storage.files.read("track")).isNotNull().isEqualTo(byteArrayOf(1, 2, 3))
     storage.files.write("track", byteArrayOf(4))
-    assertContentEquals(byteArrayOf(4), storage.files.read("track"))
+    assertThat(storage.files.read("track")).isNotNull().isEqualTo(byteArrayOf(4))
     storage.files.delete("track")
     storage.files.delete("missing")
-    assertNull(storage.files.read("track"))
+    assertThat(storage.files.read("track")).isNull()
   }
 
   @Test
@@ -124,18 +128,19 @@ class InMemoryStorageTest {
           }
         }
         .awaitAll()
-      assertEquals(20, preferences.data.first()[key])
-      assertEquals(20, transforms)
+      assertThat(preferences.data.first()[key]).isEqualTo(20)
+      assertThat(transforms).isEqualTo(20)
 
-      assertFailsWith<IllegalStateException> {
+      assertFailure {
         preferences.edit {
           it[key] = 100
           error("Edit failed")
         }
       }
-      assertEquals(20, preferences.data.first()[key])
+        .isInstanceOf<IllegalStateException>()
+      assertThat(preferences.data.first()[key]).isEqualTo(20)
       preferences.edit { it[key] = 21 }
-      assertEquals(21, preferences.data.first()[key])
+      assertThat(preferences.data.first()[key]).isEqualTo(21)
     }
 
   @Test
@@ -149,8 +154,8 @@ class InMemoryStorageTest {
       val returned = preferences.updateData { submitted }
       submitted[key] = "light"
 
-      assertEquals("dark", returned[key])
-      assertEquals("dark", preferences.data.first()[key])
+      assertThat(returned[key]).isEqualTo("dark")
+      assertThat(preferences.data.first()[key]).isEqualTo("dark")
     }
 
   @Test
@@ -160,22 +165,22 @@ class InMemoryStorageTest {
     val other = storage.preferences("other")
     val key = stringPreferencesKey("theme")
 
-    val failure =
-      assertFailsWith<IllegalStateException> {
-        withTimeout(1000) {
-          preferences.edit {
-            other.edit { preferences.updateData { it } }
-          }
+    assertFailure {
+      withTimeout(1000) {
+        preferences.edit {
+          other.edit { preferences.updateData { it } }
         }
       }
-    assertFalse(failure is CancellationException)
+    }
+      .isInstanceOf<IllegalStateException>()
+      .isNotInstanceOf<CancellationException>()
 
     preferences.edit { settings ->
       other.edit { it[key] = "light" }
       settings[key] = "dark"
     }
-    assertEquals("dark", preferences.data.first()[key])
-    assertEquals("light", other.data.first()[key])
+    assertThat(preferences.data.first()[key]).isEqualTo("dark")
+    assertThat(other.data.first()[key]).isEqualTo("light")
   }
 
   @Test
@@ -189,13 +194,14 @@ class InMemoryStorageTest {
       preferences.edit { it[key] = "dark" }
       val editStarted = CompletableDeferred<Unit>()
       val editing = async {
-        assertFailsWith<CancellationException> {
+        assertFailure {
           preferences.edit {
             it[key] = "light"
             editStarted.complete(Unit)
             runCatching { awaitCancellation() }
           }
         }
+          .isInstanceOf<CancellationException>()
       }
       editStarted.await()
 
@@ -203,7 +209,7 @@ class InMemoryStorageTest {
       editing.await()
       val reopened: Storage = scope.storage(factory)
 
-      assertEquals("dark", reopened.preferences("settings").data.first()[key])
+      assertThat(reopened.preferences("settings").data.first()[key]).isEqualTo("dark")
     }
 
   private fun Scope.storage(factory: ScopedStorage.Factory, namespace: String = "app"): Storage =

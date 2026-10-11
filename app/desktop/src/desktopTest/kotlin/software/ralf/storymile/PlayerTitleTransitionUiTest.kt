@@ -29,12 +29,16 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.lerp
 import androidx.compose.ui.unit.Density
+import assertk.assertThat
+import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
+import assertk.assertions.isGreaterThanOrEqualTo
+import assertk.assertions.isNotEmpty
+import assertk.assertions.isStrictlyBetween
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import software.ralf.app.platform.robot.composeRobot
 
 class PlayerTitleTransitionUiTest {
@@ -48,9 +52,10 @@ class PlayerTitleTransitionUiTest {
       val collapsedTop = sheetTop()
       composeRobot<AppShellRobot> { openPlayback() }
       val expanded = titleLayout("playback-title-expanded")
-      assertEquals(1, collapsed.lineCount)
-      assertEquals(1, expanded.lineCount)
-      assertTrue(!collapsed.isLineEllipsized(0) && !expanded.isLineEllipsized(0))
+      assertThat(collapsed.lineCount).isEqualTo(1)
+      assertThat(expanded.lineCount).isEqualTo(1)
+      assertThat(collapsed.isLineEllipsized(0)).isFalse()
+      assertThat(expanded.isLineEllipsized(0)).isFalse()
       composeRobot<AppShellRobot> { collapsePlayback() }
       waitForIdle()
 
@@ -62,7 +67,7 @@ class PlayerTitleTransitionUiTest {
           onRoot().performTouchInput { moveBy(Offset(0f, distance)) }
           mainClock.advanceTimeByFrame()
           val progress = 1f - sheetTop() / collapsedTop
-          assertTrue(progress > 0f && progress < 1f)
+          assertThat(progress).isStrictlyBetween(0f, 1f)
           val node =
             onNodeWithTag("playback-title-expanded", useUnmergedTree = true).fetchSemanticsNode()
           val coordinates = node.layoutInfo.coordinates
@@ -137,7 +142,7 @@ class PlayerTitleTransitionUiTest {
         }
       }
     }
-    assertTrue(ink.isNotEmpty())
+    assertThat(ink).isNotEmpty()
     // Ellipsis dots can occupy the same width. Require the letter's ink above the baseline.
     val upperEdge = ink.minOf { it.y }
     val upperInk = ink.filter {
@@ -150,10 +155,11 @@ class PlayerTitleTransitionUiTest {
         (-1..1).any { dx -> frame.pixels[x + dx, y + dy].luminance() < 0.4f }
       }
     }
-    assertTrue(
-      matched >= upperInk.size * 0.85f,
-      "The final title glyph is missing at progress ${frame.progress}: $matched/${upperInk.size} reference pixels remain",
-    )
+    assertThat(
+        matched.toFloat(),
+        "The final title glyph is missing at progress ${frame.progress}: $matched/${upperInk.size} reference pixels remain",
+      )
+      .isGreaterThanOrEqualTo(upperInk.size * 0.85f)
   }
 
   private data class TitleFrame(

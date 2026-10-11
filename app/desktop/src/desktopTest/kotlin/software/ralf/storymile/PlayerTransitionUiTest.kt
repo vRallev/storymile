@@ -16,9 +16,13 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import kotlin.math.abs
+import assertk.assertThat
+import assertk.assertions.isBetween
+import assertk.assertions.isCloseTo
+import assertk.assertions.isGreaterThan
+import assertk.assertions.isLessThan
+import assertk.assertions.isStrictlyBetween
 import kotlin.test.Test
-import kotlin.test.assertTrue
 import software.ralf.app.platform.robot.composeRobot
 
 class PlayerTransitionUiTest {
@@ -42,13 +46,13 @@ class PlayerTransitionUiTest {
           onRoot().performTouchInput { moveBy(Offset(0f, -collapsedSheetTop / 2)) }
           mainClock.advanceTimeByFrame()
           val halfway = expansionProgress(collapsedSheetTop)
-          assertTrue(halfway in 0.25f..0.75f)
+          assertThat(halfway).isBetween(0.25f, 0.75f)
           assertControls(collapsed, expanded, halfway)
 
           onRoot().performTouchInput { moveBy(Offset(0f, collapsedSheetTop / 4)) }
           mainClock.advanceTimeByFrame()
           val reversed = expansionProgress(collapsedSheetTop)
-          assertTrue(reversed > 0f && reversed < halfway)
+          assertThat(reversed).isStrictlyBetween(0f, halfway)
           assertControls(collapsed, expanded, reversed)
 
           onRoot().performTouchInput { moveBy(Offset(0f, collapsedSheetTop)) }
@@ -80,7 +84,7 @@ class PlayerTransitionUiTest {
         try {
           composeRobot<AppShellRobot> { openPlayback() }
           val openingStart = advanceToProgress(collapsedSheetTop) { it > 0f }
-          assertTrue(openingStart < 1f)
+          assertThat(openingStart).isLessThan(1f)
           assertControls(collapsed, expanded, openingStart)
           val opening = advanceToProgress(collapsedSheetTop) { it in 0.2f..0.8f }
           assertControls(collapsed, expanded, opening)
@@ -90,7 +94,7 @@ class PlayerTransitionUiTest {
           mainClock.autoAdvance = false
           composeRobot<AppShellRobot> { collapsePlayback() }
           val closingStart = advanceToProgress(collapsedSheetTop) { it < 1f }
-          assertTrue(closingStart > 0f)
+          assertThat(closingStart).isGreaterThan(0f)
           assertControls(collapsed, expanded, closingStart)
           val closing = advanceToProgress(collapsedSheetTop) { it in 0.2f..0.8f }
           assertControls(collapsed, expanded, closing)
@@ -112,14 +116,14 @@ class PlayerTransitionUiTest {
         val original = controls(expanded = true)
         onNodeWithTag("playback-current-chapter").performScrollTo()
         val scrolled = controls(expanded = true)
-        assertTrue(scrolled.title.bounds.top < original.title.bounds.top - 20f)
-        assertTrue(scrolled.button.top < original.button.top - 20f)
+        assertThat(scrolled.title.bounds.top).isLessThan(original.title.bounds.top - 20f)
+        assertThat(scrolled.button.top).isLessThan(original.button.top - 20f)
 
         mainClock.autoAdvance = false
         try {
           composeRobot<AppShellRobot> { collapsePlayback() }
           val closingStart = advanceToProgress(collapsedSheetTop) { it < 1f }
-          assertTrue(closingStart > 0f)
+          assertThat(closingStart).isGreaterThan(0f)
           assertControls(collapsed, scrolled, closingStart)
           val closing = advanceToProgress(collapsedSheetTop) { it in 0.2f..0.8f }
           assertControls(collapsed, scrolled, closing)
@@ -228,7 +232,7 @@ class PlayerTransitionUiTest {
     start + (end - start) * progress
 
   private fun assertNear(actual: Float, expected: Float, description: String) {
-    assertTrue(abs(actual - expected) <= 1f, "$description: expected $expected, got $actual")
+    assertThat(actual, description).isCloseTo(expected, 1f)
   }
 
   private data class Controls(val title: Label, val subtitle: Label, val button: Rect)

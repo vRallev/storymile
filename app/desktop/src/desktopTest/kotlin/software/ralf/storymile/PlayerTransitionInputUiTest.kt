@@ -15,8 +15,9 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import assertk.assertThat
+import assertk.assertions.isLessThan
 import kotlin.test.Test
-import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.app.platform.robot.waitUntilCatching
@@ -39,7 +40,7 @@ class PlayerTransitionInputUiTest {
         (0 until pixels.height).minOf { y ->
           (0 until pixels.width).minOf { x -> pixels[x, y].red }
         }
-      assertTrue(minimumRed < 0.6f, "The unpaired Speed label must draw its text")
+      assertThat(minimumRed, "The unpaired Speed label must draw its text").isLessThan(0.6f)
       onNodeWithTag("playback-speed").performClick()
       onNodeWithTag("playback-option-speed-1.5").performClick()
       waitUntilCatching("short wide player accepts speed", timeout = 3.seconds) {

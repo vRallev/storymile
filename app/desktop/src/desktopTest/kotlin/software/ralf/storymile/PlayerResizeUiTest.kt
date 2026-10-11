@@ -16,11 +16,12 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import assertk.assertThat
+import assertk.assertions.isGreaterThanOrEqualTo
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.math.roundToInt
 import kotlin.test.Test
-import kotlin.test.assertTrue
 import software.ralf.app.platform.robot.composeRobot
 
 class PlayerResizeUiTest {
@@ -94,7 +95,8 @@ class PlayerResizeUiTest {
             pixels[x, y].red < 0.6f
           }
         }
-      assertTrue(ink >= 10, "Expanded $part must draw after $step; found $ink foreground pixels")
+      assertThat(ink, "Expanded $part must draw after $step; found $ink foreground pixels")
+        .isGreaterThanOrEqualTo(10)
     }
   }
 }

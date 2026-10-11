@@ -69,6 +69,8 @@ Prefix project-specific Gradle properties with `storymile.`.
 
 ### Testing
 
+Use assertk for value and exception assertions.
+
 Evaluate each unit test by the behavior it protects, the complexity it covers, and its
 maintenance cost. Prefer meaningful logic, edge cases, and regressions. Skip trivial
 wrappers, dependency behavior, and tests that mirror the implementation. Coverage

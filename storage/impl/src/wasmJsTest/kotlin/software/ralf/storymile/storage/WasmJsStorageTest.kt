@@ -2,11 +2,12 @@ package software.ralf.storymile.storage
 
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import assertk.assertThat
+import assertk.assertions.isEqualTo
+import assertk.assertions.isNotNull
+import assertk.assertions.isNull
 import kotlin.random.Random
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import kotlinx.coroutines.flow.first
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.buildTestScope
@@ -22,10 +23,10 @@ class WasmJsStorageTest {
 
       try {
         storage.files.write("audio.bin", bytes)
-        assertContentEquals(bytes, storage.files.read("audio.bin"))
+        assertThat(storage.files.read("audio.bin")).isNotNull().isEqualTo(bytes)
 
         storage.files.write("audio.bin", byteArrayOf())
-        assertContentEquals(byteArrayOf(), storage.files.read("audio.bin"))
+        assertThat(storage.files.read("audio.bin")).isNotNull().isEqualTo(byteArrayOf())
       } finally {
         storage.files.delete("audio.bin")
       }
@@ -41,25 +42,24 @@ class WasmJsStorageTest {
       val second: FileStorage = storage.files.directory("bookmarks").directory("audio")
 
       try {
-        assertNull(first.read("clip.bin"))
+        assertThat(first.read("clip.bin")).isNull()
         first.delete("clip.bin")
 
         storage.files.write("clip.bin", byteArrayOf(1))
         first.write("clip.bin", byteArrayOf(2))
         second.write("clip.bin", byteArrayOf(3))
 
-        assertContentEquals(byteArrayOf(1), storage.files.read("clip.bin"))
-        assertContentEquals(
-          byteArrayOf(2),
-          storage.files.directory("stories").directory("audio").read("clip.bin"),
-        )
-        assertContentEquals(byteArrayOf(3), second.read("clip.bin"))
+        assertThat(storage.files.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(1))
+        assertThat(storage.files.directory("stories").directory("audio").read("clip.bin"))
+          .isNotNull()
+          .isEqualTo(byteArrayOf(2))
+        assertThat(second.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(3))
 
         first.delete("clip.bin")
 
-        assertNull(first.read("clip.bin"))
-        assertContentEquals(byteArrayOf(1), storage.files.read("clip.bin"))
-        assertContentEquals(byteArrayOf(3), second.read("clip.bin"))
+        assertThat(first.read("clip.bin")).isNull()
+        assertThat(storage.files.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(1))
+        assertThat(second.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(3))
       } finally {
         storage.files.delete("clip.bin")
         first.delete("clip.bin")
@@ -80,23 +80,23 @@ class WasmJsStorageTest {
       val otherCache: FileStorage = second.cache.directory("stories").directory("audio")
 
       try {
-        assertNull(cache.read("clip.bin"))
+        assertThat(cache.read("clip.bin")).isNull()
         cache.delete("clip.bin")
 
         durable.write("clip.bin", byteArrayOf(1))
         cache.write("clip.bin", byteArrayOf(2))
         otherCache.write("clip.bin", byteArrayOf(3))
 
-        assertContentEquals(byteArrayOf(1), durable.read("clip.bin"))
-        assertContentEquals(byteArrayOf(2), cache.read("clip.bin"))
-        assertContentEquals(byteArrayOf(3), otherCache.read("clip.bin"))
-        assertNull(first.cache.read("clip.bin"))
+        assertThat(durable.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(1))
+        assertThat(cache.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(2))
+        assertThat(otherCache.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(3))
+        assertThat(first.cache.read("clip.bin")).isNull()
 
         cache.delete("clip.bin")
 
-        assertNull(cache.read("clip.bin"))
-        assertContentEquals(byteArrayOf(1), durable.read("clip.bin"))
-        assertContentEquals(byteArrayOf(3), otherCache.read("clip.bin"))
+        assertThat(cache.read("clip.bin")).isNull()
+        assertThat(durable.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(1))
+        assertThat(otherCache.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(3))
       } finally {
         durable.delete("clip.bin")
         cache.delete("clip.bin")
@@ -132,31 +132,30 @@ class WasmJsStorageTest {
 
         subtree.deleteAll()
 
-        assertNull(nested.read("clip.bin"))
-        assertContentEquals(byteArrayOf(1), first.files.read("clip.bin"))
-        assertContentEquals(byteArrayOf(3), sibling.read("clip.bin"))
-        assertContentEquals(byteArrayOf(4), cache.read("clip.bin"))
-        assertContentEquals(byteArrayOf(5), otherFiles.read("clip.bin"))
-        assertEquals(7, preferences.data.first()[selected])
+        assertThat(nested.read("clip.bin")).isNull()
+        assertThat(first.files.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(1))
+        assertThat(sibling.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(3))
+        assertThat(cache.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(4))
+        assertThat(otherFiles.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(5))
+        assertThat(preferences.data.first()[selected]).isEqualTo(7)
 
         nested.write("clip.bin", byteArrayOf(6))
-        assertContentEquals(byteArrayOf(6), nested.read("clip.bin"))
+        assertThat(nested.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(6))
 
         first.files.deleteAll()
         first.files.deleteAll()
 
-        assertNull(first.files.read("clip.bin"))
-        assertNull(nested.read("clip.bin"))
-        assertNull(sibling.read("clip.bin"))
-        assertContentEquals(byteArrayOf(4), cache.read("clip.bin"))
-        assertContentEquals(byteArrayOf(5), otherFiles.read("clip.bin"))
-        assertEquals(7, preferences.data.first()[selected])
+        assertThat(first.files.read("clip.bin")).isNull()
+        assertThat(nested.read("clip.bin")).isNull()
+        assertThat(sibling.read("clip.bin")).isNull()
+        assertThat(cache.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(4))
+        assertThat(otherFiles.read("clip.bin")).isNotNull().isEqualTo(byteArrayOf(5))
+        assertThat(preferences.data.first()[selected]).isEqualTo(7)
 
         nested.write("clip.bin", byteArrayOf(8))
-        assertContentEquals(
-          byteArrayOf(8),
-          first.files.directory("stories").directory("audio").read("clip.bin"),
-        )
+        assertThat(first.files.directory("stories").directory("audio").read("clip.bin"))
+          .isNotNull()
+          .isEqualTo(byteArrayOf(8))
       } finally {
         first.files.deleteAll()
         first.cache.deleteAll()
@@ -177,20 +176,20 @@ class WasmJsStorageTest {
 
       try {
         first.files.delete("shared.bin")
-        assertNull(first.files.read("shared.bin"))
-        assertNull(second.files.read("shared.bin"))
+        assertThat(first.files.read("shared.bin")).isNull()
+        assertThat(second.files.read("shared.bin")).isNull()
 
         first.files.write("shared.bin", byteArrayOf(0, -1, -128))
         second.files.write("shared.bin", byteArrayOf(42))
 
-        assertContentEquals(byteArrayOf(0, -1, -128), first.files.read("shared.bin"))
-        assertContentEquals(byteArrayOf(42), second.files.read("shared.bin"))
+        assertThat(first.files.read("shared.bin")).isNotNull().isEqualTo(byteArrayOf(0, -1, -128))
+        assertThat(second.files.read("shared.bin")).isNotNull().isEqualTo(byteArrayOf(42))
 
         first.files.delete("shared.bin")
         first.files.delete("shared.bin")
 
-        assertNull(first.files.read("shared.bin"))
-        assertContentEquals(byteArrayOf(42), second.files.read("shared.bin"))
+        assertThat(first.files.read("shared.bin")).isNull()
+        assertThat(second.files.read("shared.bin")).isNotNull().isEqualTo(byteArrayOf(42))
       } finally {
         first.files.delete("shared.bin")
         second.files.delete("shared.bin")

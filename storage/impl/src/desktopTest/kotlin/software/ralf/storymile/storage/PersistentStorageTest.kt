@@ -4,14 +4,16 @@ package software.ralf.storymile.storage
 
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
+import assertk.assertions.isInstanceOf
+import assertk.assertions.isNotInstanceOf
+import assertk.assertions.isNotNull
+import assertk.assertions.isNull
 import java.nio.file.Files
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,11 +50,15 @@ class PersistentStorageTest {
 
       users.forEach { (namespace, storage) ->
         assertThat(storage.preferences("settings").data.first()[key]).isEqualTo(namespace)
-        assertContentEquals(namespace.encodeToByteArray(), storage.files.read("settings"))
+        assertThat(storage.files.read("settings"))
+          .isNotNull()
+          .isEqualTo(namespace.encodeToByteArray())
       }
       users[1].second.files.delete("settings")
-      assertNull(users[1].second.files.read("settings"))
-      assertContentEquals("user-Alice".encodeToByteArray(), users[2].second.files.read("settings"))
+      assertThat(users[1].second.files.read("settings")).isNull()
+      assertThat(users[2].second.files.read("settings"))
+        .isNotNull()
+        .isEqualTo("user-Alice".encodeToByteArray())
       assertThat(users[1].second.preferences("settings").data.first()[key]).isEqualTo("user-alice")
     }
 
@@ -63,16 +69,16 @@ class PersistentStorageTest {
       val preferences = storage.preferences("settings")
       val key = stringPreferencesKey("theme")
 
-      val failure =
-        assertFailsWith<IllegalStateException> {
-          withTimeout(1000) {
-            preferences.updateData { current ->
-              preferences.updateData { it }
-              current
-            }
+      assertFailure {
+        withTimeout(1000) {
+          preferences.updateData { current ->
+            preferences.updateData { it }
+            current
           }
         }
-      assertFalse(failure is CancellationException)
+      }
+        .isInstanceOf<IllegalStateException>()
+        .isNotInstanceOf<CancellationException>()
 
       preferences.edit { it[key] = "dark" }
       assertThat(preferences.data.first()[key]).isEqualTo("dark")
@@ -94,10 +100,12 @@ class PersistentStorageTest {
 
       listOf("settings", "Settings").forEach { name ->
         assertThat(reopened.preferences(name).data.first()[key]).isEqualTo(name)
-        assertContentEquals(name.encodeToByteArray(), reopened.files.read(name))
+        assertThat(reopened.files.read(name)).isNotNull().isEqualTo(name.encodeToByteArray())
       }
       reopened.files.delete("settings")
-      assertContentEquals("Settings".encodeToByteArray(), reopened.files.read("Settings"))
+      assertThat(reopened.files.read("Settings"))
+        .isNotNull()
+        .isEqualTo("Settings".encodeToByteArray())
     }
 
   @Test
@@ -114,7 +122,7 @@ class PersistentStorageTest {
       try {
         val reopened: Storage = replacementScope.storage("app", platform)
         assertThat(reopened.preferences("settings").data.first()[key]).isEqualTo("dark")
-        assertContentEquals(byteArrayOf(1, 2, 3), reopened.files.read("recording"))
+        assertThat(reopened.files.read("recording")).isNotNull().isEqualTo(byteArrayOf(1, 2, 3))
       } finally {
         replacementScope.destroy()
       }
@@ -129,11 +137,11 @@ class PersistentStorageTest {
 
       storage.files.write("selected", byteArrayOf(9))
 
-      assertContentEquals(byteArrayOf(9), storage.files.read("selected"))
+      assertThat(storage.files.read("selected")).isNotNull().isEqualTo(byteArrayOf(9))
       storage.files.delete("selected")
       storage.files.delete("missing")
-      assertNull(storage.files.read("selected"))
-      assertContentEquals(byteArrayOf(4), storage.files.read("other"))
+      assertThat(storage.files.read("selected")).isNull()
+      assertThat(storage.files.read("other")).isNotNull().isEqualTo(byteArrayOf(4))
     }
 
   @Test
@@ -152,16 +160,15 @@ class PersistentStorageTest {
       val books: FileStorage = reopened.files.directory("Books").directory("audio")
       val otherBooks: FileStorage = reopened.files.directory("books").directory("audio")
 
-      assertContentEquals(byteArrayOf(0), reopened.files.read("track"))
-      assertContentEquals(byteArrayOf(1), books.read("track"))
-      assertContentEquals(byteArrayOf(2), otherBooks.read("track"))
+      assertThat(reopened.files.read("track")).isNotNull().isEqualTo(byteArrayOf(0))
+      assertThat(books.read("track")).isNotNull().isEqualTo(byteArrayOf(1))
+      assertThat(otherBooks.read("track")).isNotNull().isEqualTo(byteArrayOf(2))
       otherBooks.delete("track")
-      assertNull(otherBooks.read("track"))
-      assertContentEquals(byteArrayOf(1), books.read("track"))
-      assertContentEquals(
-        byteArrayOf(3),
-        user.files.directory("Books").directory("audio").read("track"),
-      )
+      assertThat(otherBooks.read("track")).isNull()
+      assertThat(books.read("track")).isNotNull().isEqualTo(byteArrayOf(1))
+      assertThat(user.files.directory("Books").directory("audio").read("track"))
+        .isNotNull()
+        .isEqualTo(byteArrayOf(3))
     }
 
   @Test
@@ -170,10 +177,10 @@ class PersistentStorageTest {
       val storage: Storage = scope.storage("app", platform)
       val folder: FileStorage = storage.files.directory("books").directory("audio")
 
-      assertNull(folder.read("missing"))
+      assertThat(folder.read("missing")).isNull()
       folder.delete("missing")
 
-      assertFalse(FileSystem.SYSTEM.exists(root / "app".encodeUtf8().hex()))
+      assertThat(FileSystem.SYSTEM.exists(root / "app".encodeUtf8().hex())).isFalse()
     }
 
   @Test
@@ -187,13 +194,13 @@ class PersistentStorageTest {
       app.cache.directory("audio").write("track", byteArrayOf(2))
       user.cache.directory("audio").write("track", byteArrayOf(3))
 
-      assertContentEquals(byteArrayOf(1), app.files.directory("audio").read("track"))
-      assertContentEquals(byteArrayOf(2), app.cache.directory("audio").read("track"))
-      assertContentEquals(byteArrayOf(3), user.cache.directory("audio").read("track"))
+      assertThat(app.files.directory("audio").read("track")).isNotNull().isEqualTo(byteArrayOf(1))
+      assertThat(app.cache.directory("audio").read("track")).isNotNull().isEqualTo(byteArrayOf(2))
+      assertThat(user.cache.directory("audio").read("track")).isNotNull().isEqualTo(byteArrayOf(3))
       app.cache.directory("audio").delete("track")
-      assertNull(app.cache.directory("audio").read("track"))
-      assertContentEquals(byteArrayOf(1), app.files.directory("audio").read("track"))
-      assertContentEquals(byteArrayOf(3), user.cache.directory("audio").read("track"))
+      assertThat(app.cache.directory("audio").read("track")).isNull()
+      assertThat(app.files.directory("audio").read("track")).isNotNull().isEqualTo(byteArrayOf(1))
+      assertThat(user.cache.directory("audio").read("track")).isNotNull().isEqualTo(byteArrayOf(3))
       assertThat(app.preferences("settings").data.first()[key]).isEqualTo("dark")
     }
 
@@ -209,12 +216,12 @@ class PersistentStorageTest {
 
       FileSystem.SYSTEM.deleteRecursively(root / "cache")
 
-      assertNull(cache.read("track"))
+      assertThat(cache.read("track")).isNull()
       cache.delete("missing")
-      assertFalse(FileSystem.SYSTEM.exists(root / "cache"))
+      assertThat(FileSystem.SYSTEM.exists(root / "cache")).isFalse()
       cache.write("track", byteArrayOf(3))
-      assertContentEquals(byteArrayOf(3), cache.read("track"))
-      assertContentEquals(byteArrayOf(1), storage.files.read("track"))
+      assertThat(cache.read("track")).isNotNull().isEqualTo(byteArrayOf(3))
+      assertThat(storage.files.read("track")).isNotNull().isEqualTo(byteArrayOf(1))
       assertThat(storage.preferences("settings").data.first()[key]).isEqualTo("dark")
     }
 
@@ -236,15 +243,15 @@ class PersistentStorageTest {
 
       books.deleteAll()
 
-      assertNull(books.read("track"))
-      assertNull(chapters.read("track"))
-      assertContentEquals(byteArrayOf(0), app.files.read("track"))
-      assertContentEquals(byteArrayOf(3), app.files.directory("other").read("track"))
-      assertContentEquals(byteArrayOf(4), app.cache.directory("books").read("track"))
-      assertContentEquals(byteArrayOf(5), user.files.directory("books").read("track"))
+      assertThat(books.read("track")).isNull()
+      assertThat(chapters.read("track")).isNull()
+      assertThat(app.files.read("track")).isNotNull().isEqualTo(byteArrayOf(0))
+      assertThat(app.files.directory("other").read("track")).isNotNull().isEqualTo(byteArrayOf(3))
+      assertThat(app.cache.directory("books").read("track")).isNotNull().isEqualTo(byteArrayOf(4))
+      assertThat(user.files.directory("books").read("track")).isNotNull().isEqualTo(byteArrayOf(5))
       assertThat(app.preferences("settings").data.first()[key]).isEqualTo("dark")
       chapters.write("track", byteArrayOf(6))
-      assertContentEquals(byteArrayOf(6), chapters.read("track"))
+      assertThat(chapters.read("track")).isNotNull().isEqualTo(byteArrayOf(6))
     }
 
   @Test
@@ -262,16 +269,16 @@ class PersistentStorageTest {
 
       app.files.deleteAll()
 
-      assertNull(app.files.read("track"))
-      assertNull(app.files.directory("audio").read("track"))
-      assertContentEquals(byteArrayOf(3), app.cache.read("track"))
-      assertContentEquals(byteArrayOf(4), app.cache.directory("audio").read("track"))
+      assertThat(app.files.read("track")).isNull()
+      assertThat(app.files.directory("audio").read("track")).isNull()
+      assertThat(app.cache.read("track")).isNotNull().isEqualTo(byteArrayOf(3))
+      assertThat(app.cache.directory("audio").read("track")).isNotNull().isEqualTo(byteArrayOf(4))
       app.files.write("track", byteArrayOf(6))
       app.cache.deleteAll()
-      assertNull(app.cache.read("track"))
-      assertNull(app.cache.directory("audio").read("track"))
-      assertContentEquals(byteArrayOf(6), app.files.read("track"))
-      assertContentEquals(byteArrayOf(5), user.files.read("track"))
+      assertThat(app.cache.read("track")).isNull()
+      assertThat(app.cache.directory("audio").read("track")).isNull()
+      assertThat(app.files.read("track")).isNotNull().isEqualTo(byteArrayOf(6))
+      assertThat(user.files.read("track")).isNotNull().isEqualTo(byteArrayOf(5))
       assertThat(app.preferences("settings").data.first()[key]).isEqualTo("dark")
     }
 
@@ -285,13 +292,13 @@ class PersistentStorageTest {
       storage.files.deleteAll()
       storage.cache.deleteAll()
 
-      assertFalse(FileSystem.SYSTEM.exists(root / "app".encodeUtf8().hex()))
-      assertFalse(FileSystem.SYSTEM.exists(root / "cache"))
+      assertThat(FileSystem.SYSTEM.exists(root / "app".encodeUtf8().hex())).isFalse()
+      assertThat(FileSystem.SYSTEM.exists(root / "cache")).isFalse()
       missing.write("track", byteArrayOf(1))
       missing.deleteAll()
       missing.deleteAll()
       missing.write("track", byteArrayOf(2))
-      assertContentEquals(byteArrayOf(2), missing.read("track"))
+      assertThat(missing.read("track")).isNotNull().isEqualTo(byteArrayOf(2))
     }
 
   @Test
@@ -316,10 +323,10 @@ class PersistentStorageTest {
 
       books.deleteAll()
 
-      assertNull(books.read("own"))
-      assertFalse(FileSystem.SYSTEM.exists(directoryLink))
-      assertFalse(FileSystem.SYSTEM.exists(fileLink))
-      assertContentEquals(byteArrayOf(2), privateFiles.read("track"))
+      assertThat(books.read("own")).isNull()
+      assertThat(FileSystem.SYSTEM.exists(directoryLink)).isFalse()
+      assertThat(FileSystem.SYSTEM.exists(fileLink)).isFalse()
+      assertThat(privateFiles.read("track")).isNotNull().isEqualTo(byteArrayOf(2))
     }
 
   @Test
@@ -335,10 +342,11 @@ class PersistentStorageTest {
           .toNioPath(),
       )
 
-      assertFailsWith<IllegalStateException> { app.files.read("linked") }
-      assertFailsWith<IllegalStateException> { app.files.write("linked", byteArrayOf(9)) }
-      assertFailsWith<IllegalStateException> { app.files.delete("linked") }
-      assertContentEquals(byteArrayOf(2), user.files.read("private"))
+      assertFailure { app.files.read("linked") }.isInstanceOf<IllegalStateException>()
+      assertFailure { app.files.write("linked", byteArrayOf(9)) }
+        .isInstanceOf<IllegalStateException>()
+      assertFailure { app.files.delete("linked") }.isInstanceOf<IllegalStateException>()
+      assertThat(user.files.read("private")).isNotNull().isEqualTo(byteArrayOf(2))
     }
 
   @Test
@@ -356,12 +364,13 @@ class PersistentStorageTest {
       )
       val linked: FileStorage = app.files.directory("linked").directory("nested")
 
-      assertFailsWith<IllegalStateException> { linked.read("track") }
-      assertFailsWith<IllegalStateException> { linked.write("track", byteArrayOf(9)) }
-      assertFailsWith<IllegalStateException> { linked.delete("track") }
-      assertFailsWith<IllegalStateException> { linked.deleteAll() }
-      assertFailsWith<IllegalStateException> { app.files.directory("linked").deleteAll() }
-      assertContentEquals(byteArrayOf(2), privateFiles.read("track"))
+      assertFailure { linked.read("track") }.isInstanceOf<IllegalStateException>()
+      assertFailure { linked.write("track", byteArrayOf(9)) }.isInstanceOf<IllegalStateException>()
+      assertFailure { linked.delete("track") }.isInstanceOf<IllegalStateException>()
+      assertFailure { linked.deleteAll() }.isInstanceOf<IllegalStateException>()
+      assertFailure { app.files.directory("linked").deleteAll() }
+        .isInstanceOf<IllegalStateException>()
+      assertThat(privateFiles.read("track")).isNotNull().isEqualTo(byteArrayOf(2))
     }
 
   private fun Scope.child(testScope: TestScope): Scope {
