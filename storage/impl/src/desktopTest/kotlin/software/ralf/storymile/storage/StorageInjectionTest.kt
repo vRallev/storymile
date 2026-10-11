@@ -2,10 +2,7 @@
 
 package software.ralf.storymile.storage
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import assertk.assertThat
 import assertk.assertions.isEqualTo
@@ -24,11 +21,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.runCurrent
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.Scoped
@@ -42,7 +35,8 @@ class StorageInjectionTest {
   fun `injected storage waits for scope entry and closes with its owner`() =
     runTestWithScope { scope ->
       val graph =
-        createGraphFactory<Graph.Factory>().create(InMemoryPlatform(), scope.coroutineScope())
+        createGraphFactory<Graph.Factory>()
+          .create(InMemoryStoragePlatform(), scope.coroutineScope())
       val storage: Storage = graph.consumer.storage
       val directory: FileStorage = storage.files.directory("books")
       val cache: FileStorage = storage.cache.directory("covers")
@@ -80,7 +74,7 @@ class StorageInjectionTest {
   @Test
   fun `public factory creates storage owned by a separate scope`() = runTestWithScope { scope ->
     val graph =
-      createGraphFactory<Graph.Factory>().create(InMemoryPlatform(), scope.coroutineScope())
+      createGraphFactory<Graph.Factory>().create(InMemoryStoragePlatform(), scope.coroutineScope())
     val factory: ScopedStorage.Factory = graph.storageFactory
     val userScope = Scope.buildTestScope(this)
     val user: ScopedStorage = factory.create("user-alice", userScope.coroutineScope())
@@ -100,7 +94,7 @@ class StorageInjectionTest {
 
   @Test
   fun `failed initialization leaves sibling injected storage usable`() = runTestWithScope { scope ->
-    val platform = InMemoryPlatform()
+    val platform = InMemoryStoragePlatform()
     val original: Storage =
       DefaultStorage("app", scope.coroutineScope(), platform).also {
         scope.register(it)
@@ -144,56 +138,4 @@ class StorageInjectionTest {
   }
 
   @Inject class Consumer(@ForScope(AppScope::class) val storage: Storage)
-
-  private class InMemoryPlatform : StoragePlatform() {
-    private val files = mutableMapOf<Triple<String, FileStorageArea, String>, ByteArray>()
-
-    override fun createPreferences(
-      namespace: String,
-      name: String,
-      coroutineScope: CoroutineScope,
-    ): DataStore<Preferences> = InMemoryPreferences()
-
-    override suspend fun readFile(
-      namespace: String,
-      area: FileStorageArea,
-      name: String,
-    ): ByteArray? {
-      return files[Triple(namespace, area, name)]?.copyOf()
-    }
-
-    override suspend fun writeFile(
-      namespace: String,
-      area: FileStorageArea,
-      name: String,
-      content: ByteArray,
-    ) {
-      files[Triple(namespace, area, name)] = content.copyOf()
-    }
-
-    override suspend fun deleteFile(namespace: String, area: FileStorageArea, name: String) {
-      files.remove(Triple(namespace, area, name))
-    }
-
-    override suspend fun deleteAllFiles(namespace: String, area: FileStorageArea, path: String) {
-      files.keys.removeAll { key ->
-        key.first == namespace &&
-          key.second == area &&
-          (path.isEmpty() || key.third.startsWith("$path/"))
-      }
-    }
-  }
-
-  private class InMemoryPreferences : DataStore<Preferences> {
-    private val mutex = Mutex()
-
-    override val data: Flow<Preferences>
-      field = MutableStateFlow(emptyPreferences())
-
-    override suspend fun updateData(
-      transform: suspend (t: Preferences) -> Preferences,
-    ): Preferences {
-      return mutex.withLock { transform(data.value).also { data.value = it } }
-    }
-  }
 }

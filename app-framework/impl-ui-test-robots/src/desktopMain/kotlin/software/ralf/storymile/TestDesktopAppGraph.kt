@@ -4,14 +4,16 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import software.ralf.app.platform.scope.RootScopeProvider
+import software.ralf.storymile.storage.DefaultStorage
 
 /**
  * Desktop integration-test graph that includes production bindings and contributed test robots.
+ * Each graph uses fresh in-memory storage.
  *
  * Keeping this graph in the robot fixture module lets Metro discover every test robot without
  * adding robot dependencies to the production desktop application.
  */
-@DependencyGraph(AppScope::class)
+@DependencyGraph(AppScope::class, excludes = [DefaultStorage.Factory::class])
 interface TestDesktopAppGraph {
   /** Factory for a Desktop test graph. */
   @DependencyGraph.Factory
