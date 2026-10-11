@@ -7,7 +7,7 @@ import dev.zacsweers.metro.Multibinds
 import software.ralf.app.platform.scope.Scoped
 import software.ralf.app.platform.scope.coroutine.CoroutineScopeScoped
 
-/** Lifecycle dependencies supplied by each new platform graph. */
+/** Lifecycle dependencies supplied by the platform graph. */
 @ContributesTo(AppScope::class)
 interface ApplicationGraph {
   /** Services registered after the root scope becomes available. */
@@ -15,4 +15,7 @@ interface ApplicationGraph {
 
   /** Owns coroutine work canceled when this graph's app scope ends. */
   @ForScope(AppScope::class) val appScopeCoroutineScopeScoped: CoroutineScopeScoped
+
+  /** Restarts or terminates the current process after scope cleanup. */
+  val processRestarter: ProcessRestarter
 }

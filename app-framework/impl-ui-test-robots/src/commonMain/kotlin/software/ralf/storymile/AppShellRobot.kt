@@ -28,17 +28,11 @@ import assertk.assertions.isEqualTo
 import dev.zacsweers.metro.AppScope
 import software.ralf.app.platform.inject.robot.ContributesRobot
 import software.ralf.app.platform.robot.ComposeRobot
-import software.ralf.storymile.scope.runtime.Application
 import software.ralf.storymile.tabs.TabsPresenter
 
 /** Checks the visible app containers through the production renderer graph. */
 @ContributesRobot(AppScope::class)
-class AppShellRobot(private val application: Application) : ComposeRobot() {
-  /** Restarts the application with fresh navigation and presentation state. */
-  fun restart() {
-    application.restart()
-  }
-
+class AppShellRobot : ComposeRobot() {
   /** Checks the initial destination, navigation items, and playback container. */
   fun seeAppLayers() {
     listOf("tab-content", "tabs", "playback").forEach {

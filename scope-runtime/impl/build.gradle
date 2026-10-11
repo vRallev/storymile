@@ -5,3 +5,7 @@ plugins {
 storymile {
   enableMetro true
 }
+
+dependencies {
+  androidMainImplementation libs.process.phoenix
+}

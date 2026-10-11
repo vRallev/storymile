@@ -4,7 +4,9 @@ import android.app.Application
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
+import software.ralf.storymile.scope.runtime.AndroidProcessRestarter
 import software.ralf.storymile.scope.runtime.Application as StorymileApplication
+import software.ralf.storymile.scope.runtime.ProcessRestarter
 import software.ralf.storymile.storage.DefaultStorage
 
 /**
@@ -14,8 +16,18 @@ import software.ralf.storymile.storage.DefaultStorage
  * The graph is compiled in the robot fixture module so Metro can discover robots that are absent
  * from the production application classpath.
  */
-@DependencyGraph(AppScope::class, excludes = [DefaultStorage.Factory::class])
+@DependencyGraph(
+  AppScope::class,
+  excludes = [DefaultStorage.Factory::class, AndroidProcessRestarter::class],
+)
 interface TestAndroidAppGraph {
+  /** Prevents restart requests from terminating the instrumented test application. */
+  @Provides
+  fun processRestarter(): ProcessRestarter =
+    object : ProcessRestarter {
+      override fun restart() = Unit
+    }
+
   /** Factory for an Android test graph. */
   @DependencyGraph.Factory
   interface Factory {

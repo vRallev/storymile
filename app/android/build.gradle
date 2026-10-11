@@ -15,6 +15,7 @@ dependencies {
 
   // Android tests inherit strict versions from the app runtime.
   implementation libs.androidx.concurrent.futures
+  implementation libs.process.phoenix
 
   androidTestImplementation project(':app-framework:impl-ui-test-robots')
 }

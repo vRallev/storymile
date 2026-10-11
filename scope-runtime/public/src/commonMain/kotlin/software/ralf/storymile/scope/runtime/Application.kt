@@ -1,25 +1,18 @@
 package software.ralf.storymile.scope.runtime
 
-import kotlinx.coroutines.flow.StateFlow
 import software.ralf.app.platform.scope.RootScopeProvider
-import software.ralf.app.platform.scope.Scope
 
-/** Controls the application lifetime across app scopes. */
+/** Controls the application lifetime. */
 interface Application : RootScopeProvider {
   /**
-   * The active app scope, or `null` before startup, during restart, and after shutdown.
+   * Destroys the app scope, waits up to five seconds for coroutine cleanup, then restarts the app.
    *
-   * Hosts must replace their presenters, renderer factories, and rendered state when this changes.
-   * A new scope is published after its lifecycle services have started.
-   */
-  val rootScopes: StateFlow<Scope?>
-
-  /**
-   * Requests a fresh app scope and graph after the current scope and its coroutine work stop.
+   * Android and Desktop launch a new process. Web reloads the page. iOS closes the app without a
+   * dialog; the user must open it again. Saved data is preserved. Synchronous scope callbacks must
+   * return promptly so they do not delay the restart.
    *
    * This returns immediately and can be called from any thread, including an outgoing presenter.
-   * Requests during a restart can be combined. Requests before startup or after shutdown are
-   * ignored. Saved data is preserved.
+   * Repeated requests are combined. Requests before startup or after shutdown are ignored.
    */
   fun restart()
 }

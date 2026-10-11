@@ -6,7 +6,7 @@ import platform.UIKit.UIApplication
 import platform.UIKit.UIViewController
 import software.ralf.storymile.scope.runtime.KmpApplication
 
-/** Swift host that retains the application lifecycle across graph and scene recreation. */
+/** Swift host that owns the application lifecycle across scene recreation. */
 class IosApplication(application: UIApplication) {
   private val application = KmpApplication {
     createGraphFactory<IosAppGraph.Factory>().create(application, it)

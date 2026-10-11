@@ -10,6 +10,6 @@ import software.ralf.app.platform.scope.RootScopeProvider
 @BindingContainer
 @ContributesTo(AppScope::class)
 object ApplicationBindings {
-  /** Uses the same scope owner across application restarts. */
+  /** Exposes the application's root scope to App Platform services. */
   @Provides fun rootScopeProvider(application: Application): RootScopeProvider = application
 }

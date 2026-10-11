@@ -26,9 +26,9 @@ flowchart TD
 [TemplateProvider](../app-framework/impl/src/commonMain/kotlin/software/ralf/storymile/TemplateProvider.kt)
 starts the presenter tree.
 [Application.restart()](../scope-runtime/public/src/commonMain/kotlin/software/ralf/storymile/scope/runtime/Application.kt)
-stops the current tree, waits for scope cleanup, and creates a fresh graph.
-Each host replaces its presenters and renderer factory. The new tree starts at Home.
-Saved data remains available.
+stops the tree and waits up to five seconds for scope coroutine cleanup.
+Android and Desktop restart their process; web reloads the page.
+iOS exits without a dialog and requires a manual launch. Saved data remains available.
 [AppTemplatePresenter](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/AppTemplatePresenter.kt)
 wraps the app root with shared template support.
 
