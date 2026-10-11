@@ -17,6 +17,16 @@ import software.ralf.storymile.logging.Logger.Companion.logger
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.user.UserScope
 
+/**
+ * One repository per user scope. A single scope-owned coroutine loads the versioned document from
+ * `playlists/playlists.json` in user storage, then consumes queued mutations in submission order.
+ * Each command transforms the last saved snapshot and writes the document before publishing it.
+ *
+ * Load and command failures are logged. Failed loads are retried before later commands, so unread
+ * data is never overwritten. Failed commands preserve the published snapshot and leave the queue
+ * usable. Cancellation propagates; scope exit cancels the processor and discards queued commands
+ * without deleting saved data.
+ */
 @SingleIn(UserScope::class)
 @ContributesScoped(UserScope::class)
 class PlaylistRepositoryImpl(
