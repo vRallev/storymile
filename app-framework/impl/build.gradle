@@ -19,6 +19,7 @@ dependencies {
 
   commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':presenter-navigation:impl')
+  commonMainImplementation project(':restart:impl')
   commonMainImplementation project(':storage:impl')
   commonMainImplementation project(':tabs:impl')
   commonMainImplementation project(':templates:impl')

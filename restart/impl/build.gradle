@@ -1,0 +1,11 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  enableMetro true
+}
+
+dependencies {
+  androidMainImplementation libs.process.phoenix
+}

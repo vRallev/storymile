@@ -1,6 +1,7 @@
 package software.ralf.storymile
 
 import android.app.Application
+import com.jakewharton.processphoenix.ProcessPhoenix
 import dev.zacsweers.metro.createGraphFactory
 import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.Scope
@@ -13,8 +14,11 @@ open class AndroidApplication : Application(), RootScopeProvider {
     get() = storymileApplication.rootScope
 
   override fun onCreate() {
-    storymileApplication.create(metroGraph(storymileApplication))
     super.onCreate()
+    if (ProcessPhoenix.isPhoenixProcess(this)) {
+      return
+    }
+    storymileApplication.create(metroGraph(storymileApplication))
   }
 
   /** Creates the production graph. Tests can override this to install a test graph. */

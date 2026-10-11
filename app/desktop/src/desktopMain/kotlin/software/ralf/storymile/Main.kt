@@ -22,6 +22,7 @@ import dev.zacsweers.metro.createGraphFactory
 import java.awt.Taskbar
 import javax.imageio.ImageIO
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
+import software.ralf.storymile.restart.DesktopProcessRestarter
 import software.ralf.storymile.theme.LocalDarkThemeOverride
 import software.ralf.storymile.util.Platform
 
@@ -30,6 +31,7 @@ import software.ralf.storymile.util.Platform
  * Command/Ctrl+D toggles light and dark themes.
  */
 fun main(args: Array<String>) {
+  DesktopProcessRestarter.configure("software.ralf.storymile.MainKt", args)
 
   val initialSize =
     when (val size = args.firstOrNull { it.startsWith("--window-size=") }?.substringAfter('=')) {
