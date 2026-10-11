@@ -155,6 +155,7 @@ class RuntimeModeStorageTest {
       [
         DesktopStoragePlatform::class,
         TestStorageBindings::class,
+        TestRuntimeModeController::class,
         DefaultApplicationRestarter::class,
       ],
   )
