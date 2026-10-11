@@ -24,5 +24,6 @@ dependencies {
   commonMainImplementation project(':templates:impl')
   commonMainImplementation project(':theme:impl')
   commonMainImplementation project(':theme:public')
+  commonMainImplementation project(':user:impl')
   commonMainImplementation project(':util:impl')
 }
