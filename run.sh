@@ -191,9 +191,9 @@ run_android_release_tests() {
 }
 
 run_desktop() {
-  local size=phone
-  choose "Which Desktop window size?" 1 "Phone (480 × 840)" "Tablet (1100 × 760)"
-  [[ "$SELECTION" == 0 ]] || size=tablet
+  local sizes=(phone tablet desktop)
+  choose "Which Desktop window size?" 1 "Phone (480 × 840)" "Tablet (1100 × 760)" "Desktop (1440 × 900)"
+  local size="${sizes[$SELECTION]}"
   ./gradlew --quiet :app:desktop:hotRunDesktop --auto --args="--window-size=$size"
 }
 
