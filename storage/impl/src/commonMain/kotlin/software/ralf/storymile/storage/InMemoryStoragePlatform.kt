@@ -11,7 +11,7 @@ import kotlinx.coroutines.sync.withLock
 
 internal class InMemoryStoragePlatform : StoragePlatform() {
   private val preferences =
-    MutableStateFlow<Map<Pair<String, String>, InMemoryPreferencesStorage>>(emptyMap())
+    MutableStateFlow<Map<PreferencesKey, InMemoryPreferencesStorage>>(emptyMap())
   private val filesMutex = Mutex()
   private val files = mutableMapOf<FileKey, ByteArray>()
 
@@ -20,7 +20,7 @@ internal class InMemoryStoragePlatform : StoragePlatform() {
     name: String,
     coroutineScope: CoroutineScope,
   ): DataStore<Preferences> {
-    val key = namespace to name
+    val key = PreferencesKey(namespace, name)
     val storage =
       preferences
         .updateAndGet { stores ->
@@ -60,4 +60,6 @@ internal class InMemoryStoragePlatform : StoragePlatform() {
   }
 
   private data class FileKey(val namespace: String, val area: FileStorageArea, val path: String)
+
+  private data class PreferencesKey(val namespace: String, val name: String)
 }
