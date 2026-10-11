@@ -31,6 +31,8 @@ import software.ralf.app.platform.scope.buildTestScope
 import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.register
 import software.ralf.app.platform.scope.runTestWithScope
+import software.ralf.storymile.runtimemode.RuntimeMode
+import software.ralf.storymile.runtimemode.RuntimeModeController
 
 class StorageInjectionTest {
   @Test
@@ -133,6 +135,14 @@ class StorageInjectionTest {
     @ForScope(AppScope::class) val storage: Storage
 
     @ForScope(AppScope::class) val scopedInstances: Set<Scoped>
+
+    @Provides
+    fun runtimeModeController(): RuntimeModeController =
+      object : RuntimeModeController {
+        override suspend fun mode(): RuntimeMode = RuntimeMode.Real
+
+        override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
+      }
 
     @DependencyGraph.Factory
     fun interface Factory {

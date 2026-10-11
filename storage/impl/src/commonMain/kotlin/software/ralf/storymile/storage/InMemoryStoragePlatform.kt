@@ -8,7 +8,8 @@ import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-internal class InMemoryStoragePlatform : StoragePlatform() {
+/** Stores data in memory. Each instance starts empty. */
+class InMemoryStoragePlatform : StoragePlatform() {
   private val preferences =
     MutableStateFlow<Map<PreferencesKey, InMemoryPreferencesDataStore>>(emptyMap())
   private val filesMutex = Mutex()

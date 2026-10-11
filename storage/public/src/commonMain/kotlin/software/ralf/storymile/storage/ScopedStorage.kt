@@ -19,7 +19,14 @@ interface ScopedStorage : Storage, Scoped {
      * shared. Reopening waits for the previous owner's storage work to finish.
      *
      * [coroutineScope] must be a dedicated child of the owning scope. Storage cancels it on exit.
+     *
+     * When [mustBePersistent] is true, use persistent storage without checking the runtime mode.
+     * Otherwise, fake mode uses in-memory storage.
      */
-    fun create(namespace: String, coroutineScope: CoroutineScope): ScopedStorage
+    fun create(
+      namespace: String,
+      coroutineScope: CoroutineScope,
+      mustBePersistent: Boolean = false,
+    ): ScopedStorage
   }
 }

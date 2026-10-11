@@ -8,7 +8,8 @@ import androidx.datastore.preferences.core.Preferences
  * app data. Each namespace has separate preferences, files, and caches. Scope exit stops access and
  * preserves saved data.
  *
- * Android, Desktop, and iOS store preferences in DataStore files:
+ * Fake mode keeps preferences, files, and caches in memory until the app restarts. The runtime mode
+ * preference stays persistent. In real mode, Android, Desktop, and iOS use DataStore files:
  * - Android: preferences and files use private `filesDir`; caches use `cacheDir`.
  * - Desktop: preferences and files use `~/.storymile/storage`; caches use the OS cache directory.
  * - iOS: preferences and files use Application Support; caches use Caches in the app sandbox.

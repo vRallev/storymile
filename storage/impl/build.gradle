@@ -7,6 +7,7 @@ storymile {
 }
 
 dependencies {
+  commonMainImplementation project(':runtime-mode:public')
   commonMainImplementation project(':util:public')
   commonMainImplementation libs.androidx.datastore.core.okio
   commonMainImplementation libs.okio
