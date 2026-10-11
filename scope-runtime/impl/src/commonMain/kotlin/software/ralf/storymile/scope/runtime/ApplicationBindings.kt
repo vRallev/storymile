@@ -1,4 +1,4 @@
-package software.ralf.storymile.application
+package software.ralf.storymile.scope.runtime
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer

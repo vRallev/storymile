@@ -19,10 +19,10 @@ dependencies {
   androidMainImplementation libs.compose.ui.test.junit4.android
 
   commonMainImplementation project(':app-framework:impl')
-  commonMainImplementation project(':application:impl')
   commonMainImplementation project(':library:impl')
   commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':presenter-navigation:impl')
+  commonMainImplementation project(':scope-runtime:impl')
   commonMainImplementation project(':storage:impl')
   commonMainImplementation project(':tabs:impl')
   commonMainImplementation project(':templates:impl')

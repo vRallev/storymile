@@ -3,8 +3,8 @@ package software.ralf.storymile
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.ForScope
-import software.ralf.storymile.application.Application
-import software.ralf.storymile.application.ApplicationGraph
+import software.ralf.storymile.scope.runtime.Application
+import software.ralf.storymile.scope.runtime.ApplicationGraph
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.util.Platform
 

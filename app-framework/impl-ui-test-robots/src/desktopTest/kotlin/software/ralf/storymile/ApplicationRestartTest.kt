@@ -25,8 +25,8 @@ import kotlinx.coroutines.test.setMain
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.app.platform.robot.waitUntilCatching
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
-import software.ralf.storymile.application.Application
-import software.ralf.storymile.application.KmpApplication
+import software.ralf.storymile.scope.runtime.Application
+import software.ralf.storymile.scope.runtime.KmpApplication
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.tabs.TabsPresenter
 import software.ralf.storymile.templates.AppTemplate

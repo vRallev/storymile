@@ -1,4 +1,4 @@
-package software.ralf.storymile.application
+package software.ralf.storymile.scope.runtime
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName

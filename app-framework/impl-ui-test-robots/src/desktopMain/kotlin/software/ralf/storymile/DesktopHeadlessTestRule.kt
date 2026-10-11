@@ -9,7 +9,7 @@ import dev.zacsweers.metro.createGraphFactory
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.presenter.compose.composePresenterScope
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
-import software.ralf.storymile.application.KmpApplication
+import software.ralf.storymile.scope.runtime.KmpApplication
 import software.ralf.storymile.screen.DefaultScreenSizeProvider
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.templates.AppTemplate

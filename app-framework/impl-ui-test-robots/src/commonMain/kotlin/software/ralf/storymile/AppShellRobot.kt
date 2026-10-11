@@ -28,7 +28,7 @@ import assertk.assertions.isEqualTo
 import dev.zacsweers.metro.AppScope
 import software.ralf.app.platform.inject.robot.ContributesRobot
 import software.ralf.app.platform.robot.ComposeRobot
-import software.ralf.storymile.application.Application
+import software.ralf.storymile.scope.runtime.Application
 import software.ralf.storymile.tabs.TabsPresenter
 
 /** Checks the visible app containers through the production renderer graph. */

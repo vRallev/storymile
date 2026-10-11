@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
-import software.ralf.storymile.application.Application as StorymileApplication
+import software.ralf.storymile.scope.runtime.Application as StorymileApplication
 import software.ralf.storymile.templates.AppTemplate
 
 /** Retains presenters across configuration changes and replaces them after an app restart. */

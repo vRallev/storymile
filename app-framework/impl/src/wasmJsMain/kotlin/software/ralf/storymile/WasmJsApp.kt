@@ -3,8 +3,8 @@ package software.ralf.storymile
 import androidx.compose.runtime.Composable
 import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.Scope
-import software.ralf.storymile.application.Application
-import software.ralf.storymile.application.KmpApplication
+import software.ralf.storymile.scope.runtime.Application
+import software.ralf.storymile.scope.runtime.KmpApplication
 
 /** Owns the application lifecycle and renders each new app scope. */
 class WasmJsApp(graph: (Application) -> AppGraph) : RootScopeProvider {

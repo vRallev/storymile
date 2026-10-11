@@ -11,7 +11,7 @@ import software.ralf.app.platform.renderer.renderCompose
 import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
-import software.ralf.storymile.application.Application
+import software.ralf.storymile.scope.runtime.Application
 
 /** Replaces the presenter tree and remembered UI state when the application restarts. */
 @Composable

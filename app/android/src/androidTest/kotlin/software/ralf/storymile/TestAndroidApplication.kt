@@ -1,7 +1,7 @@
 package software.ralf.storymile
 
 import dev.zacsweers.metro.createGraphFactory
-import software.ralf.storymile.application.Application
+import software.ralf.storymile.scope.runtime.Application
 
 /** Android test application that installs the graph containing integration-test robots. */
 class TestAndroidApplication : AndroidApplication() {

@@ -3,7 +3,7 @@ package software.ralf.storymile
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
-import software.ralf.storymile.application.Application
+import software.ralf.storymile.scope.runtime.Application
 
 /** Final Wasm application graph. */
 @DependencyGraph(AppScope::class)

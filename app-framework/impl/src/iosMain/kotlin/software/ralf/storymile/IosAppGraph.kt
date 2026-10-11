@@ -4,7 +4,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import platform.UIKit.UIApplication
-import software.ralf.storymile.application.Application
+import software.ralf.storymile.scope.runtime.Application
 
 /** Final iOS graph, including dependencies supplied by UIKit. */
 @DependencyGraph(AppScope::class)

@@ -4,7 +4,7 @@ import android.app.Application
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
-import software.ralf.storymile.application.Application as StorymileApplication
+import software.ralf.storymile.scope.runtime.Application as StorymileApplication
 import software.ralf.storymile.storage.DefaultStorage
 
 /**

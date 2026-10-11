@@ -4,8 +4,8 @@ import android.app.Application
 import dev.zacsweers.metro.createGraphFactory
 import kotlinx.coroutines.flow.StateFlow
 import software.ralf.app.platform.scope.Scope
-import software.ralf.storymile.application.Application as StorymileApplication
-import software.ralf.storymile.application.KmpApplication
+import software.ralf.storymile.scope.runtime.Application as StorymileApplication
+import software.ralf.storymile.scope.runtime.KmpApplication
 
 /** Android application that creates the shared root scope. */
 open class AndroidApplication : Application(), StorymileApplication {

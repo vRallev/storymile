@@ -4,7 +4,7 @@ import androidx.compose.ui.window.ComposeUIViewController
 import dev.zacsweers.metro.createGraphFactory
 import platform.UIKit.UIApplication
 import platform.UIKit.UIViewController
-import software.ralf.storymile.application.KmpApplication
+import software.ralf.storymile.scope.runtime.KmpApplication
 
 /** Swift host that retains the application lifecycle across graph and scene recreation. */
 class IosApplication(application: UIApplication) {
