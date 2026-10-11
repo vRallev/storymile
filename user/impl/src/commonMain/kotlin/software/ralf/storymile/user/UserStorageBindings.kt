@@ -36,5 +36,7 @@ interface UserStorageBindings {
     ): ScopedStorage = factory.create("user-${user.id}", coroutineScope)
   }
 
+  // Both aliases use this private key to share one instance without exposing an unqualified
+  // ScopedStorage binding to consumers.
   @Qualifier @Retention(AnnotationRetention.BINARY) private annotation class ForStorageLifecycle
 }
