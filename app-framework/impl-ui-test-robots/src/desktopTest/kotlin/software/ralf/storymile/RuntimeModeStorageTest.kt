@@ -23,6 +23,7 @@ import software.ralf.storymile.restart.ApplicationRestarter
 import software.ralf.storymile.restart.DefaultApplicationRestarter
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
+import software.ralf.storymile.runtimemode.TestRuntimeModeController
 import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.DesktopStoragePlatform
 import software.ralf.storymile.storage.InMemoryStoragePlatform
