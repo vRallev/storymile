@@ -37,10 +37,12 @@ class UserScopeTest {
   fun `application starts with a guest bound to its user scope`() = runTest {
     withApplication { graph ->
       val manager: UserManager = graph.userManager
+      val user: User = manager.user.first()
       val userGraph = manager.userScope.metroDependencyGraph<UserBindings>()
 
-      assertThat(manager.user.isGuest).isTrue()
-      assertThat(userGraph.user).isSameInstanceAs(manager.user)
+      assertThat(user.isGuest).isTrue()
+      assertThat(userGraph.user).isSameInstanceAs(user)
+      assertThat(manager.user.value).isSameInstanceAs(user)
       assertThat(manager.userScope.isDestroyed()).isFalse()
     }
   }
@@ -102,14 +104,14 @@ class UserScopeTest {
         val storage: Storage = manager.userScope.metroDependencyGraph<UserBindings>().storage
         storage.files.write("chapter", byteArrayOf(1))
         storage.preferences("settings").edit { it[key] = "guest" }
-        manager.user.id
+        manager.user.value.id
       }
 
     withApplication(factory) { graph ->
       val manager: UserManager = graph.userManager
       val storage: Storage = manager.userScope.metroDependencyGraph<UserBindings>().storage
 
-      assertThat(manager.user.id).isEqualTo(userId)
+      assertThat(manager.user.value.id).isEqualTo(userId)
       assertThat(storage.files.read("chapter")).isNotNull().isEqualTo(byteArrayOf(1))
       assertThat(storage.preferences("settings").data.first()[key]).isEqualTo("guest")
     }
