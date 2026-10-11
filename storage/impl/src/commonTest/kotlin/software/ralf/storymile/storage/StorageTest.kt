@@ -5,11 +5,13 @@ package software.ralf.storymile.storage
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
+import assertk.assertFailure
+import assertk.assertThat
+import assertk.assertions.isFalse
+import assertk.assertions.isInstanceOf
+import assertk.assertions.isNull
+import assertk.assertions.isSameInstanceAs
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertSame
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineName
@@ -40,7 +42,7 @@ class StorageTest {
     val platform = InMemoryPlatform()
     val storage: Storage = scope.storage("app", platform)
 
-    assertSame(storage.preferences("settings"), storage.preferences("settings"))
+    assertThat(storage.preferences("settings")).isSameInstanceAs(storage.preferences("settings"))
   }
 
   @Test
@@ -50,7 +52,7 @@ class StorageTest {
     scope.storage("app", platform).files.read("file")
 
     val other: Storage = otherScope.storage("app", platform)
-    assertFailsWith<IllegalStateException> { other.files.read("file") }
+    assertFailure { other.files.read("file") }.isInstanceOf<IllegalStateException>()
   }
 
   @Test
@@ -61,24 +63,25 @@ class StorageTest {
       val preferences = storage.preferences("settings")
       val directory = storage.files.directory("books").directory("chapters")
       val collecting = async {
-        assertFailsWith<CancellationException> { preferences.data.collect {} }
+        assertFailure { preferences.data.collect {} }.isInstanceOf<CancellationException>()
       }
       runCurrent()
 
       scope.destroy()
 
       collecting.await()
-      assertFailsWith<CancellationException> { storage.files.read("file") }
-      assertFailsWith<CancellationException> { storage.files.write("file", byteArrayOf(1)) }
-      assertFailsWith<CancellationException> { storage.files.delete("file") }
-      assertFailsWith<CancellationException> { storage.files.deleteAll() }
-      assertFailsWith<CancellationException> { storage.files.directory("books") }
-      assertFailsWith<CancellationException> { directory.read("chapter") }
-      assertFailsWith<CancellationException> { storage.cache.read("file") }
-      assertFailsWith<CancellationException> { storage.preferences("settings") }
-      assertFailsWith<CancellationException> { preferences.updateData { it } }
-      assertFailsWith<CancellationException> { preferences.data.first() }
-      assertFailsWith<IllegalStateException> { scope.storage("app", platform) }
+      assertFailure { storage.files.read("file") }.isInstanceOf<CancellationException>()
+      assertFailure { storage.files.write("file", byteArrayOf(1)) }
+        .isInstanceOf<CancellationException>()
+      assertFailure { storage.files.delete("file") }.isInstanceOf<CancellationException>()
+      assertFailure { storage.files.deleteAll() }.isInstanceOf<CancellationException>()
+      assertFailure { storage.files.directory("books") }.isInstanceOf<CancellationException>()
+      assertFailure { directory.read("chapter") }.isInstanceOf<CancellationException>()
+      assertFailure { storage.cache.read("file") }.isInstanceOf<CancellationException>()
+      assertFailure { storage.preferences("settings") }.isInstanceOf<CancellationException>()
+      assertFailure { preferences.updateData { it } }.isInstanceOf<CancellationException>()
+      assertFailure { preferences.data.first() }.isInstanceOf<CancellationException>()
+      assertFailure { scope.storage("app", platform) }.isInstanceOf<IllegalStateException>()
     }
 
   @Test
@@ -89,8 +92,8 @@ class StorageTest {
 
     scope.destroy()
 
-    assertFailsWith<CancellationException> { storage.files.read("file") }
-    assertFailsWith<CancellationException> { storage.preferences("settings") }
+    assertFailure { storage.files.read("file") }.isInstanceOf<CancellationException>()
+    assertFailure { storage.preferences("settings") }.isInstanceOf<CancellationException>()
   }
 
   @Test
@@ -98,7 +101,8 @@ class StorageTest {
     val platform = InMemoryPlatform(blockWrites = true)
     val storage: Storage = scope.storage("app", platform)
     val writing = async {
-      assertFailsWith<CancellationException> { storage.files.write("file", byteArrayOf(1)) }
+      assertFailure { storage.files.write("file", byteArrayOf(1)) }
+        .isInstanceOf<CancellationException>()
     }
     platform.writeStarted.await()
 
@@ -133,12 +137,12 @@ class StorageTest {
     val clearing = async { storage.files.directory("books").deleteAll() }
     runCurrent()
 
-    assertFalse(clearing.isCompleted)
+    assertThat(clearing.isCompleted).isFalse()
     platform.finishWrite.complete(Unit)
     writing.await()
     clearing.await()
 
-    assertNull(storage.files.directory("books").read("chapter"))
+    assertThat(storage.files.directory("books").read("chapter")).isNull()
   }
 
   @Test
@@ -149,7 +153,8 @@ class StorageTest {
       val previousScope = scope.child(this)
       val previous: Storage = previousScope.storage("user-alice", platform)
       val writing = async {
-        assertFailsWith<CancellationException> { previous.files.write("file", byteArrayOf(1)) }
+        assertFailure { previous.files.write("file", byteArrayOf(1)) }
+          .isInstanceOf<CancellationException>()
       }
       platform.writeStarted.await()
 
@@ -158,10 +163,10 @@ class StorageTest {
       val reading = async { reopened.files.read("file") }
       runCurrent()
 
-      assertFalse(reading.isCompleted)
+      assertThat(reading.isCompleted).isFalse()
       cleanup.complete(Unit)
       writing.await()
-      assertNull(reading.await())
+      assertThat(reading.await()).isNull()
     }
 
   @Test
@@ -172,12 +177,13 @@ class StorageTest {
       listOf("", " ", ".", "..", "../outside", "/outside", "C:\\outside", "a\u0000b")
 
     invalidNames.forEach { name ->
-      assertFailsWith<IllegalArgumentException> { scope.storage(name, platform) }
-      assertFailsWith<IllegalArgumentException> { storage.preferences(name) }
-      assertFailsWith<IllegalArgumentException> { storage.files.read(name) }
-      assertFailsWith<IllegalArgumentException> { storage.files.write(name, byteArrayOf(1)) }
-      assertFailsWith<IllegalArgumentException> { storage.files.delete(name) }
-      assertFailsWith<IllegalArgumentException> { storage.files.directory(name) }
+      assertFailure { scope.storage(name, platform) }.isInstanceOf<IllegalArgumentException>()
+      assertFailure { storage.preferences(name) }.isInstanceOf<IllegalArgumentException>()
+      assertFailure { storage.files.read(name) }.isInstanceOf<IllegalArgumentException>()
+      assertFailure { storage.files.write(name, byteArrayOf(1)) }
+        .isInstanceOf<IllegalArgumentException>()
+      assertFailure { storage.files.delete(name) }.isInstanceOf<IllegalArgumentException>()
+      assertFailure { storage.files.directory(name) }.isInstanceOf<IllegalArgumentException>()
     }
   }
 

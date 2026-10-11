@@ -50,3 +50,11 @@ and layout rules.
 shows Home, Library, and Downloads with Material icons in every navigation layout.
 Side navigation also shows the Storymile logo and title.
 Window resizing changes the navigation layout without changing the selected destination.
+
+[PlaybackScreenRenderer](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackScreenRenderer.kt)
+shows artwork, episode details, playback controls, and chapters. Its collapse button calls the template's
+[collapse action](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/LocalCollapsePlayback.kt).
+[PlaybackBarRenderer](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackBarRenderer.kt)
+shows artwork and compact controls. Both layouts share fake playback state from the playback presenter.
+[PlaybackTransition](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/PlaybackTransition.kt)
+moves shared artwork, text, and controls with the sheet. Controls present in only one layout fade.

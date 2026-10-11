@@ -3,6 +3,7 @@ package software.ralf.storymile
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
@@ -13,14 +14,13 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.swipeDown
-import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import assertk.assertThat
@@ -38,7 +38,7 @@ class AppShellRobot : ComposeRobot() {
     listOf("tab-content", "tabs", "playback").forEach {
       compose.onNodeWithTag(it).assertIsDisplayed()
     }
-    compose.onNodeWithTag("playback").onChildren().assertCountEquals(0)
+    compose.onNodeWithTag("playback-artwork-collapsed", useUnmergedTree = true).assertIsDisplayed()
     compose
       .onAllNodes(
         hasAnyAncestor(hasTestTag("tabs")) and
@@ -83,13 +83,23 @@ class AppShellRobot : ComposeRobot() {
   fun dragPlaybackUp() {
     val height = compose.onRoot().fetchSemanticsNode().boundsInRoot.height
     compose.onNodeWithTag("playback").performTouchInput {
-      swipeUp(startY = 32f, endY = 32f - height * 0.8f, durationMillis = 500)
+      swipe(start = Offset(40f, 32f), end = Offset(40f, 32f - height * 0.8f), durationMillis = 500)
     }
   }
 
   /** Opens playback through its click action, also available to keyboard users. */
   fun openPlayback() {
-    compose.onNodeWithTag("playback").performTouchInput { click(Offset(center.x, 32f)) }
+    compose.onNodeWithTag("playback-artwork-collapsed", useUnmergedTree = true).performTouchInput {
+      click(center)
+    }
+  }
+
+  /** Returns to the app through the player header button. */
+  fun collapsePlayback() {
+    compose
+      .onNodeWithTag("playback-collapse")
+      .assertContentDescriptionEquals("Collapse player")
+      .performClick()
   }
 
   /** Drags the expanded screen back to its persistent bar. */
@@ -102,6 +112,8 @@ class AppShellRobot : ComposeRobot() {
   /** Checks that expanded playback occupies the window and covers phone tabs. */
   fun seePlaybackScreen(phone: Boolean) {
     val playback = compose.onNodeWithTag("playback-screen").assertIsDisplayed()
+    compose.onNodeWithText("Now playing").assertIsDisplayed()
+    compose.onNodeWithTag("playback-artwork-expanded").assertIsDisplayed()
     assertThat(playback.getUnclippedBoundsInRoot())
       .isEqualTo(compose.onNodeWithTag("app-shell").getUnclippedBoundsInRoot())
     if (phone) compose.onNodeWithTag("tabs").assertIsNotDisplayed()

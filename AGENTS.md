@@ -79,6 +79,8 @@ interface-typed instance by default. Follow the
 [unit-test guidance](.agents/skills/app-platform-testing/SKILL.md#unit-tests) for the
 full rules and the presenter-model exception.
 
+Use assertk for value and exception assertions.
+
 ### Storage
 
 Use `:storage:public` for preferences, files, and caches. App assembly selects `:storage:impl`.

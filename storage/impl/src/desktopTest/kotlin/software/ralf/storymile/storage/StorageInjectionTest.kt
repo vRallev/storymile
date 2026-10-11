@@ -4,8 +4,14 @@ package software.ralf.storymile.storage
 
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
+import assertk.assertions.isInstanceOf
+import assertk.assertions.isNotInstanceOf
+import assertk.assertions.isNotNull
+import assertk.assertions.isSameInstanceAs
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.ForScope
@@ -13,10 +19,6 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.createGraphFactory
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertSame
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,17 +45,17 @@ class StorageInjectionTest {
       val writing = async { directory.write("chapter", byteArrayOf(1)) }
       runCurrent()
 
-      assertFalse(writing.isCompleted)
-      assertSame(storage, graph.storage)
-      assertSame(storage, graph.consumer.storage)
-      assertSame<Any>(storage, graph.scopedInstances.single())
+      assertThat(writing.isCompleted).isFalse()
+      assertThat(graph.storage).isSameInstanceAs(storage)
+      assertThat(graph.consumer.storage).isSameInstanceAs(storage)
+      assertThat(graph.scopedInstances.single()).isSameInstanceAs(storage)
 
       scope.register(graph.scopedInstances)
 
       writing.await()
-      assertContentEquals(byteArrayOf(1), directory.read("chapter"))
+      assertThat(directory.read("chapter")).isNotNull().isEqualTo(byteArrayOf(1))
       cache.write("cover", byteArrayOf(2))
-      assertContentEquals(byteArrayOf(2), cache.read("cover"))
+      assertThat(cache.read("cover")).isNotNull().isEqualTo(byteArrayOf(2))
       val key = stringPreferencesKey("theme")
       val preferences = storage.preferences("settings")
       preferences.edit { it[key] = "dark" }
@@ -61,14 +63,15 @@ class StorageInjectionTest {
 
       scope.destroy()
 
-      assertFailsWith<CancellationException> { storage.files.directory("new") }
-      assertFailsWith<CancellationException> { directory.read("chapter") }
-      assertFailsWith<CancellationException> { directory.write("chapter", byteArrayOf(3)) }
-      assertFailsWith<CancellationException> { directory.deleteAll() }
-      assertFailsWith<CancellationException> { cache.read("cover") }
-      assertFailsWith<CancellationException> { storage.preferences("settings") }
-      assertFailsWith<CancellationException> { preferences.updateData { it } }
-      assertFailsWith<CancellationException> { preferences.data.first() }
+      assertFailure { storage.files.directory("new") }.isInstanceOf<CancellationException>()
+      assertFailure { directory.read("chapter") }.isInstanceOf<CancellationException>()
+      assertFailure { directory.write("chapter", byteArrayOf(3)) }
+        .isInstanceOf<CancellationException>()
+      assertFailure { directory.deleteAll() }.isInstanceOf<CancellationException>()
+      assertFailure { cache.read("cover") }.isInstanceOf<CancellationException>()
+      assertFailure { storage.preferences("settings") }.isInstanceOf<CancellationException>()
+      assertFailure { preferences.updateData { it } }.isInstanceOf<CancellationException>()
+      assertFailure { preferences.data.first() }.isInstanceOf<CancellationException>()
     }
 
   @Test
@@ -83,13 +86,13 @@ class StorageInjectionTest {
 
     graph.storage.files.write("file", byteArrayOf(1))
     user.files.write("file", byteArrayOf(2))
-    assertContentEquals(byteArrayOf(1), graph.storage.files.read("file"))
-    assertContentEquals(byteArrayOf(2), user.files.read("file"))
+    assertThat(graph.storage.files.read("file")).isNotNull().isEqualTo(byteArrayOf(1))
+    assertThat(user.files.read("file")).isNotNull().isEqualTo(byteArrayOf(2))
 
     userScope.destroy()
 
-    assertFailsWith<CancellationException> { user.files.read("file") }
-    assertContentEquals(byteArrayOf(1), graph.storage.files.read("file"))
+    assertFailure { user.files.read("file") }.isInstanceOf<CancellationException>()
+    assertThat(graph.storage.files.read("file")).isNotNull().isEqualTo(byteArrayOf(1))
   }
 
   @Test
@@ -106,16 +109,19 @@ class StorageInjectionTest {
         otherScope.register(it)
       }
 
-    val failure = assertFailsWith<IllegalStateException> { duplicate.files.read("chapter") }
-    assertFalse(failure is CancellationException)
+    assertFailure {
+      duplicate.files.read("chapter")
+    }
+      .isInstanceOf<IllegalStateException>()
+      .isNotInstanceOf<CancellationException>()
 
     val sibling: Storage =
       DefaultStorage("user-alice", otherScope.coroutineScope(), platform).also {
         otherScope.register(it)
       }
     sibling.files.write("chapter", byteArrayOf(2))
-    assertContentEquals(byteArrayOf(1), original.files.read("chapter"))
-    assertContentEquals(byteArrayOf(2), sibling.files.read("chapter"))
+    assertThat(original.files.read("chapter")).isNotNull().isEqualTo(byteArrayOf(1))
+    assertThat(sibling.files.read("chapter")).isNotNull().isEqualTo(byteArrayOf(2))
   }
 
   @DependencyGraph(AppScope::class, excludes = [DesktopStoragePlatform::class])

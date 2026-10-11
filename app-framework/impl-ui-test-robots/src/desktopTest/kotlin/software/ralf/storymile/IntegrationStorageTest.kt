@@ -2,13 +2,14 @@ package software.ralf.storymile
 
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isInstanceOf
+import assertk.assertions.isNotNull
+import assertk.assertions.isNull
 import dev.zacsweers.metro.createGraphFactory
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNull
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -31,8 +32,8 @@ class IntegrationStorageTest {
         second.cache.write("integration-test", byteArrayOf(4))
 
         assertThat(first.preferences("integration-test").data.first()[key]).isEqualTo("dark")
-        assertContentEquals(byteArrayOf(1), first.files.read("integration-test"))
-        assertContentEquals(byteArrayOf(2), first.cache.read("integration-test"))
+        assertThat(first.files.read("integration-test")).isNotNull().isEqualTo(byteArrayOf(1))
+        assertThat(first.cache.read("integration-test")).isNotNull().isEqualTo(byteArrayOf(2))
       }
     }
 
@@ -48,17 +49,17 @@ class IntegrationStorageTest {
         storage to storage.preferences("integration-test")
       }
 
-    assertFailsWith<CancellationException> { storage.files.read("integration-test") }
-    assertFailsWith<CancellationException> { storage.cache.read("integration-test") }
-    assertFailsWith<CancellationException> { storage.preferences("integration-test") }
-    assertFailsWith<CancellationException> { preferences.data.first() }
-    assertFailsWith<CancellationException> { preferences.updateData { it } }
+    assertFailure { storage.files.read("integration-test") }.isInstanceOf<CancellationException>()
+    assertFailure { storage.cache.read("integration-test") }.isInstanceOf<CancellationException>()
+    assertFailure { storage.preferences("integration-test") }.isInstanceOf<CancellationException>()
+    assertFailure { preferences.data.first() }.isInstanceOf<CancellationException>()
+    assertFailure { preferences.updateData { it } }.isInstanceOf<CancellationException>()
   }
 
   private suspend fun assertEmpty(storage: Storage) {
     assertThat(storage.preferences("integration-test").data.first().asMap()).isEqualTo(emptyMap())
-    assertNull(storage.files.read("integration-test"))
-    assertNull(storage.cache.read("integration-test"))
+    assertThat(storage.files.read("integration-test")).isNull()
+    assertThat(storage.cache.read("integration-test")).isNull()
   }
 
   private suspend fun <T> withStorage(block: suspend (Storage) -> T): T {
