@@ -4,7 +4,7 @@ import android.app.Application
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
-import software.ralf.storymile.scope.runtime.Application as StorymileApplication
+import software.ralf.app.platform.scope.RootScopeProvider
 
 /** Final Android graph, including dependencies supplied by the Android application. */
 @DependencyGraph(AppScope::class)
@@ -15,7 +15,7 @@ interface AndroidAppGraph {
     /** Creates a graph with Android and root-scope dependencies. */
     fun create(
       @Provides application: Application,
-      @Provides storymileApplication: StorymileApplication,
+      @Provides rootScopeProvider: RootScopeProvider,
     ): AndroidAppGraph
   }
 }

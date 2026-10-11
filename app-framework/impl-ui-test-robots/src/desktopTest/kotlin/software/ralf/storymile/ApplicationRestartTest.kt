@@ -21,9 +21,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
-import software.ralf.storymile.scope.runtime.Application
-import software.ralf.storymile.scope.runtime.KmpApplication
+import software.ralf.storymile.scope.runtime.ApplicationRestarter
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.tabs.TabsPresenter
 import software.ralf.storymile.templates.AppTemplate
@@ -32,13 +32,11 @@ class ApplicationRestartTest {
   @Test
   fun `restart stops presenters and storage before requesting a process restart`() = runTest {
     Dispatchers.setMain(StandardTestDispatcher(testScheduler))
-    val owner =
-      KmpApplication(
-        graphFactory = { createGraphFactory<TestDesktopAppGraph.Factory>().create(it) },
-      )
-    val application: Application = owner
+    val application = KmpApplication()
     try {
-      owner.create()
+      val testGraph = createGraphFactory<TestDesktopAppGraph.Factory>().create(application)
+      application.create(testGraph)
+      val restarter: ApplicationRestarter = testGraph.applicationRestarter
       val templateProvider = application.createTemplateProvider()
       templateProvider.templates.test {
         val initialTabs = awaitItem().tabs()
@@ -52,15 +50,15 @@ class ApplicationRestartTest {
         val storage = graph.storage
         storage.files.write("restart-test", byteArrayOf(1))
         val preferences = storage.preferences("restart-test")
-        val restarter = appScope.metroDependencyGraph<TestDesktopAppGraph>().restartRecorder
-        restarter.onRestart = {
+        val recorder = testGraph.restartRecorder
+        recorder.onRestart = {
           assertTrue(appScope.isDestroyed())
           assertTrue(graph.appScopeCoroutineScopeScoped.coroutineContext.job.isCompleted)
           assertFailsWith<CancellationException> { storage.files.directory("closed") }
         }
 
-        application.restart()
-        restarter.restarted.await()
+        restarter.restart()
+        recorder.restarted.await()
 
         assertFailsWith<CancellationException> { storage.files.read("restart-test") }
         assertFailsWith<CancellationException> { preferences.data.first() }
@@ -70,13 +68,13 @@ class ApplicationRestartTest {
         assertSame(selectedTemplate, templateProvider.templates.value)
       }
     } finally {
-      owner.destroy()
+      application.destroy()
       runCurrent()
       Dispatchers.resetMain()
     }
   }
 
-  private fun Application.createTemplateProvider(): TemplateProvider {
+  private fun RootScopeProvider.createTemplateProvider(): TemplateProvider {
     rootScope
       .metroDependencyGraph<DesktopHeadlessTestRule.Graph>()
       .screenSizeProvider
@@ -84,7 +82,7 @@ class ApplicationRestartTest {
         ScreenSize.from(DesktopWindowSizes.phone.width, DesktopWindowSizes.phone.height),
       )
     return rootScope
-      .metroDependencyGraph<AppGraph>()
+      .metroDependencyGraph<DesktopApp.Graph>()
       .templateProviderFactory
       .createTemplateProvider()
   }

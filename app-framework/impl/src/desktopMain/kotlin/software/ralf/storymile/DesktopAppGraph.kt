@@ -3,7 +3,7 @@ package software.ralf.storymile
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
-import software.ralf.storymile.scope.runtime.Application
+import software.ralf.app.platform.scope.RootScopeProvider
 
 /** Final Desktop application graph. */
 @DependencyGraph(AppScope::class)
@@ -12,6 +12,6 @@ interface DesktopAppGraph {
   @DependencyGraph.Factory
   fun interface Factory {
     /** Creates a graph with the shared root-scope provider. */
-    fun create(@Provides application: Application): DesktopAppGraph
+    fun create(@Provides rootScopeProvider: RootScopeProvider): DesktopAppGraph
   }
 }

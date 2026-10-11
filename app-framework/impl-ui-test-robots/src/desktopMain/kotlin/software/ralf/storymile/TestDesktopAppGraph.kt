@@ -6,7 +6,8 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CompletableDeferred
-import software.ralf.storymile.scope.runtime.Application
+import software.ralf.app.platform.scope.RootScopeProvider
+import software.ralf.storymile.scope.runtime.ApplicationRestarter
 import software.ralf.storymile.scope.runtime.DesktopProcessRestarter
 import software.ralf.storymile.scope.runtime.ProcessRestarter
 import software.ralf.storymile.storage.DefaultStorage
@@ -23,6 +24,9 @@ import software.ralf.storymile.storage.DefaultStorage
   excludes = [DefaultStorage.Factory::class, DesktopProcessRestarter::class],
 )
 interface TestDesktopAppGraph {
+  /** Production restart service used by integration tests. */
+  val applicationRestarter: ApplicationRestarter
+
   /** Records restart requests without relaunching or terminating the test process. */
   val restartRecorder: RestartRecorder
 
@@ -32,7 +36,7 @@ interface TestDesktopAppGraph {
   @DependencyGraph.Factory
   interface Factory {
     /** Creates a graph using the test application's root-scope provider. */
-    fun create(@Provides application: Application): TestDesktopAppGraph
+    fun create(@Provides rootScopeProvider: RootScopeProvider): TestDesktopAppGraph
   }
 
   /** Observes cleanup at the point where the application requests a process restart. */

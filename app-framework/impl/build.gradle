@@ -13,8 +13,6 @@ storymile {
 }
 
 dependencies {
-  commonMainApi project(':scope-runtime:impl')
-  commonMainApi project(':scope-runtime:public')
   commonMainApi project(':storage:public')
 
   androidMainImplementation libs.androidx.activity.compose
@@ -22,6 +20,7 @@ dependencies {
   commonMainImplementation project(':library:impl')
   commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':presenter-navigation:impl')
+  commonMainImplementation project(':scope-runtime:impl')
   commonMainImplementation project(':storage:impl')
   commonMainImplementation project(':tabs:impl')
   commonMainImplementation project(':templates:impl')

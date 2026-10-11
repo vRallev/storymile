@@ -9,7 +9,6 @@ import dev.zacsweers.metro.createGraphFactory
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.presenter.compose.composePresenterScope
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
-import software.ralf.storymile.scope.runtime.KmpApplication
 import software.ralf.storymile.screen.DefaultScreenSizeProvider
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.templates.AppTemplate
@@ -39,10 +38,8 @@ class DesktopHeadlessTestRule {
     block: suspend ReceiveTurbine<AppTemplate>.() -> Unit,
   ) {
     runTest {
-      val application = KmpApplication {
-        createGraphFactory<TestDesktopAppGraph.Factory>().create(it)
-      }
-      application.create()
+      val application = KmpApplication()
+      application.create(createGraphFactory<TestDesktopAppGraph.Factory>().create(application))
 
       val graph = application.rootScope.metroDependencyGraph<Graph>()
       graph.screenSizeProvider.update(ScreenSize.from(windowSize.width, windowSize.height))
