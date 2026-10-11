@@ -42,14 +42,14 @@ class UserScopeTest {
     val user: User = manager.user.first()
 
     assertThat(user.isGuest).isTrue()
-    assertFailure { user.scope }.isInstanceOf<IllegalStateException>()
+    assertFailure { manager.userScope }.isInstanceOf<IllegalStateException>()
 
     application.create(graph)
     try {
-      val userGraph = user.scope.metroDependencyGraph<UserBindings>()
+      val userGraph = manager.userScope.metroDependencyGraph<UserBindings>()
       assertThat(userGraph.user).isSameInstanceAs(user)
       assertThat(manager.user.value).isSameInstanceAs(user)
-      assertThat(user.scope.isDestroyed()).isFalse()
+      assertThat(manager.userScope.isDestroyed()).isFalse()
     } finally {
       application.destroy()
     }
@@ -58,20 +58,22 @@ class UserScopeTest {
   @Test
   fun `each application owns a separate guest and scope`() = runTest {
     withApplication { firstGraph ->
-      val first: User = firstGraph.userManager.user.value
-      val firstScope = first.scope
+      val firstManager: UserManager = firstGraph.userManager
+      val first: User = firstManager.user.value
+      val firstScope = firstManager.userScope
       val second = withApplication { secondGraph ->
-        val second: User = secondGraph.userManager.user.value
+        val secondManager: UserManager = secondGraph.userManager
+        val second: User = secondManager.user.value
         assertThat(second).isNotSameInstanceAs(first)
-        assertThat(second.scope).isNotSameInstanceAs(firstScope)
-        assertThat(first.scope).isSameInstanceAs(firstScope)
-        second
+        assertThat(secondManager.userScope).isNotSameInstanceAs(firstScope)
+        assertThat(firstManager.userScope).isSameInstanceAs(firstScope)
+        secondManager
       }
 
-      assertFailure { second.scope }.isInstanceOf<IllegalStateException>()
-      assertThat(first.scope).isSameInstanceAs(firstScope)
-      assertThat(first.scope.isDestroyed()).isFalse()
-      val storage: Storage = first.scope.metroDependencyGraph<UserBindings>().storage
+      assertFailure { second.userScope }.isInstanceOf<IllegalStateException>()
+      assertThat(firstManager.userScope).isSameInstanceAs(firstScope)
+      assertThat(firstManager.userScope.isDestroyed()).isFalse()
+      val storage: Storage = firstManager.userScope.metroDependencyGraph<UserBindings>().storage
       storage.files.write("chapter", byteArrayOf(1))
       assertThat(storage.files.read("chapter")).isNotNull().isEqualTo(byteArrayOf(1))
     }
@@ -82,7 +84,7 @@ class UserScopeTest {
     withApplication { graph ->
       val appStorage: Storage = graph.storage
       val userStorage: Storage =
-        graph.userManager.user.value.scope.metroDependencyGraph<UserBindings>().storage
+        graph.userManager.userScope.metroDependencyGraph<UserBindings>().storage
       val key = stringPreferencesKey("value")
 
       appStorage.files.write("chapter", byteArrayOf(1))
@@ -103,7 +105,7 @@ class UserScopeTest {
     val rootScope = application.rootScope
     try {
       val manager: UserManager = rootScope.metroDependencyGraph<Graph>().userManager
-      val userScope = manager.user.value.scope
+      val userScope = manager.userScope
       val storage: Storage = userScope.metroDependencyGraph<UserBindings>().storage
       val preferences = storage.preferences("settings")
       storage.files.write("chapter", byteArrayOf(1))
@@ -114,7 +116,7 @@ class UserScopeTest {
 
       assertThat(userScope.isDestroyed()).isTrue()
       assertThat(work.isCancelled).isTrue()
-      assertFailure { manager.user.value.scope }.isInstanceOf<IllegalStateException>()
+      assertFailure { manager.userScope }.isInstanceOf<IllegalStateException>()
       assertFailure { storage.files.read("chapter") }.isInstanceOf<CancellationException>()
       assertFailure { preferences.data.first() }.isInstanceOf<CancellationException>()
     } finally {
@@ -131,7 +133,7 @@ class UserScopeTest {
     val userId =
       withApplication(factory) { graph ->
         val manager: UserManager = graph.userManager
-        val storage: Storage = manager.user.value.scope.metroDependencyGraph<UserBindings>().storage
+        val storage: Storage = manager.userScope.metroDependencyGraph<UserBindings>().storage
         storage.files.write("chapter", byteArrayOf(1))
         storage.preferences("settings").edit { it[key] = "guest" }
         manager.user.value.id
@@ -139,7 +141,7 @@ class UserScopeTest {
 
     withApplication(factory) { graph ->
       val manager: UserManager = graph.userManager
-      val storage: Storage = manager.user.value.scope.metroDependencyGraph<UserBindings>().storage
+      val storage: Storage = manager.userScope.metroDependencyGraph<UserBindings>().storage
 
       assertThat(manager.user.value.id).isEqualTo(userId)
       assertThat(storage.files.read("chapter")).isNotNull().isEqualTo(byteArrayOf(1))
