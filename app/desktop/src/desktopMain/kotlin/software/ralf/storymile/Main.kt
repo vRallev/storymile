@@ -26,8 +26,8 @@ import software.ralf.storymile.theme.LocalDarkThemeOverride
 import software.ralf.storymile.util.Platform
 
 /**
- * Launches the Desktop application. Command/Ctrl+S toggles phone and tablet sizes; Command/Ctrl+D
- * toggles light and dark themes.
+ * Launches the Desktop application. Command/Ctrl+S cycles phone, tablet, and desktop sizes;
+ * Command/Ctrl+D toggles light and dark themes.
  */
 fun main(args: Array<String>) {
 
@@ -36,7 +36,8 @@ fun main(args: Array<String>) {
       null,
       "phone" -> DesktopWindowSizes.phone
       "tablet" -> DesktopWindowSizes.tablet
-      else -> error("Unknown window size '$size'. Use phone or tablet.")
+      "desktop" -> DesktopWindowSizes.desktop
+      else -> error("Unknown window size '$size'. Use phone, tablet, or desktop.")
     }
 
   val desktopApp = DesktopApp { createGraphFactory<DesktopAppGraph.Factory>().create(it) }
@@ -44,8 +45,7 @@ fun main(args: Array<String>) {
   val windowIcon = configureAppIcon(platform)
 
   application {
-    val phoneSize = DesktopWindowSizes.phone
-    val tabletSize = DesktopWindowSizes.tablet
+    var windowSize by remember { mutableStateOf(initialSize) }
     val windowState = rememberWindowState(width = initialSize.width, height = initialSize.height)
     var darkThemeOverride by remember { mutableStateOf<Boolean?>(null) }
     var systemDarkTheme by remember { mutableStateOf(false) }
@@ -62,8 +62,9 @@ fun main(args: Array<String>) {
         ) {
           when (keyEvent.key) {
             Key.S -> {
-              windowState.size =
-                if (DesktopWindowSizes.isTablet(windowState.size)) phoneSize else tabletSize
+              // Track the preset even if the OS limits the actual window size.
+              windowSize = DesktopWindowSizes.next(windowSize)
+              windowState.size = windowSize
               true
             }
             Key.D -> {
