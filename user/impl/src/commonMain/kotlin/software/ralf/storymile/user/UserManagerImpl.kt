@@ -14,16 +14,13 @@ import software.ralf.app.platform.scope.register
 @SingleIn(AppScope::class)
 @ContributesScoped(AppScope::class)
 class UserManagerImpl(private val userGraphFactory: UserGraph.Factory) : UserManager, Scoped {
-  private val guestUser = GuestUser()
-  private var scopeOrNull: Scope? = null
+  private var scopeFlowOrNull: MutableStateFlow<Scope>? = null
 
-  override val user: StateFlow<User>
-    field = MutableStateFlow<User>(guestUser)
-
-  override val userScope: Scope
-    get() = checkNotNull(scopeOrNull) { "The user scope is not active." }
+  override val userScope: StateFlow<Scope>
+    get() = checkNotNull(scopeFlowOrNull) { "The user scope is not active." }
 
   override fun onEnterScope(scope: Scope) {
+    val guestUser = GuestUser()
     val graph = userGraphFactory.createUserGraph(guestUser)
     val child =
       scope.buildChild("user-${guestUser.id}") {
@@ -31,11 +28,11 @@ class UserManagerImpl(private val userGraphFactory: UserGraph.Factory) : UserMan
         addCoroutineScopeScoped(graph.coroutineOwner)
       }
 
-    scopeOrNull = child
+    scopeFlowOrNull = MutableStateFlow(child)
     child.register(graph.userScopedInstances)
   }
 
   override fun onExitScope() {
-    scopeOrNull = null
+    scopeFlowOrNull = null
   }
 }
