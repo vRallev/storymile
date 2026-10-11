@@ -2,29 +2,49 @@ package software.ralf.storymile
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.ContributesTo
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
+import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
+import software.ralf.storymile.application.Application as StorymileApplication
 import software.ralf.storymile.templates.AppTemplate
-import software.ralf.storymile.util.rootScopeProvider
 
-/** Retains the shared template stream across Android configuration changes. */
+/** Retains presenters across configuration changes and replaces them after an app restart. */
 class MainActivityViewModel(application: Application) : AndroidViewModel(application) {
-  private val graph = application.rootScopeProvider().rootScope.metroDependencyGraph<Graph>()
-  private val templateProvider = graph.templateProviderFactory.createTemplateProvider()
+  private val applicationLifecycle = application as StorymileApplication
 
-  /** Application templates retained independently of Activity recreation. */
-  val templates: StateFlow<AppTemplate> = templateProvider.templates
+  /** Current scope and its templates, or null while the application restarts. */
+  @OptIn(ExperimentalCoroutinesApi::class)
+  val content: StateFlow<Content?> =
+    applicationLifecycle.rootScopes
+      .flatMapLatest { scope ->
+        if (scope == null || scope.isDestroyed()) {
+          flowOf(null)
+        } else {
+          flow<Content?> {
+            val provider =
+              scope
+                .metroDependencyGraph<AppGraph>()
+                .templateProviderFactory
+                .createTemplateProvider()
+            try {
+              emit(Content(scope, provider.templates))
+              awaitCancellation()
+            } finally {
+              provider.cancel()
+            }
+          }
+        }
+      }
+      .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-  override fun onCleared() {
-    templateProvider.cancel()
-  }
-
-  /** Graph access needed by the Android view model. */
-  @ContributesTo(AppScope::class)
-  interface Graph {
-    /** Factory used to create the view model's independently cancellable template stream. */
-    val templateProviderFactory: TemplateProvider.Factory
-  }
+  /** Keeps a template stream paired with the graph that produces it. */
+  class Content(val scope: Scope, val templates: StateFlow<AppTemplate>)
 }

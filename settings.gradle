@@ -26,6 +26,8 @@ if (providers.gradleProperty('storymile.enableWasm').map { it.toBoolean() }.getO
 }
 include ':app-framework:impl'
 include ':app-framework:impl-ui-test-robots'
+include ':application:impl'
+include ':application:public'
 include ':library:impl'
 include ':library:impl-robots'
 include ':library:public'

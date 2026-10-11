@@ -2,23 +2,32 @@ package software.ralf.storymile
 
 import android.app.Application
 import dev.zacsweers.metro.createGraphFactory
-import software.ralf.app.platform.scope.RootScopeProvider
+import kotlinx.coroutines.flow.StateFlow
 import software.ralf.app.platform.scope.Scope
+import software.ralf.storymile.application.Application as StorymileApplication
+import software.ralf.storymile.application.KmpApplication
 
 /** Android application that creates the shared root scope. */
-open class AndroidApplication : Application(), RootScopeProvider {
-  private val storymileApplication = KmpApplication()
+open class AndroidApplication : Application(), StorymileApplication {
+  private val storymileApplication = KmpApplication { metroGraph(it) }
+
+  override val rootScopes: StateFlow<Scope?>
+    get() = storymileApplication.rootScopes
 
   override val rootScope: Scope
     get() = storymileApplication.rootScope
 
+  override fun restart() {
+    storymileApplication.restart()
+  }
+
   override fun onCreate() {
-    storymileApplication.create(metroGraph(storymileApplication))
+    storymileApplication.create()
     super.onCreate()
   }
 
   /** Creates the production graph. Tests can override this to install a test graph. */
-  protected open fun metroGraph(storymileApplication: KmpApplication): AppGraph {
+  protected open fun metroGraph(storymileApplication: StorymileApplication): AppGraph {
     return createGraphFactory<AndroidAppGraph.Factory>().create(this, storymileApplication)
   }
 }

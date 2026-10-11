@@ -11,6 +11,7 @@ storymile {
 
 dependencies {
   implementation project(':app-framework:impl')
+  implementation project(':application:impl')
 
   // Android tests inherit strict versions from the app runtime.
   implementation libs.androidx.concurrent.futures

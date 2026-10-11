@@ -3,7 +3,7 @@ package software.ralf.storymile
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
-import software.ralf.app.platform.scope.RootScopeProvider
+import software.ralf.storymile.application.Application
 import software.ralf.storymile.storage.DefaultStorage
 
 /**
@@ -19,6 +19,6 @@ interface TestDesktopAppGraph {
   @DependencyGraph.Factory
   interface Factory {
     /** Creates a graph using the test application's root-scope provider. */
-    fun create(@Provides rootScopeProvider: RootScopeProvider): TestDesktopAppGraph
+    fun create(@Provides application: Application): TestDesktopAppGraph
   }
 }

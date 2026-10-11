@@ -13,6 +13,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
+import software.ralf.storymile.application.KmpApplication
 import software.ralf.storymile.storage.Storage
 
 class IntegrationStorageTest {
@@ -62,8 +63,10 @@ class IntegrationStorageTest {
   }
 
   private suspend fun <T> withStorage(block: suspend (Storage) -> T): T {
-    val application = KmpApplication()
-    application.create(createGraphFactory<TestDesktopAppGraph.Factory>().create(application))
+    val application = KmpApplication {
+      createGraphFactory<TestDesktopAppGraph.Factory>().create(it)
+    }
+    application.create()
     try {
       return block(application.rootScope.metroDependencyGraph<AppGraph>().storage)
     } finally {

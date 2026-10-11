@@ -3,7 +3,8 @@
 ## Structure
 
 - `app`: Android, Desktop, iOS, and Wasm launchers.
-- `app-framework`: application lifecycle, dependency graphs, and integration-test fixtures.
+- `application`: restart API and application scope lifecycle.
+- `app-framework`: dependency graphs, platform hosts, and integration-test fixtures.
 - `templates`, `theme`, `presenter-navigation`: shared UI infrastructure.
 - `buildSrc`: Gradle conventions, platform targets, module checks, and test setup.
 

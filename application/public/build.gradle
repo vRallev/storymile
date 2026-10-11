@@ -1,0 +1,11 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  addPublicModuleDependencies true
+}
+
+dependencies {
+  commonMainApi libs.coroutines.core
+}
