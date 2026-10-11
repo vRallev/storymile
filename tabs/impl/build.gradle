@@ -11,6 +11,7 @@ storymile {
 dependencies {
   commonMainImplementation project(':downloads:public')
   commonMainImplementation project(':home:public')
+  commonMainImplementation project(':library:public')
   commonMainImplementation project(':templates:public')
   commonMainImplementation project(':theme:public')
   commonMainImplementation project(':user:public')

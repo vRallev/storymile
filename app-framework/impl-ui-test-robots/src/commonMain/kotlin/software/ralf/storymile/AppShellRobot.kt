@@ -9,7 +9,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasAnyAncestor
@@ -66,7 +65,11 @@ class AppShellRobot : ComposeRobot() {
   fun seeSelectedTab(tab: TabsPresenter.Tab) {
     TabsPresenter.Tab.entries.forEach {
       val item = compose.onNodeWithTag("tab-${it.name.lowercase()}").assertIsDisplayed()
-      if (it == tab) item.assertIsSelected() else item.assertIsNotSelected()
+      if (it == tab) {
+        item.assertIsSelected()
+      } else {
+        item.assertIsNotSelected()
+      }
     }
     if (tab == TabsPresenter.Tab.HOME) {
       compose.onNodeWithTag("home-screen").assertIsDisplayed()
@@ -74,11 +77,10 @@ class AppShellRobot : ComposeRobot() {
       compose.onNodeWithTag("downloads-screen").assertIsDisplayed()
       compose.onNodeWithText("Listen anywhere").assertIsDisplayed()
     } else {
-      val label = tab.name.lowercase().replaceFirstChar { it.titlecase() }
-      compose
-        .onNodeWithTag("selected-tab")
-        .assertIsDisplayed()
-        .assertTextEquals("$label tab selected")
+      compose.onNodeWithTag("library-empty").assertIsDisplayed()
+      compose.onNodeWithTag("library-filter-episodes").assertIsDisplayed()
+      compose.onNodeWithTag("library-filter-shows").assertIsDisplayed()
+      compose.onNodeWithTag("library-discover").assertIsDisplayed()
     }
   }
 
