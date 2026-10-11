@@ -4,7 +4,6 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import software.ralf.app.platform.scope.RootScopeProvider
-import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.storage.DefaultStorage
 
 /**
@@ -16,9 +15,6 @@ import software.ralf.storymile.storage.DefaultStorage
  */
 @DependencyGraph(AppScope::class, excludes = [DefaultStorage.Factory::class])
 interface TestDesktopAppGraph {
-  /** Runtime mode used by the test application. */
-  val runtimeModeController: RuntimeModeController
-
   /** Factory for a Desktop test graph. */
   @DependencyGraph.Factory
   interface Factory {
