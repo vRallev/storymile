@@ -30,14 +30,12 @@ class PlaylistRepositoryImpl(
   private val commands = Channel<(List<Playlist>) -> List<Playlist>>(Channel.UNLIMITED)
   private var loaded = false
 
-  override fun create(name: String) {
-    val trimmedName = playlistName(name)
-    enqueue { it + Playlist(PlaylistId(Uuid.random().toString()), trimmedName, emptyList()) }
+  override fun create(name: PlaylistName) {
+    enqueue { it + Playlist(PlaylistId(Uuid.random().toString()), name, emptyList()) }
   }
 
-  override fun rename(id: PlaylistId, name: String) {
-    val trimmedName = playlistName(name)
-    updatePlaylist(id) { it.copy(name = trimmedName) }
+  override fun rename(id: PlaylistId, name: PlaylistName) {
+    updatePlaylist(id) { it.copy(name = name) }
   }
 
   override fun delete(id: PlaylistId) {
@@ -112,11 +110,6 @@ class PlaylistRepositoryImpl(
 
   override fun onExitScope() {
     commands.cancel()
-  }
-
-  private fun playlistName(name: String): String {
-    require(name.isNotBlank()) { "Playlist name must contain text." }
-    return name.trim()
   }
 
   private fun enqueue(command: (List<Playlist>) -> List<Playlist>) {

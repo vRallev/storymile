@@ -4,8 +4,8 @@ package software.ralf.storymile.playlist
 data class Playlist(
   /** Stable identity retained across edits and reloads. */
   val id: PlaylistId,
-  /** Trimmed, nonblank display name. Other playlists can use the same name. */
-  val name: String,
+  /** Display name. Other playlists can use the same name. */
+  val name: PlaylistName,
   /** Episode identities in playback order, with no repeats within this playlist. */
   val episodeIds: List<EpisodeId>,
 )

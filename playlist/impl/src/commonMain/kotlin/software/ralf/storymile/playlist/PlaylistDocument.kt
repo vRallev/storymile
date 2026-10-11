@@ -20,7 +20,7 @@ internal class PlaylistDocument {
         add(
           buildJsonObject {
             put("id", playlist.id.value)
-            put("name", playlist.name)
+            put("name", playlist.name.value)
             putJsonArray("episodeIds") {
               playlist.episodeIds.forEach { add(it.value) }
             }
@@ -42,10 +42,7 @@ internal class PlaylistDocument {
       document.getValue("playlists").jsonArray.map { element ->
         val playlist = element.jsonObject
         val id = PlaylistId(playlist.getValue("id").string())
-        val name = playlist.getValue("name").string()
-        require(name.isNotBlank() && name == name.trim()) {
-          "Saved playlist name must be trimmed and contain text."
-        }
+        val name = PlaylistName(playlist.getValue("name").string())
         val episodes = playlist.getValue("episodeIds").jsonArray.map { EpisodeId(it.string()) }
         require(episodes.distinct().size == episodes.size) {
           "Saved playlist has duplicate episodes."

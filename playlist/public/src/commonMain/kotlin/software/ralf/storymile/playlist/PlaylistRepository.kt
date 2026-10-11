@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
  * before any data is written.
  *
  * User scope exit cancels pending work and preserves saved data. Later mutations throw
- * [CancellationException] after argument validation.
+ * [CancellationException].
  */
 interface PlaylistRepository {
   /**
@@ -21,20 +21,11 @@ interface PlaylistRepository {
    */
   val playlists: StateFlow<List<Playlist>>
 
-  /**
-   * Appends an empty playlist with a new stable ID and a trimmed [name]. Duplicate names are
-   * allowed.
-   *
-   * @throws IllegalArgumentException immediately if [name] is blank.
-   */
-  fun create(name: String)
+  /** Appends an empty playlist with a new stable ID and [name]. Duplicate names are allowed. */
+  fun create(name: PlaylistName)
 
-  /**
-   * Sets the playlist's trimmed [name]. A missing playlist is logged as a failed command.
-   *
-   * @throws IllegalArgumentException immediately if [name] is blank.
-   */
-  fun rename(id: PlaylistId, name: String)
+  /** Sets the playlist's [name]. A missing playlist is logged as a failed command. */
+  fun rename(id: PlaylistId, name: PlaylistName)
 
   /** Deletes the playlist, preserving its episodes. A missing playlist requires no action. */
   fun delete(id: PlaylistId)

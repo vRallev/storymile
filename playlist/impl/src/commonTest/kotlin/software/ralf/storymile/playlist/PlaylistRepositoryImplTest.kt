@@ -27,25 +27,25 @@ class PlaylistRepositoryImplTest {
     runTestWithScope { scope ->
       val storage = FakeStorage()
       val repository: PlaylistRepository = scope.repository(storage)
-      repository.create("  Favorites  ")
-      repository.create("Favorites")
+      repository.create(PlaylistName("  Favorites  "))
+      repository.create(PlaylistName("Favorites"))
       runCurrent()
       val first = repository.playlists.value.first()
       val second = repository.playlists.value.last()
       assertThat(first.id).isNotEqualTo(second.id)
-      assertThat(repository.playlists.value.map { it.name })
+      assertThat(repository.playlists.value.map { it.name.value })
         .isEqualTo(listOf("Favorites", "Favorites"))
 
       repository.addEpisode(first.id, EpisodeId("one"))
       repository.addEpisode(first.id, EpisodeId("two"))
       repository.addEpisode(second.id, EpisodeId("one"))
-      repository.rename(first.id, "  Listen later  ")
+      repository.rename(first.id, PlaylistName("  Listen later  "))
       runCurrent()
       val saved = repository.playlists.value
       val reopened: PlaylistRepository = scope.repository(storage)
       runCurrent()
       assertThat(reopened.playlists.value).isEqualTo(saved)
-      assertThat(reopened.playlists.value.first().name).isEqualTo("Listen later")
+      assertThat(reopened.playlists.value.first().name.value).isEqualTo("Listen later")
       assertThat(reopened.playlists.value.first().episodeIds)
         .isEqualTo(listOf(EpisodeId("one"), EpisodeId("two")))
     }
@@ -54,7 +54,7 @@ class PlaylistRepositoryImplTest {
   fun `membership commands preserve order and prevent repeats within each playlist`() =
     runTestWithScope { scope ->
       val repository: PlaylistRepository = scope.repository(FakeStorage())
-      repository.create("Favorites")
+      repository.create(PlaylistName("Favorites"))
       runCurrent()
       val id = repository.playlists.value.single().id
       val one = EpisodeId("one")
@@ -85,8 +85,8 @@ class PlaylistRepositoryImplTest {
     runTestWithScope { scope ->
       val storage = FakeStorage()
       val repository: PlaylistRepository = scope.repository(storage)
-      repository.create("First")
-      repository.create("Second")
+      repository.create(PlaylistName("First"))
+      repository.create(PlaylistName("Second"))
       runCurrent()
       val first = repository.playlists.value.first().id
       val second = repository.playlists.value.last().id
@@ -100,7 +100,7 @@ class PlaylistRepositoryImplTest {
       runCurrent()
 
       assertThat(repository.playlists.value)
-        .isEqualTo(listOf(Playlist(second, "Second", listOf(episode))))
+        .isEqualTo(listOf(Playlist(second, PlaylistName("Second"), listOf(episode))))
       val reopened: PlaylistRepository = scope.repository(storage)
       runCurrent()
       assertThat(reopened.playlists.value).isEqualTo(repository.playlists.value)
@@ -114,9 +114,9 @@ class PlaylistRepositoryImplTest {
       storage.readBarrier = readBarrier
       val repository: PlaylistRepository = scope.repository(storage)
       runCurrent()
-      repository.rename(PlaylistId("saved"), "Renamed")
+      repository.rename(PlaylistId("saved"), PlaylistName("Renamed"))
       repository.addEpisode(PlaylistId("saved"), EpisodeId("two"))
-      repository.create("New")
+      repository.create(PlaylistName("New"))
       runCurrent()
 
       assertThat(repository.playlists.value).isEmpty()
@@ -125,10 +125,15 @@ class PlaylistRepositoryImplTest {
       readBarrier.complete(Unit)
       runCurrent()
 
-      assertThat(repository.playlists.value.map { it.name }).isEqualTo(listOf("Renamed", "New"))
+      assertThat(repository.playlists.value.map { it.name.value })
+        .isEqualTo(listOf("Renamed", "New"))
       assertThat(repository.playlists.value.first())
         .isEqualTo(
-          Playlist(PlaylistId("saved"), "Renamed", listOf(EpisodeId("one"), EpisodeId("two"))),
+          Playlist(
+            PlaylistId("saved"),
+            PlaylistName("Renamed"),
+            listOf(EpisodeId("one"), EpisodeId("two")),
+          ),
         )
     }
 
@@ -141,7 +146,7 @@ class PlaylistRepositoryImplTest {
 
     repository.playlists.test {
       assertThat(awaitItem()).isEmpty()
-      repository.create("Favorites")
+      repository.create(PlaylistName("Favorites"))
       runCurrent()
       assertThat(storage.writeStarted.isCompleted).isTrue()
       assertThat(storage.writeCount).isEqualTo(0)
@@ -149,7 +154,7 @@ class PlaylistRepositoryImplTest {
 
       writeBarrier.complete(Unit)
       runCurrent()
-      assertThat(awaitItem().single().name).isEqualTo("Favorites")
+      assertThat(awaitItem().single().name.value).isEqualTo("Favorites")
       assertThat(storage.writeCount).isEqualTo(1)
     }
   }
@@ -163,7 +168,7 @@ class PlaylistRepositoryImplTest {
       val saved = repository.playlists.value
       storage.writeFailure = IllegalStateException("Storage unavailable")
 
-      repository.rename(PlaylistId("saved"), "Unsaved")
+      repository.rename(PlaylistId("saved"), PlaylistName("Unsaved"))
       repository.addEpisode(PlaylistId("saved"), EpisodeId("unsaved"))
       runCurrent()
 
@@ -175,7 +180,11 @@ class PlaylistRepositoryImplTest {
 
       assertThat(repository.playlists.value.single())
         .isEqualTo(
-          Playlist(PlaylistId("saved"), "Saved", listOf(EpisodeId("one"), EpisodeId("two"))),
+          Playlist(
+            PlaylistId("saved"),
+            PlaylistName("Saved"),
+            listOf(EpisodeId("one"), EpisodeId("two")),
+          ),
         )
       val reopened: PlaylistRepository = scope.repository(storage)
       runCurrent()
@@ -189,28 +198,34 @@ class PlaylistRepositoryImplTest {
       storage.readFailure = IllegalStateException("Storage unavailable")
       val repository: PlaylistRepository = scope.repository(storage)
       runCurrent()
-      repository.create("Unsaved")
+      repository.create(PlaylistName("Unsaved"))
       runCurrent()
 
       assertThat(repository.playlists.value).isEmpty()
       assertThat(storage.savedDocument).isEqualTo(SAVED_PLAYLISTS)
       assertThat(storage.writeCount).isEqualTo(0)
       storage.readFailure = null
-      repository.create("Recovered")
+      repository.create(PlaylistName("Recovered"))
       runCurrent()
 
-      assertThat(repository.playlists.value.map { it.name }).isEqualTo(listOf("Saved", "Recovered"))
+      assertThat(repository.playlists.value.map { it.name.value })
+        .isEqualTo(listOf("Saved", "Recovered"))
       assertThat(repository.playlists.value.first().episodeIds).isEqualTo(listOf(EpisodeId("one")))
     }
 
   @Test
   fun `corrupt and unsupported saved documents are never overwritten by commands`() =
     runTestWithScope { scope ->
-      for (document in listOf("{broken", """{"version":2,"playlists":[]}""")) {
+      for (document in
+        listOf(
+          "{broken",
+          """{"version":2,"playlists":[]}""",
+          SAVED_PLAYLISTS.replace("\"Saved\"", "\"  \""),
+        )) {
         val storage = FakeStorage(document)
         val repository: PlaylistRepository = scope.repository(storage)
         runCurrent()
-        repository.create("New")
+        repository.create(PlaylistName("New"))
         repository.delete(PlaylistId("saved"))
         runCurrent()
 
@@ -243,34 +258,15 @@ class PlaylistRepositoryImplTest {
     runTestWithScope { scope ->
       val repository: PlaylistRepository = scope.repository(FakeStorage())
       val missing = PlaylistId("missing")
-      repository.rename(missing, "Renamed")
+      repository.rename(missing, PlaylistName("Renamed"))
       repository.addEpisode(missing, EpisodeId("one"))
       repository.delete(missing)
       repository.removeEpisode(missing, EpisodeId("one"))
-      repository.create("Created")
+      repository.create(PlaylistName("Created"))
       runCurrent()
 
-      assertThat(repository.playlists.value.map { it.name }).isEqualTo(listOf("Created"))
+      assertThat(repository.playlists.value.map { it.name.value }).isEqualTo(listOf("Created"))
       assertThat(repository.playlists.value.single().episodeIds).isEmpty()
-    }
-
-  @Test
-  fun `blank names fail immediately without changing saved playlists`() =
-    runTestWithScope { scope ->
-      val storage = FakeStorage(SAVED_PLAYLISTS)
-      val repository: PlaylistRepository = scope.repository(storage)
-      runCurrent()
-
-      for (name in listOf("", " \t\n ")) {
-        assertFailure { repository.create(name) }.isInstanceOf<IllegalArgumentException>()
-        assertFailure { repository.rename(PlaylistId("saved"), name) }
-          .isInstanceOf<IllegalArgumentException>()
-      }
-      runCurrent()
-
-      assertThat(repository.playlists.value.single().name).isEqualTo("Saved")
-      assertThat(storage.savedDocument).isEqualTo(SAVED_PLAYLISTS)
-      assertThat(storage.writeCount).isEqualTo(0)
     }
 
   @Test
@@ -282,8 +278,8 @@ class PlaylistRepositoryImplTest {
       val saved = repository.playlists.value
       val writeBarrier = CompletableDeferred<Unit>()
       storage.writeBarrier = writeBarrier
-      repository.rename(PlaylistId("saved"), "Pending")
-      repository.create("Queued")
+      repository.rename(PlaylistId("saved"), PlaylistName("Pending"))
+      repository.create(PlaylistName("Queued"))
       runCurrent()
       assertThat(storage.writeStarted.isCompleted).isTrue()
 
@@ -297,8 +293,10 @@ class PlaylistRepositoryImplTest {
       assertThat(repository.playlists.value).isEqualTo(saved)
       val id = PlaylistId("saved")
       val episode = EpisodeId("one")
-      assertFailure { repository.create("Later") }.isInstanceOf<CancellationException>()
-      assertFailure { repository.rename(id, "Later") }.isInstanceOf<CancellationException>()
+      assertFailure { repository.create(PlaylistName("Later")) }
+        .isInstanceOf<CancellationException>()
+      assertFailure { repository.rename(id, PlaylistName("Later")) }
+        .isInstanceOf<CancellationException>()
       assertFailure { repository.delete(id) }.isInstanceOf<CancellationException>()
       assertFailure { repository.addEpisode(id, episode) }.isInstanceOf<CancellationException>()
       assertFailure { repository.removeEpisode(id, episode) }.isInstanceOf<CancellationException>()

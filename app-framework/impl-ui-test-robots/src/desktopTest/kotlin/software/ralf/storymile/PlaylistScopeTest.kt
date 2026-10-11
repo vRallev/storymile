@@ -15,6 +15,7 @@ import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.playlist.EpisodeId
+import software.ralf.storymile.playlist.PlaylistName
 import software.ralf.storymile.playlist.PlaylistRepository
 import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.InMemoryStorageFactory
@@ -28,16 +29,16 @@ class PlaylistScopeTest {
     withApplication { firstGraph ->
       val first: PlaylistRepository = firstGraph.playlistRepository()
       assertThat(firstGraph.playlistRepository()).isSameInstanceAs(first)
-      first.create("First guest")
+      first.create(PlaylistName("First guest"))
       val firstPlaylists = first.playlists.first { it.isNotEmpty() }
 
       withApplication { secondGraph ->
         val second: PlaylistRepository = secondGraph.playlistRepository()
         assertThat(second).isNotSameInstanceAs(first)
-        second.create("Second guest")
+        second.create(PlaylistName("Second guest"))
 
         val secondPlaylists = second.playlists.first { it.isNotEmpty() }
-        assertThat(secondPlaylists.map { it.name }).isEqualTo(listOf("Second guest"))
+        assertThat(secondPlaylists.map { it.name.value }).isEqualTo(listOf("Second guest"))
         assertThat(first.playlists.value).isEqualTo(firstPlaylists)
       }
     }
@@ -51,7 +52,7 @@ class PlaylistScopeTest {
       val (previousRepository, savedPlaylists) =
         withApplication(factory) { graph ->
           val repository: PlaylistRepository = graph.playlistRepository()
-          repository.create("Road trip")
+          repository.create(PlaylistName("Road trip"))
           val playlist = repository.playlists.first { it.isNotEmpty() }.single()
           repository.addEpisode(playlist.id, episodeId)
           val playlists = repository.playlists.first { it.single().episodeIds == listOf(episodeId) }
