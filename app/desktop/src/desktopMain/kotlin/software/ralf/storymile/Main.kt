@@ -22,7 +22,7 @@ import dev.zacsweers.metro.createGraphFactory
 import java.awt.Taskbar
 import javax.imageio.ImageIO
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
-import software.ralf.storymile.scope.runtime.DesktopProcessRestarter
+import software.ralf.storymile.restart.DesktopProcessRestarter
 import software.ralf.storymile.theme.LocalDarkThemeOverride
 import software.ralf.storymile.util.Platform
 
