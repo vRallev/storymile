@@ -1,7 +1,3 @@
 plugins {
   id 'software.ralf.storymile.library.kmp'
 }
-
-dependencies {
-  commonMainApi libs.coroutines.core
-}

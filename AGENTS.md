@@ -57,6 +57,7 @@ Prefix project-specific Gradle properties with `storymile.`.
 
 - Reusable modules depend on public APIs.
 - Put dependency and SDK versions in `gradle/libs.versions.toml`.
+- Storymile plugins add coroutines by default; do not declare the dependency in module build files.
 - Prefer declaring KMP dependencies in `commonMain` or `commonTest`, even when only one
   platform uses them.
 - After editing dependencies, run `./gradlew sortDependencies` and
