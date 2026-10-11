@@ -3,14 +3,11 @@ package software.ralf.storymile.storage
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.Assisted
-import dev.zacsweers.metro.AssistedFactory
-import dev.zacsweers.metro.AssistedInject
 import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
@@ -22,6 +19,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.ByteString.Companion.encodeUtf8
 import software.ralf.app.platform.scope.Scope
+import software.ralf.storymile.runtimemode.RuntimeMode
+import software.ralf.storymile.runtimemode.RuntimeModeController
 
 /**
  * Scope-owned implementation used by [ScopedStorage.Factory].
@@ -44,11 +43,11 @@ import software.ralf.app.platform.scope.Scope
  * scope's regular [Job]. Exit cancels the dedicated scope, stopping actors and operations while
  * preserving saved data.
  */
-@AssistedInject
-class DefaultStorage(
-  @Assisted namespace: String,
-  @Assisted private val coroutineScope: CoroutineScope,
-  private val platform: StoragePlatform,
+class DefaultStorage
+private constructor(
+  namespace: String,
+  private val coroutineScope: CoroutineScope,
+  private val selectPlatform: suspend () -> StoragePlatform,
 ) : ScopedStorage {
   init {
     require(namespace.matches(namePattern)) {
@@ -59,13 +58,8 @@ class DefaultStorage(
   private val encodedNamespace = namespace.encodeUtf8().hex()
   private val job = checkNotNull(coroutineScope.coroutineContext[Job])
   private val enteredScope = CompletableDeferred<Unit>()
-  private val initialized =
-    coroutineScope.async(start = CoroutineStart.LAZY) {
-      runCatching {
-        enteredScope.await()
-        platform.claimNamespace(encodedNamespace, job)
-      }
-    }
+  private val initializationMutex = Mutex()
+  private var initializedPlatform: StoragePlatform? = null
   private val preferencesMutex = Mutex()
   private val filesMutex = Mutex()
   private val stores = mutableMapOf<String, DataStore<Preferences>>()
@@ -73,7 +67,13 @@ class DefaultStorage(
   override val files: FileStorage = DirectoryFileStorage(FileStorageArea.Files, "")
   override val cache: FileStorage = DirectoryFileStorage(FileStorageArea.Cache, "")
 
-  override suspend fun preferences(name: String): DataStore<Preferences> = operation {
+  constructor(
+    namespace: String,
+    coroutineScope: CoroutineScope,
+    platform: StoragePlatform,
+  ) : this(namespace, coroutineScope, { platform })
+
+  override suspend fun preferences(name: String): DataStore<Preferences> = operation { platform ->
     require(name.matches(namePattern)) {
       "Preferences name must contain only letters, digits, underscores, and hyphens."
     }
@@ -98,16 +98,24 @@ class DefaultStorage(
     job.ensureActive()
   }
 
-  private suspend fun <T> operation(block: suspend () -> T): T {
+  private suspend fun platform(): StoragePlatform = initializationMutex.withLock {
+    initializedPlatform?.let {
+      return@withLock it
+    }
+    enteredScope.await()
+    selectPlatform().also {
+      it.claimNamespace(encodedNamespace, job)
+      initializedPlatform = it
+    }
+  }
+
+  private suspend fun <T> operation(block: suspend (StoragePlatform) -> T): T {
     checkActive()
     val callerContext = currentCoroutineContext()
     callerContext.ensureActive()
     val operation =
       coroutineScope.async(callerContext.minusKey(Job)) {
-        runCatching {
-          initialized.await().getOrThrow()
-          block()
-        }
+        runCatching { block(platform()) }
       }
     return try {
       operation.await().getOrThrow()
@@ -129,10 +137,26 @@ class DefaultStorage(
     val namePattern = Regex("[A-Za-z0-9_-]+")
   }
 
-  @AssistedFactory
+  @SingleIn(AppScope::class)
   @ContributesBinding(AppScope::class, binding = binding<ScopedStorage.Factory>())
-  interface Factory : ScopedStorage.Factory {
-    override fun create(namespace: String, coroutineScope: CoroutineScope): DefaultStorage
+  class Factory(
+    private val platform: StoragePlatform,
+    private val controller: Lazy<RuntimeModeController>,
+  ) : ScopedStorage.Factory {
+    private val inMemoryPlatform = InMemoryStoragePlatform()
+
+    override fun create(
+      namespace: String,
+      coroutineScope: CoroutineScope,
+      mustBePersistent: Boolean,
+    ): ScopedStorage =
+      DefaultStorage(namespace, coroutineScope) {
+        if (mustBePersistent || controller.value.mode() == RuntimeMode.Real) {
+          platform
+        } else {
+          inMemoryPlatform
+        }
+      }
   }
 
   private inner class DirectoryFileStorage(
@@ -144,19 +168,19 @@ class DefaultStorage(
       return DirectoryFileStorage(area, resolve(name))
     }
 
-    override suspend fun read(name: String): ByteArray? = operation {
+    override suspend fun read(name: String): ByteArray? = operation { platform ->
       filesMutex.withLock { platform.readFile(encodedNamespace, area, resolve(name)) }
     }
 
-    override suspend fun write(name: String, content: ByteArray) = operation {
+    override suspend fun write(name: String, content: ByteArray) = operation { platform ->
       filesMutex.withLock { platform.writeFile(encodedNamespace, area, resolve(name), content) }
     }
 
-    override suspend fun delete(name: String) = operation {
+    override suspend fun delete(name: String) = operation { platform ->
       filesMutex.withLock { platform.deleteFile(encodedNamespace, area, resolve(name)) }
     }
 
-    override suspend fun deleteAll() = operation {
+    override suspend fun deleteAll() = operation { platform ->
       filesMutex.withLock { platform.deleteAllFiles(encodedNamespace, area, path) }
     }
 

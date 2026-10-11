@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ForScope
 import dev.zacsweers.metro.SingleIn
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -15,20 +16,23 @@ import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.Scoped
 import software.ralf.app.platform.scope.coroutine.launch
 import software.ralf.storymile.restart.ApplicationRestarter
-import software.ralf.storymile.storage.Storage
+import software.ralf.storymile.storage.ScopedStorage
 
 @SingleIn(AppScope::class)
 @ContributesScoped(AppScope::class)
 class RuntimeModeControllerImpl(
-  @ForScope(AppScope::class) private val storage: Storage,
+  factory: ScopedStorage.Factory,
+  @ForScope(AppScope::class) coroutineScope: CoroutineScope,
   private val applicationRestarter: ApplicationRestarter,
 ) : RuntimeModeController, Scoped {
+  private val storage = factory.create("runtime-mode", coroutineScope, mustBePersistent = true)
   private val mutex = Mutex()
   private var loadedMode: RuntimeMode? = null
 
   override suspend fun mode(): RuntimeMode = mutex.withLock { loadMode() }
 
   override fun onEnterScope(scope: Scope) {
+    scope.register(storage)
     scope.launch { mode() }
   }
 
