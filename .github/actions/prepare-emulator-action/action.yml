@@ -1,5 +1,11 @@
 name: 'Prepare Emulator'
 description: 'Common emulator setup steps'
+
+inputs:
+  system-image:
+    description: 'System image path under the Android SDK system-images directory'
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -16,3 +22,16 @@ runs:
       uses: android-actions/setup-android@v4
       with:
         packages: 'platform-tools'
+
+    # Bump v1 in these keys to refresh the cached SDK packages.
+    - name: Cache Android emulator
+      uses: actions/cache@v6
+      with:
+        path: ${{ env.ANDROID_HOME }}/emulator
+        key: android-emulator-${{ runner.os }}-${{ runner.arch }}-v1
+
+    - name: Cache Android system image
+      uses: actions/cache@v6
+      with:
+        path: ${{ env.ANDROID_HOME }}/system-images/${{ inputs.system-image }}
+        key: android-system-image-${{ runner.os }}-${{ runner.arch }}-${{ inputs.system-image }}-v1
