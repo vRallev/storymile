@@ -54,7 +54,7 @@ class RuntimeModeControllerImpl(
   }
 
   private suspend fun DataStore<Preferences>.readMode(): RuntimeMode {
-    val savedMode = data.first()[modeKey] ?: return RuntimeMode.DEFAULT
+    val savedMode = data.first()[modeKey] ?: return RuntimeMode.Real
     return checkNotNull(RuntimeMode.entries.firstOrNull { it.name == savedMode }) {
       "Unknown runtime mode: $savedMode"
     }

@@ -3,7 +3,7 @@ package software.ralf.storymile.runtimemode
 /** Stores the app-wide mode and restarts the application when it changes. */
 interface RuntimeModeController {
   /**
-   * Waits for the saved mode and caches it until the app restarts. Uses [RuntimeMode.DEFAULT] only
+   * Waits for the saved mode and caches it until the app restarts. Uses [RuntimeMode.Real] only
    * when no mode is saved. Storage failures and unknown saved values throw instead of returning a
    * default.
    */

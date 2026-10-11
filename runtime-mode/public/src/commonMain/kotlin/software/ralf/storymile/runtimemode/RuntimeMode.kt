@@ -5,11 +5,5 @@ enum class RuntimeMode {
   /** Uses real implementations. */
   Real,
   /** Uses fake implementations. */
-  Fake;
-
-  /** Defaults for applications without a saved mode. */
-  companion object {
-    /** Mode used when no value is saved. */
-    val DEFAULT: RuntimeMode = Real
-  }
+  Fake,
 }
