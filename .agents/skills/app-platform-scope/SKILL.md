@@ -29,6 +29,9 @@ Expose the app scope through `RootScopeProvider` when platform entry points or l
 
 ### Lifecycle callbacks
 
+Order `Scoped` class members as follows: properties and initializer blocks, secondary constructors,
+`onEnterScope()`, `onExitScope()`, other functions, companion object, then nested and inner classes.
+
 Implement `Scoped` on concrete services that need start or cleanup callbacks. Keep it out of their public interfaces:
 
 ```kotlin

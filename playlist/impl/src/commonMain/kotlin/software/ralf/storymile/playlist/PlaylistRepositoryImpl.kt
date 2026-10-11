@@ -30,6 +30,32 @@ class PlaylistRepositoryImpl(
   private val commands = Channel<(List<Playlist>) -> List<Playlist>>(Channel.UNLIMITED)
   private var loaded = false
 
+  override fun onEnterScope(scope: Scope) {
+    scope.launch {
+      try {
+        reportFailure { load() }
+        for (command in commands) {
+          reportFailure {
+            load()
+            val current = playlists.value
+            val updated = command(current)
+            if (updated != current) {
+              files.write(fileName, document.encode(updated))
+              currentCoroutineContext().ensureActive()
+              playlists.value = updated
+            }
+          }
+        }
+      } finally {
+        commands.cancel()
+      }
+    }
+  }
+
+  override fun onExitScope() {
+    commands.cancel()
+  }
+
   override fun create(name: PlaylistName) {
     enqueue { it + Playlist(PlaylistId(Uuid.random().toString()), name, emptyList()) }
   }
@@ -84,32 +110,6 @@ class PlaylistRepositoryImpl(
         playlist.copy(episodeIds = episodes.toList())
       }
     }
-  }
-
-  override fun onEnterScope(scope: Scope) {
-    scope.launch {
-      try {
-        reportFailure { load() }
-        for (command in commands) {
-          reportFailure {
-            load()
-            val current = playlists.value
-            val updated = command(current)
-            if (updated != current) {
-              files.write(fileName, document.encode(updated))
-              currentCoroutineContext().ensureActive()
-              playlists.value = updated
-            }
-          }
-        }
-      } finally {
-        commands.cancel()
-      }
-    }
-  }
-
-  override fun onExitScope() {
-    commands.cancel()
   }
 
   private fun enqueue(command: (List<Playlist>) -> List<Playlist>) {
