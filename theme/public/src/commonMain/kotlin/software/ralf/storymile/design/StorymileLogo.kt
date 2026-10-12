@@ -7,11 +7,15 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import org.jetbrains.compose.resources.painterResource
 import software.ralf.storymile.theme.generated.resources.Res
 import software.ralf.storymile.theme.generated.resources.storymile_logo
+
+/** Hidden action for [StorymileLogo]. Defaults to no action. */
+val LocalOnLogoLongPress = staticCompositionLocalOf<() -> Unit> { {} }
 
 /** Themed logo with a hidden five-second hold action supplied by [LocalOnLogoLongPress]. */
 @Composable
