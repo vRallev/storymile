@@ -91,6 +91,9 @@ import software.ralf.app.platform.presenter.compose.backgesture.BackGestureDispa
 import software.ralf.app.platform.presenter.compose.backgesture.ForwardBackPressEventsToPresenters
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.app.platform.renderer.Render
+import software.ralf.storymile.design.LocalOnLogoLongPress
+import software.ralf.storymile.runtimemode.RuntimeMode
+import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.screen.DefaultScreenSizeProvider
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize
@@ -111,13 +114,28 @@ class AppTemplateRenderer(
   private val backGestureDispatcherPresenter: BackGestureDispatcherPresenter,
   private val screenSizeProvider: DefaultScreenSizeProvider,
   private val themeEnvironment: ThemeEnvironment,
+  private val runtimeModeController: RuntimeModeController,
 ) : ComposeRenderer<AppTemplate>() {
   @Composable
   override fun Compose(model: AppTemplate, modifier: Modifier) {
     val screenSize by screenSizeProvider.screenSize.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
     ReportScreenSize()
 
-    CompositionLocalProvider(LocalScreenSize provides screenSize) {
+    CompositionLocalProvider(
+      LocalScreenSize provides screenSize,
+      LocalOnLogoLongPress provides
+        {
+          coroutineScope.launch {
+            val mode =
+              when (runtimeModeController.mode()) {
+                RuntimeMode.Real -> RuntimeMode.Fake
+                RuntimeMode.Fake -> RuntimeMode.Real
+              }
+            runtimeModeController.switchMode(mode)
+          }
+        },
+    ) {
       StorymileTheme(environment = themeEnvironment) {
         Surface(
           modifier = modifier.fillMaxSize(),
