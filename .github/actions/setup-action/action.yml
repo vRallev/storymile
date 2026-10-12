@@ -20,6 +20,7 @@ runs:
         java-version: 25
 
     - name: Select Xcode 26
+      id: xcode
       if: ${{ runner.os == 'macOS' && inputs['select-xcode-26'] == 'true' }}
       shell: bash
       run: |
@@ -32,6 +33,18 @@ runs:
         sudo xcode-select -s "$XCODE_APP/Contents/Developer"
         /usr/bin/xcodebuild -version
         /usr/bin/xcodebuild -showsdks
+        XCODE_BUILD=$(/usr/bin/xcodebuild -version | /usr/bin/awk '/^Build version / { print $3 }')
+        echo "build=$XCODE_BUILD" >> "$GITHUB_OUTPUT"
+
+    - name: Cache Kotlin/Native
+      if: ${{ runner.os == 'macOS' && inputs['select-xcode-26'] == 'true' }}
+      uses: actions/cache@v6
+      with:
+        path: ~/.konan
+        # Refresh dependency caches when build inputs change, not on every source commit.
+        key: konan-v1-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode.outputs.build }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ github.job }}-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', '**/gradle.properties', 'buildSrc/src/**') }}
+        restore-keys: |
+          konan-v1-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode.outputs.build }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ github.job }}-
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v6

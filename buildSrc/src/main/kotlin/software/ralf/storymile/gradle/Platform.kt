@@ -2,9 +2,14 @@ package software.ralf.storymile.gradle
 
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.Sync
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetWithSimulatorTests
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeSimulatorTest
 import software.ralf.app.platform.gradle.AppPlatformPlugin
 
 internal sealed interface Platform {
@@ -103,7 +108,45 @@ internal sealed interface Platform {
   }
 
   private class IosSimulatorArm64(override val project: Project) : Ios() {
-    override val target: KotlinNativeTarget by lazy { project.kmpExtension.iosSimulatorArm64() }
+    override val target: KotlinNativeTargetWithSimulatorTests by lazy {
+      project.kmpExtension.iosSimulatorArm64()
+    }
+
+    override fun configureCompose() {
+      val testRun = target.testRuns.getByName("test")
+      val binary = testRun.executionSource.binary
+      val linkTask = binary.linkTaskProvider
+      val resources =
+        project.tasks.named("copyTestComposeResourcesForIosSimulatorArm64", Copy::class.java)
+      val resourceDirectory =
+        project.layout.buildDirectory.dir("compose/iosSimulatorArm64/testResources")
+      resources.configure { it.into(resourceDirectory) }
+
+      // Compose resources must be beside the executable, but cannot share the link task's output.
+      val runtimeDirectory =
+        project.layout.buildDirectory.dir("ios-test-runtime/iosSimulatorArm64/${binary.name}")
+      val runtime =
+        project.tasks.register("prepareIosSimulatorArm64TestRuntime", Sync::class.java) {
+          it.into(runtimeDirectory)
+          it.dependsOn(linkTask)
+          it.from(linkTask.flatMap { link -> link.destinationDirectory }) { spec ->
+            spec.exclude("compose-resources/**")
+          }
+          it.from(resources) { spec -> spec.into("compose-resources") }
+        }
+      val executableName = linkTask.flatMap { it.outputFile }.map { it.name }
+      project.tasks
+        .named("iosSimulatorArm64Test", KotlinNativeSimulatorTest::class.java)
+        .configure { test ->
+          test.executable(
+            runtime.zip(executableName) { task, name -> task.destinationDir.resolve(name) },
+          )
+          test.inputs
+            .files(runtime)
+            .withPropertyName("testRuntime")
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+        }
+    }
   }
 
   private class IosArm64(override val project: Project) : Ios() {
