@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.ExperimentalAppPlatform
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.compose.test
+import software.ralf.storymile.downloads.DownloadsPresenter
 import software.ralf.storymile.home.HomePresenter
 
 class TabsPresenterImplTest {
@@ -19,7 +20,7 @@ class TabsPresenterImplTest {
       object : HomePresenter<HomeModel> {
         @Composable override fun present(input: Unit): HomeModel = HomeModel
       }
-    val presenter: TabsPresenter = TabsPresenterImpl(home)
+    val presenter: TabsPresenter = TabsPresenterImpl(home) { FakeDownloadsPresenter() }
 
     presenter.test(this) {
       var model = awaitItem()
@@ -33,10 +34,18 @@ class TabsPresenterImplTest {
           assertThat(model.selectedTab).isEqualTo(tab)
           if (tab == TabsPresenter.Tab.HOME) {
             assertThat(model.content).isEqualTo(HomeModel)
+          } else if (tab == TabsPresenter.Tab.DOWNLOADS) {
+            assertThat(model.content).isEqualTo(DownloadsModel)
           }
         }
     }
   }
+
+  private class FakeDownloadsPresenter : DownloadsPresenter<DownloadsModel> {
+    @Composable override fun present(input: Unit): DownloadsModel = DownloadsModel
+  }
+
+  private data object DownloadsModel : BaseModel
 
   private data object HomeModel : BaseModel
 }

@@ -192,7 +192,7 @@ class StorymileDesktopUiTest {
         TabsPresenter.Tab.entries.forEach { tab ->
           val title = tab.name.lowercase().replaceFirstChar { it.titlecase() }
           onNodeWithTag("tab-${tab.name.lowercase()}").performTouchInput { longClick() }
-          onNodeWithText(title).assertIsDisplayed()
+          onNodeWithTag("tab-${tab.name.lowercase()}").assertIsDisplayed().assertTextEquals(title)
         }
       }
     }

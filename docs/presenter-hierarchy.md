@@ -11,8 +11,9 @@ flowchart TD
   AppTemplatePresenter["AppTemplatePresenter\ntemplate wrapper"]
   AppRootPresenter["AppRootPresenter"]
   UserPresenter["UserPresenterImpl\nAdaptiveTemplate"]
-  TabContent["TabsPresenterImpl.ContentModel\nselected tab placeholder"]
+  TabContent["TabsPresenterImpl.ContentModel\nLibrary placeholder"]
   HomePresenter["HomePresenterImpl\nempty home"]
+  DownloadsPresenter["DownloadsPresenterImpl\nempty downloads"]
   TabsPresenter["TabsPresenterImpl\ntabs"]
   PlaybackPresenter["PlaybackPresenterImpl\ncollapsed and expanded playback"]
 
@@ -21,7 +22,8 @@ flowchart TD
   AppRootPresenter --> UserPresenter
   UserPresenter --> TabsPresenter
   TabsPresenter -->|Home| HomePresenter
-  TabsPresenter -->|Library or Downloads| TabContent
+  TabsPresenter -->|Library| TabContent
+  TabsPresenter -->|Downloads| DownloadsPresenter
   UserPresenter --> PlaybackPresenter
 ```
 
@@ -46,7 +48,10 @@ It starts with
 [HomeRenderer](../home/impl/src/commonMain/kotlin/software/ralf/storymile/home/HomeRenderer.kt)
 shows the welcome screen.
 [TabContentRenderer](../tabs/impl/src/commonMain/kotlin/software/ralf/storymile/tabs/TabContentRenderer.kt)
-shows the selected tab's name for Library and Downloads.
+shows a placeholder for Library.
+[DownloadsPresenterImpl](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsPresenterImpl.kt)
+provides the empty Downloads screen, rendered by
+[DownloadsRenderer](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsRenderer.kt).
 The user presenter places these models in the content, navigation, and playback slots of
 [AppTemplate](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/AppTemplate.kt).
 The playback presenter supplies its slots only when the current user's
