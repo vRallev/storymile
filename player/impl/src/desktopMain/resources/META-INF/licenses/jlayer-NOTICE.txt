@@ -1,0 +1,8 @@
+JLayer 1.0.1
+Copyright 1999-2008 JavaZOOM and contributors
+License: GNU Library General Public License, version 2 or later
+(see jlayer-LICENSE.txt)
+
+Maven artifact: javazoom:jlayer:1.0.1
+Source: https://repo.maven.apache.org/maven2/javazoom/jlayer/1.0.1/jlayer-1.0.1-sources.jar
+Storymile uses the unmodified library as a separate JAR.

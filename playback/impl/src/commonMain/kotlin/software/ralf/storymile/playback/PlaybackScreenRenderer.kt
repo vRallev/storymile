@@ -42,6 +42,7 @@ import software.ralf.storymile.playback.impl.generated.resources.Res
 import software.ralf.storymile.playback.impl.generated.resources.collapse_player
 import software.ralf.storymile.playback.impl.generated.resources.more_options
 import software.ralf.storymile.playback.impl.generated.resources.now_playing
+import software.ralf.storymile.playback.impl.generated.resources.playback_failed
 import software.ralf.storymile.playback.impl.generated.resources.profile
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize
@@ -134,6 +135,13 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
         PlaybackControls.Details(player, large)
         PlaybackControls.Seek(player, Modifier.fillMaxWidth())
         PlaybackControls.Transport(player, large)
+        if (player.error != null) {
+          Text(
+            stringResource(Res.string.playback_failed),
+            color = AppTheme.colorScheme.error,
+            modifier = Modifier.testTag("playback-error"),
+          )
+        }
         PlaybackOptions.Actions(player, onPanel)
       }
       PlaybackOptions.Chapter(player) { onPanel(PlaybackOptions.Panel.CHAPTERS) }

@@ -4,6 +4,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
+import assertk.assertions.isGreaterThan
+import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesTo
@@ -20,6 +23,7 @@ import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.buildTestScope
 import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
+import software.ralf.storymile.player.Player
 import software.ralf.storymile.playlist.PlaylistRepository
 import software.ralf.storymile.restart.ApplicationRestarter
 import software.ralf.storymile.restart.DefaultApplicationRestarter
@@ -54,11 +58,19 @@ class RuntimeModeStorageTest {
         .isEqualTo(listOf("test-episode-1", "test-episode-2", "test-episode-3"))
       for (episode in playlist.episodeIds) {
         val resource =
-          "composeResources/software.ralf.storymile.playback.impl.generated.resources/files/test-episodes/${episode.value}.mp3"
+          "composeResources/software.ralf.storymile.player.impl.generated.resources/files/test-episodes/${episode.value}.mp3"
         val recording =
           checkNotNull(javaClass.classLoader.getResourceAsStream(resource)).use { it.readBytes() }
         assertThat(recording.size > 1024).isTrue()
       }
+      val playback = graph.player().state.first { it.isReady || it.error != null }
+      assertThat(playback.error).isNull()
+      assertThat(playback.title).isEqualTo("Test episode 1")
+      assertThat(playback.isReady).isTrue()
+      assertThat(playback.isPlaying).isFalse()
+      assertThat(playback.positionMillis).isEqualTo(0L)
+      assertThat(playback.durationMillis).isGreaterThan(0L)
+      assertThat(playback.speed).isEqualTo(1f)
       repository.delete(playlist.id)
       repository.playlists.first { it.isEmpty() }
     }
@@ -183,6 +195,9 @@ class RuntimeModeStorageTest {
   private fun Graph.playlistRepository(): PlaylistRepository =
     userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().playlistRepository
 
+  private fun Graph.player(): Player =
+    userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().player
+
   private suspend fun Storage.writeData(value: String) {
     preferences("settings").edit { it[stringPreferencesKey("value")] = value }
     files.directory("nested").write("value", "$value-file".encodeToByteArray())
@@ -204,6 +219,7 @@ class RuntimeModeStorageTest {
         DesktopStoragePlatform::class,
         TestStorageBindings::class,
         TestRuntimeModeController::class,
+        TestPlayer::class,
         DefaultApplicationRestarter::class,
       ],
   )
@@ -227,6 +243,8 @@ class RuntimeModeStorageTest {
     @ForScope(UserScope::class) val storage: Storage
 
     val playlistRepository: PlaylistRepository
+
+    val player: Player
   }
 
   private class TestApplicationRestarter : ApplicationRestarter {

@@ -9,6 +9,7 @@ storymile {
 }
 
 dependencies {
+  commonMainApi project(':player:public')
   commonMainApi project(':tabs:public')
 
   androidMainImplementation libs.androidx.test.junit
@@ -22,6 +23,7 @@ dependencies {
   commonMainImplementation project(':home:impl')
   commonMainImplementation project(':library:impl')
   commonMainImplementation project(':playback:impl')
+  commonMainImplementation project(':player:impl')
   commonMainImplementation project(':playlist:impl')
   commonMainImplementation project(':playlist:impl-robots')
   commonMainImplementation project(':playlist:public')

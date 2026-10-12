@@ -28,7 +28,7 @@ class PlaybackPresenterImplTest {
   @Test
   fun `playback is absent until a playlist contains episodes`() = runTest {
     val repository = TestPlaylistRepository(emptyList())
-    val presenter: PlaybackPresenter = PlaybackPresenterImpl(repository)
+    val presenter: PlaybackPresenter = PlaybackPresenterImpl(repository, TestPlayer())
 
     presenter.test(this) {
       awaitItem().assertPlayback(visible = false)
@@ -50,7 +50,7 @@ class PlaybackPresenterImplTest {
   @Test
   fun `playback state survives unavailable content`() = runTest {
     val repository = TestPlaylistRepository(listOf(playlist()))
-    val presenter = PlaybackPresenterImpl(repository)
+    val presenter = PlaybackPresenterImpl(repository, TestPlayer())
 
     presenter.testPlayer(this) {
       awaitItem().player.onSeek(123)
@@ -72,7 +72,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `collapsed and expanded controls share playback state`() = runTest {
-    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())))
+    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())), TestPlayer())
 
     presenter.testPlayer(this) {
       var model = awaitItem()
@@ -108,7 +108,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `seeking and skips stay within the current episode`() = runTest {
-    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())))
+    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())), TestPlayer())
 
     presenter.testPlayer(this) {
       var player = awaitItem().player
@@ -146,7 +146,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `chapter selection and seeking keep the active chapter in sync`() = runTest {
-    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())))
+    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())), TestPlayer())
 
     presenter.testPlayer(this) {
       var player = awaitItem().player
@@ -167,7 +167,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `queue selection loads the episode and preserves listening preferences`() = runTest {
-    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())))
+    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())), TestPlayer())
 
     presenter.testPlayer(this) {
       var player = awaitItem().player
