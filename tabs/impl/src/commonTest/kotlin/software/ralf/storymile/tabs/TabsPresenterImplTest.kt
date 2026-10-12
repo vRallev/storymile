@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalAppPlatform::class)
-
 package software.ralf.storymile.tabs
 
 import androidx.compose.runtime.Composable
@@ -14,7 +12,6 @@ import assertk.assertions.isFalse
 import assertk.assertions.isTrue
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
-import software.ralf.app.platform.ExperimentalAppPlatform
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.compose.test
 import software.ralf.storymile.downloads.DownloadsPresenter

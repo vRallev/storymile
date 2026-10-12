@@ -10,14 +10,12 @@ import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import software.ralf.app.platform.ExperimentalAppPlatform
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.app.platform.presenter.compose.saveable.rememberReturningSaveableStateHolder
 import software.ralf.app.platform.presenter.compose.test
 
 class LibraryPresenterImplTest {
-  @OptIn(ExperimentalAppPlatform::class)
   @Test
   fun `filter survives leaving composition and creating a new presenter`() = runTest {
     val visible = MutableStateFlow(true)

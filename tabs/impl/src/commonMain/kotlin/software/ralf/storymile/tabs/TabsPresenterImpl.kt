@@ -7,7 +7,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
-import software.ralf.app.platform.ExperimentalAppPlatform
 import software.ralf.app.platform.presenter.compose.saveable.rememberReturningSaveableStateHolder
 import software.ralf.storymile.downloads.DownloadsPresenter
 import software.ralf.storymile.home.HomePresenter
@@ -22,7 +21,6 @@ class TabsPresenterImpl(
   private val downloadsPresenter: () -> DownloadsPresenter<*>,
 ) : TabsPresenter {
   @Composable
-  @OptIn(ExperimentalAppPlatform::class)
   override fun present(input: Unit): TabsPresenter.Model {
     var selectedTab by remember { mutableStateOf(TabsPresenter.Tab.HOME) }
     val tabState = rememberReturningSaveableStateHolder()

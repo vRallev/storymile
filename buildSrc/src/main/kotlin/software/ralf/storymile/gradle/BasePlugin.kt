@@ -3,6 +3,7 @@ package software.ralf.storymile.gradle
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 internal class BasePlugin : Plugin<Project> {
   override fun apply(target: Project) {
@@ -11,6 +12,7 @@ internal class BasePlugin : Plugin<Project> {
     target.tasks.register("release")
     target.extensions.create("storymile", StorymileExtension::class.java, target)
     target.configureAppPlatform()
+    target.configureKotlin()
     target.configureTestLogging()
     target.sortDependencies()
   }
@@ -24,6 +26,12 @@ internal class BasePlugin : Plugin<Project> {
     } else {
       appPlatform.enableModuleStructure(true)
       releaseTask.configure { it.dependsOn("checkModuleStructureDependencies") }
+    }
+  }
+
+  private fun Project.configureKotlin() {
+    tasks.withType(KotlinCompilationTask::class.java).configureEach {
+      it.compilerOptions.optIn.add("software.ralf.app.platform.ExperimentalAppPlatform")
     }
   }
 
