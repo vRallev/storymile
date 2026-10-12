@@ -17,11 +17,83 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.runTestWithScope
+import software.ralf.storymile.runtimemode.RuntimeMode
+import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.storage.FileStorage
 import software.ralf.storymile.storage.Storage
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PlaylistRepositoryImplTest {
+  @Test
+  fun `fake mode seeds three ordered episodes before queued edits`() = runTestWithScope { scope ->
+    val storage = FakeStorage()
+    val mode = CompletableDeferred<RuntimeMode>()
+    val repository: PlaylistRepository = scope.repository(storage, mode)
+    repository.create(PlaylistName("My playlist"))
+    runCurrent()
+    assertThat(repository.playlists.value).isEmpty()
+    assertThat(storage.writeCount).isEqualTo(0)
+
+    mode.complete(RuntimeMode.Fake)
+    runCurrent()
+    val playlists = repository.playlists.value
+    assertThat(playlists.map { it.name.value })
+      .isEqualTo(listOf("Storymile test episodes", "My playlist"))
+    assertThat(playlists.first().episodeIds)
+      .isEqualTo(
+        listOf(
+          EpisodeId("test-episode-1"),
+          EpisodeId("test-episode-2"),
+          EpisodeId("test-episode-3"),
+        ),
+      )
+
+    val reopened: PlaylistRepository = scope.repository(storage, mode)
+    runCurrent()
+    assertThat(reopened.playlists.value).isEqualTo(playlists)
+    assertThat(storage.writeCount).isEqualTo(2)
+  }
+
+  @Test
+  fun `deleting the default playlist does not reseed it in the same fake session`() =
+    runTestWithScope { scope ->
+      val storage = FakeStorage()
+      val mode = CompletableDeferred(RuntimeMode.Fake)
+      val repository: PlaylistRepository = scope.repository(storage, mode)
+      runCurrent()
+      repository.delete(repository.playlists.value.single().id)
+      runCurrent()
+
+      val reopened: PlaylistRepository = scope.repository(storage, mode)
+      runCurrent()
+      assertThat(reopened.playlists.value).isEmpty()
+      assertThat(storage.writeCount).isEqualTo(2)
+    }
+
+  @Test
+  fun `failed seeding is retried before applying a later command`() = runTestWithScope { scope ->
+    val storage = FakeStorage().apply { writeFailure = IllegalStateException("Unavailable") }
+    val repository: PlaylistRepository =
+      scope.repository(storage, CompletableDeferred(RuntimeMode.Fake))
+    runCurrent()
+    assertThat(repository.playlists.value).isEmpty()
+
+    storage.writeFailure = null
+    repository.create(PlaylistName("After retry"))
+    runCurrent()
+    assertThat(repository.playlists.value.map { it.name.value })
+      .isEqualTo(listOf("Storymile test episodes", "After retry"))
+  }
+
+  @Test
+  fun `real mode starts empty without writing a default playlist`() = runTestWithScope { scope ->
+    val storage = FakeStorage()
+    val repository: PlaylistRepository = scope.repository(storage)
+    runCurrent()
+    assertThat(repository.playlists.value).isEmpty()
+    assertThat(storage.writeCount).isEqualTo(0)
+  }
+
   @Test
   fun `playlists retain their identities and episode order when reloaded`() =
     runTestWithScope { scope ->
@@ -304,12 +376,23 @@ class PlaylistRepositoryImplTest {
         .isInstanceOf<CancellationException>()
     }
 
-  private fun Scope.repository(storage: Storage): PlaylistRepository =
-    PlaylistRepositoryImpl(storage).also { register(it) }
+  private fun Scope.repository(
+    storage: Storage,
+    mode: CompletableDeferred<RuntimeMode> = CompletableDeferred(RuntimeMode.Real),
+  ): PlaylistRepository =
+    PlaylistRepositoryImpl(storage, TestRuntimeModeController(mode)).also { register(it) }
 
   private companion object {
     const val SAVED_PLAYLISTS =
       """{"version":1,"playlists":[{"id":"saved","name":"Saved","episodeIds":["one"]}]}"""
+  }
+
+  private class TestRuntimeModeController(
+    private val selectedMode: CompletableDeferred<RuntimeMode>,
+  ) : RuntimeModeController {
+    override suspend fun mode(): RuntimeMode = selectedMode.await()
+
+    override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
   }
 
   private class FakeStorage(savedDocument: String? = null) : Storage {

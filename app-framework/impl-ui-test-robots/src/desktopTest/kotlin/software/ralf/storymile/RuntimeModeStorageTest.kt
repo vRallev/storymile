@@ -4,6 +4,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isTrue
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.DependencyGraph
@@ -19,6 +20,7 @@ import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.buildTestScope
 import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
+import software.ralf.storymile.playlist.PlaylistRepository
 import software.ralf.storymile.restart.ApplicationRestarter
 import software.ralf.storymile.restart.DefaultApplicationRestarter
 import software.ralf.storymile.runtimemode.RuntimeMode
@@ -34,6 +36,48 @@ import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.user.UserScope
 
 class RuntimeModeStorageTest {
+  @Test
+  fun `fake playlist resets after restart without changing saved real playlists`() = runTest {
+    val platform = InMemoryStoragePlatform()
+    seedStorage(platform)
+    val saved =
+      """{"version":1,"playlists":[{"id":"saved","name":"My saved playlist","episodeIds":["real-episode"]}]}"""
+    withRawStorage(platform, "user-guest") {
+      it.files.directory("playlists").write("playlists.json", saved.encodeToByteArray())
+    }
+
+    withApplication(platform) { graph, _ ->
+      val repository = graph.playlistRepository()
+      val playlist = repository.playlists.first { it.isNotEmpty() }.single()
+      assertThat(playlist.name.value).isEqualTo("Storymile test episodes")
+      assertThat(playlist.episodeIds.map { it.value })
+        .isEqualTo(listOf("test-episode-1", "test-episode-2", "test-episode-3"))
+      for (episode in playlist.episodeIds) {
+        val resource =
+          "composeResources/software.ralf.storymile.playback.impl.generated.resources/files/test-episodes/${episode.value}.mp3"
+        val recording =
+          checkNotNull(javaClass.classLoader.getResourceAsStream(resource)).use { it.readBytes() }
+        assertThat(recording.size > 1024).isTrue()
+      }
+      repository.delete(playlist.id)
+      repository.playlists.first { it.isEmpty() }
+    }
+
+    withApplication(platform) { graph, _ ->
+      val playlist = graph.playlistRepository().playlists.first { it.isNotEmpty() }.single()
+      assertThat(playlist.name.value).isEqualTo("Storymile test episodes")
+      assertThat(playlist.episodeIds.map { it.value })
+        .isEqualTo(listOf("test-episode-1", "test-episode-2", "test-episode-3"))
+      graph.runtimeModeController.switchMode(RuntimeMode.Real)
+    }
+
+    withApplication(platform) { graph, _ ->
+      val playlist = graph.playlistRepository().playlists.first { it.isNotEmpty() }.single()
+      assertThat(playlist.name.value).isEqualTo("My saved playlist")
+      assertThat(playlist.episodeIds.map { it.value }).isEqualTo(listOf("real-episode"))
+    }
+  }
+
   @Test
   fun `fake app and user storage start empty and reset after application recreation`() = runTest {
     val platform = InMemoryStoragePlatform()
@@ -136,6 +180,9 @@ class RuntimeModeStorageTest {
   private fun Graph.userStorage(): Storage =
     userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().storage
 
+  private fun Graph.playlistRepository(): PlaylistRepository =
+    userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().playlistRepository
+
   private suspend fun Storage.writeData(value: String) {
     preferences("settings").edit { it[stringPreferencesKey("value")] = value }
     files.directory("nested").write("value", "$value-file".encodeToByteArray())
@@ -178,6 +225,8 @@ class RuntimeModeStorageTest {
   @ContributesTo(UserScope::class)
   interface UserStorageBindings {
     @ForScope(UserScope::class) val storage: Storage
+
+    val playlistRepository: PlaylistRepository
   }
 
   private class TestApplicationRestarter : ApplicationRestarter {

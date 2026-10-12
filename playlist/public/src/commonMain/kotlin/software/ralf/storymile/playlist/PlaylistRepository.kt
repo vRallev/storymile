@@ -17,7 +17,8 @@ import kotlinx.coroutines.flow.StateFlow
 interface PlaylistRepository {
   /**
    * Saved snapshots in creation order. Initially empty until loading succeeds; an empty value does
-   * not indicate whether loading has finished.
+   * not indicate whether loading has finished. Fake mode starts with three test episodes in one
+   * playlist when no saved snapshot exists.
    */
   val playlists: StateFlow<List<Playlist>>
 

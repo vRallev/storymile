@@ -1,6 +1,7 @@
 package software.ralf.storymile
 
 import assertk.assertThat
+import assertk.assertions.doesNotContain
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotSameInstanceAs
 import assertk.assertions.isSameInstanceAs
@@ -30,15 +31,17 @@ class PlaylistScopeTest {
       val first: PlaylistRepository = firstGraph.playlistRepository()
       assertThat(firstGraph.playlistRepository()).isSameInstanceAs(first)
       first.create(PlaylistName("First guest"))
-      val firstPlaylists = first.playlists.first { it.isNotEmpty() }
+      val firstPlaylists =
+        first.playlists.first { playlists -> playlists.any { it.name.value == "First guest" } }
 
       withApplication { secondGraph ->
         val second: PlaylistRepository = secondGraph.playlistRepository()
         assertThat(second).isNotSameInstanceAs(first)
         second.create(PlaylistName("Second guest"))
 
-        val secondPlaylists = second.playlists.first { it.isNotEmpty() }
-        assertThat(secondPlaylists.map { it.name.value }).isEqualTo(listOf("Second guest"))
+        val secondPlaylists =
+          second.playlists.first { playlists -> playlists.any { it.name.value == "Second guest" } }
+        assertThat(secondPlaylists.map { it.name.value }).doesNotContain("First guest")
         assertThat(first.playlists.value).isEqualTo(firstPlaylists)
       }
     }
@@ -53,9 +56,15 @@ class PlaylistScopeTest {
         withApplication(factory) { graph ->
           val repository: PlaylistRepository = graph.playlistRepository()
           repository.create(PlaylistName("Road trip"))
-          val playlist = repository.playlists.first { it.isNotEmpty() }.single()
+          val playlist =
+            repository.playlists
+              .first { playlists -> playlists.any { it.name.value == "Road trip" } }
+              .single { it.name.value == "Road trip" }
           repository.addEpisode(playlist.id, episodeId)
-          val playlists = repository.playlists.first { it.single().episodeIds == listOf(episodeId) }
+          val playlists =
+            repository.playlists.first { playlists ->
+              playlists.any { it.id == playlist.id && it.episodeIds == listOf(episodeId) }
+            }
 
           graph.storage.files.deleteAll()
           repository to playlists

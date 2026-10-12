@@ -8,6 +8,7 @@ storymile {
 
 dependencies {
   commonMainImplementation project(':logging:public')
+  commonMainImplementation project(':runtime-mode:public')
   commonMainImplementation project(':storage:public')
   commonMainImplementation project(':user:public')
   commonMainImplementation libs.serialization.json
