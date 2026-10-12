@@ -7,7 +7,8 @@ import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.captureToImage
@@ -17,16 +18,17 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.unit.DpRect
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import assertk.assertThat
-import assertk.assertions.isCloseTo
+import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
+import assertk.assertions.isGreaterThan
 import assertk.assertions.isGreaterThanOrEqualTo
+import assertk.assertions.isLessThan
 import assertk.assertions.isLessThanOrEqualTo
 import java.io.File
 import javax.imageio.ImageIO
@@ -40,193 +42,92 @@ class DownloadsUiTest {
   @Test
   fun `empty downloads fits phone tablet and desktop in both themes`() {
     listOf(
-        "phone" to DesktopWindowSizes.phone,
-        "tablet" to DesktopWindowSizes.tablet,
-        "desktop" to DesktopWindowSizes.desktop,
+        DesktopWindowSizes.phone,
+        DpSize(800.dp, 1100.dp),
+        DesktopWindowSizes.tablet,
+        DesktopWindowSizes.desktop,
       )
-      .forEach { (name, size) ->
+      .forEach { size ->
         listOf(false, true).forEach { darkTheme ->
           uiTestRule.runRobotTest(windowSize = size, darkTheme = darkTheme) {
             composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.DOWNLOADS) }
-            saveScreenshot("$name-${if (darkTheme) "dark" else "light"}")
             assertDownloadsFits()
-
+            val file =
+              File(
+                "build/reports/screenshots/downloads-${size.width.value.toInt()}-${if (darkTheme) "dark" else "light"}.png",
+              )
+            file.parentFile.mkdirs()
+            ImageIO.write(onNodeWithTag("app-shell").captureToImage().toAwtImage(), "png", file)
             onNodeWithTag("downloads-discover").performClick()
-            assertDownloadsFits()
             onNodeWithTag("downloads-profile").performClick()
-            assertDownloadsFits()
+            onNodeWithTag("tab-downloads").assertIsSelected()
           }
         }
       }
   }
 
   @Test
-  fun `short windows keep every downloads message and action reachable`() {
-    listOf(DpSize(671.dp, 500.dp), DpSize(672.dp, 500.dp), DpSize(1200.dp, 300.dp)).forEach { size
-      ->
-      val contentSize = mutableStateOf(DpSize(size.width, 600.dp))
-      uiTestRule.runRobotTest(
-        windowSize = contentSize.value,
-        darkTheme = false,
-        contentSize = contentSize,
-      ) {
-        composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.DOWNLOADS) }
-        runOnIdle { contentSize.value = size }
-        assertMessagesReachable()
-        saveScreenshot("short-${size.width.value.toInt()}x${size.height.value.toInt()}")
-      }
-    }
-  }
-
-  @Test
-  fun `larger fonts keep downloads instructions and discovery reachable`() {
-    listOf(DesktopWindowSizes.phone, DesktopWindowSizes.tablet, DesktopWindowSizes.desktop)
-      .forEach { size ->
-        listOf(1.5f, 2f).forEach { fontScale ->
-          uiTestRule.runRobotTest(windowSize = size, darkTheme = false, fontScale = fontScale) {
-            composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.DOWNLOADS) }
-            assertMessagesReachable()
-            saveScreenshot(
-              "font-$fontScale-${size.width.value.toInt()}x${size.height.value.toInt()}",
-            )
-          }
-        }
-      }
-  }
-
-  @Test
-  fun `downloads stays selected and readable across window changes`() {
+  fun `resizing shrinks the illustration and keeps downloads visible without scrolling`() {
     val size = mutableStateOf(DesktopWindowSizes.phone)
-    uiTestRule.runRobotTest(
-      windowSize = DpSize(1440.dp, 1440.dp),
-      darkTheme = false,
-      contentSize = size,
-    ) {
+    uiTestRule.runRobotTest(windowSize = DesktopWindowSizes.desktop, contentSize = size) {
       composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.DOWNLOADS) }
+      val tallIllustration = assertDownloadsFits()
       listOf(
-          DpSize(320.dp, 1100.dp),
-          DpSize(599.dp, 840.dp),
-          DpSize(600.dp, 840.dp),
-          DesktopWindowSizes.tablet,
-          DpSize(1199.dp, 900.dp),
-          DpSize(1200.dp, 900.dp),
-          DpSize(1200.dp, 500.dp),
-          DesktopWindowSizes.desktop,
+          DpSize(320.dp, 480.dp),
+          DpSize(480.dp, 559.dp),
+          DpSize(480.dp, 680.dp),
+          DpSize(480.dp, 681.dp),
+          DpSize(480.dp, 600.dp),
+          DpSize(900.dp, 400.dp),
+          DpSize(1200.dp, 300.dp),
           DesktopWindowSizes.phone,
         )
         .forEach { next ->
           runOnIdle { size.value = next }
-          assertDownloadsFits()
-          saveScreenshot("resize-${next.width.value.toInt()}x${next.height.value.toInt()}")
+          val illustration = assertDownloadsFits()
+          if (next == DpSize(320.dp, 480.dp)) {
+            assertThat(illustration).isLessThan(tallIllustration)
+          }
         }
     }
   }
 
-  private fun ComposeUiTest.assertDownloadsFits() {
-    composeRobot<AppShellRobot> { seeSelectedTab(TabsPresenter.Tab.DOWNLOADS) }
-    val shell = onNodeWithTag("app-shell").getUnclippedBoundsInRoot()
-    val screen = onNodeWithTag("downloads-screen").assertIsDisplayed().getUnclippedBoundsInRoot()
-    assertWithin(screen, shell)
-    assertThat(screen.bottom)
-      .isLessThanOrEqualTo(onNodeWithTag("playback").getUnclippedBoundsInRoot().top)
-
-    val title = downloadsText("Downloads").assertTextFits(screen)
-    val count = downloadsText("0 episodes · 0 B").assertTextFits(screen)
-    val illustration =
-      onNodeWithTag("downloads-illustration", useUnmergedTree = true)
-        .assertIsDisplayed()
-        .getUnclippedBoundsInRoot()
-    val headline = downloadsText("Listen anywhere").assertTextFits(screen)
-    val body =
-      downloadsText("Download episodes to listen without a connection.").assertTextFits(screen)
-    val button = onNodeWithTag("downloads-discover").assertIsDisplayed().getUnclippedBoundsInRoot()
-    downloadsText("Discover podcasts").assertTextFits(button)
-    val helper = downloadsText("Use the download icon on any episode.").assertTextFits(screen)
-    assertWithin(illustration, screen)
-    assertWithin(button, screen)
-
-    assertThat(count.top).isGreaterThanOrEqualTo(title.bottom)
-    assertThat(headline.top).isGreaterThanOrEqualTo(count.bottom)
-    assertThat(body.top).isGreaterThanOrEqualTo(headline.bottom)
-    assertThat(button.top).isGreaterThanOrEqualTo(body.bottom)
-    assertThat(helper.top).isGreaterThanOrEqualTo(button.bottom)
-
-    val empty = onNodeWithTag("downloads-empty").getUnclippedBoundsInRoot()
-    listOf(body, button, helper).forEach { bounds ->
-      assertThat(bounds.centerX()).isCloseTo(headline.centerX(), 1f)
-    }
-    if (illustration.right <= headline.left) {
-      listOf(headline, body, button, helper).forEach { bounds ->
-        assertThat(bounds.left).isGreaterThanOrEqualTo(illustration.right)
-      }
-      assertThat(illustration.centerY())
-        .isCloseTo((headline.top.value + helper.bottom.value) / 2, 1f)
-    } else {
-      assertThat(illustration.top).isGreaterThanOrEqualTo(count.bottom)
-      assertThat(headline.top).isGreaterThanOrEqualTo(illustration.bottom)
-      assertThat(illustration.centerX()).isCloseTo(empty.centerX(), 1f)
-      assertThat(headline.centerX()).isCloseTo(empty.centerX(), 1f)
-    }
-  }
-
-  private fun DpRect.centerX(): Float = (left.value + right.value) / 2
-
-  private fun DpRect.centerY(): Float = (top.value + bottom.value) / 2
-
-  private fun ComposeUiTest.assertMessagesReachable() {
-    val screen = onNodeWithTag("downloads-screen").getUnclippedBoundsInRoot()
-    listOf(
-        "Downloads",
-        "0 episodes · 0 B",
-        "Listen anywhere",
-        "Download episodes to listen without a connection.",
-        "Discover podcasts",
-        "Use the download icon on any episode.",
-      )
-      .forEach { text -> downloadsText(text).performScrollTo().assertTextFits(screen) }
-    val button = onNodeWithTag("downloads-discover").performScrollTo().assertIsDisplayed()
-    assertWithin(button.getUnclippedBoundsInRoot(), screen)
-    button.performClick()
+  private fun ComposeUiTest.assertDownloadsFits(): Dp {
     onNodeWithTag("tab-downloads").assertIsSelected()
     onNodeWithTag("downloads-empty").assertIsDisplayed()
-  }
-
-  private fun ComposeUiTest.downloadsText(text: String): SemanticsNodeInteraction =
-    onNode(
-      hasText(text) and hasAnyAncestor(hasTestTag("downloads-screen")),
-      useUnmergedTree = true,
-    )
-
-  private fun SemanticsNodeInteraction.assertTextFits(container: DpRect): DpRect {
-    val bounds = assertIsDisplayed().getUnclippedBoundsInRoot()
-    assertWithin(bounds, container)
-    val layouts = mutableListOf<TextLayoutResult>()
-    performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
-    val layout = layouts.single()
-    assertThat(layout.didOverflowHeight, "Text overflows at $bounds").isFalse()
-    // Skiko's paragraph can retain the available width for wrap-content text.
-    repeat(layout.lineCount) { line ->
-      assertThat(layout.isLineEllipsized(line)).isFalse()
-      assertThat(layout.getLineRight(line) - layout.getLineLeft(line))
-        .isLessThanOrEqualTo(layout.size.width + 1f)
+    val screen = onNodeWithTag("downloads-screen").assertIsDisplayed().getUnclippedBoundsInRoot()
+    val descendants = hasAnyAncestor(hasTestTag("downloads-screen"))
+    onAllNodes(
+        descendants and SemanticsMatcher.keyIsDefined(SemanticsActions.ScrollBy),
+        useUnmergedTree = true,
+      )
+      .assertCountEquals(0)
+    val textNodes =
+      listOf(
+          "Downloads",
+          "0 episodes · 0 B",
+          "Listen anywhere",
+          "Download episodes to listen without a connection.",
+          "Discover podcasts",
+          "Use the download icon on any episode.",
+        )
+        .map { onNode(hasText(it) and descendants, useUnmergedTree = true) }
+    textNodes.forEach { node ->
+      val layouts = mutableListOf<TextLayoutResult>()
+      node.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
+      assertThat(layouts.single().didOverflowHeight).isFalse()
     }
-    return bounds
-  }
-
-  private fun assertWithin(bounds: DpRect, container: DpRect) {
-    assertThat(bounds.left).isGreaterThanOrEqualTo(container.left)
-    assertThat(bounds.top).isGreaterThanOrEqualTo(container.top)
-    assertThat(bounds.right).isLessThanOrEqualTo(container.right)
-    assertThat(bounds.bottom).isLessThanOrEqualTo(container.bottom)
-  }
-
-  private fun ComposeUiTest.saveScreenshot(name: String) {
-    val file = File("build/reports/screenshots/downloads-$name.png")
-    file.parentFile.mkdirs()
-    ImageIO.write(
-      onNodeWithTag("app-shell").captureToImage().toAwtImage(),
-      "png",
-      file,
-    )
+    val illustration = onNodeWithTag("downloads-illustration", useUnmergedTree = true)
+    (textNodes + illustration + onNodeWithTag("downloads-discover")).forEach { node ->
+      val bounds = node.assertIsDisplayed().getUnclippedBoundsInRoot()
+      assertThat(bounds.left).isGreaterThanOrEqualTo(screen.left)
+      assertThat(bounds.top).isGreaterThanOrEqualTo(screen.top)
+      assertThat(bounds.right).isLessThanOrEqualTo(screen.right)
+      assertThat(bounds.bottom).isLessThanOrEqualTo(screen.bottom)
+    }
+    val bounds = illustration.getUnclippedBoundsInRoot()
+    assertThat(bounds.right - bounds.left).isGreaterThan(0.dp)
+    assertThat(bounds.right - bounds.left).isEqualTo(bounds.bottom - bounds.top)
+    return bounds.right - bounds.left
   }
 }

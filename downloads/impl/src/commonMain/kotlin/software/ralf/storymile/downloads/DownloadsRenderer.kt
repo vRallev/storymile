@@ -7,16 +7,16 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Button
@@ -24,13 +24,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
@@ -61,54 +56,45 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
   @Composable
   override fun Compose(model: DownloadsPresenterImpl.Model, modifier: Modifier) {
     val window = LocalScreenSize.current
-    val compactWidth = window.width < 600.dp
-    val showBrand = window.width < 1200.dp && window.height > window.width
     BoxWithConstraints(modifier.fillMaxSize().testTag("downloads-screen")) {
-      val short = maxHeight < 480.dp
+      val short = maxHeight / LocalDensity.current.fontScale < 600.dp
+      val compact = window.width < 600.dp || short
       val horizontal = short && maxWidth >= 560.dp
-      val horizontalPadding = if (compactWidth || short) 20.dp else 32.dp
-      val verticalPadding = if (short) 12.dp else 24.dp
-      val headerSpacing = if (short) 20.dp else 32.dp
-      val bottomSpacing = if (short) 12.dp else 48.dp
-      val density = LocalDensity.current
-      var headerHeight by remember { mutableStateOf(0.dp) }
-      val minimumContentHeight =
-        (maxHeight - verticalPadding * 2 - headerHeight - headerSpacing - bottomSpacing)
-          .coerceAtLeast(0.dp)
       Column(
         Modifier.fillMaxSize()
-          .verticalScroll(rememberScrollState())
-          .padding(horizontal = horizontalPadding, vertical = verticalPadding),
+          .padding(
+            horizontal = if (compact) 20.dp else 32.dp,
+            vertical = if (short) 12.dp else 24.dp,
+          ),
       ) {
-        Column(Modifier.onSizeChanged { headerHeight = with(density) { it.height.toDp() } }) {
-          Header(showBrand = showBrand, compact = compactWidth || short)
-        }
-        Spacer(Modifier.height(headerSpacing))
-        Box(
-          Modifier.fillMaxWidth().heightIn(min = minimumContentHeight),
-          contentAlignment = Alignment.Center,
-        ) {
+        Header(
+          showBrand = !short && window.width < 1200.dp && window.height > window.width,
+          compact = compact,
+        )
+        Spacer(Modifier.height(if (short) 12.dp else 32.dp))
+        Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
           if (horizontal) {
             Row(
-              modifier = Modifier.widthIn(max = 760.dp).testTag("downloads-empty"),
+              modifier = Modifier.widthIn(max = 760.dp).fillMaxSize().testTag("downloads-empty"),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.spacedBy(32.dp),
             ) {
               DownloadIllustration(compact = true)
-              EmptyMessage(compact = true, modifier = Modifier.weight(1f))
+              EmptyMessage(compact = true, tight = true, modifier = Modifier.weight(1f))
             }
           } else {
             Column(
-              modifier = Modifier.widthIn(max = 680.dp).fillMaxWidth().testTag("downloads-empty"),
+              modifier = Modifier.widthIn(max = 680.dp).fillMaxSize().testTag("downloads-empty"),
               horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement = Arrangement.Center,
             ) {
-              DownloadIllustration(compact = compactWidth || short)
-              Spacer(Modifier.height(if (short) 16.dp else 24.dp))
-              EmptyMessage(compact = compactWidth || short)
+              DownloadIllustration(compact, Modifier.weight(1f, fill = false))
+              Spacer(Modifier.height(if (short) 12.dp else 24.dp))
+              EmptyMessage(compact, tight = short)
             }
           }
         }
-        Spacer(Modifier.height(bottomSpacing))
+        Spacer(Modifier.height(if (short) 12.dp else 48.dp))
       }
     }
   }
@@ -166,10 +152,15 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
   }
 
   @Composable
-  private fun DownloadIllustration(compact: Boolean) {
+  private fun DownloadIllustration(compact: Boolean, modifier: Modifier = Modifier) {
     Box(
       modifier =
-        Modifier.size(if (compact) 128.dp else 176.dp)
+        modifier
+          .sizeIn(
+            maxWidth = if (compact) 128.dp else 176.dp,
+            maxHeight = if (compact) 128.dp else 176.dp,
+          )
+          .aspectRatio(1f, matchHeightConstraintsFirst = true)
           .background(AppTheme.colorScheme.primaryContainer, CircleShape)
           .testTag("downloads-illustration"),
       contentAlignment = Alignment.Center,
@@ -178,13 +169,13 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
         painter = painterResource(Res.drawable.download_illustration),
         contentDescription = null,
         tint = AppTheme.colorScheme.primary,
-        modifier = Modifier.size(if (compact) 72.dp else 96.dp),
+        modifier = Modifier.fillMaxSize(0.55f),
       )
     }
   }
 
   @Composable
-  private fun EmptyMessage(compact: Boolean, modifier: Modifier = Modifier) {
+  private fun EmptyMessage(compact: Boolean, tight: Boolean, modifier: Modifier = Modifier) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
       Text(
         text = stringResource(Res.string.listen_anywhere),
@@ -195,15 +186,15 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
         textAlign = TextAlign.Center,
         modifier = Modifier.semantics { heading() },
       )
-      Spacer(Modifier.height(12.dp))
+      Spacer(Modifier.height(if (tight) 8.dp else 12.dp))
       Text(
         text = stringResource(Res.string.downloads_description),
         style = if (compact) AppTheme.typography.bodyLarge else AppTheme.typography.headlineSmall,
         color = AppTheme.colorScheme.secondary,
         textAlign = TextAlign.Center,
-        modifier = Modifier.widthIn(max = if (compact) 300.dp else 600.dp),
+        modifier = Modifier.widthIn(max = if (compact && !tight) 300.dp else 600.dp),
       )
-      Spacer(Modifier.height(24.dp))
+      Spacer(Modifier.height(if (tight) 8.dp else 24.dp))
       Button(
         onClick = {},
         modifier =
@@ -219,7 +210,7 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
           textAlign = TextAlign.Center,
         )
       }
-      Spacer(Modifier.height(20.dp))
+      Spacer(Modifier.height(if (tight) 8.dp else 20.dp))
       Text(
         text = stringResource(Res.string.downloads_hint),
         style = if (compact) AppTheme.typography.bodyMedium else AppTheme.typography.bodyLarge,
