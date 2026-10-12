@@ -113,6 +113,9 @@ internal sealed interface Platform {
     }
 
     override fun configureCompose() {
+      // Compose copies test resources under the native link output directory by default.
+      // These overlapping outputs disable Gradle caching for the link task.
+      // Give resources their own output directory so Gradle can cache the executable.
       val testRun = target.testRuns.getByName("test")
       val binary = testRun.executionSource.binary
       val linkTask = binary.linkTaskProvider
@@ -122,14 +125,18 @@ internal sealed interface Platform {
         project.layout.buildDirectory.dir("compose/iosSimulatorArm64/testResources")
       resources.configure { it.into(resourceDirectory) }
 
-      // Compose resources must be beside the executable, but cannot share the link task's output.
+      // For native tests, Compose resolves resources beside the executable through NSBundle.
+      // Stage the linked binary and resources together, then run that copy of the executable.
+      // Sync owns this runtime directory; neither source task writes into it.
       val runtimeDirectory =
         project.layout.buildDirectory.dir("ios-test-runtime/iosSimulatorArm64/${binary.name}")
       val runtime =
         project.tasks.register("prepareIosSimulatorArm64TestRuntime", Sync::class.java) {
           it.into(runtimeDirectory)
+          // The destinationDirectory provider does not carry the link task dependency.
           it.dependsOn(linkTask)
           it.from(linkTask.flatMap { link -> link.destinationDirectory }) { spec ->
+            // Ignore resources left in the link output by builds that used the old layout.
             spec.exclude("compose-resources/**")
           }
           it.from(resources) { spec -> spec.into("compose-resources") }
@@ -141,6 +148,7 @@ internal sealed interface Platform {
           test.executable(
             runtime.zip(executableName) { task, name -> task.destinationDir.resolve(name) },
           )
+          // Track resources as well as the executable so resource changes invalidate test results.
           test.inputs
             .files(runtime)
             .withPropertyName("testRuntime")
