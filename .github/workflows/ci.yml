@@ -322,6 +322,13 @@ jobs:
 
   build-mkdocs:
     runs-on: ubuntu-24.04
+    container:
+      # Keep this version aligned with app/web/e2e/package.json.
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --init --ipc=host --user 1001
+      volumes:
+        # Cached Python scripts reference this absolute path in their shebangs.
+        - /opt/hostedtoolcache:/opt/hostedtoolcache
     timeout-minutes: 15
     needs: build-web-release
     steps:
@@ -347,9 +354,6 @@ jobs:
       - name: Install browser tests
         working-directory: app/web/e2e
         run: npm ci
-      - name: Install Chromium
-        working-directory: app/web/e2e
-        run: npx playwright install --with-deps chromium
       - name: Verify documentation and embedded app
         working-directory: app/web/e2e
         run: npm run test:docs
