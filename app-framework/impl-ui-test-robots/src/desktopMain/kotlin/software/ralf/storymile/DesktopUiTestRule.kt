@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
 import dev.zacsweers.metro.createGraphFactory
 import kotlin.math.roundToInt
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.app.platform.robot.internal.RobotInternals
 import software.ralf.storymile.theme.LocalDarkThemeOverride
@@ -29,8 +31,8 @@ import software.ralf.storymile.theme.LocalDarkThemeOverride
  * Desktop integration-test fixture that renders the production application at a controlled size.
  *
  * A fresh application, root scope, Metro graph, and Compose presenter stream are created for each
- * test and destroyed after the Compose test scene closes. [withEpisodes] saves a playlist with one
- * episode and waits for playback before running the test.
+ * test and destroyed after the Compose test scene closes. Each test starts with an empty library.
+ * [withEpisodes] adds one episode and waits for playback before running the test.
  */
 class DesktopUiTestRule(private val withEpisodes: Boolean = false) {
   /** Runs [block] in the phone preset, optionally overriding the system theme with [darkTheme]. */
@@ -72,6 +74,7 @@ class DesktopUiTestRule(private val withEpisodes: Boolean = false) {
     RobotInternals.setRootScopeProvider(desktopApp)
 
     try {
+      runBlocking { withTimeout(10_000) { TestPlaylists.clear(desktopApp.rootScope) } }
       runDesktopComposeUiTest(
         width = windowSize.width.value.roundToInt(),
         height = windowSize.height.value.roundToInt(),

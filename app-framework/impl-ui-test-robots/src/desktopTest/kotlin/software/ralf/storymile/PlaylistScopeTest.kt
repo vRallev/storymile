@@ -37,6 +37,7 @@ class PlaylistScopeTest {
   fun `playback is available only while at least one playlist contains episodes`() = runTest {
     withApplication { graph ->
       val repository: PlaylistRepository = graph.playlistRepository()
+      TestPlaylists.clear(repository)
       graph.appRootPresenter.test(this) {
         awaitItem().assertPlayback(visible = false)
 

@@ -7,6 +7,8 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.v2.AndroidComposeTestRule
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -43,8 +45,11 @@ class AndroidUiTestRule : TestRule {
     return composeTestRule.apply(wrappedBase, description)
   }
 
-  /** Runs [block] after the activity reaches an idle Compose state. */
+  /** Clears the library and runs [block] after the activity reaches an idle Compose state. */
   fun runRobotTest(block: ComposeTestRule.() -> Unit) {
+    val rootScope =
+      InstrumentationRegistry.getInstrumentation().targetContext.rootScopeProvider().rootScope
+    runBlocking { withTimeout(10_000) { TestPlaylists.clear(rootScope) } }
     composeTestRule.waitForIdle()
     composeTestRule.block()
   }
