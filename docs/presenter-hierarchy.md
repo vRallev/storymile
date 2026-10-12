@@ -66,7 +66,7 @@ Side navigation also shows the Storymile logo and title.
 Window resizing changes the navigation layout without changing the selected destination.
 
 Home stacks its illustration and discovery prompt in narrow panes and places them side by side in
-wide panes. The content scrolls when the window height or text size requires more space.
+wide panes. The illustration shrinks to keep the content within the window.
 
 [PlaybackScreenRenderer](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackScreenRenderer.kt)
 shows artwork, episode details, playback controls, and chapters. Its collapse button calls the template's

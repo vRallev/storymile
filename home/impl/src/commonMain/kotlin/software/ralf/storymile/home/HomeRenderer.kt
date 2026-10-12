@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,10 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountCircle
@@ -34,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -62,7 +60,6 @@ import software.ralf.storymile.theme.AppTheme
 class HomeRenderer : ComposeRenderer<HomePresenterImpl.Model>() {
   @Composable
   override fun Compose(model: HomePresenterImpl.Model, modifier: Modifier) {
-    val scrollState = rememberScrollState()
     Box(modifier.fillMaxSize().testTag("tab-content")) {
       BoxWithConstraints(Modifier.fillMaxSize().testTag("home-screen")) {
         val wide =
@@ -70,52 +67,56 @@ class HomeRenderer : ComposeRenderer<HomePresenterImpl.Model>() {
             LocalScreenSize.current.orientation == ScreenSize.Orientation.LANDSCAPE
         val short = maxHeight < 480.dp
         val phone = maxWidth < 600.dp
+        val compact = maxHeight < 700.dp || LocalDensity.current.fontScale > 1.3f
         Column(
           modifier =
-            Modifier.fillMaxWidth()
-              .verticalScroll(scrollState)
-              .heightIn(min = maxHeight)
+            Modifier.fillMaxSize()
               .padding(
                 horizontal = if (phone) 20.dp else 32.dp,
-                vertical = if (short) 12.dp else 24.dp,
-              )
-              .testTag("home-scroll"),
+                vertical = if (compact) 8.dp else 24.dp,
+              ),
         ) {
-          Header(wide = wide, phone = phone, short = short)
-          Spacer(Modifier.height(if (short) 16.dp else 24.dp))
-          Spacer(Modifier.weight(1f))
-          Box(
-            modifier = Modifier.fillMaxWidth().heightIn(min = if (wide) 220.dp else 440.dp),
-            contentAlignment = Alignment.Center,
-          ) {
-            if (wide) {
+          Header(wide = wide, phone = phone, short = short, compact = compact)
+          Spacer(Modifier.height(if (compact) 12.dp else 24.dp))
+          if (wide) {
+            Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
               Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = if (short) 0.dp else 24.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = if (compact) 0.dp else 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(32.dp),
                 verticalAlignment = Alignment.CenterVertically,
               ) {
-                Illustration(Modifier.weight(1f))
-                Prompt(wide = true, modifier = Modifier.weight(1f))
-              }
-            } else {
-              Column(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(32.dp),
-              ) {
-                Illustration(Modifier.widthIn(max = if (phone) 320.dp else 480.dp).fillMaxWidth())
-                Prompt(wide = false, modifier = Modifier.widthIn(max = 440.dp).fillMaxWidth())
+                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                  Illustration(Modifier)
+                }
+                Prompt(wide = true, compact = compact, modifier = Modifier.weight(1f))
               }
             }
+          } else {
+            Column(
+              modifier = Modifier.weight(1f).fillMaxWidth(),
+              horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement = Arrangement.Center,
+            ) {
+              Illustration(
+                Modifier.weight(1f, fill = false).widthIn(max = if (phone) 320.dp else 480.dp),
+              )
+              Spacer(Modifier.height(if (compact) 12.dp else 16.dp))
+              Prompt(
+                wide = false,
+                compact = compact,
+                modifier =
+                  (if (compact) Modifier else Modifier.widthIn(max = 440.dp)).fillMaxWidth(),
+              )
+            }
           }
-          Spacer(Modifier.weight(1f))
         }
       }
     }
   }
 
   @Composable
-  private fun Header(wide: Boolean, phone: Boolean, short: Boolean) {
+  private fun Header(wide: Boolean, phone: Boolean, short: Boolean, compact: Boolean) {
+    val largeText = LocalDensity.current.fontScale > 1.3f
     if (!wide || !short) {
       Row(
         modifier = Modifier.fillMaxWidth(),
@@ -133,7 +134,12 @@ class HomeRenderer : ComposeRenderer<HomePresenterImpl.Model>() {
             Text(
               text = stringResource(Res.string.storymile),
               modifier = Modifier.weight(1f),
-              style = AppTheme.typography.headlineSmall,
+              style =
+                if (largeText) {
+                  AppTheme.typography.titleMedium
+                } else {
+                  AppTheme.typography.headlineSmall
+                },
               fontWeight = FontWeight.SemiBold,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,
@@ -144,8 +150,16 @@ class HomeRenderer : ComposeRenderer<HomePresenterImpl.Model>() {
         }
         Profile()
       }
-      Spacer(Modifier.height(20.dp))
+      Spacer(Modifier.height(if (compact) 8.dp else 20.dp))
     }
+    Welcome(wide = wide, phone = phone, short = short, compact = compact)
+    Spacer(Modifier.height(if (compact) 8.dp else 20.dp))
+    Search()
+  }
+
+  @Composable
+  private fun Welcome(wide: Boolean, phone: Boolean, short: Boolean, compact: Boolean) {
+    val largeText = LocalDensity.current.fontScale > 1.3f
     Row(
       modifier = Modifier.fillMaxWidth(),
       verticalAlignment = Alignment.CenterVertically,
@@ -155,10 +169,11 @@ class HomeRenderer : ComposeRenderer<HomePresenterImpl.Model>() {
         text = stringResource(Res.string.welcome_to_storymile),
         modifier =
           Modifier.weight(1f, fill = wide)
-            .widthIn(max = if (wide) 1000.dp else if (phone) 300.dp else 400.dp)
+            .widthIn(max = if (wide || compact) 1000.dp else if (phone) 300.dp else 400.dp)
             .testTag("home-welcome"),
         style =
           when {
+            (wide && compact) || largeText -> AppTheme.typography.headlineMedium
             wide && !short -> AppTheme.typography.displayLarge
             phone || short -> AppTheme.typography.displaySmall
             else -> AppTheme.typography.displayMedium
@@ -170,8 +185,6 @@ class HomeRenderer : ComposeRenderer<HomePresenterImpl.Model>() {
         Profile()
       }
     }
-    Spacer(Modifier.height(if (short) 12.dp else 20.dp))
-    Search()
   }
 
   @Composable
@@ -215,61 +228,86 @@ class HomeRenderer : ComposeRenderer<HomePresenterImpl.Model>() {
     Image(
       painter = painterResource(Res.drawable.home_illustration),
       contentDescription = null,
-      modifier = modifier.aspectRatio(600f / 370f).testTag("home-illustration"),
+      modifier = modifier.testTag("home-illustration"),
     )
   }
 
   @Composable
-  private fun Prompt(wide: Boolean, modifier: Modifier) {
+  private fun Prompt(wide: Boolean, compact: Boolean, modifier: Modifier) {
+    val largeText = LocalDensity.current.fontScale > 1.3f
     Column(
       modifier = modifier,
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(12.dp),
+      verticalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 12.dp),
     ) {
       Text(
         text = stringResource(Res.string.find_your_first_podcast),
         modifier = Modifier.testTag("home-prompt"),
-        style = if (wide) AppTheme.typography.displaySmall else AppTheme.typography.headlineMedium,
+        style =
+          when {
+            (wide && compact) || largeText -> AppTheme.typography.headlineSmall
+            wide -> AppTheme.typography.displaySmall
+            else -> AppTheme.typography.headlineMedium
+          },
         fontWeight = FontWeight.Bold,
         color = AppTheme.colorScheme.onBackground,
         textAlign = TextAlign.Center,
       )
       Text(
         text = stringResource(Res.string.explore_topics),
-        modifier = Modifier.widthIn(max = if (wide) 440.dp else 290.dp),
-        style = if (wide) AppTheme.typography.headlineSmall else AppTheme.typography.bodyLarge,
+        modifier = if (compact) Modifier else Modifier.widthIn(max = if (wide) 440.dp else 290.dp),
+        style =
+          if (wide && !compact) {
+            AppTheme.typography.headlineSmall
+          } else {
+            AppTheme.typography.bodyLarge
+          },
         fontWeight = FontWeight.Normal,
         color = AppTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
       )
-      Spacer(Modifier.height(8.dp))
-      Button(
-        onClick = {},
-        modifier =
-          Modifier.widthIn(max = if (wide) 440.dp else 340.dp)
-            .fillMaxWidth()
-            .heightIn(min = 56.dp)
-            .testTag("home-discover"),
-        shape = CircleShape,
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
-      ) {
-        Text(
-          text = stringResource(Res.string.discover_podcasts),
-          style = if (wide) AppTheme.typography.headlineSmall else AppTheme.typography.titleMedium,
-          textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.width(8.dp))
-        Icon(
-          imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-          contentDescription = null,
-        )
+      if (!compact) {
+        Spacer(Modifier.height(8.dp))
       }
-      Spacer(Modifier.height(4.dp))
+      DiscoverButton(wide = wide, compact = compact)
+      if (!compact) {
+        Spacer(Modifier.height(4.dp))
+      }
       Text(
         text = stringResource(Res.string.listen_without_account),
         style = if (wide) AppTheme.typography.bodyLarge else AppTheme.typography.bodyMedium,
         color = AppTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
+      )
+    }
+  }
+
+  @Composable
+  private fun DiscoverButton(wide: Boolean, compact: Boolean) {
+    Button(
+      onClick = {},
+      modifier =
+        Modifier.widthIn(max = if (wide || compact) 440.dp else 340.dp)
+          .fillMaxWidth()
+          .heightIn(min = if (compact) 48.dp else 56.dp)
+          .testTag("home-discover"),
+      shape = CircleShape,
+      contentPadding = PaddingValues(horizontal = 24.dp, vertical = if (compact) 12.dp else 16.dp),
+    ) {
+      Text(
+        text = stringResource(Res.string.discover_podcasts),
+        style =
+          if (wide && !compact) {
+            AppTheme.typography.headlineSmall
+          } else {
+            AppTheme.typography.titleMedium
+          },
+        textAlign = TextAlign.Center,
+      )
+      Spacer(Modifier.width(8.dp))
+      Icon(
+        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+        contentDescription = null,
       )
     }
   }
