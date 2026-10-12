@@ -3,5 +3,6 @@ plugins {
 }
 
 storymile {
+  enableComposePresenters true
   addPublicModuleDependencies true
 }

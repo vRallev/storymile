@@ -5,13 +5,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import software.ralf.app.platform.presenter.BaseModel
+import software.ralf.storymile.user.UserScope
 
 @Inject
-@ContributesBinding(AppScope::class)
+@ContributesBinding(UserScope::class)
 class TabsPresenterImpl : TabsPresenter {
   @Composable
   override fun present(input: Unit): TabsPresenter.Model {

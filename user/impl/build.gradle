@@ -3,9 +3,14 @@ plugins {
 }
 
 storymile {
+  enableComposeUi true
   enableMetro true
+  enableComposePresenters true
 }
 
 dependencies {
+  commonMainImplementation project(':playback:public')
   commonMainImplementation project(':storage:public')
+  commonMainImplementation project(':tabs:public')
+  commonMainImplementation project(':templates:public')
 }

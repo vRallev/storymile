@@ -18,6 +18,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.compose.test
 import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
@@ -75,7 +76,7 @@ class PlaylistScopeTest {
     }
   }
 
-  private fun AppTemplate.assertPlayback(visible: Boolean) {
+  private fun BaseModel.assertPlayback(visible: Boolean) {
     assertThat(this).isInstanceOf<AppTemplate.AdaptiveTemplate>().given {
       if (visible) {
         assertThat(it.playback).isNotNull()
