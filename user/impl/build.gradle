@@ -3,6 +3,7 @@ plugins {
 }
 
 storymile {
+  enableComposeUi true
   enableMetro true
   enableComposePresenters true
 }
