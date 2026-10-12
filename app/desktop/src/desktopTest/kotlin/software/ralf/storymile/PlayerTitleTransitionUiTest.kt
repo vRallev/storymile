@@ -42,7 +42,7 @@ import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
 
 class PlayerTitleTransitionUiTest {
-  private val uiTestRule = DesktopUiTestRule()
+  private val uiTestRule = DesktopUiTestRule(withEpisodes = true)
 
   @Test
   fun `phone title retains its final glyph throughout expansion and reversal`() {

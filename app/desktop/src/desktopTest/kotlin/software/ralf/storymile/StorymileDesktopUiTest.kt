@@ -52,7 +52,7 @@ import software.ralf.app.platform.robot.waitUntilCatching
 import software.ralf.storymile.tabs.TabsPresenter
 
 class StorymileDesktopUiTest {
-  private val uiTestRule = DesktopUiTestRule()
+  private val uiTestRule = DesktopUiTestRule(withEpisodes = true)
 
   @Test
   fun `phone navigation keeps its shadow above the container bounds`() {

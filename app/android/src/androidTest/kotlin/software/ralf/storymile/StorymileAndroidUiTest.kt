@@ -13,12 +13,16 @@ class StorymileAndroidUiTest {
   @Test
   fun shows_app_navigation_and_content() = uiTestRule.runRobotTest {
     waitUntilCatching("app navigation and content displayed", timeout = 5.seconds) {
-      composeRobot<AppShellRobot> { seeAppLayers() }
+      composeRobot<AppShellRobot> { seeAppLayers(playbackVisible = false) }
     }
   }
 
   @Test
   fun playback_swipes_preserve_the_selected_tab() = uiTestRule.runRobotTest {
+    composeRobot<PlaylistRobot> { addPlayablePlaylist() }
+    waitUntilCatching("playback available", timeout = 5.seconds) {
+      composeRobot<AppShellRobot> { seeAppLayers() }
+    }
     composeRobot<AppShellRobot> {
       selectTab(TabsPresenter.Tab.LIBRARY)
       dragPlaybackUp()

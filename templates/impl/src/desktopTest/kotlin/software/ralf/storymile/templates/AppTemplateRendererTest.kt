@@ -88,6 +88,75 @@ import software.ralf.storymile.theme.ThemeEnvironment
 
 class AppTemplateRendererTest {
   @Test
+  fun `playback slides up and down while navigation remains available`() {
+    listOf(400, 1000).forEach { width ->
+      runDesktopComposeUiTest(width = width, height = 900) {
+        val fixture = Fixture()
+        val populated = template()
+        var model by mutableStateOf(populated.copy(playback = null, expandedPlayback = null))
+        setContent { fixture.Render(model) }
+        onNodeWithTag("playback").assertDoesNotExist()
+        val tabs = onNodeWithTag("tabs").getUnclippedBoundsInRoot()
+        val content = onNodeWithTag("content").getUnclippedBoundsInRoot()
+        mainClock.autoAdvance = false
+
+        runOnIdle { model = populated }
+        mainClock.advanceTimeBy(64)
+        val entering = onNodeWithTag("playback-sheet").getUnclippedBoundsInRoot().top
+        mainClock.advanceTimeBy(1000)
+        val shown = onNodeWithTag("playback-sheet").getUnclippedBoundsInRoot().top
+        assertThat(entering).isGreaterThan(shown)
+        assertThat(entering).isLessThan(900.dp)
+        assertThat(onNodeWithTag("tabs").getUnclippedBoundsInRoot()).isEqualTo(tabs)
+
+        runOnIdle { model = populated.copy(playback = null, expandedPlayback = null) }
+        mainClock.advanceTimeBy(64)
+        val leaving = onNodeWithTag("playback-sheet").getUnclippedBoundsInRoot().top
+        assertThat(leaving).isGreaterThan(shown)
+        assertThat(leaving).isLessThan(900.dp)
+        mainClock.advanceTimeBy(1000)
+        onNodeWithTag("playback").assertDoesNotExist()
+        assertThat(onNodeWithTag("content").getUnclippedBoundsInRoot()).isEqualTo(content)
+        assertThat(onNodeWithTag("tabs").getUnclippedBoundsInRoot()).isEqualTo(tabs)
+      }
+    }
+  }
+
+  @Test
+  fun `expanded playback can disappear and an interrupted exit preserves expansion`() {
+    listOf(400, 1000).forEach { width ->
+      runDesktopComposeUiTest(width = width, height = 900) {
+        val fixture = Fixture()
+        val populated = template()
+        var model by mutableStateOf(populated)
+        setContent { fixture.Render(model) }
+        onNodeWithTag("playback").performSemanticsAction(SemanticsActions.Expand) { it() }
+        assertBounds("playback-screen", left = 0, top = 0, right = width, bottom = 900)
+        mainClock.autoAdvance = false
+
+        runOnIdle { model = populated.copy(playback = null, expandedPlayback = null) }
+        mainClock.advanceTimeBy(64)
+        val leaving = onNodeWithTag("playback-sheet").getUnclippedBoundsInRoot().top
+        assertThat(leaving).isGreaterThan(0.dp)
+        assertThat(leaving).isLessThan(900.dp)
+        runOnIdle { model = populated }
+        mainClock.advanceTimeBy(1000)
+        assertThat(onNodeWithTag("playback-sheet").getUnclippedBoundsInRoot().top).isEqualTo(0.dp)
+        assertBounds("playback-screen", left = 0, top = 0, right = width, bottom = 900)
+
+        mainClock.autoAdvance = true
+        runOnIdle { model = populated.copy(playback = null, expandedPlayback = null) }
+        onNodeWithTag("playback").assertDoesNotExist()
+        onNodeWithTag("playback-screen").assertDoesNotExist()
+        runOnIdle { model = populated }
+        onNodeWithTag("playback-screen").assertDoesNotExist()
+        assertThat(onNodeWithTag("playback-sheet").getUnclippedBoundsInRoot().top)
+          .isEqualTo(if (width == 400) 756.dp else 836.dp)
+      }
+    }
+  }
+
+  @Test
   fun `phone surfaces reach the edges while controls avoid cutouts and system bars`() =
     runDesktopComposeUiTest(width = 900, height = 400) {
       val fixture =

@@ -26,7 +26,7 @@ import software.ralf.app.platform.robot.composeRobot
 import software.ralf.app.platform.robot.waitUntilCatching
 
 class PlayerControlsUiTest {
-  private val uiTestRule = DesktopUiTestRule()
+  private val uiTestRule = DesktopUiTestRule(withEpisodes = true)
 
   @Test
   fun `player controls share state across collapsed and expanded layouts`() {

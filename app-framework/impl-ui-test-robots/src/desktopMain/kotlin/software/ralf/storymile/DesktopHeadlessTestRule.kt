@@ -16,11 +16,11 @@ import software.ralf.storymile.templates.AppTemplate
 /**
  * Desktop integration-test fixture that observes production templates without rendering UI.
  *
- * Each test starts a fresh application, production-backed Metro graph, and root presenter stream.
- * The production window preset is reported directly to the screen-size provider before the stream
- * starts. A test-owned Compose presenter scope produces template emissions under the test
- * scheduler, allowing tests to exercise either adaptive presentation without a Compose scene or
- * polling.
+ * Each test starts a fresh application, empty library, production-backed Metro graph, and root
+ * presenter stream. The production window preset is reported directly to the screen-size provider
+ * before the stream starts. A test-owned Compose presenter scope produces template emissions under
+ * the test scheduler, allowing tests to exercise either adaptive presentation without a Compose
+ * scene or polling.
  */
 class DesktopHeadlessTestRule {
   /** Runs [block] against the templates produced for the production phone window preset. */
@@ -40,15 +40,17 @@ class DesktopHeadlessTestRule {
     runTest {
       val application = KmpApplication()
       application.create(createGraphFactory<TestDesktopAppGraph.Factory>().create(application))
-
-      val graph = application.rootScope.metroDependencyGraph<Graph>()
-      graph.screenSizeProvider.update(ScreenSize.from(windowSize.width, windowSize.height))
-      val templateProvider = graph.templateProviderInternalFactory.create(composePresenterScope())
-
       try {
-        templateProvider.templates.test { block() }
+        TestPlaylists.clear(application.rootScope)
+        val graph = application.rootScope.metroDependencyGraph<Graph>()
+        graph.screenSizeProvider.update(ScreenSize.from(windowSize.width, windowSize.height))
+        val templateProvider = graph.templateProviderInternalFactory.create(composePresenterScope())
+        try {
+          templateProvider.templates.test { block() }
+        } finally {
+          templateProvider.cancel()
+        }
       } finally {
-        templateProvider.cancel()
         application.destroy()
       }
     }

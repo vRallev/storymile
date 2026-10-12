@@ -26,7 +26,7 @@ import kotlin.math.roundToInt
 import kotlin.test.Test
 
 class PlayerSliderTransitionUiTest {
-  private val uiTestRule = DesktopUiTestRule()
+  private val uiTestRule = DesktopUiTestRule(withEpisodes = true)
 
   @Test
   fun `slider thumb covers the track throughout expansion and reversal`() {
