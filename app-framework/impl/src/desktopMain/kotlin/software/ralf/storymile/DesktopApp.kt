@@ -10,7 +10,10 @@ import software.ralf.app.platform.renderer.ComposeRendererFactory
 import software.ralf.app.platform.renderer.renderCompose
 import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.Scope
+import software.ralf.app.platform.scope.coroutine.launch
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
+import software.ralf.storymile.runtimemode.RuntimeMode
+import software.ralf.storymile.runtimemode.RuntimeModeController
 
 /** Owns the Desktop root scope and renders its shared template stream. */
 class DesktopApp(private val graph: (RootScopeProvider) -> AppGraph) : RootScopeProvider {
@@ -33,6 +36,23 @@ class DesktopApp(private val graph: (RootScopeProvider) -> AppGraph) : RootScope
     rendererFactory.renderCompose(template)
   }
 
+  /** Saves the opposite runtime mode and restarts the application. */
+  fun toggleRuntimeMode() {
+    val scope = rootScope
+    if (scope.isDestroyed()) {
+      return
+    }
+    val controller = scope.metroDependencyGraph<Graph>().runtimeModeController
+    scope.launch {
+      val mode =
+        when (controller.mode()) {
+          RuntimeMode.Real -> RuntimeMode.Fake
+          RuntimeMode.Fake -> RuntimeMode.Real
+        }
+      controller.switchMode(mode)
+    }
+  }
+
   /** Releases presenter and application resources. */
   fun destroy() {
     templateProvider.cancel()
@@ -42,6 +62,9 @@ class DesktopApp(private val graph: (RootScopeProvider) -> AppGraph) : RootScope
   /** Graph access needed by the Desktop runtime. */
   @ContributesTo(AppScope::class)
   interface Graph {
+    /** Controller used to persist runtime mode changes and restart the application. */
+    val runtimeModeController: RuntimeModeController
+
     /** Factory used to create the window's independently cancellable template stream. */
     val templateProviderFactory: TemplateProvider.Factory
   }

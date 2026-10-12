@@ -110,6 +110,7 @@ Run `./run.sh` to choose a platform, device, or Desktop window size. Desktop use
 reload. Android and iOS device selection also requires Python 3.
 
 Desktop shortcuts: Command/Ctrl+S switches window size; Command/Ctrl+D switches theme.
+Command/Ctrl+F toggles fake mode and restarts the app.
 
 Wasm is disabled and Isolated Projects is enabled by default. Wasm commands need
 `-Pstorymile.enableWasm=true --no-isolated-projects` until Kotlin's Wasm plugin supports isolation.

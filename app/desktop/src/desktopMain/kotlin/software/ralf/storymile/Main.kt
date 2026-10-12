@@ -28,7 +28,8 @@ import software.ralf.storymile.util.Platform
 
 /**
  * Launches the Desktop application. Command/Ctrl+S cycles phone, tablet, and desktop sizes;
- * Command/Ctrl+D toggles light and dark themes.
+ * Command/Ctrl+D toggles light and dark themes; Command/Ctrl+F toggles fake mode and restarts the
+ * app.
  */
 fun main(args: Array<String>) {
   DesktopProcessRestarter.configure("software.ralf.storymile.MainKt", args)
@@ -71,6 +72,10 @@ fun main(args: Array<String>) {
             }
             Key.D -> {
               darkThemeOverride = !(darkThemeOverride ?: systemDarkTheme)
+              true
+            }
+            Key.F -> {
+              desktopApp.toggleRuntimeMode()
               true
             }
             else -> false
