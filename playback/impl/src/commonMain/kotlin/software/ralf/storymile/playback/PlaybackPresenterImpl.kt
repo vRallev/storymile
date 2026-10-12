@@ -3,38 +3,25 @@ package software.ralf.storymile.playback
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Inject
 import software.ralf.app.platform.presenter.BaseModel
-import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.playlist.PlaylistRepository
-import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.user.UserScope
 
 @Inject
-@ContributesBinding(AppScope::class)
-class PlaybackPresenterImpl(private val userManager: UserManager) : PlaybackPresenter {
+@ContributesBinding(UserScope::class)
+class PlaybackPresenterImpl(private val playlistRepository: PlaylistRepository) :
+  PlaybackPresenter {
   @Composable
   override fun present(input: Unit): Model {
-    val userScope by userManager.userScope.collectAsState()
-    val hasEpisodes =
-      key(userScope) {
-        val playlists by
-          userScope
-            .metroDependencyGraph<UserBindings>()
-            .playlistRepository
-            .playlists
-            .collectAsState()
-        playlists.any { it.episodeIds.isNotEmpty() }
-      }
+    val playlists by playlistRepository.playlists.collectAsState()
+    val hasEpisodes = playlists.any { it.episodeIds.isNotEmpty() }
     var episode by remember {
       mutableStateOf(Episode("The art of slowing down", "The Quiet Current", 2538))
     }
@@ -116,11 +103,6 @@ class PlaybackPresenterImpl(private val userManager: UserManager) : PlaybackPres
         Chapter("Closing thoughts", 2418),
       )
       .map { it.copy(startSeconds = it.startSeconds * durationSeconds / 2538) }
-
-  @ContributesTo(UserScope::class)
-  interface UserBindings {
-    val playlistRepository: PlaylistRepository
-  }
 
   data class Chapter(val title: String, val startSeconds: Int)
 

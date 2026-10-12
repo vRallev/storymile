@@ -10,22 +10,15 @@ import assertk.assertions.isSameInstanceAs
 import assertk.assertions.isTrue
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.app.platform.presenter.compose.test
-import software.ralf.app.platform.scope.Scope
-import software.ralf.app.platform.scope.buildTestScope
-import software.ralf.app.platform.scope.di.metro.addMetroDependencyGraph
 import software.ralf.storymile.playlist.EpisodeId
 import software.ralf.storymile.playlist.Playlist
 import software.ralf.storymile.playlist.PlaylistId
 import software.ralf.storymile.playlist.PlaylistName
-import software.ralf.storymile.playlist.PlaylistRepository
-import software.ralf.storymile.user.UserManager
 
 class PlaybackPresenterImplTest {
   private val PlaybackPresenterImpl.Model.player: PlaybackPresenterImpl.PlayerModel
@@ -35,7 +28,7 @@ class PlaybackPresenterImplTest {
   @Test
   fun `playback is absent until a playlist contains episodes`() = runTest {
     val repository = TestPlaylistRepository(emptyList())
-    val presenter: PlaybackPresenter = PlaybackPresenterImpl(TestUserManager(this, repository))
+    val presenter: PlaybackPresenter = PlaybackPresenterImpl(repository)
 
     presenter.test(this) {
       awaitItem().assertPlayback(visible = false)
@@ -54,35 +47,10 @@ class PlaybackPresenterImplTest {
     }
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
-  @Test
-  fun `availability follows the current user and ignores previous playlists`() = runTest {
-    val firstRepository = TestPlaylistRepository(listOf(playlist()))
-    val secondRepository = TestPlaylistRepository(emptyList())
-    val userManager = TestUserManager(this, firstRepository)
-    val presenter: PlaybackPresenter = PlaybackPresenterImpl(userManager)
-
-    presenter.test(this) {
-      awaitItem().assertPlayback(visible = true)
-
-      userManager.switchUser(secondRepository)
-      awaitItem().assertPlayback(visible = false)
-
-      firstRepository.update(emptyList())
-      runCurrent()
-      firstRepository.update(listOf(playlist()))
-      runCurrent()
-      expectNoEvents()
-
-      secondRepository.update(listOf(playlist()))
-      awaitItem().assertPlayback(visible = true)
-    }
-  }
-
   @Test
   fun `playback state survives unavailable content`() = runTest {
     val repository = TestPlaylistRepository(listOf(playlist()))
-    val presenter = PlaybackPresenterImpl(TestUserManager(this, repository))
+    val presenter = PlaybackPresenterImpl(repository)
 
     presenter.testPlayer(this) {
       awaitItem().player.onSeek(123)
@@ -104,8 +72,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `collapsed and expanded controls share playback state`() = runTest {
-    val presenter =
-      PlaybackPresenterImpl(TestUserManager(this, TestPlaylistRepository(listOf(playlist()))))
+    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())))
 
     presenter.testPlayer(this) {
       var model = awaitItem()
@@ -141,8 +108,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `seeking and skips stay within the current episode`() = runTest {
-    val presenter =
-      PlaybackPresenterImpl(TestUserManager(this, TestPlaylistRepository(listOf(playlist()))))
+    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())))
 
     presenter.testPlayer(this) {
       var player = awaitItem().player
@@ -180,8 +146,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `chapter selection and seeking keep the active chapter in sync`() = runTest {
-    val presenter =
-      PlaybackPresenterImpl(TestUserManager(this, TestPlaylistRepository(listOf(playlist()))))
+    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())))
 
     presenter.testPlayer(this) {
       var player = awaitItem().player
@@ -202,8 +167,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `queue selection loads the episode and preserves listening preferences`() = runTest {
-    val presenter =
-      PlaybackPresenterImpl(TestUserManager(this, TestPlaylistRepository(listOf(playlist()))))
+    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())))
 
     presenter.testPlayer(this) {
       var player = awaitItem().player
@@ -265,26 +229,5 @@ class PlaybackPresenterImplTest {
   ) {
     ComposePresenter<Unit, PlaybackPresenterImpl.Model> { present(it) }
       .test(scope, validate = validate)
-  }
-
-  private class TestUserManager(
-    private val testScope: TestScope,
-    repository: PlaylistRepository,
-  ) : UserManager {
-    override val userScope: StateFlow<Scope>
-      field = MutableStateFlow(createScope(repository))
-
-    fun switchUser(repository: PlaylistRepository) {
-      userScope.value = createScope(repository)
-    }
-
-    private fun createScope(repository: PlaylistRepository): Scope =
-      Scope.buildTestScope(testScope) {
-        addMetroDependencyGraph(
-          object : PlaybackPresenterImpl.UserBindings {
-            override val playlistRepository: PlaylistRepository = repository
-          },
-        )
-      }
   }
 }

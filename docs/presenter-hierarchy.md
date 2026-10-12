@@ -9,16 +9,18 @@ Phone and tablet layouts share this tree. Renderers place the template slots for
 flowchart TD
   TemplateProvider["TemplateProvider\nlaunchComposePresenter"]
   AppTemplatePresenter["AppTemplatePresenter\ntemplate wrapper"]
-  AppRootPresenter["AppRootPresenter\nAdaptiveTemplate"]
+  AppRootPresenter["AppRootPresenter"]
+  UserPresenter["UserPresenterImpl\nAdaptiveTemplate"]
   TabContent["TabsPresenterImpl.ContentModel\nselected tab placeholder"]
   TabsPresenter["TabsPresenterImpl\ntabs"]
   PlaybackPresenter["PlaybackPresenterImpl\ncollapsed and expanded playback"]
 
   TemplateProvider -->|launches| AppTemplatePresenter
   AppTemplatePresenter --> AppRootPresenter
-  AppRootPresenter --> TabsPresenter
+  AppRootPresenter --> UserPresenter
+  UserPresenter --> TabsPresenter
   TabsPresenter -->|content model| TabContent
-  AppRootPresenter --> PlaybackPresenter
+  UserPresenter --> PlaybackPresenter
 ```
 
 ## Composition
@@ -29,14 +31,18 @@ starts the presenter tree.
 wraps the app root with shared template support.
 
 [AppRootPresenter](../app-framework/impl/src/commonMain/kotlin/software/ralf/storymile/approot/AppRootPresenter.kt)
-composes the
+delegates to the app-scoped
+[UserPresenter](../user/public/src/commonMain/kotlin/software/ralf/storymile/user/UserPresenter.kt).
+[UserPresenterImpl](../user/impl/src/commonMain/kotlin/software/ralf/storymile/user/UserPresenterImpl.kt)
+obtains the
 [tabs](../tabs/impl/src/commonMain/kotlin/software/ralf/storymile/tabs/TabsPresenterImpl.kt) and
 [playback](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackPresenterImpl.kt)
-presenters. The tabs presenter owns the selected destination and produces its content model.
+presenters from the active user scope. A scope change resets their state.
+The tabs presenter owns the selected destination and produces its content model.
 It starts with Home.
 [TabContentRenderer](../tabs/impl/src/commonMain/kotlin/software/ralf/storymile/tabs/TabContentRenderer.kt)
 shows only the selected tab's name until feature screens are added.
-The app root places these models in the content, navigation, and playback slots of
+The user presenter places these models in the content, navigation, and playback slots of
 [AppTemplate](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/AppTemplate.kt).
 The playback presenter supplies its slots only when the current user's
 [playlists](../playlist/public/src/commonMain/kotlin/software/ralf/storymile/playlist/PlaylistRepository.kt)
