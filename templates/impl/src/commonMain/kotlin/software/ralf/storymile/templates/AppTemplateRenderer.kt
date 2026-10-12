@@ -91,6 +91,7 @@ import software.ralf.app.platform.presenter.compose.backgesture.BackGestureDispa
 import software.ralf.app.platform.presenter.compose.backgesture.ForwardBackPressEventsToPresenters
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.app.platform.renderer.Render
+import software.ralf.storymile.design.LocalOnLogoLongPress
 import software.ralf.storymile.screen.DefaultScreenSizeProvider
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize
@@ -127,7 +128,12 @@ class AppTemplateRenderer(
           SharedTransitionLayout {
             CompositionLocalProvider(LocalSharedTransitionScope provides this) {
               when (model) {
-                is AppTemplate.AdaptiveTemplate -> AdaptiveTemplateContent(model)
+                is AppTemplate.AdaptiveTemplate ->
+                  CompositionLocalProvider(
+                    LocalOnLogoLongPress provides model.onToggleRuntimeMode,
+                  ) {
+                    AdaptiveTemplateContent(model)
+                  }
               }
               backGestureDispatcherPresenter.ForwardBackPressEventsToPresenters()
             }
