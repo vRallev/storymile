@@ -499,7 +499,10 @@ docsHostTest('follows system theme changes in the standalone design gallery', as
   await expectGalleryIcon(page, 'light');
   expect(await root.evaluate(() => window.__docsGalleryState)).toBe('same standalone gallery');
   await expect(page.getByRole('tab', { name: 'Themes', exact: true })).toHaveAttribute('aria-selected', 'true');
-  for (const name of ['Light', 'Dark']) {
+  for (const name of ['Phone portrait', 'Tablet landscape', 'Desktop', 'Light']) {
     await expect(page.getByRole('checkbox', { name, exact: true })).toBeChecked();
+  }
+  for (const name of ['Phone landscape', 'Tablet portrait', 'Foldable', 'Dark']) {
+    await expect(page.getByRole('checkbox', { name, exact: true })).not.toBeChecked();
   }
 });

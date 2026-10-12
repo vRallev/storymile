@@ -158,7 +158,7 @@
       const platformNames = {android:'Android',ios:'iOS',desktop:'Desktop'};
       const filterNames = Object.entries(deviceNames);
       const deviceOrder = Object.keys(deviceNames);
-      const state = {view:'themes',devices:new Set(deviceOrder),themes:new Set(['light','dark']),returnFocus:null,bodyOverflow:''};
+      const state = {view:'themes',devices:new Set(['phone-portrait','tablet-landscape','desktop']),themes:new Set(['light']),returnFocus:null,bodyOverflow:''};
       const viewer = {items:[],index:-1};
       const selectedThemes = () => ['light','dark'].filter(theme => state.themes.has(theme));
       const themeVariants = new Map([...list(data.themePairs),...list(data.platformThemePairs),...list(data.flowThemePairs)].flatMap(pair => [[pair.light,pair],[pair.dark,pair]]));
