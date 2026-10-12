@@ -80,6 +80,8 @@ import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.app.platform.renderer.LocalRendererFactory
 import software.ralf.app.platform.renderer.Renderer
 import software.ralf.app.platform.renderer.RendererFactory
+import software.ralf.storymile.runtimemode.RuntimeMode
+import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.screen.DefaultScreenSizeProvider
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.screen.ScreenSizeProvider
@@ -549,6 +551,11 @@ class AppTemplateRendererTest {
           override fun Provide(darkTheme: Boolean, content: @Composable () -> Unit) {
             content()
           }
+        },
+        object : RuntimeModeController {
+          override suspend fun mode(): RuntimeMode = error("Not used")
+
+          override suspend fun switchMode(mode: RuntimeMode): Unit = error("Not used")
         },
       )
     private val slotRenderer = SlotRenderer(forwardModifiers)

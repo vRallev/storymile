@@ -35,8 +35,6 @@ sealed interface AppTemplate : Template {
      * and back handling.
      */
     val overlay: BaseModel? = null,
-    /** Saves the opposite runtime mode and restarts the application. */
-    val onToggleRuntimeMode: () -> Unit = {},
   ) : AppTemplate
 }
 

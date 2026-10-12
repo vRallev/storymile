@@ -9,5 +9,6 @@ plugins {
 }
 
 dependencies {
+  commonMainImplementation project(':runtime-mode:public')
   commonMainImplementation project(':theme:public')
 }
