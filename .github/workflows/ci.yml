@@ -148,6 +148,14 @@ jobs:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Run Android tests
         run: ./gradlew $GRADLE_ARGS testDebugUnitTest testAndroidHostTest
+      - name: Upload test results
+        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: test-results-${{ github.job }}
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
 
   test-desktop:
     runs-on: ubuntu-latest
@@ -160,6 +168,14 @@ jobs:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Run Desktop unit tests
         run: ./gradlew $GRADLE_ARGS desktopTest -x :app:desktop:desktopTest
+      - name: Upload test results
+        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: test-results-${{ github.job }}
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
 
   test-integration-desktop:
     runs-on: ubuntu-latest
@@ -174,10 +190,12 @@ jobs:
         run: ./gradlew $GRADLE_ARGS :app:desktop:desktopTest
       - name: Upload test results
         uses: actions/upload-artifact@v7
-        if: ${{ failure() }}
+        if: ${{ !cancelled() }}
         with:
           name: test-results-${{ github.job }}
-          path: "**/build/reports/"
+          path: |
+            **/build/reports/
+            **/build/test-results/
 
   test-integration-android:
     runs-on: ubuntu-latest
@@ -196,7 +214,7 @@ jobs:
         run: ./gradlew $GRADLE_ARGS :app:android:emulatorCheck
       - name: Upload test results
         uses: actions/upload-artifact@v7
-        if: ${{ failure() }}
+        if: ${{ !cancelled() }}
         with:
           name: test-results-${{ github.job }}
           path: |
@@ -214,6 +232,14 @@ jobs:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Run Wasm tests
         run: ./gradlew $GRADLE_ARGS -Pstorymile.enableWasm=true --no-isolated-projects wasmJsTest
+      - name: Upload test results
+        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: test-results-${{ github.job }}
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
 
   test-ios:
     if: ${{ github.ref == 'refs/heads/main' }}
@@ -230,10 +256,12 @@ jobs:
         run: ./gradlew $GRADLE_ARGS iosSimulatorArm64Test
       - name: Upload test results
         uses: actions/upload-artifact@v7
-        if: ${{ failure() }}
+        if: ${{ !cancelled() }}
         with:
           name: test-results-${{ github.job }}
-          path: "**/build/reports/"
+          path: |
+            **/build/reports/
+            **/build/test-results/
 
   build-android-release:
     runs-on: ubuntu-latest
@@ -313,7 +341,7 @@ jobs:
           if-no-files-found: error
       - name: Upload browser test results
         uses: actions/upload-artifact@v7
-        if: ${{ failure() }}
+        if: ${{ !cancelled() }}
         with:
           name: test-results-${{ github.job }}
           path: |
@@ -365,7 +393,7 @@ jobs:
           if-no-files-found: error
       - name: Upload documentation test results
         uses: actions/upload-artifact@v7
-        if: ${{ failure() }}
+        if: ${{ !cancelled() }}
         with:
           name: test-results-${{ github.job }}
           path: |
