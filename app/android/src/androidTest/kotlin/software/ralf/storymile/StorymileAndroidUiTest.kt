@@ -5,6 +5,7 @@ import org.junit.Rule
 import org.junit.Test
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.app.platform.robot.waitUntilCatching
+import software.ralf.storymile.playlist.PlaylistRobot
 import software.ralf.storymile.tabs.TabsPresenter
 
 class StorymileAndroidUiTest {

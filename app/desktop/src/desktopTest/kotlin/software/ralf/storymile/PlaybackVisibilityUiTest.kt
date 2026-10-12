@@ -8,6 +8,7 @@ import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.app.platform.robot.waitUntilCatching
+import software.ralf.storymile.playlist.PlaylistRobot
 
 class PlaybackVisibilityUiTest {
   private val uiTestRule = DesktopUiTestRule()

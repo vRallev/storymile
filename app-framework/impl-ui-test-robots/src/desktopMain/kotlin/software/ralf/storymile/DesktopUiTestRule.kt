@@ -25,6 +25,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.app.platform.robot.internal.RobotInternals
+import software.ralf.storymile.playlist.PlaylistRobot
 import software.ralf.storymile.theme.LocalDarkThemeOverride
 
 /**
