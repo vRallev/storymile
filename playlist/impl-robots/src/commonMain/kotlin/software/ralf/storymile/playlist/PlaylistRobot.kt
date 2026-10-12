@@ -1,4 +1,4 @@
-package software.ralf.storymile
+package software.ralf.storymile.playlist
 
 import dev.zacsweers.metro.ForScope
 import kotlinx.coroutines.CoroutineScope
@@ -6,9 +6,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import software.ralf.app.platform.inject.robot.ContributesRobot
 import software.ralf.app.platform.robot.ComposeRobot
-import software.ralf.storymile.playlist.EpisodeId
-import software.ralf.storymile.playlist.PlaylistName
-import software.ralf.storymile.playlist.PlaylistRepository
 import software.ralf.storymile.user.UserScope
 
 /** Controls the current user's playlists through the production repository. */

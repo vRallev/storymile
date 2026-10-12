@@ -16,4 +16,5 @@ dependencies {
   commonMainImplementation project(':util:public')
 
   desktopTestImplementation project(':app-framework:impl-ui-test-robots')
+  desktopTestImplementation project(':playlist:impl-robots')
 }
