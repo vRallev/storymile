@@ -1,11 +1,8 @@
-@file:OptIn(ExperimentalAppPlatform::class)
-
 package software.ralf.storymile.presenternavigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
-import software.ralf.app.platform.ExperimentalAppPlatform
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.backstack.nav3.PresenterBackstackRenderer

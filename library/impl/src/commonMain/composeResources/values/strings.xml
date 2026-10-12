@@ -1,0 +1,8 @@
+<resources>
+  <string name="library_title">Library</string>
+  <string name="library_episodes">Episodes</string>
+  <string name="library_shows">Shows</string>
+  <string name="library_empty_title">Your library starts here</string>
+  <string name="library_empty_description">Save episodes or follow shows to find them here.</string>
+  <string name="library_discover">Discover podcasts</string>
+</resources>

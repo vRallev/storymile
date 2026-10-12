@@ -11,10 +11,10 @@ flowchart TD
   AppTemplatePresenter["AppTemplatePresenter\ntemplate wrapper"]
   AppRootPresenter["AppRootPresenter"]
   UserPresenter["UserPresenterImpl\nAdaptiveTemplate"]
-  TabContent["TabsPresenterImpl.ContentModel\nLibrary placeholder"]
   HomePresenter["HomePresenterImpl\nempty home"]
   DownloadsPresenter["DownloadsPresenterImpl\nempty downloads"]
   TabsPresenter["TabsPresenterImpl\ntabs"]
+  LibraryPresenter["LibraryPresenterImpl\nempty library"]
   PlaybackPresenter["PlaybackPresenterImpl\ncollapsed and expanded playback"]
 
   TemplateProvider -->|launches| AppTemplatePresenter
@@ -22,7 +22,7 @@ flowchart TD
   AppRootPresenter --> UserPresenter
   UserPresenter --> TabsPresenter
   TabsPresenter -->|Home| HomePresenter
-  TabsPresenter -->|Library| TabContent
+  TabsPresenter -->|Library| LibraryPresenter
   TabsPresenter -->|Downloads| DownloadsPresenter
   UserPresenter --> PlaybackPresenter
 ```
@@ -47,8 +47,9 @@ It starts with
 [HomePresenterImpl](../home/impl/src/commonMain/kotlin/software/ralf/storymile/home/HomePresenterImpl.kt).
 [HomeRenderer](../home/impl/src/commonMain/kotlin/software/ralf/storymile/home/HomeRenderer.kt)
 shows the welcome screen.
-[TabContentRenderer](../tabs/impl/src/commonMain/kotlin/software/ralf/storymile/tabs/TabContentRenderer.kt)
-shows a placeholder for Library.
+The tabs presenter creates and composes only the selected screen. It retains the
+[library](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryPresenterImpl.kt)
+filter across tab changes.
 [DownloadsPresenterImpl](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsPresenterImpl.kt)
 provides the empty Downloads screen, rendered by
 [DownloadsRenderer](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsRenderer.kt).
@@ -72,6 +73,9 @@ Window resizing changes the navigation layout without changing the selected dest
 
 Home stacks its illustration and discovery prompt in narrow panes and places them side by side in
 wide panes. The illustration shrinks to keep the content within the window.
+
+[LibraryRenderer](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryRenderer.kt)
+adapts the empty library to phone, tablet, and desktop widths.
 
 [PlaybackScreenRenderer](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackScreenRenderer.kt)
 shows artwork, episode details, playback controls, and chapters. Its collapse button calls the template's
