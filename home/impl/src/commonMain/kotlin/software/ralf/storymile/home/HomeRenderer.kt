@@ -81,24 +81,7 @@ class HomeRenderer : ComposeRenderer<HomePresenterImpl.Model>() {
             Search()
             Spacer(Modifier.height(if (compact) 12.dp else 24.dp))
             if (wide) {
-              Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Row(
-                  modifier =
-                    Modifier.fillMaxWidth().padding(vertical = if (compact) 0.dp else 24.dp),
-                  horizontalArrangement = Arrangement.spacedBy(32.dp),
-                  verticalAlignment = Alignment.CenterVertically,
-                ) {
-                  Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    Illustration(Modifier)
-                  }
-                  Prompt(
-                    wide = true,
-                    compact = compact,
-                    spacing = promptSpacing,
-                    modifier = Modifier.weight(1f),
-                  )
-                }
-              }
+              WideContent(compact, promptSpacing, Modifier.weight(1f).fillMaxWidth())
             } else {
               Column(
                 modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -120,6 +103,28 @@ class HomeRenderer : ComposeRenderer<HomePresenterImpl.Model>() {
             }
           }
         }
+      }
+    }
+  }
+
+  @Composable
+  private fun WideContent(compact: Boolean, promptSpacing: Dp, modifier: Modifier) {
+    BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
+      val promptWeight = if (maxHeight / LocalDensity.current.fontScale < 200.dp) 2f else 1f
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = if (compact) 0.dp else 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(32.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+          Illustration(Modifier)
+        }
+        Prompt(
+          wide = true,
+          compact = compact,
+          spacing = promptSpacing,
+          modifier = Modifier.weight(promptWeight),
+        )
       }
     }
   }
