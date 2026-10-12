@@ -3,7 +3,8 @@ package software.ralf.storymile.library
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -16,7 +17,13 @@ import software.ralf.storymile.user.UserScope
 class LibraryPresenterImpl : LibraryPresenter<LibraryPresenterImpl.Model> {
   @Composable
   override fun present(input: Unit): Model {
-    var selectedFilter by remember { mutableStateOf(Filter.EPISODES) }
+    var selectedFilter by
+      rememberSaveable(
+        stateSaver =
+          Saver(save = { filter: Filter -> filter.name }, restore = { Filter.valueOf(it) }),
+      ) {
+        mutableStateOf(Filter.EPISODES)
+      }
     return Model(
       selectedFilter = selectedFilter,
       onSelectFilter = { selectedFilter = it },
@@ -30,7 +37,7 @@ class LibraryPresenterImpl : LibraryPresenter<LibraryPresenterImpl.Model> {
   }
 
   /**
-   * Renderer-only state starts with episodes and retains the selected filter during composition.
+   * Renderer-only state starts with episodes and retains the selected filter across tab changes.
    * Discovery is a placeholder action.
    */
   data class Model(

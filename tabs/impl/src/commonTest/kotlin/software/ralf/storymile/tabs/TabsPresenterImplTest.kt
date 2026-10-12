@@ -3,12 +3,15 @@
 package software.ralf.storymile.tabs
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
+import assertk.assertions.isTrue
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.ExperimentalAppPlatform
@@ -22,7 +25,7 @@ class TabsPresenterImplTest {
   @Test
   fun `tabs start at home and selection updates the destination`() = runTest {
     val presenter: TabsPresenter =
-      TabsPresenterImpl(FakeHomePresenter(), FakeLibraryPresenter()) {
+      TabsPresenterImpl({ FakeHomePresenter() }, { FakeLibraryPresenter() }) {
         FakeDownloadsPresenter()
       }
 
@@ -46,10 +49,62 @@ class TabsPresenterImplTest {
   }
 
   @Test
+  fun `only selected screens create and run presenters`() = runTest {
+    val home = FakeHomePresenter()
+    val library = FakeLibraryPresenter()
+    val downloads = FakeDownloadsPresenter()
+    val created = mutableSetOf<TabsPresenter.Tab>()
+    val presenter: TabsPresenter =
+      TabsPresenterImpl(
+        homePresenter = {
+          created += TabsPresenter.Tab.HOME
+          home
+        },
+        libraryPresenter = {
+          created += TabsPresenter.Tab.LIBRARY
+          library
+        },
+        downloadsPresenter = {
+          created += TabsPresenter.Tab.DOWNLOADS
+          downloads
+        },
+      )
+    assertThat(created).isEqualTo(emptySet())
+
+    presenter.test(this) {
+      var model = awaitItem()
+      assertThat(created).isEqualTo(setOf(TabsPresenter.Tab.HOME))
+      assertThat(home.active).isTrue()
+      assertThat(library.active).isFalse()
+      assertThat(downloads.active).isFalse()
+
+      model.onSelectTab(TabsPresenter.Tab.DOWNLOADS)
+      model = awaitItem()
+      assertThat(created).isEqualTo(setOf(TabsPresenter.Tab.HOME, TabsPresenter.Tab.DOWNLOADS))
+      assertThat(home.active).isFalse()
+      assertThat(library.active).isFalse()
+      assertThat(downloads.active).isTrue()
+
+      model.onSelectTab(TabsPresenter.Tab.LIBRARY)
+      model = awaitItem()
+      assertThat(created).isEqualTo(TabsPresenter.Tab.entries.toSet())
+      assertThat(home.active).isFalse()
+      assertThat(library.active).isTrue()
+      assertThat(downloads.active).isFalse()
+
+      model.onSelectTab(TabsPresenter.Tab.HOME)
+      awaitItem()
+      assertThat(home.active).isTrue()
+      assertThat(library.active).isFalse()
+      assertThat(downloads.active).isFalse()
+    }
+  }
+
+  @Test
   fun `library content keeps its filter while another tab is selected`() = runTest {
     val library = FakeLibraryPresenter()
     val presenter: TabsPresenter =
-      TabsPresenterImpl(FakeHomePresenter(), library) { FakeDownloadsPresenter() }
+      TabsPresenterImpl({ FakeHomePresenter() }, { library }) { FakeDownloadsPresenter() }
 
     presenter.test(this) {
       var model = awaitItem()
@@ -72,7 +127,17 @@ class TabsPresenterImplTest {
   }
 
   private class FakeDownloadsPresenter : DownloadsPresenter<DownloadsModel> {
-    @Composable override fun present(input: Unit): DownloadsModel = DownloadsModel
+    var active = false
+      private set
+
+    @Composable
+    override fun present(input: Unit): DownloadsModel {
+      DisposableEffect(Unit) {
+        active = true
+        onDispose { active = false }
+      }
+      return DownloadsModel
+    }
   }
 
   private data object DownloadsModel : BaseModel
@@ -80,15 +145,31 @@ class TabsPresenterImplTest {
   private data object HomeModel : BaseModel
 
   private class FakeHomePresenter : HomePresenter<HomeModel> {
-    @Composable override fun present(input: Unit): HomeModel = HomeModel
+    var active = false
+      private set
+
+    @Composable
+    override fun present(input: Unit): HomeModel {
+      DisposableEffect(Unit) {
+        active = true
+        onDispose { active = false }
+      }
+      return HomeModel
+    }
   }
 
   private class FakeLibraryPresenter : LibraryPresenter<FakeLibraryPresenter.Model> {
     var selectFilter: (String) -> Unit = {}
+    var active = false
+      private set
 
     @Composable
     override fun present(input: Unit): Model {
-      var filter by remember { mutableStateOf("Episodes") }
+      var filter by rememberSaveable { mutableStateOf("Episodes") }
+      DisposableEffect(Unit) {
+        active = true
+        onDispose { active = false }
+      }
       selectFilter = { filter = it }
       return Model(filter)
     }
