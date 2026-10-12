@@ -12,7 +12,6 @@ internal class BasePlugin : Plugin<Project> {
     target.tasks.register("release")
     target.extensions.create("storymile", StorymileExtension::class.java, target)
     target.configureAppPlatform()
-    target.configureKotlin()
     target.configureTestLogging()
     target.sortDependencies()
   }
@@ -27,9 +26,7 @@ internal class BasePlugin : Plugin<Project> {
       appPlatform.enableModuleStructure(true)
       releaseTask.configure { it.dependsOn("checkModuleStructureDependencies") }
     }
-  }
 
-  private fun Project.configureKotlin() {
     tasks.withType(KotlinCompilationTask::class.java).configureEach {
       it.compilerOptions.optIn.add("software.ralf.app.platform.ExperimentalAppPlatform")
     }
