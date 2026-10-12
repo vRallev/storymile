@@ -5,7 +5,6 @@ package software.ralf.storymile.tabs
 import androidx.compose.runtime.Composable
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import dev.zacsweers.metro.Provider
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.ExperimentalAppPlatform
@@ -21,7 +20,7 @@ class TabsPresenterImplTest {
       object : HomePresenter<HomeModel> {
         @Composable override fun present(input: Unit): HomeModel = HomeModel
       }
-    val presenter: TabsPresenter = TabsPresenterImpl(home, Provider { FakeDownloadsPresenter() })
+    val presenter: TabsPresenter = TabsPresenterImpl(home) { FakeDownloadsPresenter() }
 
     presenter.test(this) {
       var model = awaitItem()

@@ -7,7 +7,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.Provider
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.storymile.downloads.DownloadsPresenter
 import software.ralf.storymile.home.HomePresenter
@@ -17,7 +16,7 @@ import software.ralf.storymile.user.UserScope
 @ContributesBinding(UserScope::class)
 class TabsPresenterImpl(
   private val homePresenter: HomePresenter<*>,
-  private val downloadsPresenter: Provider<DownloadsPresenter<*>>,
+  private val downloadsPresenter: () -> DownloadsPresenter<*>,
 ) : TabsPresenter {
   @Composable
   override fun present(input: Unit): TabsPresenter.Model {
