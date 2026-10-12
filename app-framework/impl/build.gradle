@@ -19,7 +19,6 @@ dependencies {
 
   commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':playlist:impl')
-  commonMainImplementation project(':playlist:public')
   commonMainImplementation project(':presenter-navigation:impl')
   commonMainImplementation project(':restart:impl')
   commonMainImplementation project(':runtime-mode:impl')
@@ -29,6 +28,5 @@ dependencies {
   commonMainImplementation project(':theme:impl')
   commonMainImplementation project(':theme:public')
   commonMainImplementation project(':user:impl')
-  commonMainImplementation project(':user:public')
   commonMainImplementation project(':util:impl')
 }

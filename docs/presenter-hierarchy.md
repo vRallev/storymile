@@ -38,7 +38,7 @@ It starts with Home.
 shows only the selected tab's name until feature screens are added.
 The app root places these models in the content, navigation, and playback slots of
 [AppTemplate](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/AppTemplate.kt).
-Playback slots are present only when the current user's
+The playback presenter supplies its slots only when the current user's
 [playlists](../playlist/public/src/commonMain/kotlin/software/ralf/storymile/playlist/PlaylistRepository.kt)
 contain an episode.
 

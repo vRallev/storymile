@@ -4,103 +4,194 @@ import app.cash.turbine.ReceiveTurbine
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
+import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.isSameInstanceAs
 import assertk.assertions.isTrue
 import kotlin.test.Test
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.app.platform.presenter.compose.test
+import software.ralf.app.platform.scope.Scope
+import software.ralf.app.platform.scope.buildTestScope
+import software.ralf.app.platform.scope.di.metro.addMetroDependencyGraph
+import software.ralf.storymile.playlist.EpisodeId
+import software.ralf.storymile.playlist.Playlist
+import software.ralf.storymile.playlist.PlaylistId
+import software.ralf.storymile.playlist.PlaylistName
+import software.ralf.storymile.playlist.PlaylistRepository
+import software.ralf.storymile.user.UserManager
 
 class PlaybackPresenterImplTest {
+  private val PlaybackPresenterImpl.Model.player: PlaybackPresenterImpl.PlayerModel
+    get() = requireNotNull(expanded).player
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun `playback is absent until a playlist contains episodes`() = runTest {
+    val repository = TestPlaylistRepository(emptyList())
+    val presenter: PlaybackPresenter = PlaybackPresenterImpl(TestUserManager(this, repository))
+
+    presenter.test(this) {
+      awaitItem().assertPlayback(visible = false)
+
+      val empty = playlist().copy(episodeIds = emptyList())
+      repository.update(listOf(empty))
+      runCurrent()
+      expectNoEvents()
+
+      val populated = playlist().copy(id = PlaylistId("second"))
+      repository.update(listOf(empty, populated))
+      awaitItem().assertPlayback(visible = true)
+
+      repository.update(listOf(empty))
+      awaitItem().assertPlayback(visible = false)
+    }
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun `availability follows the current user and ignores previous playlists`() = runTest {
+    val firstRepository = TestPlaylistRepository(listOf(playlist()))
+    val secondRepository = TestPlaylistRepository(emptyList())
+    val userManager = TestUserManager(this, firstRepository)
+    val presenter: PlaybackPresenter = PlaybackPresenterImpl(userManager)
+
+    presenter.test(this) {
+      awaitItem().assertPlayback(visible = true)
+
+      userManager.switchUser(secondRepository)
+      awaitItem().assertPlayback(visible = false)
+
+      firstRepository.update(emptyList())
+      runCurrent()
+      firstRepository.update(listOf(playlist()))
+      runCurrent()
+      expectNoEvents()
+
+      secondRepository.update(listOf(playlist()))
+      awaitItem().assertPlayback(visible = true)
+    }
+  }
+
+  @Test
+  fun `playback state survives unavailable content`() = runTest {
+    val repository = TestPlaylistRepository(listOf(playlist()))
+    val presenter = PlaybackPresenterImpl(TestUserManager(this, repository))
+
+    presenter.testPlayer(this) {
+      awaitItem().player.onSeek(123)
+      awaitItem().player.onSpeed(1.5f)
+      awaitItem().player.onPlayPause()
+      assertThat(awaitItem().player.isPlaying).isFalse()
+
+      repository.update(emptyList())
+      awaitItem().assertPlayback(visible = false)
+
+      repository.update(listOf(playlist()))
+      val model = awaitItem()
+      model.assertPlayback(visible = true)
+      assertThat(model.player.positionSeconds).isEqualTo(123)
+      assertThat(model.player.speed).isEqualTo(1.5f)
+      assertThat(model.player.isPlaying).isFalse()
+    }
+  }
+
   @Test
   fun `collapsed and expanded controls share playback state`() = runTest {
-    val presenter = PlaybackPresenterImpl()
+    val presenter =
+      PlaybackPresenterImpl(TestUserManager(this, TestPlaylistRepository(listOf(playlist()))))
 
     presenter.testPlayer(this) {
       var model = awaitItem()
-      assertThat(model.collapsed.player).isSameInstanceAs(model.expanded.player)
-      assertThat(model.expanded.player.activeChapterIndex).isEqualTo(2)
+      assertThat(requireNotNull(model.collapsed).player).isSameInstanceAs(model.player)
+      assertThat(model.player.activeChapterIndex).isEqualTo(2)
 
-      model.collapsed.player.onPlayPause()
+      requireNotNull(model.collapsed).player.onPlayPause()
       model = awaitItem()
-      assertThat(model.expanded.player.isPlaying).isFalse()
+      assertThat(model.player.isPlaying).isFalse()
 
-      model.expanded.player.onBookmark()
+      model.player.onBookmark()
       model = awaitItem()
-      assertThat(model.collapsed.player.isBookmarked).isTrue()
+      assertThat(requireNotNull(model.collapsed).player.isBookmarked).isTrue()
 
-      model.expanded.player.onDownload()
+      model.player.onDownload()
       model = awaitItem()
-      assertThat(model.collapsed.player.isDownloaded).isTrue()
+      assertThat(requireNotNull(model.collapsed).player.isDownloaded).isTrue()
 
-      model.expanded.player.onSpeed(1.5f)
+      model.player.onSpeed(1.5f)
       model = awaitItem()
-      model.expanded.player.onSleep(30)
+      model.player.onSleep(30)
       model = awaitItem()
-      model.collapsed.player.onPlayPause()
+      requireNotNull(model.collapsed).player.onPlayPause()
       model = awaitItem()
-      assertThat(model.expanded.player.isPlaying).isTrue()
-      assertThat(model.expanded.player.isBookmarked).isTrue()
-      assertThat(model.expanded.player.isDownloaded).isTrue()
-      assertThat(model.expanded.player.speed).isEqualTo(1.5f)
-      assertThat(model.expanded.player.sleepMinutes).isEqualTo(30)
-      assertThat(model.collapsed.player).isSameInstanceAs(model.expanded.player)
+      assertThat(model.player.isPlaying).isTrue()
+      assertThat(model.player.isBookmarked).isTrue()
+      assertThat(model.player.isDownloaded).isTrue()
+      assertThat(model.player.speed).isEqualTo(1.5f)
+      assertThat(model.player.sleepMinutes).isEqualTo(30)
+      assertThat(requireNotNull(model.collapsed).player).isSameInstanceAs(model.player)
     }
   }
 
   @Test
   fun `seeking and skips stay within the current episode`() = runTest {
-    val presenter = PlaybackPresenterImpl()
+    val presenter =
+      PlaybackPresenterImpl(TestUserManager(this, TestPlaylistRepository(listOf(playlist()))))
 
     presenter.testPlayer(this) {
-      var player = awaitItem().expanded.player
+      var player = awaitItem().player
       player.onSkipBack()
-      player = awaitItem().expanded.player
+      player = awaitItem().player
       assertThat(player.positionSeconds).isEqualTo(739)
 
       player.onSkipForward()
-      player = awaitItem().expanded.player
+      player = awaitItem().player
       assertThat(player.positionSeconds).isEqualTo(769)
 
       player.onSeek(5)
-      player = awaitItem().expanded.player
+      player = awaitItem().player
       player.onSkipBack()
-      player = awaitItem().expanded.player
+      player = awaitItem().player
       assertThat(player.positionSeconds).isEqualTo(0)
       assertThat(player.activeChapterIndex).isEqualTo(0)
 
       player.onSeek(player.durationSeconds - 5)
-      player = awaitItem().expanded.player
+      player = awaitItem().player
       player.onSkipForward()
-      player = awaitItem().expanded.player
+      player = awaitItem().player
       assertThat(player.positionSeconds).isEqualTo(player.durationSeconds)
       assertThat(player.activeChapterIndex).isEqualTo(player.chapters.lastIndex)
 
       player.onSeek(-100)
-      player = awaitItem().expanded.player
+      player = awaitItem().player
       assertThat(player.positionSeconds).isEqualTo(0)
 
       player.onSeek(Int.MAX_VALUE)
-      player = awaitItem().expanded.player
+      player = awaitItem().player
       assertThat(player.positionSeconds).isEqualTo(player.durationSeconds)
     }
   }
 
   @Test
   fun `chapter selection and seeking keep the active chapter in sync`() = runTest {
-    val presenter = PlaybackPresenterImpl()
+    val presenter =
+      PlaybackPresenterImpl(TestUserManager(this, TestPlaylistRepository(listOf(playlist()))))
 
     presenter.testPlayer(this) {
-      var player = awaitItem().expanded.player
+      var player = awaitItem().player
       player.onChapter(4)
-      player = awaitItem().expanded.player
+      player = awaitItem().player
       assertThat(player.positionSeconds).isEqualTo(player.chapters[4].startSeconds)
       assertThat(player.activeChapterIndex).isEqualTo(4)
 
       player.onSeek(player.chapters[4].startSeconds - 1)
-      player = awaitItem().expanded.player
+      player = awaitItem().player
       assertThat(player.activeChapterIndex).isEqualTo(3)
 
       player.onChapter(-1)
@@ -111,25 +202,26 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `queue selection loads the episode and preserves listening preferences`() = runTest {
-    val presenter = PlaybackPresenterImpl()
+    val presenter =
+      PlaybackPresenterImpl(TestUserManager(this, TestPlaylistRepository(listOf(playlist()))))
 
     presenter.testPlayer(this) {
-      var player = awaitItem().expanded.player
+      var player = awaitItem().player
       val nextEpisode = player.queue[1]
       player.onBookmark()
-      player = awaitItem().expanded.player
+      player = awaitItem().player
       player.onDownload()
-      player = awaitItem().expanded.player
+      player = awaitItem().player
       player.onPlayPause()
-      player = awaitItem().expanded.player
+      player = awaitItem().player
       player.onSpeed(1.5f)
-      player = awaitItem().expanded.player
+      player = awaitItem().player
       player.onSleep(30)
-      player = awaitItem().expanded.player
+      player = awaitItem().player
 
       player.onEpisode(1)
       val model = awaitItem()
-      player = model.expanded.player
+      player = model.player
       assertThat(player.title).isEqualTo(nextEpisode.title)
       assertThat(player.showTitle).isEqualTo(nextEpisode.showTitle)
       assertThat(player.durationSeconds).isEqualTo(nextEpisode.durationSeconds)
@@ -142,15 +234,28 @@ class PlaybackPresenterImplTest {
       assertThat(player.isDownloaded).isFalse()
       assertThat(player.speed).isEqualTo(1.5f)
       assertThat(player.sleepMinutes).isEqualTo(30)
-      assertThat(model.collapsed.player).isSameInstanceAs(player)
+      assertThat(requireNotNull(model.collapsed).player).isSameInstanceAs(player)
 
       player.onSleep(null)
-      player = awaitItem().expanded.player
+      player = awaitItem().player
       assertThat(player.sleepMinutes).isNull()
 
       player.onEpisode(-1)
       player.onEpisode(player.queue.size)
       expectNoEvents()
+    }
+  }
+
+  private fun playlist(): Playlist =
+    Playlist(PlaylistId("playlist"), PlaylistName("Favorites"), listOf(EpisodeId("episode")))
+
+  private fun PlaybackPresenter.Model.assertPlayback(visible: Boolean) {
+    if (visible) {
+      assertThat(collapsed).isNotNull()
+      assertThat(expanded).isNotNull()
+    } else {
+      assertThat(collapsed).isNull()
+      assertThat(expanded).isNull()
     }
   }
 
@@ -160,5 +265,26 @@ class PlaybackPresenterImplTest {
   ) {
     ComposePresenter<Unit, PlaybackPresenterImpl.Model> { present(it) }
       .test(scope, validate = validate)
+  }
+
+  private class TestUserManager(
+    private val testScope: TestScope,
+    repository: PlaylistRepository,
+  ) : UserManager {
+    override val userScope: StateFlow<Scope>
+      field = MutableStateFlow(createScope(repository))
+
+    fun switchUser(repository: PlaylistRepository) {
+      userScope.value = createScope(repository)
+    }
+
+    private fun createScope(repository: PlaylistRepository): Scope =
+      Scope.buildTestScope(testScope) {
+        addMetroDependencyGraph(
+          object : PlaybackPresenterImpl.UserBindings {
+            override val playlistRepository: PlaylistRepository = repository
+          },
+        )
+      }
   }
 }
