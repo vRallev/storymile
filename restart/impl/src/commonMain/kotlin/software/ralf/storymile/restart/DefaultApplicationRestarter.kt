@@ -30,8 +30,10 @@ class DefaultApplicationRestarter(
     // This coroutine must outlive the app scope it destroys.
     CoroutineScope(mainDispatcher).launch {
       // Scope jobs are independent, so a timeout does not wait for their remaining cleanup.
-      runCatching {
+      try {
         withTimeoutOrNull(5.seconds) { rootScopeProvider.rootScope.destroyAndWait() }
+      } catch (_: Throwable) {
+        // Restart even if scope cleanup fails.
       }
       processRestarter.restart()
     }

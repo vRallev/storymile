@@ -44,7 +44,7 @@ class AndroidAudioPlayer(
     }
     releasePlayer()
     state.value = State(source = source)
-    runCatching {
+    try {
       val engine =
         ExoPlayer.Builder(application)
           .setAudioAttributes(
@@ -83,8 +83,9 @@ class AndroidAudioPlayer(
             delay(100)
           }
         }
+    } catch (exception: Throwable) {
+      fail(exception)
     }
-      .onFailure { fail(it) }
   }
 
   override fun play() {
@@ -135,11 +136,12 @@ class AndroidAudioPlayer(
     if (closed || state.value.error != null) {
       return
     }
-    runCatching {
+    try {
       block(engine)
       publish(engine)
+    } catch (exception: Throwable) {
+      fail(exception)
     }
-      .onFailure { fail(it) }
   }
 
   private fun publish(engine: ExoPlayer) {

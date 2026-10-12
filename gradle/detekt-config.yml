@@ -21,6 +21,9 @@ style:
     active: false
   ReturnCount:
     active: false
+exceptions:
+  TooGenericExceptionCaught:
+    active: false
 comments:
   DeprecatedBlockTag:
     active: true

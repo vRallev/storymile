@@ -49,7 +49,7 @@ internal constructor(
         synchronized(lock) {
           ensureActive()
           if (!closed) {
-            runCatching {
+            try {
               if (command != null) {
                 handle(command, this)
               }
@@ -62,13 +62,12 @@ internal constructor(
               if (playRequested) {
                 session?.render()
               }
-            }
-              .onFailure { exception ->
-                if (exception is CancellationException) {
-                  throw exception
-                }
-                fail(exception)
+            } catch (exception: Throwable) {
+              if (exception is CancellationException) {
+                throw exception
               }
+              fail(exception)
+            }
           }
         }
       }
@@ -161,17 +160,16 @@ internal constructor(
     state.value = State(source = source)
     val requestedGeneration = generation
     preparation = coroutineScope.launch {
-      runCatching {
+      try {
         val audio = decode(source)
         ensureActive()
         commands.send(Command.Prepared(requestedGeneration, audio))
-      }
-        .onFailure { exception ->
-          if (exception is CancellationException) {
-            throw exception
-          }
-          commands.send(Command.Failed(requestedGeneration, exception))
+      } catch (exception: Throwable) {
+        if (exception is CancellationException) {
+          throw exception
         }
+        commands.send(Command.Failed(requestedGeneration, exception))
+      }
     }
   }
 

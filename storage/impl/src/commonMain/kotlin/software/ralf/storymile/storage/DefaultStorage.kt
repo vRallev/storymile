@@ -115,7 +115,11 @@ private constructor(
     callerContext.ensureActive()
     val operation =
       coroutineScope.async(callerContext.minusKey(Job)) {
-        runCatching { block(platform()) }
+        try {
+          Result.success(block(platform()))
+        } catch (exception: Throwable) {
+          Result.failure(exception)
+        }
       }
     return try {
       operation.await().getOrThrow()

@@ -67,7 +67,7 @@ class IosAudioPlayer(
     }
     releasePlayer()
     state.value = State(source = source)
-    runCatching {
+    try {
       val engine = memScoped {
         val error = alloc<ObjCObjectVar<NSError?>>()
         error.value = null
@@ -127,8 +127,9 @@ class IosAudioPlayer(
             delay(100)
           }
         }
+    } catch (exception: Throwable) {
+      fail(exception.message ?: "Could not load audio.")
     }
-      .onFailure { fail(it.message ?: "Could not load audio.") }
   }
 
   override fun play() {
@@ -190,11 +191,12 @@ class IosAudioPlayer(
     if (closed || state.value.error != null) {
       return
     }
-    runCatching {
+    try {
       block(engine)
       publish(engine)
+    } catch (exception: Throwable) {
+      fail(exception.message ?: "Could not play audio.")
     }
-      .onFailure { fail(it.message ?: "Could not play audio.") }
   }
 
   private fun publish(engine: AVAudioPlayer) {
