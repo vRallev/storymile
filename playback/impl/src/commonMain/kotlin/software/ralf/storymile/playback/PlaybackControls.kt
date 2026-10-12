@@ -156,7 +156,7 @@ internal object PlaybackControls {
             player.onSeek(it.roundToInt())
           }
         },
-        valueRange = 0f..player.durationSeconds.toFloat(),
+        valueRange = 0f..player.durationSeconds.coerceAtLeast(1).toFloat(),
         modifier =
           sliderModifier.testTag(tag).semantics {
             contentDescription = description

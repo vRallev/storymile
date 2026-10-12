@@ -11,16 +11,20 @@ import androidx.compose.runtime.setValue
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import software.ralf.app.platform.presenter.BaseModel
+import software.ralf.storymile.player.Player
 import software.ralf.storymile.playlist.PlaylistRepository
 import software.ralf.storymile.user.UserScope
 
 @Inject
 @ContributesBinding(UserScope::class)
-class PlaybackPresenterImpl(private val playlistRepository: PlaylistRepository) :
-  PlaybackPresenter {
+class PlaybackPresenterImpl(
+  private val playlistRepository: PlaylistRepository,
+  private val player: Player,
+) : PlaybackPresenter {
   @Composable
   override fun present(input: Unit): Model {
     val playlists by playlistRepository.playlists.collectAsState()
+    val audio by player.state.collectAsState()
     val hasEpisodes = playlists.any { it.episodeIds.isNotEmpty() }
     var episode by remember {
       mutableStateOf(Episode("The art of slowing down", "The Quiet Current", 2538))
@@ -42,7 +46,7 @@ class PlaybackPresenterImpl(private val playlistRepository: PlaylistRepository) 
     var sleepMinutes by remember { mutableStateOf<Int?>(null) }
     val chapters = remember(episode) { chapters(episode.durationSeconds) }
 
-    val player =
+    val placeholder =
       PlayerModel(
         title = episode.title,
         showTitle = episode.showTitle,
@@ -85,9 +89,34 @@ class PlaybackPresenterImpl(private val playlistRepository: PlaylistRepository) 
         },
       )
 
+    // Deferred options retain sample state; transport controls follow the audio.
+    val playerModel =
+      if (audio.title == null) {
+        placeholder
+      } else {
+        val duration = (audio.durationMillis / 1000).toInt()
+        val position = (audio.positionMillis / 1000).toInt()
+        placeholder.copy(
+          title = requireNotNull(audio.title),
+          showTitle = "Storymile test episodes",
+          positionSeconds = position,
+          durationSeconds = duration,
+          isPlaying = audio.isPlaying,
+          speed = audio.speed,
+          error = audio.error,
+          onPlayPause = { player.togglePlayback() },
+          onSeek = { player.seekTo(it.toLong() * 1000) },
+          onSkipBack = { player.seekTo(player.state.value.positionMillis - 15_000) },
+          onSkipForward = {
+            player.seekTo(player.state.value.positionMillis + 30_000)
+          },
+          onSpeed = { player.setSpeed(it) },
+        )
+      }
+
     return Model(
-      collapsed = BarModel(player).takeIf { hasEpisodes },
-      expanded = ScreenModel(player).takeIf { hasEpisodes },
+      collapsed = BarModel(playerModel).takeIf { hasEpisodes },
+      expanded = ScreenModel(playerModel).takeIf { hasEpisodes },
     )
   }
 
@@ -131,6 +160,7 @@ class PlaybackPresenterImpl(private val playlistRepository: PlaylistRepository) 
     val onSleep: (Int?) -> Unit,
     val onChapter: (Int) -> Unit,
     val onEpisode: (Int) -> Unit,
+    val error: String? = null,
   )
 
   data class BarModel(val player: PlayerModel) : BaseModel

@@ -1,0 +1,18 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  enableComposeUi true
+  enableMetro true
+}
+
+dependencies {
+  androidMainImplementation libs.androidx.media3.exoplayer
+
+  commonMainImplementation project(':playlist:public')
+  commonMainImplementation project(':runtime-mode:public')
+  commonMainImplementation project(':user:public')
+
+  desktopMainImplementation libs.jlayer
+}

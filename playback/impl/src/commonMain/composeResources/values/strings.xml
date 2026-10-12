@@ -11,6 +11,7 @@
   <string name="forward_thirty">Forward 30 seconds</string>
   <string name="play">Play</string>
   <string name="pause">Pause</string>
+  <string name="playback_failed">Could not play this episode.</string>
   <string name="speed">Speed</string>
   <string name="sleep">Sleep</string>
   <string name="queue">Queue</string>

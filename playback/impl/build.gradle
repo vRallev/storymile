@@ -9,6 +9,7 @@ storymile {
 }
 
 dependencies {
+  commonMainImplementation project(':player:public')
   commonMainImplementation project(':playlist:public')
   commonMainImplementation project(':templates:public')
   commonMainImplementation project(':theme:public')

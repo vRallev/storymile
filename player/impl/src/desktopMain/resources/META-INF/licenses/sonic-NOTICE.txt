@@ -1,0 +1,8 @@
+Sonic
+Copyright 2010, 2011 Bill Cox
+License: Apache License 2.0 (see sonic-LICENSE.txt)
+
+Source: https://github.com/waywardgeek/sonic
+Revision: 1d7051354f32392a3b3cdb8a8bcfe56e6f8b744f
+File: Sonic.java
+The source is unmodified.

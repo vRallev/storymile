@@ -81,7 +81,9 @@ adapts the empty library to phone, tablet, and desktop widths.
 shows artwork, episode details, playback controls, and chapters. Its collapse button calls the template's
 [collapse action](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/LocalCollapsePlayback.kt).
 [PlaybackBarRenderer](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackBarRenderer.kt)
-shows artwork and compact controls. Both layouts share fake playback state from the playback presenter.
+shows artwork and compact controls. In fake mode, both layouts read audio state from the user-scoped
+[player](../player/public/src/commonMain/kotlin/software/ralf/storymile/player/Player.kt).
+Other playback options retain their placeholder state.
 [PlaybackTransition](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/PlaybackTransition.kt)
 moves shared artwork, text, and controls with the sheet. Controls present in only one layout fade.
 The sheet slides up when playback becomes available and down when no playlist contains episodes.
