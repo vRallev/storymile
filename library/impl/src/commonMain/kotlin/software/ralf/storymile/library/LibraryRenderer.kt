@@ -1,6 +1,7 @@
 package software.ralf.storymile.library
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -33,6 +34,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
@@ -41,6 +43,7 @@ import software.ralf.storymile.library.impl.generated.resources.library_discover
 import software.ralf.storymile.library.impl.generated.resources.library_empty_description
 import software.ralf.storymile.library.impl.generated.resources.library_empty_title
 import software.ralf.storymile.library.impl.generated.resources.library_episodes
+import software.ralf.storymile.library.impl.generated.resources.library_illustration
 import software.ralf.storymile.library.impl.generated.resources.library_shows
 import software.ralf.storymile.library.impl.generated.resources.library_title
 import software.ralf.storymile.theme.AppTheme
@@ -65,8 +68,10 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
           ) {
-            LibraryIllustration(
-              Modifier.padding(end = 24.dp).size(144.dp).testTag("library-illustration"),
+            Image(
+              painter = painterResource(Res.drawable.library_illustration),
+              contentDescription = null,
+              modifier = Modifier.padding(end = 24.dp).size(144.dp).testTag("library-illustration"),
             )
             EmptyMessage(
               model,
@@ -83,10 +88,13 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
           ) {
-            LibraryIllustration(
-              Modifier.weight(1f, fill = false)
-                .size(if (compact) 164.dp else if (large) 256.dp else 216.dp)
-                .testTag("library-illustration"),
+            Image(
+              painter = painterResource(Res.drawable.library_illustration),
+              contentDescription = null,
+              modifier =
+                Modifier.weight(1f, fill = false)
+                  .size(if (compact) 164.dp else if (large) 256.dp else 216.dp)
+                  .testTag("library-illustration"),
             )
             Spacer(Modifier.height(if (short) 8.dp else 24.dp))
             EmptyMessage(model, compact, large, horizontal = false)
