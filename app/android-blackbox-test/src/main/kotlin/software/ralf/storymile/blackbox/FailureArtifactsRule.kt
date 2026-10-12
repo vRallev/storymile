@@ -7,9 +7,6 @@ import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
 class FailureArtifactsRule : TestWatcher() {
-  @Suppress(
-    "TooGenericExceptionCaught",
-  ) // Keep artifact failures from replacing the original test failure.
   override fun failed(error: Throwable, description: Description) {
     try {
       val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())

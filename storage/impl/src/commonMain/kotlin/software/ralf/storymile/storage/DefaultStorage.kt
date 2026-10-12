@@ -109,9 +109,6 @@ private constructor(
     }
   }
 
-  @Suppress(
-    "TooGenericExceptionCaught",
-  ) // Return failures to the caller without cancelling the storage scope.
   private suspend fun <T> operation(block: suspend (StoragePlatform) -> T): T {
     checkActive()
     val callerContext = currentCoroutineContext()

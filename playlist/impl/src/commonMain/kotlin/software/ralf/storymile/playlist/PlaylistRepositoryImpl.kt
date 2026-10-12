@@ -161,7 +161,6 @@ class PlaylistRepositoryImpl(
     return defaults
   }
 
-  @Suppress("TooGenericExceptionCaught") // Report command failures while preserving cancellation.
   private suspend fun reportFailure(block: suspend () -> Unit) {
     try {
       block()

@@ -37,7 +37,6 @@ internal constructor(
   private var session: Session? = null
   private var playRequested = false
   private var speed = 1f
-  @Suppress("TooGenericExceptionCaught") // Report playback failures while preserving cancellation.
   private val job = coroutineScope.launch {
     try {
       while (true) {
@@ -152,7 +151,6 @@ internal constructor(
     }
   }
 
-  @Suppress("TooGenericExceptionCaught") // Report decoder failures while preserving cancellation.
   private fun prepare(source: String, coroutineScope: CoroutineScope) {
     generation++
     preparation?.cancel()

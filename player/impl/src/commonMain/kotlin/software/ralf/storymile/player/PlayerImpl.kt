@@ -53,7 +53,6 @@ internal constructor(
     { Res.getUri(it) },
   )
 
-  @Suppress("TooGenericExceptionCaught") // Report playback failures while preserving cancellation.
   override fun onEnterScope(scope: Scope) {
     scope.launch(mainDispatcher) {
       try {

@@ -61,7 +61,6 @@ class IosAudioPlayer(
   private var playWhenReady = false
   private val pauseObservers = mutableListOf<NSObjectProtocol>()
 
-  @Suppress("TooGenericExceptionCaught") // Report all platform playback failures.
   override fun load(source: String) {
     if (closed) {
       return
@@ -187,7 +186,6 @@ class IosAudioPlayer(
     state.value = state.value.copy(isPlaying = false, playWhenReady = false, isReady = false)
   }
 
-  @Suppress("TooGenericExceptionCaught") // Report all platform playback failures.
   private fun command(block: (AVAudioPlayer) -> Unit) {
     val engine = player ?: return
     if (closed || state.value.error != null) {
