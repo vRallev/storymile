@@ -27,6 +27,17 @@ internal class BasePlugin : Plugin<Project> {
       releaseTask.configure { it.dependsOn("checkModuleStructureDependencies") }
     }
 
+    plugins.withId(Plugins.KOTLIN_MULTIPLATFORM) {
+      kmpExtension.sourceSets.getByName("commonMain").dependencies {
+        implementation(libs.findLibrary("app-platform-common").get())
+      }
+    }
+    listOf(Plugins.ANDROID_APP, Plugins.ANDROID_TEST).forEach { plugin ->
+      plugins.withId(plugin) {
+        dependencies.add("implementation", libs.findLibrary("app-platform-common").get())
+      }
+    }
+
     tasks.withType(KotlinCompilationTask::class.java).configureEach {
       it.compilerOptions.optIn.add("software.ralf.app.platform.ExperimentalAppPlatform")
     }
