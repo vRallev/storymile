@@ -59,7 +59,7 @@ class DownloadsUiTest {
             file.parentFile.mkdirs()
             ImageIO.write(onNodeWithTag("app-shell").captureToImage().toAwtImage(), "png", file)
             onNodeWithTag("downloads-discover").performClick()
-            onNodeWithTag("downloads-profile").performClick()
+            onNodeWithTag("tab-profile").performClick()
             onNodeWithTag("tab-downloads").assertIsSelected()
           }
         }

@@ -27,7 +27,7 @@ final class LaunchTests: XCTestCase {
             XCTAssertFalse(container.frame.isEmpty)
         }
 
-        let selectedTab = app.staticTexts["home-welcome"]
+        let selectedTab = app.staticTexts["tab-title"]
         XCTAssertTrue(selectedTab.waitForExistence(timeout: 15))
         XCTAssertEqual(selectedTab.label, "Welcome to Storymile")
 

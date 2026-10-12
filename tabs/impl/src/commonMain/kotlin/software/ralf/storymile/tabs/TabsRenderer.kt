@@ -58,6 +58,7 @@ import kotlinx.coroutines.job
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
+import software.ralf.storymile.design.StorymileLogo
 import software.ralf.storymile.tabs.impl.generated.resources.Res
 import software.ralf.storymile.tabs.impl.generated.resources.downloads
 import software.ralf.storymile.tabs.impl.generated.resources.home
@@ -66,7 +67,6 @@ import software.ralf.storymile.tabs.impl.generated.resources.storymile
 import software.ralf.storymile.templates.LocalTabPlacement
 import software.ralf.storymile.templates.TabPlacement
 import software.ralf.storymile.theme.AppTheme
-import software.ralf.storymile.theme.StorymileLogo
 import software.ralf.storymile.theme.appLayerShadow
 
 @ContributesRenderer

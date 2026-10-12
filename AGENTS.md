@@ -200,6 +200,7 @@ Android Lint checks the app and shared KMP code.
 
 ## Design
 
+- Put shared design components in `:theme:public` under `software.ralf.storymile.design`.
 - Use Material 3 components and color roles from `AppTheme` in `:theme:public`.
 - Use the shared Storymile typography for text sizes. Set sizes in `StorymileTheme`; do not add
   custom text components to enlarge standard Material components.

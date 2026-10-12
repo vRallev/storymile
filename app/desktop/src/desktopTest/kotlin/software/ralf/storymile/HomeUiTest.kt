@@ -75,7 +75,7 @@ class HomeUiTest {
     listOf(DpSize(412.dp, 916.dp), DpSize(1280.dp, 800.dp), DpSize(1600.dp, 900.dp)).forEach { size
       ->
       uiTestRule.runRobotTest(windowSize = size, darkTheme = false) {
-        listOf("home-search", "home-profile", "home-discover").forEach { tag ->
+        listOf("home-search", "tab-profile", "home-discover").forEach { tag ->
           onNodeWithTag(tag).assertIsDisplayed().performClick()
           assertHomeFitsWithoutScrolling()
         }
@@ -92,6 +92,7 @@ class HomeUiTest {
         DpSize(320.dp, 1000.dp),
         DpSize(599.dp, 480.dp),
         DpSize(600.dp, 480.dp),
+        DpSize(900.dp, 360.dp),
         DpSize(916.dp, 412.dp),
         DpSize(1199.dp, 500.dp),
         DpSize(1200.dp, 500.dp),
@@ -146,7 +147,7 @@ class HomeUiTest {
         useUnmergedTree = true,
       )
       .assertCountEquals(0)
-    listOf("home-welcome", "home-search", "home-profile", "home-discover", "home-illustration")
+    listOf("tab-title", "home-search", "tab-profile", "home-discover", "home-illustration")
       .forEach { tag ->
         onNodeWithTag(tag, useUnmergedTree = true).assertFullyInside(home)
       }
