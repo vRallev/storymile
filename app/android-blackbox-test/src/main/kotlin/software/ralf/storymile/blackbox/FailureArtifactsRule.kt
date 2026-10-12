@@ -7,8 +7,11 @@ import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
 class FailureArtifactsRule : TestWatcher() {
+  @Suppress(
+    "TooGenericExceptionCaught",
+  ) // Keep artifact failures from replacing the original test failure.
   override fun failed(error: Throwable, description: Description) {
-    runCatching {
+    try {
       val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
       val reporter = ResultsReporter(description.methodName)
       val screenshot = reporter.addNewFile("${description.methodName}.png", "Screenshot")
@@ -20,7 +23,8 @@ class FailureArtifactsRule : TestWatcher() {
         .addNewFile("${description.methodName}-logcat.txt", "Logcat")
         .writeText(device.executeShellCommand("logcat -d -t 500"))
       reporter.reportToInstrumentation()
+    } catch (exception: Throwable) {
+      error.addSuppressed(exception)
     }
-      .onFailure { error.addSuppressed(it) }
   }
 }

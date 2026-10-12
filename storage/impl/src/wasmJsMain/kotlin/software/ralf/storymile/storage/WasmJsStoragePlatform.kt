@@ -103,7 +103,13 @@ class WasmJsStoragePlatform : StoragePlatform() {
       awaitResult(onCancellation)
     } catch (exception: CancellationException) {
       // Finish browser work before the scope can release this namespace.
-      withContext(NonCancellable) { runCatching { awaitResult() } }
+      withContext(NonCancellable) {
+        try {
+          awaitResult()
+        } catch (_: Throwable) {
+          // Preserve the original cancellation after browser cleanup.
+        }
+      }
       throw exception
     }
 

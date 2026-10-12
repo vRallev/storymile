@@ -38,13 +38,14 @@ class AndroidAudioPlayer(
   private var speed = 1f
   private var closed = false
 
+  @Suppress("TooGenericExceptionCaught") // Report all platform playback failures.
   override fun load(source: String) {
     if (closed) {
       return
     }
     releasePlayer()
     state.value = State(source = source)
-    runCatching {
+    try {
       val engine =
         ExoPlayer.Builder(application)
           .setAudioAttributes(
@@ -83,8 +84,9 @@ class AndroidAudioPlayer(
             delay(100)
           }
         }
+    } catch (exception: Throwable) {
+      fail(exception)
     }
-      .onFailure { fail(it) }
   }
 
   override fun play() {
@@ -130,16 +132,18 @@ class AndroidAudioPlayer(
     state.value = state.value.copy(isPlaying = false, playWhenReady = false, isReady = false)
   }
 
+  @Suppress("TooGenericExceptionCaught") // Report all platform playback failures.
   private fun command(block: (ExoPlayer) -> Unit) {
     val engine = player ?: return
     if (closed || state.value.error != null) {
       return
     }
-    runCatching {
+    try {
       block(engine)
       publish(engine)
+    } catch (exception: Throwable) {
+      fail(exception)
     }
-      .onFailure { fail(it) }
   }
 
   private fun publish(engine: ExoPlayer) {

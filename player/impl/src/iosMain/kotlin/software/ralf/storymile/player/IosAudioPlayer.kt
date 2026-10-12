@@ -61,13 +61,14 @@ class IosAudioPlayer(
   private var playWhenReady = false
   private val pauseObservers = mutableListOf<NSObjectProtocol>()
 
+  @Suppress("TooGenericExceptionCaught") // Report all platform playback failures.
   override fun load(source: String) {
     if (closed) {
       return
     }
     releasePlayer()
     state.value = State(source = source)
-    runCatching {
+    try {
       val engine = memScoped {
         val error = alloc<ObjCObjectVar<NSError?>>()
         error.value = null
@@ -127,8 +128,9 @@ class IosAudioPlayer(
             delay(100)
           }
         }
+    } catch (exception: Throwable) {
+      fail(exception.message ?: "Could not load audio.")
     }
-      .onFailure { fail(it.message ?: "Could not load audio.") }
   }
 
   override fun play() {
@@ -185,16 +187,18 @@ class IosAudioPlayer(
     state.value = state.value.copy(isPlaying = false, playWhenReady = false, isReady = false)
   }
 
+  @Suppress("TooGenericExceptionCaught") // Report all platform playback failures.
   private fun command(block: (AVAudioPlayer) -> Unit) {
     val engine = player ?: return
     if (closed || state.value.error != null) {
       return
     }
-    runCatching {
+    try {
       block(engine)
       publish(engine)
+    } catch (exception: Throwable) {
+      fail(exception.message ?: "Could not play audio.")
     }
-      .onFailure { fail(it.message ?: "Could not play audio.") }
   }
 
   private fun publish(engine: AVAudioPlayer) {

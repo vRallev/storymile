@@ -161,14 +161,16 @@ class PlaylistRepositoryImpl(
     return defaults
   }
 
+  @Suppress("TooGenericExceptionCaught") // Report command failures while preserving cancellation.
   private suspend fun reportFailure(block: suspend () -> Unit) {
-    runCatching { block() }
-      .onFailure { exception ->
-        if (exception is CancellationException) {
-          throw exception
-        }
-        logger.e(exception) { "Could not load or update playlists." }
+    try {
+      block()
+    } catch (exception: Throwable) {
+      if (exception is CancellationException) {
+        throw exception
       }
+      logger.e(exception) { "Could not load or update playlists." }
+    }
   }
 
   private companion object {

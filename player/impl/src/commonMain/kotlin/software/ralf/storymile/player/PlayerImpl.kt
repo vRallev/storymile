@@ -53,9 +53,10 @@ internal constructor(
     { Res.getUri(it) },
   )
 
+  @Suppress("TooGenericExceptionCaught") // Report playback failures while preserving cancellation.
   override fun onEnterScope(scope: Scope) {
     scope.launch(mainDispatcher) {
-      runCatching {
+      try {
         if (runtimeModeController.mode() != RuntimeMode.Fake || closed) {
           return@launch
         }
@@ -69,15 +70,14 @@ internal constructor(
           }
         }
         audioPlayer.value.state.collect { updateAudioState(it) }
-      }
-        .onFailure { exception ->
-          if (exception is CancellationException) {
-            throw exception
-          }
-          state.update {
-            it.copy(isPlaying = false, error = exception.message ?: "Playback failed")
-          }
+      } catch (exception: Throwable) {
+        if (exception is CancellationException) {
+          throw exception
         }
+        state.update {
+          it.copy(isPlaying = false, error = exception.message ?: "Playback failed")
+        }
+      }
     }
   }
 

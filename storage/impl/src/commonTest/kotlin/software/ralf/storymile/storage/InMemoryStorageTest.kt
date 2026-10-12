@@ -198,7 +198,11 @@ class InMemoryStorageTest {
           preferences.edit {
             it[key] = "light"
             editStarted.complete(Unit)
-            runCatching { awaitCancellation() }
+            try {
+              awaitCancellation()
+            } catch (_: CancellationException) {
+              // An edit that swallows cancellation must not commit.
+            }
           }
         }
           .isInstanceOf<CancellationException>()
