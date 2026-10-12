@@ -29,8 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -38,6 +36,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
+import software.ralf.storymile.design.TabHeader
 import software.ralf.storymile.library.impl.generated.resources.Res
 import software.ralf.storymile.library.impl.generated.resources.library_discover
 import software.ralf.storymile.library.impl.generated.resources.library_empty_description
@@ -46,6 +45,7 @@ import software.ralf.storymile.library.impl.generated.resources.library_episodes
 import software.ralf.storymile.library.impl.generated.resources.library_illustration
 import software.ralf.storymile.library.impl.generated.resources.library_shows
 import software.ralf.storymile.library.impl.generated.resources.library_title
+import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.theme.AppTheme
 
 @ContributesRenderer
@@ -59,45 +59,52 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
       val short = maxHeight < 480.dp
       val horizontal = !compact && short
       val large = maxWidth >= 1000.dp && !short
-      val sidePadding = if (compact) 16.dp else 32.dp
-      Column(Modifier.fillMaxSize().padding(horizontal = sidePadding)) {
-        Header(model, compact)
-        if (horizontal) {
-          Row(
-            modifier = Modifier.fillMaxWidth().weight(1f).padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-          ) {
-            Image(
-              painter = painterResource(Res.drawable.library_illustration),
-              contentDescription = null,
-              modifier = Modifier.padding(end = 24.dp).size(144.dp).testTag("library-illustration"),
-            )
-            EmptyMessage(
-              model,
-              compact = true,
-              large = false,
-              horizontal = true,
-              modifier = Modifier.weight(1f, fill = false),
-            )
-          }
-        } else {
-          Column(
-            modifier =
-              Modifier.fillMaxWidth().weight(1f).padding(vertical = if (short) 8.dp else 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-          ) {
-            Image(
-              painter = painterResource(Res.drawable.library_illustration),
-              contentDescription = null,
+      val sidePadding = if (compact) 20.dp else 32.dp
+      Column(Modifier.fillMaxSize()) {
+        TabHeader(
+          title = stringResource(Res.string.library_title),
+          windowWidth = LocalScreenSize.current.width,
+        )
+        Column(Modifier.weight(1f).padding(horizontal = sidePadding)) {
+          Filters(model)
+          if (horizontal) {
+            Row(
+              modifier = Modifier.fillMaxWidth().weight(1f).padding(vertical = 8.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.Center,
+            ) {
+              Image(
+                painter = painterResource(Res.drawable.library_illustration),
+                contentDescription = null,
+                modifier =
+                  Modifier.padding(end = 24.dp).size(144.dp).testTag("library-illustration"),
+              )
+              EmptyMessage(
+                model,
+                compact = true,
+                large = false,
+                horizontal = true,
+                modifier = Modifier.weight(1f, fill = false),
+              )
+            }
+          } else {
+            Column(
               modifier =
-                Modifier.weight(1f, fill = false)
-                  .size(if (compact) 164.dp else if (large) 256.dp else 216.dp)
-                  .testTag("library-illustration"),
-            )
-            Spacer(Modifier.height(if (short) 8.dp else 24.dp))
-            EmptyMessage(model, compact, large, horizontal = false)
+                Modifier.fillMaxWidth().weight(1f).padding(vertical = if (short) 8.dp else 24.dp),
+              horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement = Arrangement.Center,
+            ) {
+              Image(
+                painter = painterResource(Res.drawable.library_illustration),
+                contentDescription = null,
+                modifier =
+                  Modifier.weight(1f, fill = false)
+                    .size(if (compact) 164.dp else if (large) 256.dp else 216.dp)
+                    .testTag("library-illustration"),
+              )
+              Spacer(Modifier.height(if (short) 8.dp else 24.dp))
+              EmptyMessage(model, compact, large, horizontal = false)
+            }
           }
         }
       }
@@ -105,14 +112,7 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
   }
 
   @Composable
-  private fun Header(model: LibraryPresenterImpl.Model, compact: Boolean) {
-    Text(
-      stringResource(Res.string.library_title),
-      modifier = Modifier.padding(top = 16.dp).semantics { heading() },
-      style = if (compact) AppTheme.typography.headlineLarge else AppTheme.typography.displaySmall,
-      fontWeight = FontWeight.Bold,
-      color = AppTheme.colorScheme.onBackground,
-    )
+  private fun Filters(model: LibraryPresenterImpl.Model) {
     FlowRow(
       Modifier.padding(top = 8.dp, bottom = 8.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp),

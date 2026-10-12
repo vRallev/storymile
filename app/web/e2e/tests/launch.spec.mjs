@@ -20,7 +20,7 @@ test('launches into app navigation and selected tab content', async ({ page }, t
     await page.goto('/');
     await expect(page).toHaveTitle('Storymile');
     // Compose exposes test tags as accessibility DOM IDs; pixels are checked separately.
-    for (const tag of ['tab-content', 'home-welcome', 'home-search', 'home-discover', 'tabs', 'tab-home', 'tab-library', 'tab-downloads']) {
+    for (const tag of ['tab-content', 'tab-title', 'home-search', 'home-discover', 'tabs', 'tab-home', 'tab-library', 'tab-downloads']) {
       await expect(page.locator(`[id="${tag}"]`)).toBeAttached();
     }
     await expect(page.locator('[id="playback"]')).not.toBeAttached();

@@ -13,15 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -37,6 +33,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
+import software.ralf.storymile.design.TabHeader
 import software.ralf.storymile.downloads.impl.generated.resources.Res
 import software.ralf.storymile.downloads.impl.generated.resources.discover_podcasts
 import software.ralf.storymile.downloads.impl.generated.resources.download_illustration
@@ -45,11 +42,8 @@ import software.ralf.storymile.downloads.impl.generated.resources.downloads_desc
 import software.ralf.storymile.downloads.impl.generated.resources.downloads_hint
 import software.ralf.storymile.downloads.impl.generated.resources.downloads_summary
 import software.ralf.storymile.downloads.impl.generated.resources.listen_anywhere
-import software.ralf.storymile.downloads.impl.generated.resources.profile
-import software.ralf.storymile.downloads.impl.generated.resources.storymile
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.theme.AppTheme
-import software.ralf.storymile.theme.StorymileLogo
 
 @ContributesRenderer
 class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
@@ -60,94 +54,46 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
       val short = maxHeight / LocalDensity.current.fontScale < 600.dp
       val compact = window.width < 600.dp || short
       val horizontal = short && maxWidth >= 560.dp
-      Column(
-        Modifier.fillMaxSize()
-          .padding(
-            horizontal = if (compact) 20.dp else 32.dp,
-            vertical = if (short) 12.dp else 24.dp,
-          ),
-      ) {
-        Header(
-          showBrand = !short && window.width < 1200.dp && window.height > window.width,
-          compact = compact,
-        )
-        Spacer(Modifier.height(if (short) 12.dp else 32.dp))
-        Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-          if (horizontal) {
-            Row(
-              modifier = Modifier.widthIn(max = 760.dp).fillMaxSize().testTag("downloads-empty"),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(32.dp),
-            ) {
-              DownloadIllustration(compact = true)
-              EmptyMessage(compact = true, tight = true, modifier = Modifier.weight(1f))
-            }
-          } else {
-            Column(
-              modifier = Modifier.widthIn(max = 680.dp).fillMaxSize().testTag("downloads-empty"),
-              horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.Center,
-            ) {
-              DownloadIllustration(compact, Modifier.weight(1f, fill = false))
-              Spacer(Modifier.height(if (short) 12.dp else 24.dp))
-              EmptyMessage(compact, tight = short)
+      val sidePadding = if (maxWidth < 600.dp) 20.dp else 32.dp
+      Column(Modifier.fillMaxSize()) {
+        TabHeader(title = stringResource(Res.string.downloads), windowWidth = window.width)
+        Column(
+          Modifier.weight(1f)
+            .padding(horizontal = sidePadding)
+            .padding(bottom = if (short) 12.dp else 24.dp),
+        ) {
+          Text(
+            text = stringResource(Res.string.downloads_summary),
+            style =
+              if (compact) AppTheme.typography.bodyLarge else AppTheme.typography.headlineSmall,
+            color = AppTheme.colorScheme.secondary,
+          )
+          Spacer(Modifier.height(if (short) 12.dp else 32.dp))
+          Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+            if (horizontal) {
+              Row(
+                modifier = Modifier.widthIn(max = 760.dp).fillMaxSize().testTag("downloads-empty"),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(32.dp),
+              ) {
+                DownloadIllustration(compact = true)
+                EmptyMessage(compact = true, tight = true, modifier = Modifier.weight(1f))
+              }
+            } else {
+              Column(
+                modifier = Modifier.widthIn(max = 680.dp).fillMaxSize().testTag("downloads-empty"),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+              ) {
+                DownloadIllustration(compact, Modifier.weight(1f, fill = false))
+                Spacer(Modifier.height(if (short) 12.dp else 24.dp))
+                EmptyMessage(compact, tight = short)
+              }
             }
           }
+          Spacer(Modifier.height(if (short) 12.dp else 48.dp))
         }
-        Spacer(Modifier.height(if (short) 12.dp else 48.dp))
       }
-    }
-  }
-
-  @Composable
-  private fun Header(showBrand: Boolean, compact: Boolean) {
-    if (showBrand) {
-      Row(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-      ) {
-        StorymileLogo(Modifier.size(if (compact) 44.dp else 56.dp))
-        Text(
-          text = stringResource(Res.string.storymile),
-          style = AppTheme.typography.titleLarge,
-          color = AppTheme.colorScheme.primary,
-          modifier = Modifier.weight(1f),
-        )
-        Profile()
-      }
-    }
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-      Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-          text = stringResource(Res.string.downloads),
-          style =
-            if (compact) AppTheme.typography.headlineLarge else AppTheme.typography.displayLarge,
-          fontWeight = FontWeight.Bold,
-          color = AppTheme.colorScheme.onBackground,
-          modifier = Modifier.semantics { heading() },
-        )
-        Text(
-          text = stringResource(Res.string.downloads_summary),
-          style = if (compact) AppTheme.typography.bodyLarge else AppTheme.typography.headlineSmall,
-          color = AppTheme.colorScheme.secondary,
-        )
-      }
-      if (!showBrand) {
-        Profile()
-      }
-    }
-  }
-
-  @Composable
-  private fun Profile() {
-    IconButton(onClick = {}, modifier = Modifier.testTag("downloads-profile")) {
-      Icon(
-        imageVector = Icons.Filled.AccountCircle,
-        contentDescription = stringResource(Res.string.profile),
-        tint = AppTheme.colorScheme.outline,
-        modifier = Modifier.size(44.dp),
-      )
     }
   }
 

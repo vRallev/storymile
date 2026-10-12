@@ -5,6 +5,4 @@
   <string name="downloads_description">Download episodes to listen without a connection.</string>
   <string name="discover_podcasts">Discover podcasts</string>
   <string name="downloads_hint">Use the download icon on any episode.</string>
-  <string name="storymile">Storymile</string>
-  <string name="profile">Profile</string>
 </resources>

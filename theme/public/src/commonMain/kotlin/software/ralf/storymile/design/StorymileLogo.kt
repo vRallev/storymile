@@ -1,4 +1,4 @@
-package software.ralf.storymile.theme
+package software.ralf.storymile.design
 
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
