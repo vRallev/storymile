@@ -12,6 +12,7 @@ flowchart TD
   AppRootPresenter["AppRootPresenter"]
   UserPresenter["UserPresenterImpl\nAdaptiveTemplate"]
   TabContent["TabsPresenterImpl.ContentModel\nselected tab placeholder"]
+  HomePresenter["HomePresenterImpl\nempty home"]
   TabsPresenter["TabsPresenterImpl\ntabs"]
   PlaybackPresenter["PlaybackPresenterImpl\ncollapsed and expanded playback"]
 
@@ -19,7 +20,8 @@ flowchart TD
   AppTemplatePresenter --> AppRootPresenter
   AppRootPresenter --> UserPresenter
   UserPresenter --> TabsPresenter
-  TabsPresenter -->|content model| TabContent
+  TabsPresenter -->|Home| HomePresenter
+  TabsPresenter -->|Library or Downloads| TabContent
   UserPresenter --> PlaybackPresenter
 ```
 
@@ -39,9 +41,12 @@ obtains the
 [playback](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackPresenterImpl.kt)
 presenters from the active user scope. A scope change resets their state.
 The tabs presenter owns the selected destination and produces its content model.
-It starts with Home.
+It starts with
+[HomePresenterImpl](../home/impl/src/commonMain/kotlin/software/ralf/storymile/home/HomePresenterImpl.kt).
+[HomeRenderer](../home/impl/src/commonMain/kotlin/software/ralf/storymile/home/HomeRenderer.kt)
+shows the welcome screen.
 [TabContentRenderer](../tabs/impl/src/commonMain/kotlin/software/ralf/storymile/tabs/TabContentRenderer.kt)
-shows only the selected tab's name until feature screens are added.
+shows the selected tab's name for Library and Downloads.
 The user presenter places these models in the content, navigation, and playback slots of
 [AppTemplate](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/AppTemplate.kt).
 The playback presenter supplies its slots only when the current user's
@@ -59,6 +64,9 @@ and layout rules.
 shows Home, Library, and Downloads with Material icons in every navigation layout.
 Side navigation also shows the Storymile logo and title.
 Window resizing changes the navigation layout without changing the selected destination.
+
+Home stacks its illustration and discovery prompt in narrow panes and places them side by side in
+wide panes. The illustration shrinks to keep the content within the window.
 
 [PlaybackScreenRenderer](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackScreenRenderer.kt)
 shows artwork, episode details, playback controls, and chapters. Its collapse button calls the template's

@@ -14,6 +14,7 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -67,17 +68,21 @@ class AppShellRobot : ComposeRobot() {
       val item = compose.onNodeWithTag("tab-${it.name.lowercase()}").assertIsDisplayed()
       if (it == tab) item.assertIsSelected() else item.assertIsNotSelected()
     }
-    val label = tab.name.lowercase().replaceFirstChar { it.titlecase() }
-    compose
-      .onNodeWithTag("selected-tab")
-      .assertIsDisplayed()
-      .assertTextEquals("$label tab selected")
+    if (tab == TabsPresenter.Tab.HOME) {
+      compose.onNodeWithTag("home-screen").assertIsDisplayed()
+    } else {
+      val label = tab.name.lowercase().replaceFirstChar { it.titlecase() }
+      compose
+        .onNodeWithTag("selected-tab")
+        .assertIsDisplayed()
+        .assertTextEquals("$label tab selected")
+    }
   }
 
   /** Checks that side navigation includes the app's logo and title. */
   fun seeBranding(visible: Boolean) {
     val logo = compose.onNodeWithTag("storymile-logo")
-    val title = compose.onNodeWithText("Storymile")
+    val title = compose.onNode(hasText("Storymile") and hasAnyAncestor(hasTestTag("tabs")))
     if (visible) {
       logo.assertIsDisplayed()
       title.assertIsDisplayed()

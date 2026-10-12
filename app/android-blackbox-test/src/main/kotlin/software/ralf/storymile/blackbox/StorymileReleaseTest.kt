@@ -26,7 +26,7 @@ class StorymileReleaseTest {
       intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
     )
 
-    listOf("tab-content", "tabs").forEach { tag ->
+    listOf("tab-content", "home-welcome", "home-search", "tabs").forEach { tag ->
       onElement(timeoutMs = 10_000) {
         packageName?.toString() == APP_PACKAGE && isVisibleToUser && viewIdResourceName == tag
       }

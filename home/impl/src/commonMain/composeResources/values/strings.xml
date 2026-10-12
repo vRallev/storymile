@@ -1,0 +1,10 @@
+<resources>
+  <string name="storymile">Storymile</string>
+  <string name="welcome_to_storymile">Welcome to Storymile</string>
+  <string name="podcasts_and_episodes">Podcasts and episodes</string>
+  <string name="find_your_first_podcast">Find your first podcast</string>
+  <string name="explore_topics">Explore topics and find a story worth listening to.</string>
+  <string name="discover_podcasts">Discover podcasts</string>
+  <string name="listen_without_account">Listen without an account</string>
+  <string name="profile">Profile</string>
+</resources>

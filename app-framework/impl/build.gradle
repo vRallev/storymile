@@ -17,6 +17,7 @@ dependencies {
 
   androidMainImplementation libs.androidx.activity.compose
 
+  commonMainImplementation project(':home:impl')
   commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':playlist:impl')
   commonMainImplementation project(':presenter-navigation:impl')

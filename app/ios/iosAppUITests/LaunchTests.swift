@@ -21,15 +21,15 @@ final class LaunchTests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 15))
 
-        for tag in ["tab-content", "tabs"] {
+        for tag in ["tab-content", "home-search", "tabs"] {
             let container = app.descendants(matching: .any)[tag]
             XCTAssertTrue(container.waitForExistence(timeout: 15), "Missing \(tag) container")
             XCTAssertFalse(container.frame.isEmpty)
         }
 
-        let selectedTab = app.staticTexts["selected-tab"]
+        let selectedTab = app.staticTexts["home-welcome"]
         XCTAssertTrue(selectedTab.waitForExistence(timeout: 15))
-        XCTAssertEqual(selectedTab.label, "Home tab selected")
+        XCTAssertEqual(selectedTab.label, "Welcome to Storymile")
 
         for tag in ["tab-home", "tab-library", "tab-downloads"] {
             let tab = app.buttons[tag]
