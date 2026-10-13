@@ -1,4 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { verifyFakePlayback } from './playback.mjs';
+
+test('plays fake episodes when opened through index.html', async ({ page }) => {
+  await verifyFakePlayback(page, '/index.html');
+});
 
 test('launches into app navigation and selected tab content', async ({ page }, testInfo) => {
   const errors = [];

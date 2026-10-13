@@ -1,4 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { verifyFakePlayback } from './playback.mjs';
+
+test('plays fake episodes under the published project path', async ({ page }) => {
+  await verifyFakePlayback(page, 'web/index.html');
+});
 
 // Host controls need a persistent app window; production Wasm is checked separately in CI.
 const docsHostTest = test.extend({
