@@ -27,7 +27,8 @@ final class LaunchTests: XCTestCase {
             XCTAssertFalse(container.frame.isEmpty)
         }
 
-        let selectedTab = app.staticTexts["tab-title"]
+        // Compose exposes heading semantics as an Other accessibility element on iOS.
+        let selectedTab = app.descendants(matching: .any)["tab-title"]
         XCTAssertTrue(selectedTab.waitForExistence(timeout: 15))
         XCTAssertEqual(selectedTab.label, "Welcome to Storymile")
 
