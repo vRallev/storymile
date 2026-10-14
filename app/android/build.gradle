@@ -9,6 +9,17 @@ storymile {
   addImplModuleDependencies true
 }
 
+android.buildFeatures.buildConfig = true
+
+androidComponents {
+  onVariants(selector().withBuildType('release')) { variant ->
+    def versionCode = providers.environmentVariable('GITHUB_RUN_NUMBER')
+      .orElse(providers.gradleProperty('VERSION_CODE'))
+      .map { it.toInteger() }
+    variant.outputs.each { it.versionCode.set(versionCode) }
+  }
+}
+
 dependencies {
   implementation project(':app-framework:impl')
 
