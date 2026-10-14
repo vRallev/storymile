@@ -253,7 +253,7 @@ Desktop tests include rendered and headless application smoke tests.
 #### Android
 
 Android UI tests use a managed Pixel 3 emulator. The blackbox test checks the initial screen
-of the release APK, signed with the debug key and shrunk by R8 without obfuscation.
+of the release APK, shrunk by R8 without obfuscation. Main uses the release key; PRs use the debug key.
 
 #### Web
 
