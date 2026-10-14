@@ -135,8 +135,6 @@ Put local signing values in `~/.gradle/gradle.properties`:
 storymile.android.signing.storeFile=/absolute/path/to/storymile-release.p12
 storymile.android.signing.storePassword=YOUR_PASSWORD
 storymile.android.signing.keyAlias=storymile
-# Optional; defaults to storePassword.
-storymile.android.signing.keyPassword=YOUR_KEY_PASSWORD
 # Optional; fail when credentials are missing.
 storymile.android.signing.required=true
 ```
@@ -144,13 +142,12 @@ storymile.android.signing.required=true
 Build with `./gradlew --quiet :app:android:assembleRelease`.
 Environment variables override these properties: `STORYMILE_ANDROID_KEYSTORE_PATH`,
 `STORYMILE_ANDROID_KEYSTORE_PASSWORD`, `STORYMILE_ANDROID_KEY_ALIAS`,
-`STORYMILE_ANDROID_KEY_PASSWORD`, and `STORYMILE_ANDROID_SIGNING_REQUIRED`, respectively.
+and `STORYMILE_ANDROID_SIGNING_REQUIRED`, respectively.
 Without credentials, release builds use debug signing. Incomplete credentials fail configuration.
 Keep the keystore and passwords outside the repository.
 
 Main-branch Android release CI requires the `ANDROID_KEYSTORE_BASE64`,
 `ANDROID_KEYSTORE_PASSWORD`, and `ANDROID_KEY_ALIAS` repository secrets.
-`ANDROID_KEY_PASSWORD` is optional and defaults to the keystore password.
 PR builds use debug signing. CI removes the restored key after the job.
 
 ### Documentation site

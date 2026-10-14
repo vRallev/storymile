@@ -270,7 +270,6 @@ jobs:
       STORYMILE_ANDROID_SIGNING_REQUIRED: ${{ github.ref == 'refs/heads/main' }}
       STORYMILE_ANDROID_KEYSTORE_PASSWORD: ${{ github.ref == 'refs/heads/main' && secrets.ANDROID_KEYSTORE_PASSWORD || '' }}
       STORYMILE_ANDROID_KEY_ALIAS: ${{ github.ref == 'refs/heads/main' && secrets.ANDROID_KEY_ALIAS || '' }}
-      STORYMILE_ANDROID_KEY_PASSWORD: ${{ github.ref == 'refs/heads/main' && secrets.ANDROID_KEY_PASSWORD || '' }}
     steps:
       - uses: actions/checkout@v7
       - name: Setup

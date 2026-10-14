@@ -46,15 +46,12 @@ internal class BaseAndroidPlugin : Plugin<Project> {
     val storeFile = signingProperty("storeFile", "STORYMILE_ANDROID_KEYSTORE_PATH")
     val storePassword = signingProperty("storePassword", "STORYMILE_ANDROID_KEYSTORE_PASSWORD")
     val keyAlias = signingProperty("keyAlias", "STORYMILE_ANDROID_KEY_ALIAS")
-    val keyPassword = signingProperty("keyPassword", "STORYMILE_ANDROID_KEY_PASSWORD")
     val required =
       signingProperty("required", "STORYMILE_ANDROID_SIGNING_REQUIRED")
         .map { it.toBooleanStrict() }
         .getOrElse(false)
 
-    if (
-      !required && listOf(storeFile, storePassword, keyAlias, keyPassword).none { it.isPresent }
-    ) {
+    if (!required && listOf(storeFile, storePassword, keyAlias).none { it.isPresent }) {
       return
     }
 
@@ -70,7 +67,7 @@ internal class BaseAndroidPlugin : Plugin<Project> {
         it.storeFile = file(storeFile.get())
         it.storePassword = storePassword.get()
         it.keyAlias = keyAlias.get()
-        it.keyPassword = keyPassword.orElse(storePassword).get()
+        it.keyPassword = storePassword.get()
       }
     android.buildTypes.getByName("release").signingConfig = signing
   }
