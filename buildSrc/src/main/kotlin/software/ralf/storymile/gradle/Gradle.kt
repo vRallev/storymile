@@ -65,6 +65,9 @@ internal val Project.safePathString: String
 internal val Project.versionName: String
   get() = providers.gradleProperty("VERSION_NAME").get()
 
+internal val Project.versionCode: Int
+  get() = providers.gradleProperty("storymile.versionCode").get().toInt()
+
 internal fun String.capitalize(): String = replaceFirstChar {
   if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString()
 }

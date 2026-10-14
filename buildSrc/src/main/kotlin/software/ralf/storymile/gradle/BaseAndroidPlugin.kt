@@ -17,7 +17,7 @@ internal class BaseAndroidPlugin : Plugin<Project> {
       applicationId = "software.ralf.storymile"
       minSdk = androidMinSdk
       targetSdk = androidTargetSdk
-      versionCode = 1
+      versionCode = this@configureAndroid.versionCode
       versionName = this@configureAndroid.versionName
     }
 

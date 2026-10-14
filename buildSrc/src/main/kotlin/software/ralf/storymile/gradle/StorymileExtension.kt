@@ -5,6 +5,35 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 /** Project build options configured through the `storymile` Gradle DSL. */
 public open class StorymileExtension(private val project: Project) {
+  public fun enableBuildInfo(enabled: Boolean) {
+    if (!enabled) {
+      return
+    }
+
+    val generate =
+      project.tasks.register("generateBuildInfo", GenerateBuildInfoTask::class.java) {
+        it.versionName.set(project.versionName)
+        it.versionCode.set(project.versionCode)
+        it.gitSha.set(
+          project.providers
+            .exec { spec ->
+              spec.workingDir(project.isolated.rootProject.projectDirectory.asFile)
+              spec.commandLine("git", "rev-parse", "HEAD")
+            }
+            .standardOutput
+            .asText
+            .map { sha -> sha.trim() },
+        )
+        it.outputDirectory.set(project.layout.buildDirectory.dir("generated/buildInfo/commonMain"))
+      }
+    project.kmpExtension.sourceSets
+      .getByName("commonMain")
+      .kotlin
+      .srcDir(
+        generate.flatMap { it.outputDirectory },
+      )
+  }
+
   public fun enableComposeUi(enabled: Boolean) {
     project.appPlatform.enableComposeUi(enabled)
     if (enabled) {

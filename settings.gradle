@@ -59,6 +59,7 @@ include ':user:impl'
 include ':user:public'
 include ':util:impl'
 include ':util:public'
+include ':util:testing'
 
 develocity {
     buildScan {
