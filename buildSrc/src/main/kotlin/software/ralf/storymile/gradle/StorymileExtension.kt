@@ -3,6 +3,7 @@ package software.ralf.storymile.gradle
 import com.github.gmazzo.buildconfig.BuildConfigExtension
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
+import software.ralf.app.platform.gradle.ModuleStructurePlugin.Companion.namespace
 
 /** Project build options configured through the `storymile` Gradle DSL. */
 public open class StorymileExtension(private val project: Project) {
@@ -13,7 +14,7 @@ public open class StorymileExtension(private val project: Project) {
 
     project.plugins.apply(Plugins.BUILD_CONFIG)
     project.extensions.getByType(BuildConfigExtension::class.java).apply {
-      packageName("software.ralf.storymile.util")
+      packageName(project.namespace())
       className("BuildInfoValues")
       useKotlinOutput()
       buildConfigField(String::class.java, "VERSION_NAME", project.versionName)
