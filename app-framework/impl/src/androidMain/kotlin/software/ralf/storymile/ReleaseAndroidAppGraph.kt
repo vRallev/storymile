@@ -5,11 +5,12 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import software.ralf.app.platform.scope.RootScopeProvider
+import software.ralf.storymile.util.BuildInfo
 import software.ralf.storymile.util.BuildInfoImpl
 
-/** Final Android graph, including dependencies supplied by the Android application. */
-@DependencyGraph(AppScope::class)
-interface AndroidAppGraph {
+/** Release Android graph, including dependencies supplied by the Android application. */
+@DependencyGraph(AppScope::class, excludes = [BuildInfoImpl::class])
+interface ReleaseAndroidAppGraph {
   /** Factory for the Android application graph. */
   @DependencyGraph.Factory
   fun interface Factory {
@@ -17,7 +18,7 @@ interface AndroidAppGraph {
     fun create(
       @Provides application: Application,
       @Provides rootScopeProvider: RootScopeProvider,
-      @Provides @BuildInfoImpl.VersionCode versionCode: Int,
-    ): AndroidAppGraph
+      @Provides buildInfo: BuildInfo,
+    ): ReleaseAndroidAppGraph
   }
 }
