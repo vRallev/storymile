@@ -1,6 +1,8 @@
 package software.ralf.storymile.templates
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.shape.CornerSize
@@ -99,7 +101,8 @@ class PlaybackTransition(private val progress: () -> Float) {
    * during motion. Fully scrolled-out endpoints fade to or from the visible endpoint.
    *
    * [horizontalArc] and [verticalArc] bend the path away from the straight line. Positive values
-   * move right and down. Both reach their maximum deviation halfway and are zero at the endpoints.
+   * move right and down. [arcEasing] controls when the detour reaches its peak. Both arcs are zero
+   * at the endpoints.
    */
   @Composable
   fun SharedText(
@@ -111,6 +114,7 @@ class PlaybackTransition(private val progress: () -> Float) {
     maxLines: Int = Int.MAX_VALUE,
     verticalArc: Dp = 0.dp,
     horizontalArc: Dp = 0.dp,
+    arcEasing: Easing = LinearEasing,
     content: @Composable BoxScope.() -> Unit,
   ) {
     require(style.fontSize.value.isFinite() && style.fontSize.value > 0f)
@@ -123,6 +127,7 @@ class PlaybackTransition(private val progress: () -> Float) {
       text = TextEndpoint(text, style, maxLines),
       verticalArc = verticalArc,
       horizontalArc = horizontalArc,
+      arcEasing = arcEasing,
     ) { element ->
       Box(
         Modifier.drawWithContent {
@@ -148,6 +153,7 @@ class PlaybackTransition(private val progress: () -> Float) {
     text: TextEndpoint? = null,
     verticalArc: Dp = 0.dp,
     horizontalArc: Dp = 0.dp,
+    arcEasing: Easing = LinearEasing,
     zIndexInOverlay: Float = 0f,
     content: @Composable BoxScope.(Element) -> Unit,
   ) {
@@ -209,7 +215,15 @@ class PlaybackTransition(private val progress: () -> Float) {
             }
           }
           .graphicsLayer {
-            element.transform(this, expanded, fraction, cornerSize, verticalArc, horizontalArc)
+            element.transform(
+              this,
+              expanded,
+              fraction,
+              cornerSize,
+              verticalArc,
+              horizontalArc,
+              arcEasing,
+            )
           }
           .then(if (accessible) Modifier else Modifier.clearAndSetSemantics {}),
         propagateMinConstraints = true,
@@ -270,6 +284,7 @@ class PlaybackTransition(private val progress: () -> Float) {
       cornerSize: CornerSize,
       verticalArc: Dp,
       horizontalArc: Dp,
+      arcEasing: Easing,
     ) =
       with(layer) {
         val start = collapsed
@@ -287,12 +302,14 @@ class PlaybackTransition(private val progress: () -> Float) {
             scaleX = lerp(start.bounds.width, end.bounds.width, fraction) / size.width
             scaleY = lerp(start.bounds.height, end.bounds.height, fraction) / size.height
           }
+          val arcFraction = arcEasing.transform(fraction)
+          val arc = 4f * arcFraction * (1f - arcFraction)
           translationX =
             lerp(start.bounds.left, end.bounds.left, fraction) - current.bounds.left +
-              horizontalArc.toPx() * 4f * fraction * (1f - fraction)
+              horizontalArc.toPx() * arc
           translationY =
             lerp(start.bounds.top, end.bounds.top, fraction) - current.bounds.top +
-              verticalArc.toPx() * 4f * fraction * (1f - fraction)
+              verticalArc.toPx() * arc
           shape = RoundedCornerShape(lerp(start.cornerRadius, end.cornerRadius, fraction) / scaleX)
         } else {
           scaleX = 1f

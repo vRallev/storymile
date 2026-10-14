@@ -2,6 +2,7 @@
 
 package software.ralf.storymile
 
+import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.findRootCoordinates
@@ -189,8 +190,16 @@ class PlayerTransitionUiTest {
     progress: Float,
   ) {
     val actual = controls(expanded = progress > 0f)
-    assertLabel(collapsed.title, expanded.title, actual.title, progress, "title")
-    assertLabel(collapsed.subtitle, expanded.subtitle, actual.subtitle, progress, "subtitle")
+    val window = onRoot().fetchSemanticsNode().boundsInRoot
+    val stacked = window.width < 600f || window.width <= window.height
+    val arc =
+      if (stacked) {
+        Offset(window.width * 0.1f, if (window.width < 600f) 64f else 96f)
+      } else {
+        Offset.Zero
+      }
+    assertLabel(collapsed.title, expanded.title, actual.title, progress, "title", arc)
+    assertLabel(collapsed.subtitle, expanded.subtitle, actual.subtitle, progress, "subtitle", arc)
     val expectedButton =
       Rect(
         left = interpolate(collapsed.button.left, expanded.button.left, progress),
@@ -211,17 +220,21 @@ class PlayerTransitionUiTest {
     actual: Label,
     progress: Float,
     name: String,
+    arc: Offset,
   ) {
     val layout = if (progress > 0f) expanded else collapsed
     val scale = interpolate(collapsed.fontSize, expanded.fontSize, progress) / layout.fontSize
+    val arcFraction = EaseOutCubic.transform(progress)
     assertNear(
       actual.bounds.left,
-      interpolate(collapsed.bounds.left, expanded.bounds.left, progress),
+      interpolate(collapsed.bounds.left, expanded.bounds.left, progress) +
+        arc.x * 4f * arcFraction * (1f - arcFraction),
       "$name left at $progress",
     )
     assertNear(
       actual.bounds.top,
-      interpolate(collapsed.bounds.top, expanded.bounds.top, progress),
+      interpolate(collapsed.bounds.top, expanded.bounds.top, progress) +
+        arc.y * 4f * arcFraction * (1f - arcFraction),
       "$name top at $progress",
     )
     assertNear(actual.bounds.width, layout.bounds.width * scale, "$name width at $progress")
