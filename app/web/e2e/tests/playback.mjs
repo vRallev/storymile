@@ -34,10 +34,16 @@ export async function verifyFakePlayback(page, path) {
     path: new URL('composeResources/software.ralf.storymile.player.impl.generated.resources/files/test-episodes/test-episode-1.mp3', page.url()).pathname,
   });
 
-  await page.locator('[id="playback-bar-play-pause"]').click({ force: true });
+  // Media readiness can precede initialization of the Compose semantics node.
+  const play = page.locator('[id="playback-bar-play-pause"][aria-label="Play"]');
+  await expect(play).toBeVisible();
+  await play.click({ force: true });
   await expect.poll(() => page.evaluate(() => window.storymileTestAudio.currentTime)).toBeGreaterThan(0);
   await expect.poll(() => page.evaluate(() => window.storymileTestAudio.paused)).toBe(false);
-  await page.locator('[id="playback-bar-play-pause"]').click({ force: true });
+  // Audio starts before Compose replaces the Play semantics node with Pause.
+  const pause = page.locator('[id="playback-bar-play-pause"][aria-label="Pause"]');
+  await expect(pause).toBeVisible();
+  await pause.click({ force: true });
   await expect.poll(() => page.evaluate(() => window.storymileTestAudio.paused)).toBe(true);
   expect(await page.evaluate(() => window.storymileTestAudio.error)).toBeNull();
 }
