@@ -27,12 +27,13 @@ open class AndroidApplication : Application(), RootScopeProvider {
   protected open fun metroGraph(storymileApplication: KmpApplication): AppGraph {
     return createGraphFactory<AndroidAppGraph.Factory>()
       .create(
-        this,
-        storymileApplication,
-        BuildInfoImpl(
-          versionName = BuildConfig.VERSION_NAME,
-          versionCode = BuildConfig.VERSION_CODE,
-        ),
+        application = this,
+        rootScopeProvider = storymileApplication,
+        buildInfo =
+          BuildInfoImpl(
+            versionName = BuildConfig.VERSION_NAME,
+            versionCode = BuildConfig.VERSION_CODE,
+          ),
       )
   }
 }
