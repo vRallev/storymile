@@ -1,6 +1,7 @@
 package software.ralf.storymile.gradle
 
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
@@ -29,6 +30,16 @@ internal class BaseAndroidPlugin : Plugin<Project> {
       it.optimization { enable = true }
       it.isDebuggable = false
       it.signingConfig = android.signingConfigs.getByName("debug")
+    }
+    android.buildFeatures.buildConfig = true
+    val androidComponents = extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
+    androidComponents.onVariants(androidComponents.selector().withBuildType("release")) { variant ->
+      val releaseVersionCode =
+        providers
+          .environmentVariable("GITHUB_RUN_NUMBER")
+          .orElse(providers.gradleProperty("VERSION_CODE"))
+          .map { it.toInt() }
+      variant.outputs.forEach { it.versionCode.set(releaseVersionCode) }
     }
     configureReleaseSigning(android)
     android.testOptions.unitTests {
