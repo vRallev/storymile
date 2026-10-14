@@ -1,10 +1,39 @@
 package software.ralf.storymile.gradle
 
+import com.github.gmazzo.buildconfig.BuildConfigExtension
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
+import software.ralf.app.platform.gradle.ModuleStructurePlugin.Companion.namespace
 
 /** Project build options configured through the `storymile` Gradle DSL. */
 public open class StorymileExtension(private val project: Project) {
+  public fun enableBuildInfo(enabled: Boolean) {
+    if (!enabled) {
+      return
+    }
+
+    project.plugins.apply(Plugins.BUILD_CONFIG)
+    project.extensions.getByType(BuildConfigExtension::class.java).apply {
+      packageName(project.namespace())
+      className("BuildInfoValues")
+      useKotlinOutput()
+      buildConfigField(String::class.java, "VERSION_NAME", project.versionName)
+      buildConfigField(Int::class.java, "VERSION_CODE", project.versionCode)
+      buildConfigField(
+        String::class.java,
+        "GIT_SHA",
+        project.providers
+          .exec { spec ->
+            spec.workingDir(project.isolated.rootProject.projectDirectory.asFile)
+            spec.commandLine("git", "rev-parse", "HEAD")
+          }
+          .standardOutput
+          .asText
+          .map { sha -> sha.trim() },
+      )
+    }
+  }
+
   public fun enableComposeUi(enabled: Boolean) {
     project.appPlatform.enableComposeUi(enabled)
     if (enabled) {
