@@ -69,6 +69,7 @@ gradlePlugin {
 dependencies {
   implementation libs.android.gradle.plugin
   implementation libs.app.platform.gradle.plugin
+  implementation libs.buildconfig.gradle.plugin
   implementation libs.compose.gradle.plugin
   implementation libs.compose.hot.reload.gradle.plugin
   implementation libs.detekt.gradle.plugin

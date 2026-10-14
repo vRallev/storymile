@@ -1,5 +1,6 @@
 package software.ralf.storymile.gradle
 
+import com.github.gmazzo.buildconfig.BuildConfigExtension
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
@@ -10,28 +11,26 @@ public open class StorymileExtension(private val project: Project) {
       return
     }
 
-    val generate =
-      project.tasks.register("generateBuildInfo", GenerateBuildInfoTask::class.java) {
-        it.versionName.set(project.versionName)
-        it.versionCode.set(project.versionCode)
-        it.gitSha.set(
-          project.providers
-            .exec { spec ->
-              spec.workingDir(project.isolated.rootProject.projectDirectory.asFile)
-              spec.commandLine("git", "rev-parse", "HEAD")
-            }
-            .standardOutput
-            .asText
-            .map { sha -> sha.trim() },
-        )
-        it.outputDirectory.set(project.layout.buildDirectory.dir("generated/buildInfo/commonMain"))
-      }
-    project.kmpExtension.sourceSets
-      .getByName("commonMain")
-      .kotlin
-      .srcDir(
-        generate.flatMap { it.outputDirectory },
+    project.plugins.apply(Plugins.BUILD_CONFIG)
+    project.extensions.getByType(BuildConfigExtension::class.java).apply {
+      packageName("software.ralf.storymile.util")
+      className("BuildInfoValues")
+      useKotlinOutput()
+      buildConfigField(String::class.java, "VERSION_NAME", project.versionName)
+      buildConfigField(Int::class.java, "VERSION_CODE", project.versionCode)
+      buildConfigField(
+        String::class.java,
+        "GIT_SHA",
+        project.providers
+          .exec { spec ->
+            spec.workingDir(project.isolated.rootProject.projectDirectory.asFile)
+            spec.commandLine("git", "rev-parse", "HEAD")
+          }
+          .standardOutput
+          .asText
+          .map { sha -> sha.trim() },
       )
+    }
   }
 
   public fun enableComposeUi(enabled: Boolean) {
