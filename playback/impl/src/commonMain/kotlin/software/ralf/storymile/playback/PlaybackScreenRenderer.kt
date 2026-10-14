@@ -88,22 +88,22 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
             }
           }
         } else {
-          // Reserve room for the controls; keep the shared artwork outside the scroll clip.
           val available = if (tablet) maxWidth * 0.7f else (maxWidth - 48.dp).coerceAtLeast(0.dp)
-          val artworkSize = minOf(available, (maxHeight - 450.dp).coerceAtLeast(160.dp))
           Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-            PlaybackArtwork(Modifier.size(artworkSize))
+            // Measure the controls first, then fit the artwork into the remaining height.
+            BoxWithConstraints(Modifier.weight(1f, fill = false)) {
+              PlaybackArtwork(Modifier.size(minOf(available, maxHeight)))
+            }
             Spacer(Modifier.height(20.dp))
             PlayerDetails(
               model.player,
               tablet,
               fade
-                .weight(1f)
                 .fillMaxWidth()
                 .verticalScroll(controlsScroll)
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 24.dp),
-              contentWidth = if (tablet) artworkSize else Dp.Unspecified,
+              contentWidth = if (tablet) available else Dp.Unspecified,
             ) {
               panel = it
             }
