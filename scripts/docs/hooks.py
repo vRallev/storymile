@@ -7,6 +7,7 @@ import shutil
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 from mkdocs.exceptions import PluginError
+import segno
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -31,6 +32,9 @@ def on_pre_build(config):
     resources = ROOT / "app/web/src/wasmJsMain/resources"
     shutil.copyfile(resources / "icons/icon-192.png", assets / "icon.png")
     shutil.copyfile(resources / "favicon.ico", assets / "favicon.ico")
+    segno.make(android_apk_url(config), error="m").save(
+        assets / "android-download.svg", scale=5, light="white"
+    )
 
     gallery = Path(config["docs_dir"]) / "design-research/gallery"
     if gallery.exists():
@@ -56,6 +60,11 @@ def on_pre_build(config):
 
 
 def on_page_markdown(markdown, page, config, files):
+    if page.file.src_uri == "index.md":
+        markdown = markdown.replace("{{ android_apk_url }}", android_apk_url(config))
+        markdown = markdown.replace(
+            "{{ android_release_url }}", f"{config['repo_url']}/releases/latest"
+        )
     docs = Path(config["docs_dir"]).resolve()
     source = Path(page.file.abs_src_path).parent
 
@@ -81,3 +90,7 @@ def on_page_markdown(markdown, page, config, files):
         return match["start"] + (f"<{rewritten}>" if enclosed else rewritten)
 
     return REFERENCE_LINK.sub(replace, INLINE_LINK.sub(replace, markdown))
+
+
+def android_apk_url(config):
+    return f"{config['repo_url']}/releases/latest/download/storymile.apk"

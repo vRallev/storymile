@@ -23,6 +23,24 @@ async function expectPreviewSize(iframe, width, height) {
   }))).toEqual({ width, height });
 }
 
+docsHostTest('offers the latest main APK on desktop and phone', async ({ page }) => {
+  const apkUrl = 'https://github.com/vRallev/storymile/releases/latest/download/storymile.apk';
+  await page.route('**/*', route => new URL(route.request().url()).hostname === '127.0.0.1'
+    ? route.fallback() : route.abort());
+  await page.goto('./');
+  const download = page.getByRole('region', { name: 'Install Storymile on Android' });
+  for (const width of [1600, 375]) {
+    await page.setViewportSize({ width, height: 1100 });
+    await expect(download.getByRole('link', { name: 'Install Android APK', exact: true })).toHaveAttribute('href', apkUrl);
+    const qr = download.getByRole('img', { name: 'QR code to download the latest Android APK' });
+    await expect(qr).toBeVisible();
+    await expect(qr.locator('..')).toHaveAttribute('href', apkUrl);
+    await expect.poll(() => qr.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
+    await expect(download.getByRole('link', { name: 'Build details on GitHub' })).toHaveAttribute('href', 'https://github.com/vRallev/storymile/releases/latest');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+});
+
 async function galleryAppearance(root) {
   return root.evaluate(element => {
     const selectedTab = document.querySelector('.tab[aria-selected="true"]');
@@ -466,7 +484,7 @@ docsHostTest('opens the design gallery, enlarges a screen, and switches views', 
     await expect(page.locator('#__drawer')).toBeChecked();
     await page.locator('.md-sidebar--primary').getByRole('link', { name: 'Home', exact: true }).click();
     await expect(page.getByRole('heading', { name: /^Storymile/, level: 1 })).toBeVisible();
-    await expect(page.locator('.storymile-intro + [data-app-preview]')).toBeAttached();
+    await expect(page.locator('.android-download + [data-app-preview]')).toBeAttached();
     await expect(page.locator('.storymile-links, .storymile-intro .md-button')).toHaveCount(0);
     await expect(page.getByRole('heading', { name: /^Try Storymile/ })).toHaveCount(0);
     await page.setViewportSize({ width: 1600, height: 1100 });
