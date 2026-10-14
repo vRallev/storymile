@@ -3,6 +3,7 @@ package software.ralf.storymile.gradle
 import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 
 internal class BaseAndroidPlugin : Plugin<Project> {
   override fun apply(target: Project) {
@@ -27,9 +28,9 @@ internal class BaseAndroidPlugin : Plugin<Project> {
     android.buildTypes.named("release") {
       it.optimization { enable = true }
       it.isDebuggable = false
-      // Use local debug signing until a release signing key is configured.
       it.signingConfig = android.signingConfigs.getByName("debug")
     }
+    configureReleaseSigning(android)
     android.testOptions.unitTests {
       isIncludeAndroidResources = false
       isReturnDefaultValues = true
@@ -40,6 +41,47 @@ internal class BaseAndroidPlugin : Plugin<Project> {
 
     releaseTask.configure { it.dependsOn("lintDebug") }
   }
+
+  private fun Project.configureReleaseSigning(android: ApplicationExtension) {
+    val storeFile = signingProperty("storeFile", "STORYMILE_ANDROID_KEYSTORE_PATH")
+    val storePassword = signingProperty("storePassword", "STORYMILE_ANDROID_KEYSTORE_PASSWORD")
+    val keyAlias = signingProperty("keyAlias", "STORYMILE_ANDROID_KEY_ALIAS")
+    val keyPassword = signingProperty("keyPassword", "STORYMILE_ANDROID_KEY_PASSWORD")
+    val required =
+      signingProperty("required", "STORYMILE_ANDROID_SIGNING_REQUIRED")
+        .map { it.toBooleanStrict() }
+        .getOrElse(false)
+
+    if (
+      !required && listOf(storeFile, storePassword, keyAlias, keyPassword).none { it.isPresent }
+    ) {
+      return
+    }
+
+    check(storeFile.isPresent && storePassword.isPresent && keyAlias.isPresent) {
+      "Release signing requires storymile.android.signing.storeFile, " +
+        "storymile.android.signing.storePassword, and storymile.android.signing.keyAlias " +
+        "or their STORYMILE_ANDROID_KEYSTORE_PATH, STORYMILE_ANDROID_KEYSTORE_PASSWORD, " +
+        "and STORYMILE_ANDROID_KEY_ALIAS environment variables."
+    }
+
+    val signing =
+      android.signingConfigs.create("release") {
+        it.storeFile = file(storeFile.get())
+        it.storePassword = storePassword.get()
+        it.keyAlias = keyAlias.get()
+        it.keyPassword = keyPassword.orElse(storePassword).get()
+      }
+    android.buildTypes.getByName("release").signingConfig = signing
+  }
+
+  private fun Project.signingProperty(name: String, environmentVariable: String): Provider<String> =
+    providers
+      .environmentVariable(environmentVariable)
+      .filter { it.isNotBlank() }
+      .orElse(
+        providers.gradleProperty("storymile.android.signing.$name").filter { it.isNotBlank() },
+      )
 
   private fun Project.configureAndroidInstrumentedTests(android: ApplicationExtension) {
     android.defaultConfig {
