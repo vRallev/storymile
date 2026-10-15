@@ -19,9 +19,15 @@ class ApplePodcastDiscoveryService(private val client: HttpClient) : PodcastDisc
           "media" to "podcast",
           "entity" to "podcast",
           "country" to "US",
-          "limit" to "25",
+          "limit" to "200",
         ),
       decode = { ApplePodcastSearchResponse().decode(it) },
     )
   }
+
+  override suspend fun popular(): HttpResponse<List<DiscoveredPodcast>> =
+    client.get(
+      url = "https://rss.marketingtools.apple.com/api/v2/us/podcasts/top/25/podcasts.json",
+      decode = { ApplePodcastChartResponse().decode(it) },
+    )
 }

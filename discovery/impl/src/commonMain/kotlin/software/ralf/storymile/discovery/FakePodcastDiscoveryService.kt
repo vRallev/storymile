@@ -26,6 +26,9 @@ class FakePodcastDiscoveryService : PodcastDiscoveryService {
     return HttpResponse.Success(results, statusCode = 200)
   }
 
+  override suspend fun popular(): HttpResponse<List<DiscoveredPodcast>> =
+    HttpResponse.Success(podcasts, statusCode = 200)
+
   private fun podcast(id: String, title: String, author: String): DiscoveredPodcast =
     DiscoveredPodcast(
       id = "sample-$id",

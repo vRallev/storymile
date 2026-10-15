@@ -19,4 +19,10 @@ class PodcastDiscoveryServiceImpl(
       RuntimeMode.Real -> real.value.search(query)
       RuntimeMode.Fake -> fake.value.search(query)
     }
+
+  override suspend fun popular(): HttpResponse<List<DiscoveredPodcast>> =
+    when (runtimeModeController.mode()) {
+      RuntimeMode.Real -> real.value.popular()
+      RuntimeMode.Fake -> fake.value.popular()
+    }
 }

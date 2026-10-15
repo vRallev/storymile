@@ -37,9 +37,29 @@ class PodcastDiscoveryServiceTest {
           "media" to "podcast",
           "entity" to "podcast",
           "country" to "US",
-          "limit" to "25",
+          "limit" to "200",
         ),
       )
+  }
+
+  @Test
+  fun `popular requests the top 25 podcasts from the US chart`() = runTest {
+    val client =
+      LocalHttpClient(
+        body = """{"feed":{"results":[{"id":"123","name":"Popular Result"}]}}""",
+      )
+    val service: PodcastDiscoveryService = ApplePodcastDiscoveryService(client)
+
+    assertThat(service.popular())
+      .isEqualTo(
+        HttpResponse.Success(
+          listOf(DiscoveredPodcast("123", "Popular Result", null, null, null, null)),
+          statusCode = 200,
+        ),
+      )
+    assertThat(client.requestedUrl)
+      .isEqualTo("https://rss.marketingtools.apple.com/api/v2/us/podcasts/top/25/podcasts.json")
+    assertThat(client.requestedParameters).isEqualTo(emptyMap())
   }
 
   @Test
@@ -59,6 +79,19 @@ class PodcastDiscoveryServiceTest {
       ApplePodcastDiscoveryService(LocalHttpClient(error = failure))
 
     assertThat(service.search("science")).isSameInstanceAs(failure)
+    assertThat(service.popular()).isSameInstanceAs(failure)
+  }
+
+  @Test
+  fun `fake popular returns all sample podcasts in a stable order`() = runTest {
+    val service: PodcastDiscoveryService = FakePodcastDiscoveryService()
+
+    val first = service.popular()
+    assertThat(first)
+      .isInstanceOf<HttpResponse.Success<List<DiscoveredPodcast>>>()
+      .transform { it.data.map { podcast -> podcast.title } }
+      .isEqualTo(listOf("Small Science", "History on Foot", "Design Notes"))
+    assertThat(service.popular()).isEqualTo(first)
   }
 
   @Test
@@ -104,5 +137,33 @@ class PodcastDiscoveryServiceTest {
         .isInstanceOf<HttpResponse.Success<List<DiscoveredPodcast>>>()
         .transform { it.data.single().title }
         .isEqualTo("Small Science")
+    }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun `popular waits for the saved mode and fake mode never constructs the real service`() =
+    runTest {
+      val savedMode = CompletableDeferred<RuntimeMode>()
+      val controller: RuntimeModeController =
+        object : RuntimeModeController {
+          override suspend fun mode(): RuntimeMode = savedMode.await()
+
+          override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
+        }
+      val fake = lazy { FakePodcastDiscoveryService() }
+      val service: PodcastDiscoveryService =
+        PodcastDiscoveryServiceImpl(controller, lazy { error("Real service constructed") }, fake)
+
+      val result = async { service.popular() }
+      runCurrent()
+
+      assertThat(result.isCompleted).isFalse()
+      assertThat(fake.isInitialized()).isFalse()
+      savedMode.complete(RuntimeMode.Fake)
+
+      assertThat(result.await())
+        .isInstanceOf<HttpResponse.Success<List<DiscoveredPodcast>>>()
+        .transform { it.data.map { podcast -> podcast.title } }
+        .isEqualTo(listOf("Small Science", "History on Foot", "Design Notes"))
     }
 }
