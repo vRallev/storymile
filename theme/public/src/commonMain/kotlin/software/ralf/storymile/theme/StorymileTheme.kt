@@ -4,7 +4,16 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.sp
+
+/** Sets [StorymileTheme]'s appearance before a manual toggle. Null follows the system theme. */
+val LocalDarkThemeOverride = compositionLocalOf<Boolean?> { null }
+
+/** Toggles the active [StorymileTheme]. Defaults to no action outside the theme. */
+val LocalOnToggleTheme = staticCompositionLocalOf<() -> Unit> { {} }
 
 private val storymileTypography =
   Typography().run {
@@ -35,7 +44,8 @@ private val storymileTypographyLarge =
 
 /**
  * Applies Paper Tide or Harbor Night around [content], using [LocalDarkThemeOverride] or the system
- * appearance by default. Theme-qualified Compose resources follow the same appearance.
+ * appearance until a manual toggle. The manual choice lasts until the process exits.
+ * Theme-qualified Compose resources follow the same appearance.
  */
 @Composable
 fun StorymileTheme(
@@ -43,12 +53,20 @@ fun StorymileTheme(
   darkTheme: Boolean = LocalDarkThemeOverride.current ?: isSystemInDarkTheme(),
   content: @Composable () -> Unit,
 ) {
-  environment.Provide(darkTheme) {
-    MaterialTheme(
-      colorScheme =
-        if (darkTheme) StorymileColorSchemes.harborNight else StorymileColorSchemes.paperTide,
-      typography = storymileTypography,
-      content = content,
-    )
+  val controller = LocalThemeController.current
+  val effectiveDarkTheme = controller.darkThemeOverride ?: darkTheme
+  CompositionLocalProvider(LocalOnToggleTheme provides { controller.toggle(effectiveDarkTheme) }) {
+    environment.Provide(effectiveDarkTheme) {
+      MaterialTheme(
+        colorScheme =
+          if (effectiveDarkTheme) {
+            StorymileColorSchemes.harborNight
+          } else {
+            StorymileColorSchemes.paperTide
+          },
+        typography = storymileTypography,
+        content = content,
+      )
+    }
   }
 }
