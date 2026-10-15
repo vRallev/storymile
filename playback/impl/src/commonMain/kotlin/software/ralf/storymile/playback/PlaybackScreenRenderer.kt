@@ -158,7 +158,10 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
   ) {
     val onCollapse = LocalCollapsePlayback.current
     val transition = LocalPlaybackTransition.current
-    val fade = with(transition) { if (this == null) Modifier else Modifier.fade(expanded = true) }
+    val fade =
+      with(transition) {
+        if (this == null) Modifier else Modifier.fade(expanded = true, startFraction = 0.5f)
+      }
     TopAppBar(
       title = {
         Text(

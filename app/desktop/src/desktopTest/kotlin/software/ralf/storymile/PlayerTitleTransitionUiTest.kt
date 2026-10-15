@@ -9,9 +9,11 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PixelMap
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.platform.LocalDensity
@@ -19,8 +21,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
@@ -29,12 +34,16 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.lerp
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isGreaterThanOrEqualTo
 import assertk.assertions.isNotEmpty
 import assertk.assertions.isStrictlyBetween
+import java.io.File
+import javax.imageio.ImageIO
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -43,6 +52,95 @@ import software.ralf.app.platform.robot.composeRobot
 
 class PlayerTitleTransitionUiTest {
   private val uiTestRule = DesktopUiTestRule(withEpisodes = true)
+
+  @Test
+  fun `whole player header stays hidden through halfway during expansion and reversal`() {
+    uiTestRule.runPhoneRobotTest {
+      val collapsedTop = sheetTop()
+      mainClock.autoAdvance = false
+      try {
+        onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
+        listOf(0.3f, 0.49f, 0.51f, 0.75f, 0.95f, 0.75f, 0.51f, 0.49f, 0.3f, 0.75f).forEach { target
+          ->
+          val distance = collapsedTop * (1f - target) - sheetTop()
+          onRoot().performTouchInput { moveBy(Offset(0f, distance)) }
+          mainClock.advanceTimeByFrame()
+          val progress = 1f - sheetTop() / collapsedTop
+          listOf(
+              onNodeWithText("Now playing"),
+              onNodeWithTag("playback-more"),
+              onNodeWithTag("playback-collapse"),
+            )
+            .forEach { node ->
+              if (progress <= 0.5f) {
+                node.assertIsNotDisplayed()
+              } else {
+                node.assertIsDisplayed()
+              }
+            }
+        }
+      } finally {
+        onRoot().performTouchInput {
+          advanceEventTime(100)
+          up()
+        }
+        mainClock.autoAdvance = true
+      }
+    }
+  }
+
+  @Test
+  fun `title and subtitle avoid artwork throughout expansion and reversal`() {
+    listOf(
+        DpSize(390.dp, 844.dp),
+        DpSize(480.dp, 1200.dp),
+        DpSize(599.dp, 960.dp),
+        DpSize(600.dp, 960.dp),
+        DpSize(840.dp, 1200.dp),
+        DpSize(900.dp, 760.dp),
+        DpSize(900.dp, 480.dp),
+        DpSize(1440.dp, 900.dp),
+        DpSize(360.dp, 480.dp),
+      )
+      .forEach { size ->
+        uiTestRule.runRobotTest(windowSize = size, darkTheme = false) {
+          val collapsedTop = sheetTop()
+          composeRobot<AppShellRobot> { openPlayback() }
+          composeRobot<AppShellRobot> { collapsePlayback() }
+          waitForIdle()
+          mainClock.autoAdvance = false
+          try {
+            onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
+            val steps = (1..49).map { it / 50f }
+            (steps + steps.reversed()).forEach { target ->
+              val distance = collapsedTop * (1f - target) - sheetTop()
+              onRoot().performTouchInput { moveBy(Offset(0f, distance)) }
+              mainClock.advanceTimeByFrame()
+              val artwork = bounds("playback-artwork-expanded")
+              if (size.width == 390.dp && target in listOf(0.1f, 0.2f, 0.5f)) {
+                val file = File("build/reports/screenshots/player-title-path-$target.png")
+                file.parentFile.mkdirs()
+                ImageIO.write(onRoot().captureToImage().toAwtImage(), "png", file)
+              }
+              listOf("title", "subtitle").forEach { key ->
+                val label = bounds("playback-$key-expanded")
+                assertThat(
+                    label.overlaps(artwork),
+                    "$key $label overlaps artwork $artwork at $target in $size",
+                  )
+                  .isFalse()
+              }
+            }
+          } finally {
+            onRoot().performTouchInput {
+              advanceEventTime(100)
+              up()
+            }
+            mainClock.autoAdvance = true
+          }
+        }
+      }
+  }
 
   @Test
   fun `phone title retains its final glyph throughout expansion and reversal`() {
@@ -127,6 +225,12 @@ class PlayerTitleTransitionUiTest {
 
   private fun ComposeUiTest.sheetTop(): Float =
     onNodeWithTag("playback-sheet").fetchSemanticsNode().boundsInRoot.top
+
+  private fun ComposeUiTest.bounds(tag: String): Rect {
+    val coordinates =
+      onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().layoutInfo.coordinates
+    return coordinates.findRootCoordinates().localBoundingBoxOf(coordinates, clipBounds = false)
+  }
 
   private fun assertFinalGlyph(frame: TitleFrame, reference: PixelMap, layout: TextLayoutResult) {
     val last = layout.getBoundingBox(frame.text.lastIndex)

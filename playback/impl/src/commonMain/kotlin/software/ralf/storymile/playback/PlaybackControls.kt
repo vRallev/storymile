@@ -1,5 +1,8 @@
 package software.ralf.storymile.playback
 
+import androidx.compose.animation.core.EaseOutCubic
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -65,6 +68,11 @@ import software.ralf.storymile.theme.AppTheme
 internal object PlaybackControls {
   @Composable
   fun Details(player: PlayerModel, large: Boolean) {
+    val screen = LocalScreenSize.current
+    val stacked = screen.width < 600.dp || screen.width <= screen.height
+    // Keep both labels beside the growing artwork until they can pass below it.
+    val horizontalArc = if (stacked) screen.width * 0.1f else 0.dp
+    val verticalArc = if (!stacked) 0.dp else if (screen.width < 600.dp) 64.dp else 96.dp
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
       Column(Modifier.weight(1f)) {
         Label(
@@ -73,6 +81,9 @@ internal object PlaybackControls {
           expanded = true,
           modifier = Modifier.fillMaxWidth(),
           style = if (large) AppTheme.typography.titleLarge else AppTheme.typography.headlineSmall,
+          horizontalArc = horizontalArc,
+          verticalArc = verticalArc,
+          arcEasing = EaseOutCubic,
         )
         Spacer(Modifier.height(4.dp))
         Label(
@@ -82,6 +93,9 @@ internal object PlaybackControls {
           modifier = Modifier.fillMaxWidth(),
           color = AppTheme.colorScheme.onSurfaceVariant,
           style = if (large) AppTheme.typography.headlineSmall else AppTheme.typography.bodyLarge,
+          horizontalArc = horizontalArc,
+          verticalArc = verticalArc,
+          arcEasing = EaseOutCubic,
         )
       }
       IconToggleButton(
@@ -334,6 +348,7 @@ internal object PlaybackControls {
     maxLines: Int = Int.MAX_VALUE,
     verticalArc: Dp = 0.dp,
     horizontalArc: Dp = 0.dp,
+    arcEasing: Easing = LinearEasing,
   ) {
     val transition = LocalPlaybackTransition.current
     val label: @Composable BoxScope.() -> Unit = {
@@ -358,6 +373,7 @@ internal object PlaybackControls {
         maxLines = maxLines,
         verticalArc = verticalArc,
         horizontalArc = horizontalArc,
+        arcEasing = arcEasing,
         content = label,
       )
     }
