@@ -6,6 +6,7 @@ storymile {
   enableComposeUi true
   enableMetro true
   enableComposePresenters true
+  addImplModuleDependencies true
 }
 
 dependencies {
@@ -19,6 +20,8 @@ dependencies {
   androidMainImplementation libs.compose.ui.test.junit4.android
 
   commonMainImplementation project(':app-framework:impl')
+  commonMainImplementation project(':discovery:impl')
+  commonMainImplementation project(':discovery:impl-robots')
   commonMainImplementation project(':downloads:impl')
   commonMainImplementation project(':home:impl')
   commonMainImplementation project(':library:impl')

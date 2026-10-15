@@ -3,7 +3,9 @@ package software.ralf.storymile.tabs
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import assertk.assertThat
@@ -123,6 +125,69 @@ class TabsPresenterImplTest {
     }
   }
 
+  @Test
+  fun `reselecting home calls its reset without recreating home state`() = runTest {
+    val home = StatefulHomePresenter()
+    var creationCount = 0
+    val presenter: TabsPresenter =
+      TabsPresenterImpl(
+        homePresenter = {
+          creationCount++
+          home
+        },
+        libraryPresenter = { FakeLibraryPresenter() },
+        downloadsPresenter = { FakeDownloadsPresenter() },
+      )
+
+    presenter.test(this) {
+      var tabs = awaitItem()
+      repeat(2) { index ->
+        (tabs.content as StatefulHomePresenter.Model).onNavigate()
+        tabs = awaitItem()
+        assertThat((tabs.content as StatefulHomePresenter.Model).destination).isEqualTo("Discovery")
+
+        tabs.onSelectTab(TabsPresenter.Tab.HOME)
+        tabs = awaitItem()
+        assertThat(tabs.selectedTab).isEqualTo(TabsPresenter.Tab.HOME)
+        val homeModel = tabs.content as StatefulHomePresenter.Model
+        assertThat(homeModel.destination).isEqualTo("Welcome")
+        assertThat(homeModel.navigationCount).isEqualTo(index + 1)
+      }
+      assertThat(creationCount).isEqualTo(1)
+      assertThat(home.homeSelections).isEqualTo(2)
+      tabs.onSelectTab(TabsPresenter.Tab.HOME)
+      tabs.onSelectTab(TabsPresenter.Tab.HOME)
+      expectNoEvents()
+      assertThat(home.homeSelections).isEqualTo(4)
+      assertThat(creationCount).isEqualTo(1)
+    }
+  }
+
+  @Test
+  fun `returning home starts at welcome and preserves the library filter`() = runTest {
+    val library = FakeLibraryPresenter()
+    val presenter: TabsPresenter =
+      TabsPresenterImpl({ StatefulHomePresenter() }, { library }) { FakeDownloadsPresenter() }
+
+    presenter.test(this) {
+      var tabs = awaitItem()
+      (tabs.content as StatefulHomePresenter.Model).onNavigate()
+      tabs = awaitItem()
+      tabs.onSelectTab(TabsPresenter.Tab.LIBRARY)
+      awaitItem()
+      library.selectFilter("Shows")
+      tabs = awaitItem()
+
+      tabs.onSelectTab(TabsPresenter.Tab.HOME)
+      tabs = awaitItem()
+      assertThat((tabs.content as StatefulHomePresenter.Model).destination).isEqualTo("Welcome")
+
+      tabs.onSelectTab(TabsPresenter.Tab.LIBRARY)
+      tabs = awaitItem()
+      assertThat(tabs.content).isEqualTo(FakeLibraryPresenter.Model("Shows"))
+    }
+  }
+
   private class FakeDownloadsPresenter : DownloadsPresenter<DownloadsModel> {
     var active = false
       private set
@@ -139,7 +204,9 @@ class TabsPresenterImplTest {
 
   private data object DownloadsModel : BaseModel
 
-  private data object HomeModel : BaseModel
+  private data object HomeModel : HomePresenter.Model {
+    override val onHomeSelected: () -> Unit = {}
+  }
 
   private class FakeHomePresenter : HomePresenter<HomeModel> {
     var active = false
@@ -172,5 +239,35 @@ class TabsPresenterImplTest {
     }
 
     data class Model(val filter: String) : BaseModel
+  }
+
+  private class StatefulHomePresenter : HomePresenter<StatefulHomePresenter.Model> {
+    var homeSelections = 0
+      private set
+
+    @Composable
+    override fun present(input: Unit): Model {
+      var destination by remember { mutableStateOf("Welcome") }
+      var navigationCount by remember { mutableIntStateOf(0) }
+      return Model(
+        destination = destination,
+        navigationCount = navigationCount,
+        onNavigate = {
+          destination = "Discovery"
+          navigationCount++
+        },
+        onHomeSelected = {
+          homeSelections++
+          destination = "Welcome"
+        },
+      )
+    }
+
+    data class Model(
+      val destination: String,
+      val navigationCount: Int,
+      val onNavigate: () -> Unit,
+      override val onHomeSelected: () -> Unit,
+    ) : HomePresenter.Model
   }
 }

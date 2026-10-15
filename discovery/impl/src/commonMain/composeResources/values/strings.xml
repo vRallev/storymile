@@ -1,0 +1,33 @@
+<resources>
+  <string name="discover_podcasts">Discover podcasts</string>
+  <string name="search_podcasts">Search podcasts</string>
+  <string name="clear_search">Clear search</string>
+  <string name="back">Back</string>
+  <string name="profile">Profile</string>
+  <string name="browse_topics">Browse topics</string>
+  <string name="topic_nature">Nature</string>
+  <string name="topic_nature_subtitle">Stories from the natural world</string>
+  <string name="topic_science">Science</string>
+  <string name="topic_science_subtitle">Explore science and discovery</string>
+  <string name="topic_culture">Culture</string>
+  <string name="topic_culture_subtitle">Explore arts and culture</string>
+  <string name="topic_technology">Technology</string>
+  <string name="topic_technology_subtitle">Explore technology and ideas</string>
+  <string name="filter_all_nature">All nature</string>
+  <string name="filter_oceans">Oceans</string>
+  <string name="filter_outdoors">Outdoors</string>
+  <string name="featured_podcasts">Featured podcasts</string>
+  <string name="podcasts_to_explore">Podcasts to explore</string>
+  <string name="search_results">Search results</string>
+  <string name="episodes_to_try">Episodes to try</string>
+  <string name="episodes">Episodes</string>
+  <string name="sample_episodes_notice">Sample episodes. Episode details are not available yet.</string>
+  <string name="sample_episode">Sample episode %1$d</string>
+  <string name="play_sample_episode">Play sample episode %1$d</string>
+  <string name="follow">Follow</string>
+  <string name="loading_podcasts">Loading podcasts</string>
+  <string name="load_error">Could not load podcasts.</string>
+  <string name="retry">Try again</string>
+  <string name="no_podcasts">No podcasts found</string>
+  <string name="try_another_search">Try another search or browse a topic.</string>
+</resources>

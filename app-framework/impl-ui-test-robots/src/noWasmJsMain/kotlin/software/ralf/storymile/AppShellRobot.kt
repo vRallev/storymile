@@ -2,6 +2,8 @@ package software.ralf.storymile
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertCountEquals
@@ -28,6 +30,7 @@ import assertk.assertions.isEqualTo
 import dev.zacsweers.metro.AppScope
 import software.ralf.app.platform.inject.robot.ContributesRobot
 import software.ralf.app.platform.robot.ComposeRobot
+import software.ralf.app.platform.robot.waitUntilCatching
 import software.ralf.storymile.tabs.TabsPresenter
 import software.ralf.storymile.util.runOnUiThread
 
@@ -60,28 +63,49 @@ class AppShellRobot : ComposeRobot() {
   /** Chooses a destination through the visible navigation item. */
   fun selectTab(tab: TabsPresenter.Tab) {
     runOnUiThread(compose) { compose.onNodeWithTag("tab-${tab.name.lowercase()}").performClick() }
+    seeSelectedTab(tab)
   }
 
   /** Checks that exactly one navigation item is selected and its content is visible. */
   fun seeSelectedTab(tab: TabsPresenter.Tab) {
-    TabsPresenter.Tab.entries.forEach {
-      val item = compose.onNodeWithTag("tab-${it.name.lowercase()}").assertIsDisplayed()
-      if (it == tab) {
-        item.assertIsSelected()
+    waitForSelection(tab) {
+      TabsPresenter.Tab.entries.forEach {
+        val item = compose.onNodeWithTag("tab-${it.name.lowercase()}").assertIsDisplayed()
+        if (it == tab) {
+          item.assertIsSelected()
+        } else {
+          item.assertIsNotSelected()
+        }
+      }
+      if (tab == TabsPresenter.Tab.HOME) {
+        compose.onNodeWithTag("home-screen").assertIsDisplayed()
+      } else if (tab == TabsPresenter.Tab.DOWNLOADS) {
+        compose.onNodeWithTag("downloads-screen").assertIsDisplayed()
+        compose.onNodeWithText("Listen anywhere").assertIsDisplayed()
       } else {
-        item.assertIsNotSelected()
+        compose.onNodeWithTag("library-empty").assertIsDisplayed()
+        compose.onNodeWithTag("library-filter-episodes").assertIsDisplayed()
+        compose.onNodeWithTag("library-filter-shows").assertIsDisplayed()
+        compose.onNodeWithTag("library-discover").assertIsDisplayed()
       }
     }
-    if (tab == TabsPresenter.Tab.HOME) {
-      compose.onNodeWithTag("home-screen").assertIsDisplayed()
-    } else if (tab == TabsPresenter.Tab.DOWNLOADS) {
-      compose.onNodeWithTag("downloads-screen").assertIsDisplayed()
-      compose.onNodeWithText("Listen anywhere").assertIsDisplayed()
+  }
+
+  @OptIn(ExperimentalTestApi::class)
+  private fun waitForSelection(tab: TabsPresenter.Tab, assertion: () -> Unit) {
+    val description = "Tab $tab selected"
+    val uiTest = compose as? ComposeUiTest
+    if (uiTest == null) {
+      waitUntilCatching(description) { assertion() }
     } else {
-      compose.onNodeWithTag("library-empty").assertIsDisplayed()
-      compose.onNodeWithTag("library-filter-episodes").assertIsDisplayed()
-      compose.onNodeWithTag("library-filter-shows").assertIsDisplayed()
-      compose.onNodeWithTag("library-discover").assertIsDisplayed()
+      uiTest.waitUntil(description, timeoutMillis = 10_000) {
+        try {
+          assertion()
+          true
+        } catch (_: AssertionError) {
+          false
+        }
+      }
     }
   }
 

@@ -24,17 +24,23 @@ class TabsPresenterImpl(
   override fun present(input: Unit): TabsPresenter.Model {
     var selectedTab by remember { mutableStateOf(TabsPresenter.Tab.HOME) }
     val tabState = rememberReturningSaveableStateHolder()
+    val content =
+      tabState.SaveableStateProvider(selectedTab.name) {
+        when (selectedTab) {
+          TabsPresenter.Tab.HOME -> remember { homePresenter() }.present(Unit)
+          TabsPresenter.Tab.LIBRARY -> remember { libraryPresenter() }.present(Unit)
+          TabsPresenter.Tab.DOWNLOADS -> remember { downloadsPresenter() }.present(Unit)
+        }
+      }
     return TabsPresenter.Model(
       selectedTab = selectedTab,
-      content =
-        tabState.SaveableStateProvider(selectedTab.name) {
-          when (selectedTab) {
-            TabsPresenter.Tab.HOME -> remember { homePresenter() }.present(Unit)
-            TabsPresenter.Tab.LIBRARY -> remember { libraryPresenter() }.present(Unit)
-            TabsPresenter.Tab.DOWNLOADS -> remember { downloadsPresenter() }.present(Unit)
-          }
-        },
-      onSelectTab = { selectedTab = it },
+      content = content,
+      onSelectTab = {
+        if (it == TabsPresenter.Tab.HOME && content is HomePresenter.Model) {
+          content.onHomeSelected()
+        }
+        selectedTab = it
+      },
     )
   }
 }

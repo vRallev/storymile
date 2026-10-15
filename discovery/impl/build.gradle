@@ -3,15 +3,28 @@ plugins {
 }
 
 storymile {
+  enableComposePresenterBackstack true
   enableMetro true
   enableSerialization true
 }
 
 dependencies {
+  androidMainImplementation libs.ktor.client.okhttp
+
   commonMainImplementation project(':http:public')
   commonMainImplementation project(':runtime-mode:public')
+  commonMainImplementation project(':templates:public')
+  commonMainImplementation project(':theme:public')
+  commonMainImplementation project(':user:public')
   commonMainImplementation project(':util:public')
+  commonMainImplementation libs.coil.compose
+  commonMainImplementation libs.coil.network.ktor3
+  commonMainImplementation libs.ktor.client.core
   commonMainImplementation libs.serialization.json
 
   commonTestImplementation project(':util:testing')
+
+  desktopMainImplementation libs.ktor.client.okhttp
+
+  iosMainImplementation libs.ktor.client.darwin
 }

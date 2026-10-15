@@ -2,6 +2,10 @@ plugins {
   id 'software.ralf.storymile.library.kmp'
 }
 
+storymile {
+  enableComposePresenters true
+}
+
 dependencies {
   commonMainApi project(':http:public')
 }

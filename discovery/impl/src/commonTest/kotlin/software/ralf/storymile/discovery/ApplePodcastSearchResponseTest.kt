@@ -8,6 +8,29 @@ import kotlin.test.Test
 
 class ApplePodcastSearchResponseTest {
   @Test
+  fun `search artwork and thumbnail fallbacks use larger images`() {
+    val body =
+      """
+      {"results":[
+        {"collectionId":1,"collectionName":"Large",
+         "artworkUrl600":"https://is1-ssl.mzstatic.com/image/thumb/large.jpg/600x600bb.jpg",
+         "artworkUrl100":"https://is1-ssl.mzstatic.com/image/thumb/small.jpg/100x100bb.jpg"},
+        {"collectionId":2,"collectionName":"Fallback",
+         "artworkUrl100":"https://is2-ssl.mzstatic.com/image/thumb/fallback.jpg/100x100bb.jpg"}
+      ]}
+      """
+        .trimIndent()
+
+    assertThat(ApplePodcastSearchResponse().decode(body).map { it.artworkUrl })
+      .isEqualTo(
+        listOf(
+          "https://is1-ssl.mzstatic.com/image/thumb/large.jpg/1200x1200bb.jpg",
+          "https://is2-ssl.mzstatic.com/image/thumb/fallback.jpg/1200x1200bb.jpg",
+        ),
+      )
+  }
+
+  @Test
   fun `catalog fields map to podcasts and unknown fields are ignored`() {
     val body =
       """
