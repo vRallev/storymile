@@ -57,6 +57,13 @@ public open class StorymileExtension(private val project: Project) {
     }
   }
 
+  /** Generates serializers for classes annotated with `@Serializable`. */
+  public fun enableSerialization(enabled: Boolean) {
+    if (enabled) {
+      project.plugins.apply(Plugins.KOTLIN_SERIALIZATION)
+    }
+  }
+
   public fun enableComposePresenters(enabled: Boolean) {
     project.appPlatform.enableComposePresenters(enabled)
     if (enabled) {

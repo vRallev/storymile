@@ -30,6 +30,7 @@ jvm-target = "11"
 kermit = "2.2.0"
 kotlin = "2.4.21"
 ktfmt = "0.65"
+ktor = "3.6.0"
 metro = "1.4.5"
 okio = "3.18.2"
 process-phoenix = "3.0.0"
@@ -77,6 +78,11 @@ detekt-gradle-plugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref
 jlayer = { module = "javazoom:jlayer", version.ref = "jlayer" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-serialization-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 metro-gradle-plugin = { module = "dev.zacsweers.metro:gradle-plugin", version.ref = "metro" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 process-phoenix = { module = "com.jakewharton:process-phoenix", version.ref = "process-phoenix" }

@@ -1,0 +1,14 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  enableMetro true
+  enableSerialization true
+}
+
+dependencies {
+  commonMainImplementation project(':http:public')
+  commonMainImplementation project(':runtime-mode:public')
+  commonMainImplementation libs.serialization.json
+}
