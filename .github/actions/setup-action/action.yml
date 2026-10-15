@@ -19,6 +19,12 @@ runs:
         distribution: 'zulu'
         java-version: 25
 
+    - name: Initialize Kotlin daemon directory
+      if: ${{ runner.os == 'Linux' }}
+      shell: bash
+      # Keep Kotlin's daemon directory stable when Chrome creates its data directory.
+      run: mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}"
+
     - name: Select Xcode 26
       id: xcode
       if: ${{ runner.os == 'macOS' && inputs['select-xcode-26'] == 'true' }}
