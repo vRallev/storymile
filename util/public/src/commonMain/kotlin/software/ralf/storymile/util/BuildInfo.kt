@@ -8,6 +8,6 @@ interface BuildInfo {
   /** Numeric application version, shared with Android's version code. */
   val versionCode: Int
 
-  /** Full Git commit SHA of the source checkout used for this build. */
+  /** Full Git commit SHA when `storymile.useRealGitSha` is enabled; otherwise 40 zeroes. */
   val gitSha: String
 }
