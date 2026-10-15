@@ -7,13 +7,11 @@ storymile {
 }
 
 dependencies {
-  androidMainImplementation libs.ktor.client.okhttp
+  commonJvmMainImplementation libs.ktor.client.okhttp
 
   commonMainImplementation libs.ktor.client.core
 
   commonTestImplementation libs.ktor.client.mock
-
-  desktopMainImplementation libs.ktor.client.okhttp
 
   iosMainImplementation libs.ktor.client.darwin
 }

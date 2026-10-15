@@ -87,3 +87,10 @@ Other playback options retain their placeholder state.
 [PlaybackTransition](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/PlaybackTransition.kt)
 moves shared artwork, text, and controls with the sheet. Controls present in only one layout fade.
 The sheet slides up when playback becomes available and down when no playlist contains episodes.
+
+## Source set hierarchy
+
+Shared modules use this [source set hierarchy](../buildSrc/src/main/kotlin/software/ralf/storymile/gradle/KmpPlugin.kt)
+with Wasm enabled. The diagram shows production and test sources from `:http:impl`.
+
+[![Shared production and test source sets](images/source-set-hierarchy.svg)](images/source-set-hierarchy.svg)

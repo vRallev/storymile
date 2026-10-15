@@ -2,6 +2,8 @@ package software.ralf.storymile.gradle
 
 import dev.zacsweers.metro.gradle.DiagnosticSeverity
 import dev.zacsweers.metro.gradle.MetroPluginExtension
+import guru.nidi.graphviz.engine.Format
+import io.github.terrakok.KmpHierarchyConfig
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.BasePluginExtension
@@ -17,6 +19,8 @@ internal class KmpPlugin : Plugin<Project> {
     target.plugins.apply(Plugins.KOTLIN_MULTIPLATFORM)
 
     target.configureKotlin()
+    target.addExtraSourceSets()
+    target.configureHierarchyPlugin()
     target.configureDependencies()
     target.configureComposeDependencies()
     target.configureMetro()
@@ -32,6 +36,40 @@ internal class KmpPlugin : Plugin<Project> {
     }
 
     platforms().forEach { it.configurePlatform() }
+  }
+
+  private fun Project.addExtraSourceSets() {
+    val sourceSets = kmpExtension.sourceSets
+    if (
+      sourceSets.findByName("androidMain") == null || sourceSets.findByName("desktopMain") == null
+    ) {
+      return
+    }
+
+    setOf("Main", "Test").forEach { suffix ->
+      val noWasmJs = sourceSets.create("noWasmJs$suffix")
+      noWasmJs.dependsOn(sourceSets.getByName("common$suffix"))
+      sourceSets.named("native$suffix").configure { it.dependsOn(noWasmJs) }
+
+      val appleAndDesktop = sourceSets.create("appleAndDesktop$suffix")
+      appleAndDesktop.dependsOn(noWasmJs)
+      sourceSets.named("apple$suffix").configure { it.dependsOn(appleAndDesktop) }
+      sourceSets.named("desktop$suffix").configure { it.dependsOn(appleAndDesktop) }
+
+      val commonJvm = sourceSets.create("commonJvm$suffix")
+      commonJvm.dependsOn(noWasmJs)
+      sourceSets.named("desktop$suffix").configure { it.dependsOn(commonJvm) }
+      val androidSourceSet = if (suffix == "Main") "androidMain" else "androidHostTest"
+      sourceSets.named(androidSourceSet).configure { it.dependsOn(commonJvm) }
+    }
+  }
+
+  private fun Project.configureHierarchyPlugin() {
+    plugins.apply(Plugins.KOTLIN_HIERARCHY)
+    (kmpExtension as ExtensionAware).extensions.getByType(KmpHierarchyConfig::class.java).apply {
+      formats(Format.PNG, Format.SVG)
+      withTestHierarchy = true
+    }
   }
 
   private fun Project.configureDependencies() {

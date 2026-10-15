@@ -30,6 +30,13 @@ runs:
         path: ${{ env.ANDROID_HOME }}/emulator
         key: android-emulator-${{ runner.os }}-${{ runner.arch }}-v1
 
+    - name: Install missing Android emulator
+      shell: bash
+      run: |
+        if [[ ! -x "$ANDROID_HOME/emulator/emulator" || ! -f "$ANDROID_HOME/emulator/package.xml" ]]; then
+          sdkmanager --install "emulator"
+        fi
+
     - name: Cache Android system image
       uses: actions/cache@v6
       with:

@@ -24,11 +24,13 @@ compose-multiplatform = "1.12.2"
 coroutines = "1.11.0"
 detekt = "2.0.0-alpha.6"
 gmazzo-buildconfig = "6.1.2"
+graphviz-java = "0.18.1"
 jlayer = "1.0.1"
 jvm-buildsrc = "21"
 jvm-target = "11"
 kermit = "2.2.0"
 kotlin = "2.4.21"
+kotlin-hierarchy = "1.1"
 ktfmt = "0.65"
 ktor = "3.6.0"
 metro = "1.4.5"
@@ -75,9 +77,11 @@ coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", ve
 coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 detekt-gradle-plugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+graphviz-java = { module = "guru.nidi:graphviz-java", version.ref = "graphviz-java" }
 jlayer = { module = "javazoom:jlayer", version.ref = "jlayer" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-hierarchy-plugin = { module = "io.github.terrakok:kmp-hierarchy", version.ref = "kotlin-hierarchy" }
 kotlin-serialization-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
