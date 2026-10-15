@@ -22,14 +22,23 @@ public open class StorymileExtension(private val project: Project) {
       buildConfigField(
         String::class.java,
         "GIT_SHA",
-        project.providers
-          .exec { spec ->
-            spec.workingDir(project.isolated.rootProject.projectDirectory.asFile)
-            spec.commandLine("git", "rev-parse", "HEAD")
-          }
-          .standardOutput
-          .asText
-          .map { sha -> sha.trim() },
+        if (
+          project.providers
+            .gradleProperty("storymile.useRealGitSha")
+            .map { it.toBoolean() }
+            .getOrElse(false)
+        ) {
+          project.providers
+            .exec { spec ->
+              spec.workingDir(project.isolated.rootProject.projectDirectory.asFile)
+              spec.commandLine("git", "rev-parse", "HEAD")
+            }
+            .standardOutput
+            .asText
+            .map { sha -> sha.trim() }
+        } else {
+          project.providers.provider { "0000000000000000000000000000000000000000" }
+        },
       )
     }
   }
