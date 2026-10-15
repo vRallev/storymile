@@ -33,7 +33,7 @@ class PlayerControlsUiTest {
     listOf(DesktopWindowSizes.phone, DesktopWindowSizes.tablet, DpSize(1440.dp, 900.dp)).forEach {
       size ->
       uiTestRule.runRobotTest(windowSize = size) {
-        onNodeWithTag("playback-bar-play-pause").performTouchInput { click() }
+        runOnUiThread { onNodeWithTag("playback-bar-play-pause").performTouchInput { click() } }
         onNodeWithTag("playback-bar-play-pause").assertContentDescriptionEquals("Play")
         onNodeWithTag("playback-screen").assertDoesNotExist()
 
@@ -45,12 +45,12 @@ class PlayerControlsUiTest {
         seePlayerText("18:00")
         assertChapterText("Chapter 4 of 8")
 
-        onNodeWithTag("playback-back").performClick()
+        runOnUiThread { onNodeWithTag("playback-back").performClick() }
         seePlayerText("17:45")
-        onNodeWithTag("playback-forward").performClick()
+        runOnUiThread { onNodeWithTag("playback-forward").performClick() }
         seePlayerText("18:15")
-        onNodeWithTag("playback-bookmark").performScrollTo().performClick()
-        onNodeWithTag("playback-download").performClick()
+        runOnUiThread { onNodeWithTag("playback-bookmark").performScrollTo().performClick() }
+        runOnUiThread { onNodeWithTag("playback-download").performClick() }
 
         composeRobot<AppShellRobot> { collapsePlayback() }
         onNodeWithTag("playback-bar-play-pause").assertContentDescriptionEquals("Play")
@@ -68,32 +68,36 @@ class PlayerControlsUiTest {
       size ->
       uiTestRule.runRobotTest(windowSize = size) {
         composeRobot<AppShellRobot> { openPlayback() }
-        onNodeWithTag("playback-speed").performScrollTo().performClick()
-        onNodeWithTag("playback-option-speed-1.5").performClick()
+        runOnUiThread { onNodeWithTag("playback-speed").performScrollTo().performClick() }
+        runOnUiThread { onNodeWithTag("playback-option-speed-1.5").performClick() }
         onNodeWithTag("playback-speed").assertTextContains("1.5x")
 
-        onNodeWithTag("playback-sleep").performClick()
-        onNodeWithTag("playback-option-sleep-30").performClick()
+        runOnUiThread { onNodeWithTag("playback-sleep").performClick() }
+        runOnUiThread { onNodeWithTag("playback-option-sleep-30").performClick() }
         onNodeWithTag("playback-sleep").assertTextContains("30 min")
 
-        onNodeWithTag("playback-chapters").performClick()
-        onNodeWithTag("playback-option-chapter-4").performScrollTo().performClick()
+        runOnUiThread { onNodeWithTag("playback-chapters").performClick() }
+        runOnUiThread {
+          onNodeWithTag("playback-option-chapter-4").performScrollTo().performClick()
+        }
         assertChapterText("Returning to yourself")
         assertChapterText("Chapter 5 of 8")
 
-        onNodeWithTag("playback-queue").performClick()
-        onNodeWithTag("playback-option-episode-1").performClick()
-        onNodeWithTag("playback-seek").performScrollTo()
+        runOnUiThread { onNodeWithTag("playback-queue").performClick() }
+        runOnUiThread { onNodeWithTag("playback-option-episode-1").performClick() }
+        runOnUiThread { onNodeWithTag("playback-seek").performScrollTo() }
         seePlayerText("Making room for what matters")
         seePlayerText("0:00")
         onNodeWithTag("playback-play-pause").assertContentDescriptionEquals("Pause")
 
-        onNodeWithTag("playback-speed").performScrollTo().assertTextContains("1.5x")
+        runOnUiThread { onNodeWithTag("playback-speed").performScrollTo() }
+        onNodeWithTag("playback-speed").assertTextContains("1.5x")
         onNodeWithTag("playback-sleep").assertTextContains("30 min")
         composeRobot<AppShellRobot> { collapsePlayback() }
         onNodeWithTag("playback-bar-play-pause").assertContentDescriptionEquals("Pause")
         composeRobot<AppShellRobot> { openPlayback() }
-        onNodeWithTag("playback-speed").performScrollTo().assertTextContains("1.5x")
+        runOnUiThread { onNodeWithTag("playback-speed").performScrollTo() }
+        onNodeWithTag("playback-speed").assertTextContains("1.5x")
         onNodeWithTag("playback-sleep").assertTextContains("30 min")
       }
     }
@@ -104,14 +108,12 @@ class PlayerControlsUiTest {
     listOf(DpSize(360.dp, 480.dp), DpSize(900.dp, 480.dp)).forEach { size ->
       uiTestRule.runRobotTest(windowSize = size) {
         composeRobot<AppShellRobot> { openPlayback() }
-        onNodeWithTag("playback-current-chapter")
-          .performScrollTo()
-          .assertIsDisplayed()
-          .performClick()
-        onNodeWithTag("playback-option-chapter-7")
-          .performScrollTo()
-          .assertIsDisplayed()
-          .performClick()
+        runOnUiThread { onNodeWithTag("playback-current-chapter").performScrollTo() }
+        onNodeWithTag("playback-current-chapter").assertIsDisplayed()
+        runOnUiThread { onNodeWithTag("playback-current-chapter").performClick() }
+        runOnUiThread { onNodeWithTag("playback-option-chapter-7").performScrollTo() }
+        onNodeWithTag("playback-option-chapter-7").assertIsDisplayed()
+        runOnUiThread { onNodeWithTag("playback-option-chapter-7").performClick() }
         onNodeWithTag("playback-current-chapter").assertIsDisplayed()
         assertChapterText("Closing thoughts")
         assertChapterText("Chapter 8 of 8")
@@ -128,7 +130,8 @@ class PlayerControlsUiTest {
         useUnmergedTree = true,
       )
     waitUntilCatching("player shows $text", timeout = 3.seconds) { node.assertExists() }
-    node.performScrollTo().assertIsDisplayed()
+    runOnUiThread { node.performScrollTo() }
+    node.assertIsDisplayed()
   }
 
   private fun ComposeUiTest.assertChapterText(text: String) {

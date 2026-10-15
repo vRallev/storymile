@@ -41,12 +41,12 @@ class PlayerAudioUiTest {
       robot<PlayerRobot> { publish(initial) }
       seeAudioState(expanded = false, positionSeconds = 22, playing = false, speed = 1f)
 
-      onNodeWithTag("playback-bar-play-pause").performClick()
+      runOnUiThread { onNodeWithTag("playback-bar-play-pause").performClick() }
       onNodeWithTag("playback-bar-seek").performSemanticsAction(SemanticsActions.SetProgress) {
         it(50f)
       }
-      onNodeWithTag("playback-bar-speed").performClick()
-      onNodeWithTag("playback-option-speed-1.5").performClick()
+      runOnUiThread { onNodeWithTag("playback-bar-speed").performClick() }
+      runOnUiThread { onNodeWithTag("playback-option-speed-1.5").performClick() }
       robot<PlayerRobot> { seeCommands(1, listOf(50_000), listOf(1.5f)) }
       seeAudioState(expanded = false, positionSeconds = 22, playing = false, speed = 1f)
 
@@ -56,14 +56,14 @@ class PlayerAudioUiTest {
 
       composeRobot<AppShellRobot> { openPlayback() }
       seeAudioState(expanded = true, positionSeconds = 30, playing = true, speed = 1.5f)
-      onNodeWithTag("playback-play-pause").performClick()
+      runOnUiThread { onNodeWithTag("playback-play-pause").performClick() }
       onNodeWithTag("playback-seek").performSemanticsAction(SemanticsActions.SetProgress) {
         it(60f)
       }
-      onNodeWithTag("playback-back").performClick()
-      onNodeWithTag("playback-forward").performClick()
-      onNodeWithTag("playback-speed").performScrollTo().performClick()
-      onNodeWithTag("playback-option-speed-2.0").performClick()
+      runOnUiThread { onNodeWithTag("playback-back").performClick() }
+      runOnUiThread { onNodeWithTag("playback-forward").performClick() }
+      runOnUiThread { onNodeWithTag("playback-speed").performScrollTo().performClick() }
+      runOnUiThread { onNodeWithTag("playback-option-speed-2.0").performClick() }
       robot<PlayerRobot> {
         seeCommands(2, listOf(50_000, 60_000, 15_000, 60_000), listOf(1.5f, 2f))
         publish(playing.copy(positionMillis = 60_000, isPlaying = false, speed = 2f))

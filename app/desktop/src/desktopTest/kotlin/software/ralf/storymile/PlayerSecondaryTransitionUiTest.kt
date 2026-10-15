@@ -78,16 +78,18 @@ class PlayerSecondaryTransitionUiTest {
         waitForIdle()
         mainClock.autoAdvance = false
         try {
-          onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
+          runOnUiThread { onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) } }
           listOf(0.1f, 0.2f, 0.35f, 0.5f, 0.65f, 0.4f).forEach { target ->
             dragToProgress(collapsedTop, target)
             val progress = 1f - sheetTop() / collapsedTop
             assertShared(collapsed, expanded, snapshot(parts, expanded = true), progress)
           }
         } finally {
-          onRoot().performTouchInput {
-            advanceEventTime(100)
-            up()
+          runOnUiThread {
+            onRoot().performTouchInput {
+              advanceEventTime(100)
+              up()
+            }
           }
           mainClock.autoAdvance = true
         }
@@ -118,7 +120,7 @@ class PlayerSecondaryTransitionUiTest {
         waitForIdle()
         mainClock.autoAdvance = false
         try {
-          onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
+          runOnUiThread { onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) } }
           val targets = if (phone) listOf(0.85f, 0.95f, 0.8f) else listOf(0.9f, 0.97f, 0.9f)
           targets.forEach { target ->
             dragToProgress(collapsedTop, target)
@@ -137,9 +139,11 @@ class PlayerSecondaryTransitionUiTest {
             }
           }
         } finally {
-          onRoot().performTouchInput {
-            advanceEventTime(100)
-            up()
+          runOnUiThread {
+            onRoot().performTouchInput {
+              advanceEventTime(100)
+              up()
+            }
           }
           mainClock.autoAdvance = true
         }
@@ -347,7 +351,7 @@ class PlayerSecondaryTransitionUiTest {
 
   private fun ComposeUiTest.dragToProgress(collapsedTop: Float, target: Float) {
     val distance = collapsedTop * (1f - target) - sheetTop()
-    onRoot().performTouchInput { moveBy(Offset(0f, distance)) }
+    runOnUiThread { onRoot().performTouchInput { moveBy(Offset(0f, distance)) } }
     mainClock.advanceTimeByFrame()
   }
 

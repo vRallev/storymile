@@ -55,7 +55,8 @@ class TabHeaderUiTest {
               assertThat(header.controls, tab.name).isEqualTo(home.controls)
               assertThat(header.titleStyle, tab.name).isEqualTo(home.titleStyle)
 
-              onNodeWithTag("tab-profile").assertHasClickAction().performClick()
+              onNodeWithTag("tab-profile").assertHasClickAction()
+              runOnUiThread { onNodeWithTag("tab-profile").performClick() }
               onNodeWithTag("tab-${tab.name.lowercase()}").assertIsSelected()
               val dimensions = "${size.width.value.toInt()}-${size.height.value.toInt()}"
               saveScreenshot(
@@ -100,7 +101,7 @@ class TabHeaderUiTest {
   }
 
   private fun ComposeUiTest.saveScreenshot(name: String) {
-    onNodeWithTag("tab-header").performMouseInput { moveTo(center) }
+    runOnUiThread { onNodeWithTag("tab-header").performMouseInput { moveTo(center) } }
     val file = File("build/reports/screenshots/tab-header-$name.png")
     file.parentFile.mkdirs()
     ImageIO.write(onNodeWithTag("app-shell").captureToImage().toAwtImage(), "png", file)

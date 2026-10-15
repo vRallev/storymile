@@ -76,7 +76,8 @@ class HomeUiTest {
       ->
       uiTestRule.runRobotTest(windowSize = size, darkTheme = false) {
         listOf("home-search", "tab-profile", "home-discover").forEach { tag ->
-          onNodeWithTag(tag).assertIsDisplayed().performClick()
+          onNodeWithTag(tag).assertIsDisplayed()
+          runOnUiThread { onNodeWithTag(tag).performClick() }
           assertHomeFitsWithoutScrolling()
         }
       }

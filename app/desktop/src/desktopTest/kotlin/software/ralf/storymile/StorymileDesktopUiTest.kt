@@ -121,7 +121,7 @@ class StorymileDesktopUiTest {
           item.assertTextEquals(title)
           onNodeWithText(title).assertIsDisplayed()
           onNode(hasText(title) and hasAnyAncestor(isPopup())).assertDoesNotExist()
-          item.performTouchInput { longClick() }
+          runOnUiThread { item.performTouchInput { longClick() } }
           onNode(hasText(title) and hasAnyAncestor(isPopup())).assertIsDisplayed()
           onNodeWithTag("tab-home").assertIsSelected()
           saveScreenshot(
@@ -146,8 +146,10 @@ class StorymileDesktopUiTest {
         uiTestRule.runPhoneRobotTest(darkTheme = darkTheme) {
           onNodeWithText("Home").assertIsDisplayed()
           onNode(isPopup()).assertDoesNotExist()
-          onNodeWithTag("tab-home").performTouchInput {
-            longClick(Offset(center.x + width * edge.x, center.y + height * edge.y))
+          runOnUiThread {
+            onNodeWithTag("tab-home").performTouchInput {
+              longClick(Offset(center.x + width * edge.x, center.y + height * edge.y))
+            }
           }
           onNode(hasText("Home") and hasAnyAncestor(isPopup())).assertIsDisplayed()
           onNodeWithTag("tab-home").assertIsSelected()
@@ -165,15 +167,15 @@ class StorymileDesktopUiTest {
       mainClock.autoAdvance = false
       try {
         val item = onNodeWithTag("tab-library")
-        item.performMouseInput { moveTo(center) }
+        runOnUiThread { item.performMouseInput { moveTo(center) } }
         mainClock.advanceTimeBy(300)
         onNode(isPopup()).assertDoesNotExist()
 
-        item.performMouseInput { moveTo(Offset(center.x, -height.toFloat())) }
+        runOnUiThread { item.performMouseInput { moveTo(Offset(center.x, -height.toFloat())) } }
         mainClock.advanceTimeBy(700)
         onNode(isPopup()).assertDoesNotExist()
 
-        item.performMouseInput { moveTo(center) }
+        runOnUiThread { item.performMouseInput { moveTo(center) } }
         mainClock.advanceTimeBy(300)
         onNode(isPopup()).assertDoesNotExist()
         mainClock.advanceTimeBy(400)
@@ -191,7 +193,9 @@ class StorymileDesktopUiTest {
       uiTestRule.runRobotTest(windowSize = size) {
         TabsPresenter.Tab.entries.forEach { tab ->
           val title = tab.name.lowercase().replaceFirstChar { it.titlecase() }
-          onNodeWithTag("tab-${tab.name.lowercase()}").performTouchInput { longClick() }
+          runOnUiThread {
+            onNodeWithTag("tab-${tab.name.lowercase()}").performTouchInput { longClick() }
+          }
           onNodeWithTag("tab-${tab.name.lowercase()}").assertIsDisplayed().assertTextEquals(title)
         }
       }
@@ -279,9 +283,11 @@ class StorymileDesktopUiTest {
       waitUntilCatching("playback screen expanded", timeout = 3.seconds) {
         composeRobot<AppShellRobot> { seePlaybackScreen(phone = true) }
       }
-      onNodeWithTag("playback-screen").performKeyInput {
-        keyDown(Key.Escape)
-        keyUp(Key.Escape)
+      runOnUiThread {
+        onNodeWithTag("playback-screen").performKeyInput {
+          keyDown(Key.Escape)
+          keyUp(Key.Escape)
+        }
       }
       waitUntilCatching("playback bar restored", timeout = 3.seconds) {
         composeRobot<AppShellRobot> { seeCompactLayout() }
@@ -384,25 +390,33 @@ class StorymileDesktopUiTest {
 
         mainClock.autoAdvance = false
         try {
-          onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
-          onRoot().performTouchInput { moveBy(Offset(0f, -collapsedSheetTop / 2)) }
+          runOnUiThread {
+            onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
+          }
+          runOnUiThread {
+            onRoot().performTouchInput { moveBy(Offset(0f, -collapsedSheetTop / 2)) }
+          }
           mainClock.advanceTimeByFrame()
           val halfway = assertPlaybackArtworkTransition(collapsed, expanded, collapsedSheetTop)
           assertThat(halfway).isBetween(0.25f, 0.75f)
           val dimensions = "${size.width.value.toInt()}x${size.height.value.toInt()}"
           saveScreenshot("playback-transition-$dimensions-light")
 
-          onRoot().performTouchInput { moveBy(Offset(0f, collapsedSheetTop / 4)) }
+          runOnUiThread {
+            onRoot().performTouchInput { moveBy(Offset(0f, collapsedSheetTop / 4)) }
+          }
           mainClock.advanceTimeByFrame()
           val reversed = assertPlaybackArtworkTransition(collapsed, expanded, collapsedSheetTop)
           assertThat(reversed).isGreaterThan(0f)
           assertThat(reversed).isLessThan(halfway)
 
-          onRoot().performTouchInput { moveBy(Offset(0f, collapsedSheetTop)) }
+          runOnUiThread { onRoot().performTouchInput { moveBy(Offset(0f, collapsedSheetTop)) } }
         } finally {
-          onRoot().performTouchInput {
-            advanceEventTime(100)
-            up()
+          runOnUiThread {
+            onRoot().performTouchInput {
+              advanceEventTime(100)
+              up()
+            }
           }
           mainClock.autoAdvance = true
         }
@@ -458,8 +472,10 @@ class StorymileDesktopUiTest {
           val originalPlaybackTop = onNodeWithTag("playback-sheet").getUnclippedBoundsInRoot().top
           mainClock.autoAdvance = false
           try {
-            onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
-            onRoot().performTouchInput { moveBy(Offset(0f, -48f)) }
+            runOnUiThread {
+              onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
+            }
+            runOnUiThread { onRoot().performTouchInput { moveBy(Offset(0f, -48f)) } }
             mainClock.advanceTimeByFrame()
             onNodeWithTag("tabs").assertIsDisplayed()
             assertTabTravel(originalTabs, originalPlaybackTop, phone)
@@ -467,24 +483,26 @@ class StorymileDesktopUiTest {
               "tabs-drag-${if (phone) "phone" else "tablet"}-${if (darkTheme) "dark" else "light"}",
             )
 
-            onRoot().performTouchInput { moveBy(Offset(0f, 12f)) }
+            runOnUiThread { onRoot().performTouchInput { moveBy(Offset(0f, 12f)) } }
             mainClock.advanceTimeByFrame()
             assertTabTravel(originalTabs, originalPlaybackTop, phone)
 
-            onRoot().performTouchInput { moveBy(Offset(0f, -100f)) }
+            runOnUiThread { onRoot().performTouchInput { moveBy(Offset(0f, -100f)) } }
             mainClock.advanceTimeByFrame()
             if (phone) onNodeWithTag("tabs").assertIsNotDisplayed()
             else onNodeWithTag("tabs").assertIsDisplayed()
             assertTabTravel(originalTabs, originalPlaybackTop, phone)
 
-            onRoot().performTouchInput { moveBy(Offset(0f, 100f)) }
+            runOnUiThread { onRoot().performTouchInput { moveBy(Offset(0f, 100f)) } }
             mainClock.advanceTimeByFrame()
             onNodeWithTag("tabs").assertIsDisplayed()
             assertTabTravel(originalTabs, originalPlaybackTop, phone)
           } finally {
-            onRoot().performTouchInput {
-              advanceEventTime(100)
-              up()
+            runOnUiThread {
+              onRoot().performTouchInput {
+                advanceEventTime(100)
+                up()
+              }
             }
             mainClock.autoAdvance = true
           }
@@ -508,9 +526,11 @@ class StorymileDesktopUiTest {
           val surface = onRoot().captureToImage().toPixelMap()[x, (original.top + 32).roundToInt()]
           mainClock.autoAdvance = false
           try {
-            onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
+            runOnUiThread {
+              onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
+            }
             mainClock.advanceTimeBy(300)
-            onRoot().performTouchInput { moveBy(Offset(0f, -240f)) }
+            runOnUiThread { onRoot().performTouchInput { moveBy(Offset(0f, -240f)) } }
             mainClock.advanceTimeByFrame()
             val dragged = onNodeWithTag("playback-screen").fetchSemanticsNode().boundsInRoot
             assertThat(original.top - dragged.top).isGreaterThan(original.height)
@@ -520,7 +540,7 @@ class StorymileDesktopUiTest {
             val dimensions = "${size.width.value.toInt()}x${size.height.value.toInt()}"
             saveScreenshot("drag-feedback-$dimensions-${if (darkTheme) "dark" else "light"}")
           } finally {
-            onRoot().performTouchInput { up() }
+            runOnUiThread { onRoot().performTouchInput { up() } }
             mainClock.autoAdvance = true
           }
         }

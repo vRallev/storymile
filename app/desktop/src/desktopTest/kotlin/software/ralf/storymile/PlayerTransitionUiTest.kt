@@ -43,24 +43,28 @@ class PlayerTransitionUiTest {
 
         mainClock.autoAdvance = false
         try {
-          onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
-          onRoot().performTouchInput { moveBy(Offset(0f, -collapsedSheetTop / 2)) }
+          runOnUiThread { onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) } }
+          runOnUiThread {
+            onRoot().performTouchInput { moveBy(Offset(0f, -collapsedSheetTop / 2)) }
+          }
           mainClock.advanceTimeByFrame()
           val halfway = expansionProgress(collapsedSheetTop)
           assertThat(halfway).isBetween(0.25f, 0.75f)
           assertControls(collapsed, expanded, halfway)
 
-          onRoot().performTouchInput { moveBy(Offset(0f, collapsedSheetTop / 4)) }
+          runOnUiThread { onRoot().performTouchInput { moveBy(Offset(0f, collapsedSheetTop / 4)) } }
           mainClock.advanceTimeByFrame()
           val reversed = expansionProgress(collapsedSheetTop)
           assertThat(reversed).isStrictlyBetween(0f, halfway)
           assertControls(collapsed, expanded, reversed)
 
-          onRoot().performTouchInput { moveBy(Offset(0f, collapsedSheetTop)) }
+          runOnUiThread { onRoot().performTouchInput { moveBy(Offset(0f, collapsedSheetTop)) } }
         } finally {
-          onRoot().performTouchInput {
-            advanceEventTime(100)
-            up()
+          runOnUiThread {
+            onRoot().performTouchInput {
+              advanceEventTime(100)
+              up()
+            }
           }
           mainClock.autoAdvance = true
         }
@@ -115,7 +119,7 @@ class PlayerTransitionUiTest {
         val collapsedSheetTop = sheetTop()
         composeRobot<AppShellRobot> { openPlayback() }
         val original = controls(expanded = true)
-        onNodeWithTag("playback-current-chapter").performScrollTo()
+        runOnUiThread { onNodeWithTag("playback-current-chapter").performScrollTo() }
         val scrolled = controls(expanded = true)
         assertThat(scrolled.title.bounds.top).isLessThan(original.title.bounds.top - 20f)
         assertThat(scrolled.button.top).isLessThan(original.button.top - 20f)
