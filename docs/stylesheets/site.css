@@ -78,6 +78,42 @@ body:has([data-app-preview]) .md-grid {
   border-radius: 1.25rem;
 }
 
+.android-download {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--storymile-outline);
+  border-radius: 0.9rem;
+  background: var(--storymile-surface);
+}
+
+.android-download > div {
+  flex: 1 1 16rem;
+}
+
+.md-typeset .android-download h2 {
+  margin-top: 0;
+}
+
+.md-typeset .android-download figure {
+  margin: 0;
+  width: 225px;
+  max-width: 100%;
+}
+
+.android-download img {
+  display: block;
+}
+
+.android-download__help,
+.android-download figcaption {
+  font-size: 0.7rem;
+  color: var(--md-default-fg-color--light);
+}
+
 .app-preview {
   margin-top: 1.5rem;
   border: 1px solid var(--storymile-outline);
