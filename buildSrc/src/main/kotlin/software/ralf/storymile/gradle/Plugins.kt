@@ -12,6 +12,7 @@ internal object Plugins {
   const val COMPOSE_MULTIPLATFORM = "org.jetbrains.compose"
   const val DETEKT = "dev.detekt"
   const val KOTLIN_MULTIPLATFORM = "org.jetbrains.kotlin.multiplatform"
+  const val KOTLIN_SERIALIZATION = "org.jetbrains.kotlin.plugin.serialization"
   const val METRO = "dev.zacsweers.metro"
   const val SORT_DEPENDENCIES = "com.squareup.sort-dependencies"
 }

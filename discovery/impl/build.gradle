@@ -4,6 +4,7 @@ plugins {
 
 storymile {
   enableMetro true
+  enableSerialization true
 }
 
 dependencies {

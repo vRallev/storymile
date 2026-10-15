@@ -64,9 +64,14 @@ class ApplePodcastSearchResponseTest {
       listOf(
         "not json",
         "{}",
+        """{"results":null}""",
+        """{"results":{}}""",
         """{"results":[{"collectionName":"Missing ID"}]}""",
+        """{"results":[{"collectionId":null,"collectionName":"Null ID"}]}""",
         """{"results":[{"collectionId":0,"collectionName":"Invalid ID"}]}""",
+        """{"results":[{"collectionId":-1,"collectionName":"Negative ID"}]}""",
         """{"results":[{"collectionId":1}]}""",
+        """{"results":[{"collectionId":1,"collectionName":null}]}""",
         """{"results":[{"collectionId":1,"collectionName":" "}]}""",
         """{"results":[{"collectionId":1,"collectionName":"Title","feedUrl":42}]}""",
       )

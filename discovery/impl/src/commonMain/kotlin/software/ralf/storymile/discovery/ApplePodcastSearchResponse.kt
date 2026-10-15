@@ -1,42 +1,40 @@
 package software.ralf.storymile.discovery
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.longOrNull
 
 internal class ApplePodcastSearchResponse {
-  fun decode(body: String): List<DiscoveredPodcast> {
-    val document = Json.parseToJsonElement(body).jsonObject
-    val results =
-      requireNotNull(document["results"]) { "Missing podcast search results." }.jsonArray
-    return results.map { element ->
-      val podcast = element.jsonObject
-      val id = (podcast["collectionId"] as? JsonPrimitive)?.longOrNull
-      require(id != null && id > 0) { "Missing or invalid podcast ID." }
-      val title = podcast.string("collectionName")
-      require(!title.isNullOrBlank()) { "Missing podcast title." }
-      DiscoveredPodcast(
+  private val json = Json { ignoreUnknownKeys = true }
+
+  fun decode(body: String): List<DiscoveredPodcast> =
+    json.decodeFromString<Response>(body).results.map { it.toPodcast() }
+
+  @Serializable private data class Response(val results: List<Podcast>)
+
+  @Serializable
+  private data class Podcast(
+    @SerialName("collectionId") val id: Long,
+    @SerialName("collectionName") val title: String,
+    @SerialName("artistName") val author: String? = null,
+    val feedUrl: String? = null,
+    @SerialName("artworkUrl600") val largeArtworkUrl: String? = null,
+    @SerialName("artworkUrl100") val smallArtworkUrl: String? = null,
+    @SerialName("collectionViewUrl") val catalogUrl: String? = null,
+  ) {
+    fun toPodcast(): DiscoveredPodcast {
+      require(id > 0) { "Missing or invalid podcast ID." }
+      require(title.isNotBlank()) { "Missing podcast title." }
+      return DiscoveredPodcast(
         id = id.toString(),
         title = title,
-        author = podcast.string("artistName"),
-        feedUrl = podcast.string("feedUrl"),
-        artworkUrl = podcast.string("artworkUrl600") ?: podcast.string("artworkUrl100"),
-        catalogUrl = podcast.string("collectionViewUrl"),
+        author = author.nonBlank(),
+        feedUrl = feedUrl.nonBlank(),
+        artworkUrl = largeArtworkUrl.nonBlank() ?: smallArtworkUrl.nonBlank(),
+        catalogUrl = catalogUrl.nonBlank(),
       )
     }
-  }
 
-  private fun JsonObject.string(key: String): String? {
-    val value = this[key] ?: return null
-    require(value is JsonPrimitive) { "Invalid podcast field: $key." }
-    if (value.contentOrNull == null) {
-      return null
-    }
-    require(value.isString) { "Invalid podcast field: $key." }
-    return value.content.takeIf { it.isNotBlank() }
+    private fun String?.nonBlank(): String? = this?.takeIf { it.isNotBlank() }
   }
 }
