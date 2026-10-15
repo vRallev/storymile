@@ -7,10 +7,8 @@ import software.ralf.storymile.util.impl.BuildInfoValues
 
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
-class BuildInfoImpl : BuildInfo {
-  override val versionName: String = BuildInfoValues.VERSION_NAME
-
-  override val versionCode: Int = BuildInfoValues.VERSION_CODE
-
-  override val gitSha: String = BuildInfoValues.GIT_SHA
-}
+class BuildInfoImpl(
+  override val versionName: String = BuildInfoValues.VERSION_NAME,
+  override val versionCode: Int = BuildInfoValues.VERSION_CODE,
+  override val gitSha: String = BuildInfoValues.GIT_SHA,
+) : BuildInfo

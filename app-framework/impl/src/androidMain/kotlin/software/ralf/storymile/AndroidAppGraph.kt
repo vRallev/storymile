@@ -5,9 +5,11 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import software.ralf.app.platform.scope.RootScopeProvider
+import software.ralf.storymile.util.BuildInfo
+import software.ralf.storymile.util.BuildInfoImpl
 
 /** Final Android graph, including dependencies supplied by the Android application. */
-@DependencyGraph(AppScope::class)
+@DependencyGraph(AppScope::class, excludes = [BuildInfoImpl::class])
 interface AndroidAppGraph {
   /** Factory for the Android application graph. */
   @DependencyGraph.Factory
@@ -16,6 +18,7 @@ interface AndroidAppGraph {
     fun create(
       @Provides application: Application,
       @Provides rootScopeProvider: RootScopeProvider,
+      @Provides buildInfo: BuildInfo,
     ): AndroidAppGraph
   }
 }
