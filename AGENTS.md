@@ -111,6 +111,7 @@ reload. Android and iOS device selection also requires Python 3.
 
 Desktop shortcuts: Command/Ctrl+S switches window size; Command/Ctrl+D switches theme.
 Command/Ctrl+F toggles fake mode and restarts the app.
+Hold the Storymile title for five seconds to toggle the theme until the process exits.
 
 Wasm is disabled and Isolated Projects is enabled by default. Wasm commands need
 `-Pstorymile.enableWasm=true --no-isolated-projects` until Kotlin's Wasm plugin supports isolation.

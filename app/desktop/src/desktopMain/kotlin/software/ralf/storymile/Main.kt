@@ -1,7 +1,6 @@
 package software.ralf.storymile
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,7 +22,7 @@ import java.awt.Taskbar
 import javax.imageio.ImageIO
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.restart.DesktopProcessRestarter
-import software.ralf.storymile.theme.LocalDarkThemeOverride
+import software.ralf.storymile.theme.LocalThemeController
 import software.ralf.storymile.util.Platform
 
 /**
@@ -50,7 +49,7 @@ fun main(args: Array<String>) {
   application {
     var windowSize by remember { mutableStateOf(initialSize) }
     val windowState = rememberWindowState(width = initialSize.width, height = initialSize.height)
-    var darkThemeOverride by remember { mutableStateOf<Boolean?>(null) }
+    val themeController = LocalThemeController.current
     var systemDarkTheme by remember { mutableStateOf(false) }
 
     Window(
@@ -71,7 +70,7 @@ fun main(args: Array<String>) {
               true
             }
             Key.D -> {
-              darkThemeOverride = !(darkThemeOverride ?: systemDarkTheme)
+              themeController.toggle(systemDarkTheme)
               true
             }
             Key.F -> {
@@ -92,9 +91,7 @@ fun main(args: Array<String>) {
       // Desktop supplies live system appearance updates inside the window's composition.
       val currentSystemDarkTheme = isSystemInDarkTheme()
       SideEffect { systemDarkTheme = currentSystemDarkTheme }
-      CompositionLocalProvider(LocalDarkThemeOverride provides darkThemeOverride) {
-        desktopApp.renderTemplates()
-      }
+      desktopApp.renderTemplates()
     }
   }
 }
