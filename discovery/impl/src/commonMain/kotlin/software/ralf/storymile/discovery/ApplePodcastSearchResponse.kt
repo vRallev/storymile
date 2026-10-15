@@ -30,7 +30,10 @@ internal class ApplePodcastSearchResponse {
         title = title,
         author = author.nonBlank(),
         feedUrl = feedUrl.nonBlank(),
-        artworkUrl = largeArtworkUrl.nonBlank() ?: smallArtworkUrl.nonBlank(),
+        artworkUrl =
+          (largeArtworkUrl.nonBlank() ?: smallArtworkUrl.nonBlank())?.let {
+            ApplePodcastArtwork.highResolutionUrl(it)
+          },
         catalogUrl = catalogUrl.nonBlank(),
       )
     }

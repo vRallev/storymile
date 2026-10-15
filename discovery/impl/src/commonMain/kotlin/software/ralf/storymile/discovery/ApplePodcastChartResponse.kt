@@ -30,7 +30,7 @@ internal class ApplePodcastChartResponse {
         title = title,
         author = author.nonBlank(),
         feedUrl = null,
-        artworkUrl = artworkUrl.nonBlank(),
+        artworkUrl = artworkUrl.nonBlank()?.let { ApplePodcastArtwork.highResolutionUrl(it) },
         catalogUrl = catalogUrl.nonBlank(),
       )
     }

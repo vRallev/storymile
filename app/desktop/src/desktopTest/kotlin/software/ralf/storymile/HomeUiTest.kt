@@ -38,6 +38,9 @@ import assertk.assertions.isLessThanOrEqualTo
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
+import software.ralf.app.platform.robot.composeRobot
+import software.ralf.storymile.discovery.DiscoveryRobot
+import software.ralf.storymile.tabs.TabsPresenter.Tab
 
 class HomeUiTest {
   private val uiTestRule = DesktopUiTestRule()
@@ -71,13 +74,19 @@ class HomeUiTest {
   }
 
   @Test
-  fun `home actions keep the empty home selected`() {
+  fun `home search and discovery open the catalog and home restores the invitation`() {
     listOf(DpSize(412.dp, 916.dp), DpSize(1280.dp, 800.dp), DpSize(1600.dp, 900.dp)).forEach { size
       ->
       uiTestRule.runRobotTest(windowSize = size, darkTheme = false) {
-        listOf("home-search", "tab-profile", "home-discover").forEach { tag ->
-          onNodeWithTag(tag).assertIsDisplayed()
-          runOnUiThread { onNodeWithTag(tag).performClick() }
+        onNodeWithTag("tab-profile").assertIsDisplayed()
+        runOnUiThread { onNodeWithTag("tab-profile").performClick() }
+        assertHomeFitsWithoutScrolling()
+
+        listOf<DiscoveryRobot.() -> Unit>({ openSearch() }, { discover() }).forEach { openCatalog ->
+          composeRobot<DiscoveryRobot> { openCatalog() }
+          onNodeWithTag("discovery-screen").assertIsDisplayed()
+          onNodeWithTag("tab-home").assertIsSelected()
+          composeRobot<AppShellRobot> { selectTab(Tab.HOME) }
           assertHomeFitsWithoutScrolling()
         }
       }

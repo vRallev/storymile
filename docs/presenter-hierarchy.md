@@ -11,7 +11,10 @@ flowchart TD
   AppTemplatePresenter["AppTemplatePresenter\ntemplate wrapper"]
   AppRootPresenter["AppRootPresenter"]
   UserPresenter["UserPresenterImpl\nAdaptiveTemplate"]
-  HomePresenter["HomePresenterImpl\nempty home"]
+  HomePresenter["HomePresenterImpl\nbackstack"]
+  HomeContentPresenter["HomeContentPresenter\nempty home"]
+  DiscoveryPresenterImpl["DiscoveryPresenterImpl\nbrowse, topics, and search"]
+  ShowPresenter["ShowPresenter\npodcast preview"]
   DownloadsPresenter["DownloadsPresenterImpl\nempty downloads"]
   TabsPresenter["TabsPresenterImpl\ntabs"]
   LibraryPresenter["LibraryPresenterImpl\nempty library"]
@@ -22,6 +25,9 @@ flowchart TD
   AppRootPresenter --> UserPresenter
   UserPresenter --> TabsPresenter
   TabsPresenter -->|Home| HomePresenter
+  HomePresenter -->|root| HomeContentPresenter
+  HomePresenter -->|pushed entries| DiscoveryPresenterImpl
+  HomePresenter -->|pushed entry| ShowPresenter
   TabsPresenter -->|Library| LibraryPresenter
   TabsPresenter -->|Downloads| DownloadsPresenter
   UserPresenter --> PlaybackPresenter
@@ -45,8 +51,19 @@ presenters from the active user scope. A scope change resets their state.
 The tabs presenter owns the selected destination and produces its content model.
 It starts with
 [HomePresenterImpl](../home/impl/src/commonMain/kotlin/software/ralf/storymile/home/HomePresenterImpl.kt).
-[HomeRenderer](../home/impl/src/commonMain/kotlin/software/ralf/storymile/home/HomeRenderer.kt)
+Home owns an App Platform presenter backstack rooted at
+[HomeContentPresenter](../home/impl/src/commonMain/kotlin/software/ralf/storymile/home/HomeContentPresenter.kt).
+[HomeContentRenderer](../home/impl/src/commonMain/kotlin/software/ralf/storymile/home/HomeContentRenderer.kt)
 shows the welcome screen.
+Discover and Search push
+[DiscoveryPresenterImpl](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/DiscoveryPresenterImpl.kt).
+Topic selection pushes another catalog. Podcast selection pushes
+[ShowPresenter](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/ShowPresenter.kt).
+Back returns to the previous entry. Reselecting Home calls its model callback to pop to the welcome
+entry and keeps it in composition.
+[HomeRenderer](../home/impl/src/commonMain/kotlin/software/ralf/storymile/home/HomeRenderer.kt)
+renders the `DefaultBackstackModel`.
+Returning from another tab starts a new Home stack.
 The tabs presenter creates and composes only the selected screen. It retains the
 [library](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryPresenterImpl.kt)
 filter across tab changes.
@@ -73,6 +90,12 @@ Window resizing changes the navigation layout without changing the selected dest
 
 Home stacks its illustration and discovery prompt in narrow panes and places them side by side in
 wide panes. The illustration shrinks to keep the content within the window.
+
+[DiscoveryRenderer](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/DiscoveryRenderer.kt)
+adapts browsing, topics, and search to the available width.
+[ShowRenderer](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/ShowRenderer.kt)
+shows the catalog beside the selected podcast in wide panes. Narrow previews show only the selected
+podcast. Both layouts use the same presenter stack.
 
 [LibraryRenderer](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryRenderer.kt)
 adapts the empty library to phone, tablet, and desktop widths.

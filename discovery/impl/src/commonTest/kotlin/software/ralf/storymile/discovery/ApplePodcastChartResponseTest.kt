@@ -8,6 +8,21 @@ import kotlin.test.Test
 
 class ApplePodcastChartResponseTest {
   @Test
+  fun `chart thumbnails use larger artwork for cards and show previews`() {
+    val body =
+      """
+      {"feed":{"results":[{
+        "id":"123","name":"Science Weekly",
+        "artworkUrl100":"https://is1-ssl.mzstatic.com/image/thumb/cover.jpg/100x100bb.png"
+      }]}}
+      """
+        .trimIndent()
+
+    assertThat(ApplePodcastChartResponse().decode(body).single().artworkUrl)
+      .isEqualTo("https://is1-ssl.mzstatic.com/image/thumb/cover.jpg/1200x1200bb.png")
+  }
+
+  @Test
   fun `chart fields map to podcasts in ranking order and unknown fields are ignored`() {
     val body =
       """
