@@ -57,7 +57,8 @@ class LibraryUiTest {
       contentSize = size,
     ) {
       composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
-      onNodeWithTag("library-filter-shows").performClick().assertIsSelected()
+      runOnUiThread { onNodeWithTag("library-filter-shows").performClick() }
+      onNodeWithTag("library-filter-shows").assertIsSelected()
 
       listOf(
           DesktopWindowSizes.tablet,
@@ -71,7 +72,8 @@ class LibraryUiTest {
           onNodeWithTag("tab-library").assertIsSelected()
           onNodeWithTag("library-filter-shows").assertIsSelected()
           onNodeWithTag("library-filter-episodes").assertIsNotSelected()
-          onNodeWithTag("library-discover").assertIsDisplayed().performClick()
+          onNodeWithTag("library-discover").assertIsDisplayed()
+          runOnUiThread { onNodeWithTag("library-discover").performClick() }
           onNodeWithTag("library-empty").assertIsDisplayed()
           onNodeWithTag("tab-library").assertIsSelected()
           saveScreenshot("resized-${next.width.value.toInt()}-${next.height.value.toInt()}")
@@ -80,7 +82,7 @@ class LibraryUiTest {
   }
 
   private fun ComposeUiTest.saveScreenshot(name: String) {
-    onNodeWithTag("library-empty").performMouseInput { moveTo(center) }
+    runOnUiThread { onNodeWithTag("library-empty").performMouseInput { moveTo(center) } }
     val file = File("build/reports/screenshots/library-$name.png")
     file.parentFile.mkdirs()
     ImageIO.write(onNodeWithTag("app-shell").captureToImage().toAwtImage(), "png", file)

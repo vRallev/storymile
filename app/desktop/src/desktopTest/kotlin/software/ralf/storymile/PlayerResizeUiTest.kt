@@ -36,7 +36,7 @@ class PlayerResizeUiTest {
       contentSize = size,
     ) {
       composeRobot<AppShellRobot> { openPlayback() }
-      onNodeWithTag("playback-speed").performScrollTo()
+      runOnUiThread { onNodeWithTag("playback-speed").performScrollTo() }
       onNodeWithTag("playback-bar-speed", useUnmergedTree = true).assertDoesNotExist()
       assertSpeedDrawn("initial-phone")
       repeat(2) { cycle ->
@@ -51,7 +51,7 @@ class PlayerResizeUiTest {
             waitForIdle()
             if (next == DesktopWindowSizes.phone) {
               onNodeWithTag("playback-bar-speed", useUnmergedTree = true).assertDoesNotExist()
-              onNodeWithTag("playback-speed").performScrollTo()
+              runOnUiThread { onNodeWithTag("playback-speed").performScrollTo() }
             } else {
               onNodeWithTag("playback-bar-speed", useUnmergedTree = true).assertExists()
             }
@@ -60,8 +60,8 @@ class PlayerResizeUiTest {
               pairedControls = next != DesktopWindowSizes.phone,
             )
             if (cycle == 0 && next == DesktopWindowSizes.tablet) {
-              onNodeWithTag("playback-speed").performClick()
-              onNodeWithTag("playback-option-speed-1.5").performClick()
+              runOnUiThread { onNodeWithTag("playback-speed").performClick() }
+              runOnUiThread { onNodeWithTag("playback-option-speed-1.5").performClick() }
               onNodeWithTag("playback-speed-value-expanded", useUnmergedTree = true)
                 .assertTextEquals("1.5x")
             }

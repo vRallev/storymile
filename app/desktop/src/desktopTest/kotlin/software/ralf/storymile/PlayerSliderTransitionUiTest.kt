@@ -39,10 +39,10 @@ class PlayerSliderTransitionUiTest {
           val collapsedTop = sheetTop()
           mainClock.autoAdvance = false
           try {
-            onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
+            runOnUiThread { onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) } }
             listOf(0.2f, 0.5f, 0.75f, 0.4f, 0.15f).forEach { target ->
               val distance = collapsedTop * (1f - target) - sheetTop()
-              onRoot().performTouchInput { moveBy(Offset(0f, distance)) }
+              runOnUiThread { onRoot().performTouchInput { moveBy(Offset(0f, distance)) } }
               mainClock.advanceTimeByFrame()
               val bounds = thumbBounds(expanded = true)
               val screenshot = onRoot().captureToImage()
@@ -54,9 +54,11 @@ class PlayerSliderTransitionUiTest {
               assertThumbAboveTrack(screenshot.toPixelMap(), bounds, color)
             }
           } finally {
-            onRoot().performTouchInput {
-              advanceEventTime(100)
-              up()
+            runOnUiThread {
+              onRoot().performTouchInput {
+                advanceEventTime(100)
+                up()
+              }
             }
             mainClock.autoAdvance = true
           }

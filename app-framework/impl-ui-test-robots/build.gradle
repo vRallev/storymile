@@ -39,6 +39,7 @@ dependencies {
   commonMainImplementation project(':user:impl')
   commonMainImplementation project(':user:public')
   commonMainImplementation project(':util:impl')
+  commonMainImplementation project(':util:public-robots')
 
   commonTestImplementation project(':restart:public')
   commonTestImplementation project(':runtime-mode:impl')

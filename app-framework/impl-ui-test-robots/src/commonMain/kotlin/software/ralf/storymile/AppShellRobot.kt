@@ -29,6 +29,7 @@ import dev.zacsweers.metro.AppScope
 import software.ralf.app.platform.inject.robot.ContributesRobot
 import software.ralf.app.platform.robot.ComposeRobot
 import software.ralf.storymile.tabs.TabsPresenter
+import software.ralf.storymile.util.runOnUiThread
 
 /** Checks the visible app containers through the production renderer graph. */
 @ContributesRobot(AppScope::class)
@@ -58,7 +59,7 @@ class AppShellRobot : ComposeRobot() {
 
   /** Chooses a destination through the visible navigation item. */
   fun selectTab(tab: TabsPresenter.Tab) {
-    compose.onNodeWithTag("tab-${tab.name.lowercase()}").performClick()
+    runOnUiThread(compose) { compose.onNodeWithTag("tab-${tab.name.lowercase()}").performClick() }
   }
 
   /** Checks that exactly one navigation item is selected and its content is visible. */
@@ -100,30 +101,40 @@ class AppShellRobot : ComposeRobot() {
   /** Drags the persistent playback bar to the expanded screen. */
   fun dragPlaybackUp() {
     val height = compose.onRoot().fetchSemanticsNode().boundsInRoot.height
-    compose.onNodeWithTag("playback").performTouchInput {
-      swipe(start = Offset(40f, 32f), end = Offset(40f, 32f - height * 0.8f), durationMillis = 500)
+    runOnUiThread(compose) {
+      compose.onNodeWithTag("playback").performTouchInput {
+        swipe(
+          start = Offset(40f, 32f),
+          end = Offset(40f, 32f - height * 0.8f),
+          durationMillis = 500,
+        )
+      }
     }
   }
 
   /** Opens playback through its click action, also available to keyboard users. */
   fun openPlayback() {
-    compose.onNodeWithTag("playback-artwork-collapsed", useUnmergedTree = true).performTouchInput {
-      click(center)
+    runOnUiThread(compose) {
+      compose
+        .onNodeWithTag("playback-artwork-collapsed", useUnmergedTree = true)
+        .performTouchInput {
+          click(center)
+        }
     }
   }
 
   /** Returns to the app through the player header button. */
   fun collapsePlayback() {
-    compose
-      .onNodeWithTag("playback-collapse")
-      .assertContentDescriptionEquals("Collapse player")
-      .performClick()
+    compose.onNodeWithTag("playback-collapse").assertContentDescriptionEquals("Collapse player")
+    runOnUiThread(compose) { compose.onNodeWithTag("playback-collapse").performClick() }
   }
 
   /** Drags the expanded screen back to its persistent bar. */
   fun dragPlaybackDown() {
-    compose.onNodeWithTag("playback-screen").performTouchInput {
-      swipeDown(startY = 32f, endY = height - 32f, durationMillis = 500)
+    runOnUiThread(compose) {
+      compose.onNodeWithTag("playback-screen").performTouchInput {
+        swipeDown(startY = 32f, endY = height - 32f, durationMillis = 500)
+      }
     }
   }
 

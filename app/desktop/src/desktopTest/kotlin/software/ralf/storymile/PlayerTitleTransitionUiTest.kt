@@ -59,11 +59,11 @@ class PlayerTitleTransitionUiTest {
       val collapsedTop = sheetTop()
       mainClock.autoAdvance = false
       try {
-        onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
+        runOnUiThread { onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) } }
         listOf(0.3f, 0.49f, 0.51f, 0.75f, 0.95f, 0.75f, 0.51f, 0.49f, 0.3f, 0.75f).forEach { target
           ->
           val distance = collapsedTop * (1f - target) - sheetTop()
-          onRoot().performTouchInput { moveBy(Offset(0f, distance)) }
+          runOnUiThread { onRoot().performTouchInput { moveBy(Offset(0f, distance)) } }
           mainClock.advanceTimeByFrame()
           val progress = 1f - sheetTop() / collapsedTop
           listOf(
@@ -80,9 +80,11 @@ class PlayerTitleTransitionUiTest {
             }
         }
       } finally {
-        onRoot().performTouchInput {
-          advanceEventTime(100)
-          up()
+        runOnUiThread {
+          onRoot().performTouchInput {
+            advanceEventTime(100)
+            up()
+          }
         }
         mainClock.autoAdvance = true
       }
@@ -110,11 +112,11 @@ class PlayerTitleTransitionUiTest {
           waitForIdle()
           mainClock.autoAdvance = false
           try {
-            onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
+            runOnUiThread { onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) } }
             val steps = (1..49).map { it / 50f }
             (steps + steps.reversed()).forEach { target ->
               val distance = collapsedTop * (1f - target) - sheetTop()
-              onRoot().performTouchInput { moveBy(Offset(0f, distance)) }
+              runOnUiThread { onRoot().performTouchInput { moveBy(Offset(0f, distance)) } }
               mainClock.advanceTimeByFrame()
               val artwork = bounds("playback-artwork-expanded")
               if (size.width == 390.dp && target in listOf(0.1f, 0.2f, 0.5f)) {
@@ -132,9 +134,11 @@ class PlayerTitleTransitionUiTest {
               }
             }
           } finally {
-            onRoot().performTouchInput {
-              advanceEventTime(100)
-              up()
+            runOnUiThread {
+              onRoot().performTouchInput {
+                advanceEventTime(100)
+                up()
+              }
             }
             mainClock.autoAdvance = true
           }
@@ -159,10 +163,10 @@ class PlayerTitleTransitionUiTest {
 
       mainClock.autoAdvance = false
       try {
-        onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
+        runOnUiThread { onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) } }
         listOf(0.05f, 0.1f, 0.2f, 0.35f, 0.5f, 0.7f, 0.5f, 0.2f, 0.05f).forEach { target ->
           val distance = collapsedTop * (1f - target) - sheetTop()
-          onRoot().performTouchInput { moveBy(Offset(0f, distance)) }
+          runOnUiThread { onRoot().performTouchInput { moveBy(Offset(0f, distance)) } }
           mainClock.advanceTimeByFrame()
           val progress = 1f - sheetTop() / collapsedTop
           assertThat(progress).isStrictlyBetween(0f, 1f)
@@ -185,9 +189,11 @@ class PlayerTitleTransitionUiTest {
             )
         }
       } finally {
-        onRoot().performTouchInput {
-          advanceEventTime(100)
-          up()
+        runOnUiThread {
+          onRoot().performTouchInput {
+            advanceEventTime(100)
+            up()
+          }
         }
         mainClock.autoAdvance = true
       }
