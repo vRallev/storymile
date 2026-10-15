@@ -3,9 +3,11 @@ package software.ralf.storymile.discovery
 import dev.zacsweers.metro.Inject
 import software.ralf.storymile.http.HttpClient
 import software.ralf.storymile.http.HttpResponse
+import software.ralf.storymile.util.Device
 
 @Inject
-class ApplePodcastDiscoveryService(private val client: HttpClient) : PodcastDiscoveryService {
+class ApplePodcastDiscoveryService(private val client: HttpClient, private val device: Device) :
+  PodcastDiscoveryService {
   override suspend fun search(query: String): HttpResponse<List<DiscoveredPodcast>> {
     val term = query.trim()
     if (term.isEmpty()) {
@@ -18,7 +20,7 @@ class ApplePodcastDiscoveryService(private val client: HttpClient) : PodcastDisc
           "term" to term,
           "media" to "podcast",
           "entity" to "podcast",
-          "country" to "US",
+          "country" to (device.countryCode ?: "US"),
           "limit" to "200",
         ),
       decode = { ApplePodcastSearchResponse().decode(it) },

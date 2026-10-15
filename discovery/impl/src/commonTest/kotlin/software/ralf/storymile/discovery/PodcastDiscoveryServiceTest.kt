@@ -15,12 +15,13 @@ import kotlinx.coroutines.test.runTest
 import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
+import software.ralf.storymile.util.testing.FakeDevice
 
 class PodcastDiscoveryServiceTest {
   @Test
-  fun `search trims the query and requests podcasts from the US catalog`() = runTest {
+  fun `search trims the query and requests podcasts from the device country catalog`() = runTest {
     val client = LocalHttpClient()
-    val service: PodcastDiscoveryService = ApplePodcastDiscoveryService(client)
+    val service: PodcastDiscoveryService = ApplePodcastDiscoveryService(client, FakeDevice("DE"))
 
     assertThat(service.search("  science & history  "))
       .isEqualTo(
@@ -36,7 +37,7 @@ class PodcastDiscoveryServiceTest {
           "term" to "science & history",
           "media" to "podcast",
           "entity" to "podcast",
-          "country" to "US",
+          "country" to "DE",
           "limit" to "200",
         ),
       )
@@ -48,7 +49,7 @@ class PodcastDiscoveryServiceTest {
       LocalHttpClient(
         body = """{"feed":{"results":[{"id":"123","name":"Popular Result"}]}}""",
       )
-    val service: PodcastDiscoveryService = ApplePodcastDiscoveryService(client)
+    val service: PodcastDiscoveryService = ApplePodcastDiscoveryService(client, FakeDevice())
 
     assertThat(service.popular())
       .isEqualTo(
@@ -63,9 +64,27 @@ class PodcastDiscoveryServiceTest {
   }
 
   @Test
+  fun `search reads the current country and falls back to US when unavailable`() = runTest {
+    val client = LocalHttpClient()
+    val device = FakeDevice("CA")
+    val service: PodcastDiscoveryService = ApplePodcastDiscoveryService(client, device)
+
+    service.search("science")
+    assertThat(client.requestedParameters["country"]).isEqualTo("CA")
+
+    device.countryCode = "GB"
+    service.search("science")
+    assertThat(client.requestedParameters["country"]).isEqualTo("GB")
+
+    device.countryCode = null
+    service.search("science")
+    assertThat(client.requestedParameters["country"]).isEqualTo("US")
+  }
+
+  @Test
   fun `blank queries return no podcasts without making a request`() = runTest {
     val client = LocalHttpClient()
-    val service: PodcastDiscoveryService = ApplePodcastDiscoveryService(client)
+    val service: PodcastDiscoveryService = ApplePodcastDiscoveryService(client, FakeDevice())
 
     assertThat(service.search(" \n\t "))
       .isEqualTo(HttpResponse.Success(emptyList(), statusCode = 200))
@@ -76,7 +95,7 @@ class PodcastDiscoveryServiceTest {
   fun `catalog failures reach callers unchanged`() = runTest {
     val failure = HttpResponse.Error.Server(503)
     val service: PodcastDiscoveryService =
-      ApplePodcastDiscoveryService(LocalHttpClient(error = failure))
+      ApplePodcastDiscoveryService(LocalHttpClient(error = failure), FakeDevice())
 
     assertThat(service.search("science")).isSameInstanceAs(failure)
     assertThat(service.popular()).isSameInstanceAs(failure)

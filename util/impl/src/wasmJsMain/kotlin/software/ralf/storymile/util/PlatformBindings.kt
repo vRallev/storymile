@@ -10,4 +10,8 @@ import dev.zacsweers.metro.SingleIn
 @BindingContainer
 object PlatformBindings {
   @Provides @SingleIn(AppScope::class) fun providePlatform(): Platform = Platform.Wasm
+
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideDevice(): Device = LocaleDevice { browserCountryCode() }
 }

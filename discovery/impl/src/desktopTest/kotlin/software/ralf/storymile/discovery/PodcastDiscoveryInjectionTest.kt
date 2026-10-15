@@ -14,6 +14,8 @@ import software.ralf.storymile.http.HttpClient
 import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
+import software.ralf.storymile.util.Device
+import software.ralf.storymile.util.testing.FakeDevice
 
 class PodcastDiscoveryInjectionTest {
   @Test
@@ -26,6 +28,7 @@ class PodcastDiscoveryInjectionTest {
       .transform { it.data.single().title }
       .isEqualTo("Catalog Result")
     assertThat(client.requestedUrl).isEqualTo("https://itunes.apple.com/search")
+    assertThat(client.requestedParameters["country"]).isEqualTo("DE")
   }
 
   @Test
@@ -69,6 +72,7 @@ class PodcastDiscoveryInjectionTest {
           override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
         },
         client,
+        FakeDevice("DE"),
       )
 
   @DependencyGraph(AppScope::class)
@@ -80,6 +84,7 @@ class PodcastDiscoveryInjectionTest {
       fun create(
         @Provides controller: RuntimeModeController,
         @Provides client: HttpClient,
+        @Provides device: Device,
       ): Graph
     }
   }
