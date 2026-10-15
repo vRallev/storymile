@@ -21,8 +21,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
@@ -49,6 +52,42 @@ import software.ralf.app.platform.robot.composeRobot
 
 class PlayerTitleTransitionUiTest {
   private val uiTestRule = DesktopUiTestRule(withEpisodes = true)
+
+  @Test
+  fun `whole player header stays hidden through halfway during expansion and reversal`() {
+    uiTestRule.runPhoneRobotTest {
+      val collapsedTop = sheetTop()
+      mainClock.autoAdvance = false
+      try {
+        onNodeWithTag("playback").performTouchInput { down(Offset(40f, 32f)) }
+        listOf(0.3f, 0.49f, 0.51f, 0.75f, 0.95f, 0.75f, 0.51f, 0.49f, 0.3f, 0.75f).forEach { target
+          ->
+          val distance = collapsedTop * (1f - target) - sheetTop()
+          onRoot().performTouchInput { moveBy(Offset(0f, distance)) }
+          mainClock.advanceTimeByFrame()
+          val progress = 1f - sheetTop() / collapsedTop
+          listOf(
+              onNodeWithText("Now playing"),
+              onNodeWithTag("playback-more"),
+              onNodeWithTag("playback-collapse"),
+            )
+            .forEach { node ->
+              if (progress <= 0.5f) {
+                node.assertIsNotDisplayed()
+              } else {
+                node.assertIsDisplayed()
+              }
+            }
+        }
+      } finally {
+        onRoot().performTouchInput {
+          advanceEventTime(100)
+          up()
+        }
+        mainClock.autoAdvance = true
+      }
+    }
+  }
 
   @Test
   fun `title and subtitle avoid artwork throughout expansion and reversal`() {

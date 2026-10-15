@@ -53,18 +53,25 @@ class PlaybackTransition(private val progress: () -> Float) {
 
   /**
    * Fades content that exists in only one playback state. Keeps its measured space and removes
-   * hidden content from placement, input, and accessibility.
+   * hidden content from placement, input, and accessibility. Starts fading in after [startFraction]
+   * of progress toward that state; the value must be in `[0, 1)`.
    */
-  fun Modifier.fade(expanded: Boolean): Modifier = layout { measurable, constraints ->
-    val placeable = measurable.measure(constraints)
-    layout(placeable.width, placeable.height) {
-      val alpha = if (expanded) fraction else 1f - fraction
-      if (alpha > 0f) {
-        placeable.placeRelative(0, 0)
+  fun Modifier.fade(expanded: Boolean, startFraction: Float = 0f): Modifier {
+    require(startFraction >= 0f && startFraction < 1f)
+    fun opacity(): Float {
+      val progress = if (expanded) fraction else 1f - fraction
+      return ((progress - startFraction) / (1f - startFraction)).coerceIn(0f, 1f)
+    }
+    return layout { measurable, constraints ->
+      val placeable = measurable.measure(constraints)
+      layout(placeable.width, placeable.height) {
+        if (opacity() > 0f) {
+          placeable.placeRelative(0, 0)
+        }
       }
     }
+      .graphicsLayer { alpha = opacity() }
   }
-    .graphicsLayer { alpha = if (expanded) fraction else 1f - fraction }
 
   /**
    * Matches content with the same [key] in the two playback slots. Measures both endpoints and

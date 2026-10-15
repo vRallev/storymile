@@ -27,9 +27,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
@@ -50,6 +54,56 @@ import kotlin.math.abs
 import kotlin.test.Test
 
 class PlaybackTransitionTest {
+  @Test
+  fun `delayed fade stays hidden through halfway and reverses with the sheet`() =
+    runDesktopComposeUiTest(width = 80, height = 80) {
+      var progress by mutableFloatStateOf(0f)
+      val transition = PlaybackTransition { progress }
+      var clicks = 0
+      setContent {
+        Box(Modifier.fillMaxSize().background(Color.White)) {
+          with(transition) {
+            Box(
+              Modifier.fade(expanded = true, startFraction = 0.5f)
+                .fillMaxSize()
+                .background(Color.Black)
+                .testTag("delayed")
+                .clickable(
+                  interactionSource = remember { MutableInteractionSource() },
+                  indication = null,
+                ) {
+                  clicks++
+                },
+            )
+          }
+        }
+      }
+
+      var expectedClicks = 0
+      listOf(
+          0f to 0f,
+          0.3f to 0f,
+          0.5f to 0f,
+          0.75f to 0.5f,
+          1f to 1f,
+          0.75f to 0.5f,
+          0.5f to 0f,
+          0.3f to 0f,
+        )
+        .forEach { (fraction, opacity) ->
+          runOnIdle { progress = fraction }
+          assertGrayscale(onRoot().captureToImage().toPixelMap()[40, 40], 1f - opacity)
+          if (opacity > 0f) {
+            onNodeWithTag("delayed").assertIsDisplayed()
+            expectedClicks++
+          } else {
+            onNodeWithTag("delayed").assertIsNotDisplayed()
+          }
+          onRoot().performTouchInput { click(Offset(40f, 40f)) }
+          runOnIdle { assertThat(clicks).isEqualTo(expectedClicks) }
+        }
+    }
+
   @Test
   fun `exclusive content fades with the sheet and hidden controls ignore touch`() =
     runDesktopComposeUiTest(width = 160, height = 80) {
