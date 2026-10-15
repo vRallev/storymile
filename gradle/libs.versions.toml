@@ -36,6 +36,7 @@ okio = "3.18.2"
 process-phoenix = "3.0.0"
 serialization = "1.11.0"
 sort-dependencies = "0.21.0"
+xmlutil = "1.0.2"
 
 [libraries]
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -88,6 +89,7 @@ okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 process-phoenix = { module = "com.jakewharton:process-phoenix", version.ref = "process-phoenix" }
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 sort-dependencies-gradle-plugin = { module = "com.squareup:sort-dependencies-gradle-plugin", version.ref = "sort-dependencies" }
+xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlutil" }
 
 [plugins]
 android-lint = { id = "com.android.lint", version.ref = "agp" }

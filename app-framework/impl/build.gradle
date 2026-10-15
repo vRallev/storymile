@@ -27,6 +27,7 @@ dependencies {
   commonMainImplementation project(':playlist:impl')
   commonMainImplementation project(':presenter-navigation:impl')
   commonMainImplementation project(':restart:impl')
+  commonMainImplementation project(':rss:impl')
   commonMainImplementation project(':runtime-mode:impl')
   commonMainImplementation project(':storage:impl')
   commonMainImplementation project(':tabs:impl')
