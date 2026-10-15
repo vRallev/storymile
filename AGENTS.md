@@ -53,6 +53,13 @@ Configuration used only once may stay in its build file.
 
 Prefix project-specific Gradle properties with `storymile.`.
 
+### Source set hierarchies
+
+Use `commonJvmMain` and `commonJvmTest` for Android and Desktop code.
+Use `noWasmJsMain` and `noWasmJsTest` for Android, Desktop, and iOS code.
+Use `appleAndDesktopMain` and `appleAndDesktopTest` for iOS and Desktop code.
+Android host tests inherit `commonJvmTest`.
+
 ### Dependencies
 
 - Reusable modules depend on public APIs.

@@ -7,7 +7,7 @@ import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.okhttp.OkHttp
 
 @ContributesBinding(AppScope::class)
-class AndroidKtorClientFactory : KtorClientFactory() {
+class JvmKtorClientFactory : KtorClientFactory() {
   override fun create(configure: HttpClientConfig<*>.() -> Unit): KtorClient =
     KtorClient(OkHttp) {
       configure(this)

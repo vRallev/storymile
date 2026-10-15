@@ -11,6 +11,7 @@ internal object Plugins {
   const val COMPOSE_HOT_RELOAD = "org.jetbrains.compose.hot-reload"
   const val COMPOSE_MULTIPLATFORM = "org.jetbrains.compose"
   const val DETEKT = "dev.detekt"
+  const val KOTLIN_HIERARCHY = "io.github.terrakok.kmp-hierarchy"
   const val KOTLIN_MULTIPLATFORM = "org.jetbrains.kotlin.multiplatform"
   const val KOTLIN_SERIALIZATION = "org.jetbrains.kotlin.plugin.serialization"
   const val METRO = "dev.zacsweers.metro"
