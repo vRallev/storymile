@@ -29,7 +29,8 @@ class ApplePodcastDiscoveryService(private val client: HttpClient, private val d
 
   override suspend fun popular(): HttpResponse<List<DiscoveredPodcast>> =
     client.get(
-      url = "https://rss.marketingtools.apple.com/api/v2/us/podcasts/top/25/podcasts.json",
+      // The Marketing Tools chart feed has no CORS headers; this feed supports browser requests.
+      url = "https://itunes.apple.com/us/rss/toppodcasts/limit=25/json",
       decode = { ApplePodcastChartResponse().decode(it) },
     )
 }

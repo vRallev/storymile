@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  testMatch: 'launch.spec.mjs',
+  testMatch: ['launch.spec.mjs', 'discovery.spec.mjs'],
   forbidOnly: Boolean(process.env.CI),
   workers: 1,
   retries: 0,

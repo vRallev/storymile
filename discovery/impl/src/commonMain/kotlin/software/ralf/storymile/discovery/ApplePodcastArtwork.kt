@@ -15,7 +15,7 @@ internal object ApplePodcastArtwork {
       return url
     }
 
-    // Chart artwork is only 100px; request enough detail for cards and high-density previews.
+    // Request enough detail for cards and high-density previews.
     return "${match.groupValues[1]}1200x1200${match.groupValues[4]}${match.groupValues[5]}"
   }
 }
