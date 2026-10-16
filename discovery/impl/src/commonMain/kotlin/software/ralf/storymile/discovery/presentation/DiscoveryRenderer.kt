@@ -128,7 +128,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
       val listState = rememberLazyListState()
       var requestedFocus by rememberSaveable { mutableStateOf(false) }
       val floatingSearch = model.topic == null
-      var headerHeight by remember { mutableIntStateOf(0) }
+      var headerHeight by rememberSaveable { mutableIntStateOf(0) }
       val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
       val scrollConnection =
         remember(scrollBehavior) {
