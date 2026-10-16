@@ -25,7 +25,12 @@ choose() {
   done
   while true; do
     printf 'Selection [1-%d, default %d]: ' "$#" "$default"
-    read -r answer || fail "Selection cancelled."
+    if [[ -t 0 && $# -lt 10 ]]; then
+      read -r -n 1 answer || fail "Selection cancelled."
+      printf '\n'
+    else
+      read -r answer || fail "Selection cancelled."
+    fi
     answer="${answer:-$default}"
     if [[ "$answer" =~ ^[0-9]{1,3}$ ]] && (( 10#$answer >= 1 && 10#$answer <= $# )); then
       SELECTION=$((10#$answer - 1))
