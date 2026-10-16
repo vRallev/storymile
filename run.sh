@@ -127,7 +127,7 @@ prepare_android() {
   if [[ "$TARGET_KIND" == avd ]]; then
     echo "Starting $TARGET_ID..."
     mkdir -p "$ROOT_DIR/build/run"
-    nohup "$EMULATOR" -avd "$TARGET_ID" > "$ROOT_DIR/build/run/android-emulator.log" 2>&1 < /dev/null &
+    nohup "$EMULATOR" -avd "$TARGET_ID" -gpu host > "$ROOT_DIR/build/run/android-emulator.log" 2>&1 < /dev/null &
     ANDROID_EMULATOR_PID=$!
   fi
 }
