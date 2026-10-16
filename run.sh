@@ -146,6 +146,29 @@ prepare_android() {
   done
 }
 
+install_android_apk() {
+  local app_id="$1" apk="$2" install_status
+  if "$ADB" -s "$ANDROID_SERIAL_ID" install -r "$apk" 2>&1 | tee "$WORK_DIR/android-install"; then
+    return 0
+  else
+    install_status=$?
+  fi
+  grep -q 'INSTALL_FAILED_VERSION_DOWNGRADE' "$WORK_DIR/android-install" || return "$install_status"
+
+  echo "Newer app version installed. Retrying with downgrade enabled..."
+  if "$ADB" -s "$ANDROID_SERIAL_ID" install -r -d "$apk" 2>&1 | tee "$WORK_DIR/android-install"; then
+    return 0
+  else
+    install_status=$?
+  fi
+  grep -Eqi 'INSTALL_FAILED_VERSION_DOWNGRADE|(unknown|unrecognized|unsupported|invalid) (option|argument).*-d' \
+    "$WORK_DIR/android-install" || return "$install_status"
+
+  echo "Downgrade is not supported. Uninstalling $app_id and deleting its app data before reinstalling..."
+  "$ADB" -s "$ANDROID_SERIAL_ID" uninstall "$app_id"
+  "$ADB" -s "$ANDROID_SERIAL_ID" install "$apk"
+}
+
 run_android() {
   local build_type=Debug
   require_command python3
@@ -169,7 +192,7 @@ print(directory / apks[0]["outputFile"])
 PY
   local app_id apk activity
   { read -r app_id; read -r apk; } < "$WORK_DIR/apk"
-  "$ADB" -s "$ANDROID_SERIAL_ID" install -r "$apk"
+  install_android_apk "$app_id" "$apk"
   activity="$("$ADB" -s "$ANDROID_SERIAL_ID" shell cmd package resolve-activity --brief \
     -a android.intent.action.MAIN -c android.intent.category.LAUNCHER "$app_id" | tr -d '\r' | tail -n 1)"
   [[ "$activity" == */* ]] || fail "Could not resolve the launcher activity for $app_id."
