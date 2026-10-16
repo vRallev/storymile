@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import assertk.assertThat
@@ -103,6 +104,7 @@ class DiscoveryRobot(private val service: TestPodcastDiscoveryService) : Compose
 
   /** Returns to the previous catalog or Home screen. */
   fun backFromCatalog() {
+    scrollCatalogTo("discovery-back")
     compose.onNodeWithTag("discovery-back").assertIsDisplayed()
     runOnUiThread(compose) { compose.onNodeWithTag("discovery-back").performClick() }
   }
@@ -125,7 +127,11 @@ class DiscoveryRobot(private val service: TestPodcastDiscoveryService) : Compose
 
   private fun scrollCatalogTo(tag: String) {
     runOnUiThread(compose) {
-      compose.onNodeWithTag("discovery-list").performScrollToNode(hasTestTag(tag))
+      if (tag in listOf("discovery-search", "discovery-clear", "discovery-back")) {
+        compose.onNodeWithTag("discovery-list").performScrollToIndex(0)
+      } else {
+        compose.onNodeWithTag("discovery-list").performScrollToNode(hasTestTag(tag))
+      }
     }
   }
 

@@ -1,6 +1,7 @@
 package software.ralf.storymile.discovery.presentation
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,18 +35,26 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
@@ -52,7 +63,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.ExperimentalAppPlatform
@@ -104,41 +117,90 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
         DiscoveryTopic.Filter.OUTDOORS -> Res.string.filter_outdoors
       }
 
+  @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Compose(model: DiscoveryPresenterImpl.Model, modifier: Modifier) {
     BoxWithConstraints(
-      modifier.fillMaxSize().discoveryScreenTransition().testTag("discovery-screen"),
+      modifier.fillMaxSize().discoveryScreenTransition().clipToBounds().testTag("discovery-screen"),
     ) {
       val wide = maxWidth / LocalDensity.current.fontScale >= 760.dp
       val padding = if (maxWidth < 600.dp) 16.dp else 32.dp
       val listState = rememberLazyListState()
       var requestedFocus by rememberSaveable { mutableStateOf(false) }
+      val floatingSearch = model.topic == null
+      var headerHeight by rememberSaveable { mutableIntStateOf(0) }
+      val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+      val scrollConnection =
+        remember(scrollBehavior) {
+          object : NestedScrollConnection by scrollBehavior.nestedScrollConnection {
+            // Let the list scroll beneath the returning header.
+            override fun onPreScroll(available: Offset, source: NestedScrollSource) = Offset.Zero
+          }
+        }
+      LaunchedEffect(listState.canScrollBackward) {
+        if (!listState.canScrollBackward) {
+          scrollBehavior.state.heightOffset = 0f
+        }
+      }
       Column(Modifier.fillMaxSize()) {
-        TitleBar(
-          title = stringResource(model.topic?.titleResource ?: Res.string.discover_podcasts),
-          onBack = model.onBack,
-          backButtonModifier = Modifier.testTag("discovery-back"),
-        )
+        if (!floatingSearch) {
+          TitleBar(
+            title = stringResource(requireNotNull(model.topic).titleResource),
+            onBack = model.onBack,
+            backButtonModifier = Modifier.testTag("discovery-back"),
+          )
+        }
         LazyColumn(
-          modifier = Modifier.weight(1f).testTag("discovery-list"),
+          modifier =
+            Modifier.weight(1f)
+              .then(if (floatingSearch) Modifier.nestedScroll(scrollConnection) else Modifier)
+              .testTag("discovery-list"),
           state = listState,
-          contentPadding = PaddingValues(horizontal = padding, vertical = 16.dp),
+          contentPadding =
+            PaddingValues(
+              start = padding,
+              end = padding,
+              top =
+                if (floatingSearch) with(LocalDensity.current) { headerHeight.toDp() } else 16.dp,
+              bottom = 16.dp,
+            ),
           verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-          item {
-            if (model.topic == null) {
-              Search(model, model.focusSearch && !requestedFocus) { requestedFocus = true }
-            } else {
-              Topic(model)
-            }
-          }
-          if (model.topic == null) {
+          if (floatingSearch) {
             item { Topics(model) }
+          } else {
+            item { Topic(model) }
           }
           when (val state = model.state) {
             CatalogState.Loading -> item { Loading() }
             CatalogState.Error -> item { Error(model.onRetry) }
             is CatalogState.Ready -> results(model, state.podcasts, wide)
+          }
+        }
+      }
+      if (floatingSearch) {
+        Surface(
+          modifier =
+            Modifier.fillMaxWidth()
+              .offset { IntOffset(0, scrollBehavior.state.heightOffset.roundToInt()) }
+              .onSizeChanged {
+                headerHeight = it.height
+                scrollBehavior.state.heightOffsetLimit = -it.height.toFloat()
+                scrollBehavior.state.heightOffset =
+                  scrollBehavior.state.heightOffset.coerceIn(-it.height.toFloat(), 0f)
+              }
+              .testTag("discovery-search-header"),
+          color = AppTheme.colorScheme.background,
+        ) {
+          Column {
+            TitleBar(
+              title = stringResource(Res.string.discover_podcasts),
+              onBack = model.onBack,
+              backButtonModifier = Modifier.testTag("discovery-back"),
+            )
+            Box(Modifier.padding(horizontal = padding).padding(top = 16.dp, bottom = 20.dp)) {
+              Search(model, model.focusSearch && !requestedFocus) { requestedFocus = true }
+            }
           }
         }
       }
