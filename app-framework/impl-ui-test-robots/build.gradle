@@ -32,6 +32,7 @@ dependencies {
   commonMainImplementation project(':playlist:public')
   commonMainImplementation project(':presenter-navigation:impl')
   commonMainImplementation project(':restart:impl')
+  commonMainImplementation project(':rss:impl')
   commonMainImplementation project(':runtime-mode:impl-robots')
   commonMainImplementation project(':runtime-mode:public')
   commonMainImplementation project(':storage:impl')

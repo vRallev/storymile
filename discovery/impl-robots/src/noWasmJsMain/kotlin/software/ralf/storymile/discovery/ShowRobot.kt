@@ -1,6 +1,7 @@
 package software.ralf.storymile.discovery
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -22,16 +23,18 @@ class ShowRobot : ComposeRobot() {
     }
   }
 
-  /** Exercises the deliberately inactive follow and sample playback controls. */
+  /** Checks preview actions and the episode row before playback is connected. */
   fun pressPreviewActions() {
     runOnUiThread(compose) {
       compose.onNodeWithTag("show-detail").performScrollToNode(hasTestTag("show-follow"))
       compose.onNodeWithTag("show-follow").performClick()
     }
     compose.onNodeWithTag("show-follow").assertTextContains("Follow")
-    runOnUiThread(compose) {
-      compose.onNodeWithTag("show-detail").performScrollToNode(hasTestTag("episode-play-0"))
-      compose.onNodeWithTag("episode-play-0").performClick()
+    compose.waitUntilCatching("Episodes loaded") {
+      runOnUiThread(compose) {
+        compose.onNodeWithTag("show-detail").performScrollToNode(hasTestTag("episode-play-0"))
+      }
+      compose.onNodeWithTag("episode-play-0").assertIsDisplayed().assertIsNotEnabled()
     }
     compose.onNodeWithTag("show-screen").assertIsDisplayed()
     compose.onNodeWithTag("playback").assertDoesNotExist()

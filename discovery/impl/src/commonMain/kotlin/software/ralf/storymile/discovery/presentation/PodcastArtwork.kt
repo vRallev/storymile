@@ -21,6 +21,11 @@ import software.ralf.storymile.theme.AppTheme
 
 @Composable
 internal fun PodcastArtwork(podcast: DiscoveredPodcast, modifier: Modifier) {
+  PodcastArtwork(podcast.artworkUrl, modifier)
+}
+
+@Composable
+internal fun PodcastArtwork(artworkUrl: String?, modifier: Modifier) {
   Box(
     modifier =
       modifier.clip(RoundedCornerShape(12.dp)).background(AppTheme.colorScheme.secondaryContainer),
@@ -32,13 +37,13 @@ internal fun PodcastArtwork(podcast: DiscoveredPodcast, modifier: Modifier) {
       modifier = Modifier.fillMaxSize(0.4f),
       tint = AppTheme.colorScheme.onSecondaryContainer,
     )
-    if (podcast.artworkUrl != null) {
+    if (artworkUrl != null) {
       AsyncImage(
         model =
           ImageRequest.Builder(LocalPlatformContext.current)
-            .data(podcast.artworkUrl)
-            .memoryCacheKey(podcast.artworkUrl)
-            .placeholderMemoryCacheKey(podcast.artworkUrl)
+            .data(artworkUrl)
+            .memoryCacheKey(artworkUrl)
+            .placeholderMemoryCacheKey(artworkUrl)
             .build(),
         contentDescription = null,
         modifier = Modifier.fillMaxSize(),
