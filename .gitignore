@@ -9,7 +9,9 @@ local.properties
 # Documentation builds
 /.venv-docs/
 /site/
+/release-apk/
 /docs/assets/
+/docs/downloads/
 /docs/web/
 /docs/design-research/gallery/
 /docs/design-research/images/

@@ -150,16 +150,17 @@ python3 -m venv .venv-docs
 .venv-docs/bin/python -m pip install -r requirements-docs.txt
 ```
 
+Download the `android-release` CI artifact into `release-apk/`.
 Build the production web app. Then build and preview the site:
 
 ```sh
 ./gradlew --quiet -Pstorymile.enableWasm=true --no-isolated-projects :app:web:wasmJsBrowserDistribution
-.venv-docs/bin/python scripts/docs/build.py
+.venv-docs/bin/python scripts/docs/build.py --android-apk-dir release-apk
 .venv-docs/bin/python scripts/docs/serve.py
 ```
 
 Open `http://127.0.0.1:4174/storymile/`. Rebuild the site after changing its source files.
-The build copies the web distribution, existing app icons, and design gallery into generated
+The build copies the web distribution, APK, app icons, and design gallery into generated
 directories under `docs/`. Do not edit those copies. Edit `design-research/` to update the gallery.
 
 ## Verify
@@ -238,12 +239,13 @@ and [canonical layouts](https://developer.android.com/develop/adaptive-apps/guid
 Every push to `main` runs CI without canceling earlier runs. New PR pushes cancel older
 runs for that PR.
 
-The `build-mkdocs` job uses the tested distribution from `build-web-release`.
+The `build-mkdocs` job uses the tested `build-web-release` distribution and `build-android-release` APK.
 It builds the complete site with strict link validation and runs its browser checks.
 Pull requests upload the site as the `wiki` artifact for review.
 The `CI passed` check requires the documentation build to pass.
 
-After `build-mkdocs` passes on `main`, `deploy-mkdocs` publishes the site to GitHub Pages.
+After `build-mkdocs` passes on `main`, `deploy-mkdocs` publishes the site and APK to GitHub Pages.
+Superseded main runs skip deployment. APK downloads do not create releases or Git tags.
 Manual runs can deploy only from `main`. Deployments use the `github-pages` environment and run
 one at a time. In repository settings, select **GitHub Actions** as the Pages source.
 

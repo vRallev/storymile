@@ -20,12 +20,12 @@ episodes in your library. Built with Kotlin Multiplatform and
   <div>
     <h2>Take Storymile with you</h2>
     <p>Download the latest Android build from main. No Google Play needed.</p>
-    <p><a class="md-button md-button--primary" href="{{ android_apk_url }}">Install Android APK</a></p>
+    <p><a class="md-button md-button--primary" href="{{ android_apk_url }}" download="storymile.apk">Install Android APK</a></p>
     <p class="android-download__help">Open the APK on your phone. If prompted, allow installs from your browser.</p>
-    <a href="{{ android_release_url }}">Build details on GitHub ↗</a>
+    <a href="{{ android_build_url }}">Build details on GitHub ↗</a>
   </div>
   <figure>
-    <a href="{{ android_apk_url }}"><img src="assets/android-download.svg" alt="QR code to download the latest Android APK" width="225" height="225"></a>
+    <a href="{{ android_apk_url }}" download="storymile.apk"><img src="assets/android-download.svg" alt="QR code to download the latest Android APK" width="225" height="225"></a>
     <figcaption>Scan to download on your phone</figcaption>
   </figure>
 </section>

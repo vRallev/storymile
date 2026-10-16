@@ -1,6 +1,7 @@
 """Keep repository assets and source links in sync with the documentation."""
 
 from hashlib import sha256
+import os
 from pathlib import Path
 import re
 import shutil
@@ -61,9 +62,11 @@ def on_pre_build(config):
 
 def on_page_markdown(markdown, page, config, files):
     if page.file.src_uri == "index.md":
-        markdown = markdown.replace("{{ android_apk_url }}", android_apk_url(config))
+        markdown = markdown.replace("{{ android_apk_url }}", "downloads/storymile.apk")
+        run_id = os.environ.get("GITHUB_RUN_ID")
+        build_path = f"actions/runs/{run_id}" if run_id else "actions/workflows/ci.yml"
         markdown = markdown.replace(
-            "{{ android_release_url }}", f"{config['repo_url']}/releases/latest"
+            "{{ android_build_url }}", f"{config['repo_url']}/{build_path}"
         )
     docs = Path(config["docs_dir"]).resolve()
     source = Path(page.file.abs_src_path).parent
@@ -93,4 +96,4 @@ def on_page_markdown(markdown, page, config, files):
 
 
 def android_apk_url(config):
-    return f"{config['repo_url']}/releases/latest/download/storymile.apk"
+    return f"{config['site_url'].rstrip('/')}/downloads/storymile.apk"
