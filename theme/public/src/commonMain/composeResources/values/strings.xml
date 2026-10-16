@@ -1,4 +1,5 @@
 <resources>
   <string name="storymile">Storymile</string>
   <string name="profile">Profile</string>
+  <string name="back">Back</string>
 </resources>

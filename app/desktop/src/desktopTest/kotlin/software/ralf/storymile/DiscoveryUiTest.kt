@@ -11,11 +11,14 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import assertk.assertThat
+import assertk.assertions.isEqualTo
 import assertk.assertions.isLessThanOrEqualTo
 import java.io.File
 import javax.imageio.ImageIO
@@ -94,13 +97,15 @@ class DiscoveryUiTest {
   }
 
   @Test
-  fun `catalog and show controls remain reachable across sizes themes and large text`() {
+  fun `catalog and show headers align and controls remain reachable across sizes themes and large text`() {
     listOf(
         Scenario(DpSize(412.dp, 916.dp)),
         Scenario(DpSize(800.dp, 1280.dp), darkTheme = true),
         Scenario(DpSize(1280.dp, 800.dp)),
         Scenario(DpSize(1600.dp, 900.dp), darkTheme = true),
         Scenario(DpSize(900.dp, 360.dp)),
+        Scenario(DpSize(599.dp, 480.dp)),
+        Scenario(DpSize(600.dp, 480.dp)),
         Scenario(DpSize(480.dp, 1000.dp), fontScale = 2f),
       )
       .forEach { scenario ->
@@ -109,19 +114,27 @@ class DiscoveryUiTest {
           darkTheme = scenario.darkTheme,
           fontScale = scenario.fontScale,
         ) {
+          val homeProfileSize = profileSize()
           composeRobot<DiscoveryRobot> {
             discover()
             seePodcast("quiet-current")
           }
-          onNodeWithTag("discovery-list").performScrollToNode(hasTestTag("discovery-back"))
+          val catalogHeader = headerBounds("discovery-back")
+          assertThat(profileSize()).isEqualTo(homeProfileSize)
+          onNodeWithTag("discovery-list").performScrollToNode(hasTestTag("discovery-search"))
           onNodeWithTag("discovery-back").assertIsDisplayed()
           onNodeWithTag("discovery-search").assertIsDisplayed()
           saveScreenshot("catalog-${scenario.label()}")
           composeRobot<DiscoveryRobot> { openPodcast("quiet-current") }
           composeRobot<ShowRobot> { seeShow() }
           onNodeWithTag("show-back").assertIsDisplayed()
+          assertThat(headerBounds("show-back")).isEqualTo(catalogHeader)
+          assertThat(profileSize()).isEqualTo(homeProfileSize)
           saveScreenshot("show-${scenario.label()}")
           composeRobot<ShowRobot> { pressPreviewActions() }
+          assertThat(headerBounds("show-back")).isEqualTo(catalogHeader)
+          composeRobot<ShowRobot> { back() }
+          assertThat(headerBounds("discovery-back")).isEqualTo(catalogHeader)
           composeRobot<AppShellRobot> { selectTab(Tab.HOME) }
         }
       }
@@ -175,6 +188,20 @@ class DiscoveryUiTest {
     val file = File("build/reports/screenshots/discovery-$name.png")
     file.parentFile.mkdirs()
     ImageIO.write(onNodeWithTag("app-shell").captureToImage().toAwtImage(), "png", file)
+  }
+
+  private fun ComposeUiTest.headerBounds(backTag: String): List<DpRect> = runOnUiThread {
+    listOf("title-bar", "title-bar-title", backTag, "tab-profile").map {
+      onNodeWithTag(it, useUnmergedTree = true).assertIsDisplayed().getUnclippedBoundsInRoot()
+    }
+  }
+
+  private fun ComposeUiTest.profileSize(): DpSize = runOnUiThread {
+    val bounds =
+      onNodeWithContentDescription("Profile", useUnmergedTree = true)
+        .assertIsDisplayed()
+        .getUnclippedBoundsInRoot()
+    DpSize(bounds.right - bounds.left, bounds.bottom - bounds.top)
   }
 
   private data class Scenario(
