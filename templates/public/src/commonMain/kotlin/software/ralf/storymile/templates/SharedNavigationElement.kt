@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 enum class SharedNavigationElement {
   /** The title in the screen's app bar. */
   APP_BAR_TITLE,
+  /** The profile icon in the screen's app bar. */
+  PROFILE_ICON,
   /** The search entry point or editable search field. */
   SEARCH_FIELD,
 }

@@ -35,6 +35,7 @@ fun TitleBar(
   modifier: Modifier = Modifier,
   backButtonModifier: Modifier = Modifier,
   titleModifier: Modifier = Modifier,
+  profileIconModifier: Modifier = Modifier,
 ) {
   BoxWithConstraints(modifier.fillMaxWidth().testTag("title-bar")) {
     Row(
@@ -57,7 +58,11 @@ fun TitleBar(
         fontWeight = FontWeight.Bold,
         color = AppTheme.colorScheme.onSurface,
       )
-      ProfileButton(onClick = {}, modifier = Modifier.testTag("tab-profile"))
+      ProfileButton(
+        onClick = {},
+        modifier = Modifier.testTag("tab-profile"),
+        iconModifier = profileIconModifier,
+      )
     }
   }
 }

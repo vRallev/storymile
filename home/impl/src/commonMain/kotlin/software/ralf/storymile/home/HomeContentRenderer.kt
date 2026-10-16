@@ -76,6 +76,9 @@ class HomeContentRenderer : ComposeRenderer<HomeContentPresenter.Model>() {
             windowWidth = LocalScreenSize.current.width,
             appBarTitleModifier =
               Modifier.sharedNavigationBounds(SharedNavigationElement.APP_BAR_TITLE),
+            profileIconModifier =
+              Modifier.sharedNavigationBounds(SharedNavigationElement.PROFILE_ICON)
+                .testTag("home-profile-icon"),
           )
           Column(
             Modifier.weight(1f)

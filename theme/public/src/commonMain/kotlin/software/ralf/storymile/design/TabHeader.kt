@@ -38,6 +38,7 @@ fun TabHeader(
   windowWidth: Dp,
   modifier: Modifier = Modifier,
   appBarTitleModifier: Modifier = Modifier,
+  profileIconModifier: Modifier = Modifier,
 ) {
   BoxWithConstraints(modifier.fillMaxWidth().testTag("tab-header")) {
     val fontScale = LocalDensity.current.fontScale
@@ -74,7 +75,11 @@ fun TabHeader(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
           )
-          ProfileButton(onClick = {}, modifier = Modifier.testTag("tab-profile"))
+          ProfileButton(
+            onClick = {},
+            modifier = Modifier.testTag("tab-profile"),
+            iconModifier = profileIconModifier,
+          )
         }
         Spacer(Modifier.height(if (tight) 8.dp else 20.dp))
       }
@@ -100,7 +105,11 @@ fun TabHeader(
           color = AppTheme.colorScheme.onBackground,
         )
         if (!showBrand) {
-          ProfileButton(onClick = {}, modifier = Modifier.testTag("tab-profile"))
+          ProfileButton(
+            onClick = {},
+            modifier = Modifier.testTag("tab-profile"),
+            iconModifier = profileIconModifier,
+          )
         }
       }
     }

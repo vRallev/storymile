@@ -205,6 +205,9 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
               backButtonModifier = Modifier.testTag("discovery-back"),
               titleModifier =
                 Modifier.sharedNavigationBounds(SharedNavigationElement.APP_BAR_TITLE),
+              profileIconModifier =
+                Modifier.sharedNavigationBounds(SharedNavigationElement.PROFILE_ICON)
+                  .testTag("discovery-profile-icon"),
             )
             Box(Modifier.padding(horizontal = padding).padding(top = 16.dp, bottom = 20.dp)) {
               Search(model, model.focusSearch && !requestedFocus) { requestedFocus = true }

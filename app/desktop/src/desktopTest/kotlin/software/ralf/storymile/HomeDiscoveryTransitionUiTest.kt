@@ -5,6 +5,7 @@ package software.ralf.storymile
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
@@ -28,7 +29,7 @@ class HomeDiscoveryTransitionUiTest {
   private val uiTestRule = DesktopUiTestRule()
 
   @Test
-  fun `title and search animate between home and discovery in both directions`() {
+  fun `title search and profile animate between home and discovery in both directions`() {
     listOf(
         Scenario(DpSize(412.dp, 916.dp)),
         Scenario(DpSize(599.dp, 480.dp)),
@@ -61,6 +62,8 @@ class HomeDiscoveryTransitionUiTest {
             "discovery-search",
             homeTitle,
             "title-bar-title",
+            "home-profile-icon",
+            "discovery-profile-icon",
             scenario.label,
           ) {
             onNodeWithTag("home-search").performClick()
@@ -71,6 +74,8 @@ class HomeDiscoveryTransitionUiTest {
             "home-search",
             "title-bar-title",
             homeTitle,
+            "discovery-profile-icon",
+            "home-profile-icon",
             scenario.label,
           ) {
             onNodeWithTag("discovery-back").performClick()
@@ -85,11 +90,14 @@ class HomeDiscoveryTransitionUiTest {
     targetSearch: String,
     sourceTitle: String,
     targetTitle: String,
+    sourceProfile: String,
+    targetProfile: String,
     name: String,
     navigate: ComposeUiTest.() -> Unit,
   ) {
     val startSearch = bounds(sourceSearch)
     val startTitle = titlePosition(sourceTitle)
+    val startProfile = bounds(sourceProfile)
     mainClock.autoAdvance = false
     try {
       runOnUiThread { navigate() }
@@ -105,7 +113,7 @@ class HomeDiscoveryTransitionUiTest {
           if (targetSearch == "discovery-search") {
             onNodeWithTag(targetSearch).assertIsNotFocused()
           }
-          Frame(bounds(targetSearch), titlePosition(targetTitle))
+          Frame(bounds(targetSearch), titlePosition(targetTitle), bounds(targetProfile))
         }
       val screenshot =
         File("build/reports/screenshots/discovery-transition-$name-$targetSearch.png")
@@ -114,6 +122,7 @@ class HomeDiscoveryTransitionUiTest {
       mainClock.advanceTimeBy(2_000)
       val endSearch = bounds(targetSearch)
       val endTitle = titlePosition(targetTitle)
+      val endProfile = bounds(targetProfile)
       frames.forEach { frame ->
         assertThat(
             abs(frame.search.top - startSearch.top),
@@ -123,6 +132,21 @@ class HomeDiscoveryTransitionUiTest {
         assertThat(
             abs(frame.search.top - endSearch.top) > 1f,
             "Search has an intermediate frame in $name",
+          )
+          .isTrue()
+        assertThat(
+            (frame.profile.center - startProfile.center).getDistance(),
+            "Profile moves between endpoints in $name",
+          )
+          .isLessThan((endProfile.center - startProfile.center).getDistance())
+        assertThat(
+            abs(frame.profile.width - startProfile.width),
+            "Profile keeps the shared icon size in $name",
+          )
+          .isLessThan(0.5f)
+        assertThat(
+            (frame.profile.center - endProfile.center).getDistance() > 0.5f,
+            "Profile has an intermediate position in $name",
           )
           .isTrue()
         assertThat(
@@ -143,7 +167,10 @@ class HomeDiscoveryTransitionUiTest {
   }
 
   private fun ComposeUiTest.bounds(tag: String): Rect = runOnUiThread {
-    onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+    val coordinates =
+      onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().layoutInfo.coordinates
+    // Shared content draws in an overlay outside its original parent clipping bounds.
+    coordinates.findRootCoordinates().localBoundingBoxOf(coordinates, clipBounds = false)
   }
 
   private fun ComposeUiTest.titlePosition(tag: String): Offset {
@@ -151,7 +178,7 @@ class HomeDiscoveryTransitionUiTest {
     return Offset(bounds.left, bounds.center.y)
   }
 
-  private data class Frame(val search: Rect, val title: Offset)
+  private data class Frame(val search: Rect, val title: Offset, val profile: Rect)
 
   private data class Scenario(val size: DpSize, val fontScale: Float = 1f) {
     val label: String = "${size.width.value.toInt()}x${size.height.value.toInt()}-$fontScale"
