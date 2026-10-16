@@ -14,6 +14,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.theme.AppTheme
 
@@ -32,7 +34,12 @@ internal fun PodcastArtwork(podcast: DiscoveredPodcast, modifier: Modifier) {
     )
     if (podcast.artworkUrl != null) {
       AsyncImage(
-        model = podcast.artworkUrl,
+        model =
+          ImageRequest.Builder(LocalPlatformContext.current)
+            .data(podcast.artworkUrl)
+            .memoryCacheKey(podcast.artworkUrl)
+            .placeholderMemoryCacheKey(podcast.artworkUrl)
+            .build(),
         contentDescription = null,
         modifier = Modifier.fillMaxSize(),
         contentScale = ContentScale.Crop,

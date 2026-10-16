@@ -104,7 +104,9 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
 
   @Composable
   override fun Compose(model: DiscoveryPresenterImpl.Model, modifier: Modifier) {
-    BoxWithConstraints(modifier.fillMaxSize().testTag("discovery-screen")) {
+    BoxWithConstraints(
+      modifier.fillMaxSize().discoveryScreenTransition().testTag("discovery-screen"),
+    ) {
       val wide = maxWidth / LocalDensity.current.fontScale >= 760.dp
       val padding = if (maxWidth < 600.dp) 16.dp else 32.dp
       val listState = rememberLazyListState()
@@ -169,7 +171,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
         } else {
           Modifier.fillMaxWidth()
         }
-      Column(resultModifier) { FirstPodcasts(remaining, featured, model.onPodcastSelected) }
+      Column(resultModifier) { FirstPodcasts(remaining, featured, model) }
     }
   }
 
@@ -183,7 +185,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
       Column(Modifier.weight(1.1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         ResultsTitle(model, featured)
-        FirstPodcasts(podcasts, featured, model.onPodcastSelected)
+        FirstPodcasts(podcasts, featured, model)
       }
       if (showEpisodesBeside) {
         SampleEpisodes(
@@ -307,20 +309,23 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
   private fun FirstPodcasts(
     podcasts: List<DiscoveredPodcast>,
     featured: Boolean,
-    onSelected: (DiscoveredPodcast) -> Unit,
+    model: DiscoveryPresenterImpl.Model,
   ) {
+    val source =
+      model.topic?.let { ShowPresenter.Source.Topic(it) }
+        ?: if (featured) ShowPresenter.Source.Browse else ShowPresenter.Source.Search
     if (featured) {
       BoxWithConstraints(Modifier.fillMaxWidth()) {
         if (maxWidth / LocalDensity.current.fontScale < 300.dp) {
           Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             podcasts.forEach { podcast ->
-              FeaturedPodcast(podcast, onSelected, Modifier.fillMaxWidth())
+              FeaturedPodcast(podcast, model.onPodcastSelected, Modifier.fillMaxWidth())
             }
           }
         } else {
           Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             podcasts.forEach { podcast ->
-              FeaturedPodcast(podcast, onSelected, Modifier.weight(1f))
+              FeaturedPodcast(podcast, model.onPodcastSelected, Modifier.weight(1f))
             }
             if (podcasts.size == 1) {
               Spacer(Modifier.weight(1f))
@@ -331,7 +336,11 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     } else {
       Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         podcasts.forEach { podcast ->
-          PodcastRow(podcast, onClick = { onSelected(podcast) })
+          PodcastRow(
+            podcast,
+            onClick = { model.onPodcastSelected(podcast) },
+            transitionSource = source,
+          )
         }
       }
     }
@@ -350,9 +359,18 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
       color = Color.Transparent,
     ) {
       Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        PodcastArtwork(podcast, Modifier.fillMaxWidth().aspectRatio(1f))
+        PodcastArtwork(
+          podcast,
+          PodcastSharedElement.Artwork.modifier(podcast, ShowPresenter.Source.Browse)
+            .testTag("discovery-artwork-${podcast.id}")
+            .fillMaxWidth()
+            .aspectRatio(1f),
+        )
         Text(
           text = podcast.title,
+          modifier =
+            PodcastSharedElement.Title.modifier(podcast, ShowPresenter.Source.Browse)
+              .testTag("discovery-title-${podcast.id}"),
           style = AppTheme.typography.titleMedium,
           fontWeight = FontWeight.SemiBold,
           maxLines = 3,
@@ -361,6 +379,9 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
         podcast.author?.let { author ->
           Text(
             text = author,
+            modifier =
+              PodcastSharedElement.Author.modifier(podcast, ShowPresenter.Source.Browse)
+                .testTag("discovery-author-${podcast.id}"),
             style = AppTheme.typography.bodyMedium,
             color = AppTheme.colorScheme.onSurfaceVariant,
             maxLines = 2,

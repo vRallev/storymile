@@ -28,6 +28,7 @@ internal fun PodcastRow(
   podcast: DiscoveredPodcast,
   onClick: () -> Unit,
   selected: Boolean = false,
+  transitionSource: ShowPresenter.Source? = null,
 ) {
   Surface(
     onClick = onClick,
@@ -40,10 +41,18 @@ internal fun PodcastRow(
       horizontalArrangement = Arrangement.spacedBy(12.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      PodcastArtwork(podcast, Modifier.size(76.dp))
+      PodcastArtwork(
+        podcast,
+        PodcastSharedElement.Artwork.modifier(podcast, transitionSource)
+          .testTag("discovery-artwork-${podcast.id}")
+          .size(76.dp),
+      )
       Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
           text = podcast.title,
+          modifier =
+            PodcastSharedElement.Title.modifier(podcast, transitionSource)
+              .testTag("discovery-title-${podcast.id}"),
           style = AppTheme.typography.titleMedium,
           fontWeight = FontWeight.SemiBold,
           maxLines = 3,
@@ -52,6 +61,9 @@ internal fun PodcastRow(
         podcast.author?.let { author ->
           Text(
             text = author,
+            modifier =
+              PodcastSharedElement.Author.modifier(podcast, transitionSource)
+                .testTag("discovery-author-${podcast.id}"),
             style = AppTheme.typography.bodyMedium,
             color = AppTheme.colorScheme.onSurfaceVariant,
             maxLines = 2,

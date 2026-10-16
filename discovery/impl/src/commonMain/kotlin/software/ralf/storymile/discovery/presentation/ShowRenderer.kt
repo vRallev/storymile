@@ -49,7 +49,7 @@ import software.ralf.storymile.theme.AppTheme
 class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
   @Composable
   override fun Compose(model: ShowPresenter.Model, modifier: Modifier) {
-    BoxWithConstraints(modifier.fillMaxSize().testTag("show-screen")) {
+    BoxWithConstraints(modifier.fillMaxSize().discoveryScreenTransition().testTag("show-screen")) {
       val wide = maxWidth / LocalDensity.current.fontScale >= 760.dp
       val padding = if (maxWidth < 600.dp) 16.dp else 32.dp
       val selectedIndex = model.podcasts.indexOfFirst { it.id == model.podcast.id }.coerceAtLeast(0)
@@ -103,7 +103,7 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
             contentPadding = PaddingValues(vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
           ) {
-            item { PodcastDetails(model.podcast) }
+            item { PodcastDetails(model.podcast, model.source) }
             item {
               HorizontalDivider(color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             }
@@ -122,7 +122,7 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
   }
 
   @Composable
-  private fun PodcastDetails(podcast: DiscoveredPodcast) {
+  private fun PodcastDetails(podcast: DiscoveredPodcast, source: ShowPresenter.Source) {
     BoxWithConstraints(Modifier.fillMaxWidth()) {
       if (maxWidth / LocalDensity.current.fontScale >= 440.dp) {
         Row(
@@ -131,9 +131,16 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
           verticalAlignment = Alignment.CenterVertically,
         ) {
           Box(Modifier.weight(0.8f)) {
-            PodcastArtwork(podcast, Modifier.widthIn(max = 240.dp).fillMaxWidth().aspectRatio(1f))
+            PodcastArtwork(
+              podcast,
+              PodcastSharedElement.Artwork.modifier(podcast, source)
+                .testTag("show-artwork")
+                .widthIn(max = 240.dp)
+                .fillMaxWidth()
+                .aspectRatio(1f),
+            )
           }
-          Metadata(podcast, Modifier.weight(1.2f))
+          Metadata(podcast, source, Modifier.weight(1.2f))
         }
       } else {
         Column(
@@ -141,26 +148,41 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
           verticalArrangement = Arrangement.spacedBy(16.dp),
           horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-          PodcastArtwork(podcast, Modifier.widthIn(max = 320.dp).fillMaxWidth().aspectRatio(1f))
-          Metadata(podcast, Modifier.fillMaxWidth())
+          PodcastArtwork(
+            podcast,
+            PodcastSharedElement.Artwork.modifier(podcast, source)
+              .testTag("show-artwork")
+              .widthIn(max = 320.dp)
+              .fillMaxWidth()
+              .aspectRatio(1f),
+          )
+          Metadata(podcast, source, Modifier.fillMaxWidth())
         }
       }
     }
   }
 
   @Composable
-  private fun Metadata(podcast: DiscoveredPodcast, modifier: Modifier) {
+  private fun Metadata(
+    podcast: DiscoveredPodcast,
+    source: ShowPresenter.Source,
+    modifier: Modifier,
+  ) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
       Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
           text = podcast.title,
-          modifier = Modifier.testTag("show-title").semantics { heading() },
+          modifier =
+            PodcastSharedElement.Title.modifier(podcast, source).testTag("show-title").semantics {
+              heading()
+            },
           style = AppTheme.typography.headlineSmall,
           fontWeight = FontWeight.Bold,
         )
         podcast.author?.let { author ->
           Text(
             text = author,
+            modifier = PodcastSharedElement.Author.modifier(podcast, source).testTag("show-author"),
             style = AppTheme.typography.bodyLarge,
             color = AppTheme.colorScheme.onSurfaceVariant,
           )
