@@ -26,7 +26,12 @@ async function expectPreviewSize(iframe, width, height) {
 }
 
 docsHostTest('offers the latest main APK on desktop and phone', async ({ page }) => {
-  const apkUrl = 'downloads/storymile.apk';
+  const artifact = new URL('../../../../release-apk/', import.meta.url);
+  const metadata = JSON.parse(await readFile(new URL('output-metadata.json', artifact), 'utf8'));
+  expect(metadata.elements).toHaveLength(1);
+  const { versionName, versionCode, outputFile } = metadata.elements[0];
+  const apkFilename = `storymile-${versionName}-${versionCode}.apk`;
+  const apkUrl = `downloads/${apkFilename}`;
   const buildPath = process.env.GITHUB_RUN_ID
     ? `actions/runs/${process.env.GITHUB_RUN_ID}` : 'actions/workflows/ci.yml';
   await page.route('**/*', route => new URL(route.request().url()).hostname === '127.0.0.1'
@@ -47,11 +52,10 @@ docsHostTest('offers the latest main APK on desktop and phone', async ({ page })
   const downloadEvent = page.waitForEvent('download');
   await download.getByRole('link', { name: 'Install Android APK', exact: true }).click();
   const apk = await downloadEvent;
-  expect(apk.url()).toBe('http://127.0.0.1:4174/storymile/downloads/storymile.apk');
-  expect(apk.suggestedFilename()).toBe('storymile.apk');
-  const artifact = new URL('../../../../release-apk/', import.meta.url);
+  expect(apk.url()).toBe(`http://127.0.0.1:4174/storymile/${apkUrl}`);
+  expect(apk.suggestedFilename()).toBe(apkFilename);
   const apkNames = (await readdir(artifact)).filter(name => name.endsWith('.apk'));
-  expect(apkNames).toHaveLength(1);
+  expect(apkNames).toEqual([outputFile]);
   const checksum = bytes => createHash('sha256').update(bytes).digest('hex');
   expect(checksum(await readFile(await apk.path())))
     .toBe(checksum(await readFile(new URL(apkNames[0], artifact))));
