@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,12 +37,12 @@ import androidx.compose.ui.unit.isSpecified
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
+import software.ralf.storymile.design.ProfileButton
 import software.ralf.storymile.playback.impl.generated.resources.Res
 import software.ralf.storymile.playback.impl.generated.resources.collapse_player
 import software.ralf.storymile.playback.impl.generated.resources.more_options
 import software.ralf.storymile.playback.impl.generated.resources.now_playing
 import software.ralf.storymile.playback.impl.generated.resources.playback_failed
-import software.ralf.storymile.playback.impl.generated.resources.profile
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.templates.LocalCollapsePlayback
@@ -181,7 +180,7 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
       },
       actions = {
         if (showProfile && landscape) {
-          ProfilePlaceholder()
+          ProfileButton(onClick = {}, enabled = false)
         }
         IconButton(
           onClick = onMore,
@@ -194,7 +193,7 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
           )
         }
         if (showProfile && !landscape) {
-          ProfilePlaceholder()
+          ProfileButton(onClick = {}, enabled = false)
         }
       },
       modifier = fade.padding(horizontal = if (tablet) 16.dp else 0.dp).testTag("playback-header"),
@@ -206,16 +205,5 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
         ),
       windowInsets = WindowInsets(0),
     )
-  }
-
-  @Composable
-  private fun ProfilePlaceholder() {
-    IconButton(onClick = {}, enabled = false) {
-      Icon(
-        imageVector = Icons.Default.AccountCircle,
-        contentDescription = stringResource(Res.string.profile),
-        modifier = Modifier.size(40.dp),
-      )
-    }
   }
 }

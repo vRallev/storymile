@@ -9,10 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,7 +25,6 @@ import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.LocalOnToggleTheme
 import software.ralf.storymile.theme.generated.resources.Res
-import software.ralf.storymile.theme.generated.resources.profile
 import software.ralf.storymile.theme.generated.resources.storymile
 
 /**
@@ -73,7 +68,7 @@ fun TabHeader(title: String, windowWidth: Dp, modifier: Modifier = Modifier) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
           )
-          Profile()
+          ProfileButton(onClick = {}, modifier = Modifier.testTag("tab-profile"))
         }
         Spacer(Modifier.height(if (tight) 8.dp else 20.dp))
       }
@@ -95,21 +90,9 @@ fun TabHeader(title: String, windowWidth: Dp, modifier: Modifier = Modifier) {
           color = AppTheme.colorScheme.onBackground,
         )
         if (!showBrand) {
-          Profile()
+          ProfileButton(onClick = {}, modifier = Modifier.testTag("tab-profile"))
         }
       }
     }
-  }
-}
-
-@Composable
-private fun Profile() {
-  IconButton(onClick = {}, modifier = Modifier.size(48.dp).testTag("tab-profile")) {
-    Icon(
-      imageVector = Icons.Filled.AccountCircle,
-      contentDescription = stringResource(Res.string.profile),
-      modifier = Modifier.size(44.dp),
-      tint = AppTheme.colorScheme.outline,
-    )
   }
 }

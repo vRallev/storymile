@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
+import software.ralf.storymile.design.TitleBar
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.impl.generated.resources.Res
 import software.ralf.storymile.discovery.impl.generated.resources.discover_podcasts
@@ -58,8 +59,8 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
           initialFirstVisibleItemIndex = if (selectedIndex == 0) 0 else selectedIndex + 1,
         )
       val detailState = rememberLazyListState()
-      Column(Modifier.fillMaxSize().padding(horizontal = padding)) {
-        DiscoveryHeader(
+      Column(Modifier.fillMaxSize()) {
+        TitleBar(
           title =
             stringResource(
               when (val source = model.source) {
@@ -68,10 +69,13 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
                 is ShowPresenter.Source.Topic -> source.topic.titleResource
               },
             ),
-          backTag = "show-back",
           onBack = model.onBack,
+          backButtonModifier = Modifier.testTag("show-back"),
         )
-        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+        Row(
+          Modifier.weight(1f).padding(horizontal = padding),
+          horizontalArrangement = Arrangement.spacedBy(24.dp),
+        ) {
           if (wide) {
             LazyColumn(
               modifier = Modifier.weight(0.85f).testTag("show-list"),

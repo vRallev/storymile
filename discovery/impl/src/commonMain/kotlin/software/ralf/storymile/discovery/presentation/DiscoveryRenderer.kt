@@ -59,6 +59,7 @@ import software.ralf.app.platform.ExperimentalAppPlatform
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.app.platform.renderer.text.rememberPresenterBackedTextFieldState
+import software.ralf.storymile.design.TitleBar
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.impl.generated.resources.Res
 import software.ralf.storymile.discovery.impl.generated.resources.browse_topics
@@ -109,33 +110,33 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
       val padding = if (maxWidth < 600.dp) 16.dp else 32.dp
       val listState = rememberLazyListState()
       var requestedFocus by rememberSaveable { mutableStateOf(false) }
-      LazyColumn(
-        modifier = Modifier.fillMaxSize().testTag("discovery-list"),
-        state = listState,
-        contentPadding = PaddingValues(horizontal = padding, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-      ) {
-        item {
-          DiscoveryHeader(
-            title = stringResource(model.topic?.titleResource ?: Res.string.discover_podcasts),
-            backTag = "discovery-back",
-            onBack = model.onBack,
-          )
-        }
-        item {
-          if (model.topic == null) {
-            Search(model, model.focusSearch && !requestedFocus) { requestedFocus = true }
-          } else {
-            Topic(model)
+      Column(Modifier.fillMaxSize()) {
+        TitleBar(
+          title = stringResource(model.topic?.titleResource ?: Res.string.discover_podcasts),
+          onBack = model.onBack,
+          backButtonModifier = Modifier.testTag("discovery-back"),
+        )
+        LazyColumn(
+          modifier = Modifier.weight(1f).testTag("discovery-list"),
+          state = listState,
+          contentPadding = PaddingValues(horizontal = padding, vertical = 16.dp),
+          verticalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
+          item {
+            if (model.topic == null) {
+              Search(model, model.focusSearch && !requestedFocus) { requestedFocus = true }
+            } else {
+              Topic(model)
+            }
           }
-        }
-        if (model.topic == null) {
-          item { Topics(model) }
-        }
-        when (val state = model.state) {
-          CatalogState.Loading -> item { Loading() }
-          CatalogState.Error -> item { Error(model.onRetry) }
-          is CatalogState.Ready -> results(model, state.podcasts, wide)
+          if (model.topic == null) {
+            item { Topics(model) }
+          }
+          when (val state = model.state) {
+            CatalogState.Loading -> item { Loading() }
+            CatalogState.Error -> item { Error(model.onRetry) }
+            is CatalogState.Ready -> results(model, state.podcasts, wide)
+          }
         }
       }
     }

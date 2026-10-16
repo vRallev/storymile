@@ -103,7 +103,7 @@ class DiscoveryRobot(private val service: TestPodcastDiscoveryService) : Compose
 
   /** Returns to the previous catalog or Home screen. */
   fun backFromCatalog() {
-    scrollCatalogTo("discovery-back")
+    compose.onNodeWithTag("discovery-back").assertIsDisplayed()
     runOnUiThread(compose) { compose.onNodeWithTag("discovery-back").performClick() }
   }
 
