@@ -1,6 +1,11 @@
 package software.ralf.storymile.discovery.presentation
 
 import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -172,15 +177,37 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
             ),
           verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-          if (floatingSearch) {
-            item { Topics(model) }
-          } else {
-            item { Topic(model) }
+          item {
+            Column {
+              if (floatingSearch) {
+                AnimatedVisibility(
+                  visible = model.query.value.isBlank(),
+                  modifier = Modifier.testTag("discovery-topics"),
+                  enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
+                  exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
+                ) {
+                  Column(Modifier.padding(bottom = 20.dp)) { Topics(model) }
+                }
+              } else {
+                Column(Modifier.padding(bottom = 20.dp)) { Topic(model) }
+              }
+              when (val state = model.state) {
+                CatalogState.Loading -> Loading()
+                CatalogState.Error -> Error(model.onRetry)
+                is CatalogState.Ready -> {
+                  if (state.podcasts.isEmpty()) {
+                    Empty()
+                  } else {
+                    val featured = model.topic == null && model.query.value.isBlank()
+                    FirstResults(model, state.podcasts.take(2), featured, wide && (featured || model.topic != null))
+                  }
+                }
+              }
+            }
           }
-          when (val state = model.state) {
-            CatalogState.Loading -> item { Loading() }
-            CatalogState.Error -> item { Error(model.onRetry) }
-            is CatalogState.Ready -> results(model, state.podcasts, wide)
+          val state = model.state
+          if (state is CatalogState.Ready && state.podcasts.isNotEmpty()) {
+            results(model, state.podcasts, wide)
           }
         }
       }
@@ -223,13 +250,8 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     podcasts: List<DiscoveredPodcast>,
     wide: Boolean,
   ) {
-    if (podcasts.isEmpty()) {
-      item { Empty() }
-      return
-    }
     val featured = model.topic == null && model.query.value.isBlank()
     val showEpisodes = featured || model.topic != null
-    item { FirstResults(model, podcasts.take(2), featured, wide && showEpisodes) }
     if (!wide && showEpisodes) {
       item {
         SampleEpisodes(

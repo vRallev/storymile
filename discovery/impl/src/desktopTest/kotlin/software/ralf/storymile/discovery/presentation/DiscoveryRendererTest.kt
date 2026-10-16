@@ -21,6 +21,7 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
@@ -29,8 +30,10 @@ import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import assertk.assertThat
+import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
 import assertk.assertions.isLessThan
+import assertk.assertions.isStrictlyBetween
 import assertk.assertions.isTrue
 import java.io.File
 import javax.imageio.ImageIO
@@ -156,4 +159,82 @@ class DiscoveryRendererTest {
       onRetry = {},
       onBack = {},
     )
+
+  @Test
+  fun `search collapses topics and their spacing while clearing restores them`() {
+    listOf(412 to 916, 759 to 480, 760 to 480, 900 to 360).forEach { (width, height) ->
+      runDesktopComposeUiTest(width = width, height = height) {
+        val renderer = DiscoveryRenderer()
+        val model =
+          DiscoveryPresenterImpl.Model(
+            topic = null,
+            query = PresenterTextFieldState(),
+            state = CatalogState.Loading,
+            focusSearch = false,
+            selectedFilter = null,
+            onFilterSelected = {},
+            onTopicSelected = {},
+            onPodcastSelected = {},
+            onRetry = {},
+            onBack = {},
+          )
+        setContent {
+          CompositionLocalProvider(LocalDensity provides Density(1f)) {
+            StorymileTheme(environment = themeEnvironment, darkTheme = false) {
+              renderer.renderCompose(model, Modifier)
+            }
+          }
+        }
+
+        val search = onNodeWithTag("discovery-search")
+        val topics = onNodeWithTag("discovery-topics")
+        val content = onNodeWithTag("discovery-loading")
+        search.performClick()
+        topics.assertIsDisplayed()
+        search.performTextReplacement(" ")
+        topics.assertIsDisplayed()
+        val searchBounds = search.getUnclippedBoundsInRoot()
+        val topicsBounds = topics.getUnclippedBoundsInRoot()
+        val expandedContentTop = content.getUnclippedBoundsInRoot().top
+        val collapsedContentTop = expandedContentTop - (topicsBounds.bottom - topicsBounds.top)
+
+        mainClock.autoAdvance = false
+        try {
+          search.performTextReplacement("Nature")
+          mainClock.advanceTimeByFrame()
+          mainClock.advanceTimeByFrame()
+          mainClock.advanceTimeBy(80)
+          assertThat(content.getUnclippedBoundsInRoot().top)
+            .isStrictlyBetween(collapsedContentTop, expandedContentTop)
+          topics.assertExists()
+
+          mainClock.autoAdvance = true
+          waitForIdle()
+          topics.assertDoesNotExist()
+          onNodeWithTag("discovery-topic-NATURE").assertDoesNotExist()
+          assertThat(content.getUnclippedBoundsInRoot().top).isEqualTo(collapsedContentTop)
+          assertThat(search.getUnclippedBoundsInRoot()).isEqualTo(searchBounds)
+
+          mainClock.autoAdvance = false
+          onNodeWithTag("discovery-clear").performClick()
+          mainClock.advanceTimeByFrame()
+          mainClock.advanceTimeByFrame()
+          mainClock.advanceTimeBy(80)
+          assertThat(content.getUnclippedBoundsInRoot().top)
+            .isStrictlyBetween(collapsedContentTop, expandedContentTop)
+
+          mainClock.autoAdvance = true
+          waitForIdle()
+          topics.assertIsDisplayed()
+          onNodeWithTag("discovery-topic-NATURE").assertIsDisplayed()
+          assertThat(
+              content.getUnclippedBoundsInRoot().top - search.getUnclippedBoundsInRoot().bottom,
+            )
+            .isEqualTo(expandedContentTop - searchBounds.bottom)
+        } finally {
+          mainClock.autoAdvance = true
+        }
+      }
+    }
+  }
 }
