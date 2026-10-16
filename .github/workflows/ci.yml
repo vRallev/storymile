@@ -46,8 +46,6 @@ jobs:
       - build-web-release
       - build-ios-release
       - build-mkdocs
-      - check-release-publishing
-      - publish-android-release
     steps:
       - name: Verify all jobs passed
         env:
@@ -56,7 +54,7 @@ jobs:
           printf '%s\n' "$NEEDS_RESULTS" | jq -e '
             all(to_entries[];
               .value.result == "success" or
-              ((.key == "test-ios" or .key == "build-ios-release" or .key == "publish-android-release") and .value.result == "skipped" and env.GITHUB_REF != "refs/heads/main")
+              ((.key == "test-ios" or .key == "build-ios-release") and .value.result == "skipped" and env.GITHUB_REF != "refs/heads/main")
             )'
 
   check-build-src:
@@ -302,6 +300,7 @@ jobs:
         with:
           name: android-release
           path: app/android/build/outputs/apk/release/*.apk
+          if-no-files-found: error
       - name: Upload test results
         uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
@@ -314,36 +313,6 @@ jobs:
       - name: Remove Android signing key
         if: ${{ always() && github.ref == 'refs/heads/main' }}
         run: rm -f "$RUNNER_TEMP/storymile-release.p12"
-
-  check-release-publishing:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v7
-      - run: python3 -m unittest discover -s scripts/android-release -v
-
-  publish-android-release:
-    if: ${{ github.repository == 'vRallev/storymile' && github.ref == 'refs/heads/main' }}
-    needs: [build-android-release, check-release-publishing]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: write
-    concurrency:
-      group: android-main-release
-      cancel-in-progress: false
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-      - uses: actions/download-artifact@v8
-        with:
-          name: android-release
-          path: release-apk
-      - name: Publish latest main APK
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/android-release/publish.py release-apk
 
   build-desktop:
     runs-on: ubuntu-latest
@@ -407,13 +376,17 @@ jobs:
         # Cached Python scripts reference this absolute path in their shebangs.
         - /opt/hostedtoolcache:/opt/hostedtoolcache
     timeout-minutes: 15
-    needs: build-web-release
+    needs: [build-web-release, build-android-release]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
         with:
           name: web-release
           path: app/web/build/dist/wasmJs/productionExecutable/
+      - uses: actions/download-artifact@v8
+        with:
+          name: android-release
+          path: release-apk
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
@@ -421,8 +394,10 @@ jobs:
           cache-dependency-path: requirements-docs.txt
       - name: Install documentation dependencies
         run: python3 -m pip install -r requirements-docs.txt
+      - name: Test documentation packaging
+        run: python3 -m unittest discover -s scripts/docs -v
       - name: Build documentation
-        run: python3 scripts/docs/build.py
+        run: python3 scripts/docs/build.py --android-apk-dir release-apk
       - uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -453,8 +428,9 @@ jobs:
     if: ${{ github.repository == 'vRallev/storymile' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [build-mkdocs, publish-android-release]
+    needs: build-mkdocs
     permissions:
+      actions: read
       pages: write
       id-token: write
     environment:
@@ -464,15 +440,30 @@ jobs:
       group: pages
       cancel-in-progress: false
     steps:
+      - name: Check for a newer main build
+        id: latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          latest_run=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?branch=main&per_page=1" --jq '.workflow_runs[0].id')
+          if [ "$latest_run" = "$GITHUB_RUN_ID" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Skipping superseded main build $GITHUB_RUN_ID."
+          fi
       - uses: actions/configure-pages@v6
+        if: ${{ steps.latest.outputs.deploy == 'true' }}
       - uses: actions/download-artifact@v8
+        if: ${{ steps.latest.outputs.deploy == 'true' }}
         with:
           name: wiki
           path: site/
       - uses: actions/upload-pages-artifact@v5
+        if: ${{ steps.latest.outputs.deploy == 'true' }}
         with:
           path: site/
       - name: Deploy documentation
+        if: ${{ steps.latest.outputs.deploy == 'true' }}
         id: deployment
         uses: actions/deploy-pages@v5
 

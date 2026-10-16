@@ -1,4 +1,6 @@
 import { expect, test } from '@playwright/test';
+import { createHash } from 'node:crypto';
+import { readFile, readdir } from 'node:fs/promises';
 import { verifyFakePlayback } from './playback.mjs';
 
 test('plays fake episodes under the published project path', async ({ page }) => {
@@ -24,7 +26,9 @@ async function expectPreviewSize(iframe, width, height) {
 }
 
 docsHostTest('offers the latest main APK on desktop and phone', async ({ page }) => {
-  const apkUrl = 'https://github.com/vRallev/storymile/releases/latest/download/storymile.apk';
+  const apkUrl = 'downloads/storymile.apk';
+  const buildPath = process.env.GITHUB_RUN_ID
+    ? `actions/runs/${process.env.GITHUB_RUN_ID}` : 'actions/workflows/ci.yml';
   await page.route('**/*', route => new URL(route.request().url()).hostname === '127.0.0.1'
     ? route.fallback() : route.abort());
   await page.goto('./');
@@ -36,9 +40,21 @@ docsHostTest('offers the latest main APK on desktop and phone', async ({ page })
     await expect(qr).toBeVisible();
     await expect(qr.locator('..')).toHaveAttribute('href', apkUrl);
     await expect.poll(() => qr.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
-    await expect(download.getByRole('link', { name: 'Build details on GitHub' })).toHaveAttribute('href', 'https://github.com/vRallev/storymile/releases/latest');
+    await expect(download.getByRole('link', { name: 'Build details on GitHub' }))
+      .toHaveAttribute('href', `https://github.com/vRallev/storymile/${buildPath}`);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
+  const downloadEvent = page.waitForEvent('download');
+  await download.getByRole('link', { name: 'Install Android APK', exact: true }).click();
+  const apk = await downloadEvent;
+  expect(apk.url()).toBe('http://127.0.0.1:4174/storymile/downloads/storymile.apk');
+  expect(apk.suggestedFilename()).toBe('storymile.apk');
+  const artifact = new URL('../../../../release-apk/', import.meta.url);
+  const apkNames = (await readdir(artifact)).filter(name => name.endsWith('.apk'));
+  expect(apkNames).toHaveLength(1);
+  const checksum = bytes => createHash('sha256').update(bytes).digest('hex');
+  expect(checksum(await readFile(await apk.path())))
+    .toBe(checksum(await readFile(new URL(apkNames[0], artifact))));
 });
 
 async function galleryAppearance(root) {
