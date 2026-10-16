@@ -66,7 +66,7 @@ class PodcastDiscoveryInjectionTest {
       .transform { it.data.single().title }
       .isEqualTo("Popular Result")
     assertThat(client.requestedUrl)
-      .isEqualTo("https://itunes.apple.com/us/rss/toppodcasts/limit=25/json")
+      .isEqualTo("https://itunes.apple.com/us/rss/toppodcasts/limit=200/json")
   }
 
   @Test

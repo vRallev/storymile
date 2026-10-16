@@ -44,7 +44,7 @@ class PodcastDiscoveryServiceTest {
   }
 
   @Test
-  fun `popular requests the top 25 podcasts from the US chart`() = runTest {
+  fun `popular requests the top 200 podcasts from the US chart`() = runTest {
     val client =
       LocalHttpClient(
         body =
@@ -65,7 +65,7 @@ class PodcastDiscoveryServiceTest {
         ),
       )
     assertThat(client.requestedUrl)
-      .isEqualTo("https://itunes.apple.com/us/rss/toppodcasts/limit=25/json")
+      .isEqualTo("https://itunes.apple.com/us/rss/toppodcasts/limit=200/json")
     assertThat(client.requestedParameters).isEqualTo(emptyMap())
   }
 
