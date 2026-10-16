@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import software.ralf.storymile.discovery.DiscoveredPodcast
+import software.ralf.storymile.discovery.presentation.PodcastSharedElement.Companion.podcastSharedElement
 import software.ralf.storymile.theme.AppTheme
 
 @Composable
@@ -28,6 +29,7 @@ internal fun PodcastRow(
   podcast: DiscoveredPodcast,
   onClick: () -> Unit,
   selected: Boolean = false,
+  transitionSource: ShowPresenter.Source? = null,
 ) {
   Surface(
     onClick = onClick,
@@ -40,10 +42,18 @@ internal fun PodcastRow(
       horizontalArrangement = Arrangement.spacedBy(12.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      PodcastArtwork(podcast, Modifier.size(76.dp))
+      PodcastArtwork(
+        podcast,
+        Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Artwork)
+          .testTag("discovery-artwork-${podcast.id}")
+          .size(76.dp),
+      )
       Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
           text = podcast.title,
+          modifier =
+            Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Title)
+              .testTag("discovery-title-${podcast.id}"),
           style = AppTheme.typography.titleMedium,
           fontWeight = FontWeight.SemiBold,
           maxLines = 3,
@@ -52,6 +62,9 @@ internal fun PodcastRow(
         podcast.author?.let { author ->
           Text(
             text = author,
+            modifier =
+              Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Author)
+                .testTag("discovery-author-${podcast.id}"),
             style = AppTheme.typography.bodyMedium,
             color = AppTheme.colorScheme.onSurfaceVariant,
             maxLines = 2,
