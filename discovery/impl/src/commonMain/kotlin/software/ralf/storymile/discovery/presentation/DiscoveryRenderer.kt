@@ -1,6 +1,13 @@
 package software.ralf.storymile.discovery.presentation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -14,7 +21,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -60,6 +69,8 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -172,16 +183,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
             ),
           verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-          if (floatingSearch) {
-            item { Topics(model) }
-          } else {
-            item { Topic(model) }
-          }
-          when (val state = model.state) {
-            CatalogState.Loading -> item { Loading() }
-            CatalogState.Error -> item { Error(model.onRetry) }
-            is CatalogState.Ready -> results(model, state.podcasts, wide)
-          }
+          catalogItems(model, wide)
         }
       }
       if (floatingSearch) {
@@ -218,37 +220,116 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     }
   }
 
+  private fun LazyListScope.catalogItems(model: DiscoveryPresenterImpl.Model, wide: Boolean) {
+    val featured = model.topic == null && model.query.value.isBlank()
+    item(key = "catalog") {
+      Column {
+        if (model.topic == null) {
+          AnimatedVisibility(
+            visible = featured,
+            modifier = Modifier.testTag("discovery-topics"),
+            enter =
+              expandVertically(tween(200), expandFrom = Alignment.Top) +
+                fadeIn(tween(FADE_DURATION_MILLIS)),
+            exit =
+              shrinkVertically(tween(200), shrinkTowards = Alignment.Top) +
+                fadeOut(tween(FADE_DURATION_MILLIS)),
+          ) {
+            Column(Modifier.padding(bottom = 20.dp)) { Topics(model) }
+          }
+        } else {
+          Column(Modifier.padding(bottom = 20.dp)) { Topic(model) }
+        }
+        Catalog(model, featured, wide)
+      }
+    }
+    val state = model.state
+    if (state is CatalogState.Ready && state.podcasts.isNotEmpty()) {
+      results(model, state.podcasts, featured, wide)
+    }
+  }
+
+  @Composable
+  private fun Catalog(model: DiscoveryPresenterImpl.Model, featured: Boolean, wide: Boolean) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+      Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
+        ResultsTitle(model, featured, Modifier.weight(1.1f))
+        if (wide) {
+          AnimatedVisibility(
+            visible =
+              (featured || model.topic != null) &&
+                (model.state as? CatalogState.Ready)?.podcasts?.isNotEmpty() == true,
+            modifier = Modifier.weight(1f),
+            enter = fadeIn(tween(FADE_DURATION_MILLIS)),
+            exit = fadeOut(tween(FADE_DURATION_MILLIS)),
+          ) {
+            SectionTitle(stringResource(Res.string.episodes_to_try))
+          }
+        }
+      }
+      Crossfade(
+        targetState = CatalogContent(model.state, featured),
+        animationSpec = tween(FADE_DURATION_MILLIS),
+        label = "discovery-content",
+      ) { content ->
+        when (val state = content.state) {
+          CatalogState.Loading -> Loading()
+          CatalogState.Error -> Error(model.onRetry)
+          is CatalogState.Ready -> {
+            if (state.podcasts.isEmpty()) {
+              Empty()
+            } else {
+              FirstResults(
+                model,
+                state.podcasts.take(2),
+                content.featured,
+                wide && (content.featured || model.topic != null),
+              )
+            }
+          }
+        }
+      }
+    }
+  }
+
   private fun LazyListScope.results(
     model: DiscoveryPresenterImpl.Model,
     podcasts: List<DiscoveredPodcast>,
+    featured: Boolean,
     wide: Boolean,
   ) {
-    if (podcasts.isEmpty()) {
-      item { Empty() }
-      return
-    }
-    val featured = model.topic == null && model.query.value.isBlank()
     val showEpisodes = featured || model.topic != null
-    item { FirstResults(model, podcasts.take(2), featured, wide && showEpisodes) }
     if (!wide && showEpisodes) {
-      item {
+      item(key = "episodes") {
         SampleEpisodes(
           title = stringResource(Res.string.episodes_to_try),
           podcasts = podcasts.take(2),
-          modifier = Modifier.fillMaxWidth(),
+          modifier = Modifier.fadeItem(this).fillMaxWidth(),
         )
       }
     }
-    items(podcasts.drop(2).chunked(if (featured) 2 else 1), key = { it.first().id }) { remaining ->
+    items(
+      podcasts.drop(2).chunked(if (featured) 2 else 1),
+      key = { "${if (featured) "featured" else "results"}-${it.first().id}" },
+    ) { remaining ->
       val resultModifier =
         if (wide && showEpisodes) {
-          Modifier.fillMaxWidth(0.52f)
+          Modifier.fadeItem(this).fillMaxWidth(0.52f)
         } else {
-          Modifier.fillMaxWidth()
+          Modifier.fadeItem(this).fillMaxWidth()
         }
       Column(resultModifier) { FirstPodcasts(remaining, featured, model) }
     }
   }
+
+  private fun Modifier.fadeItem(scope: LazyItemScope): Modifier =
+    with(scope) {
+      animateItem(
+        fadeInSpec = tween(FADE_DURATION_MILLIS),
+        placementSpec = null,
+        fadeOutSpec = tween(FADE_DURATION_MILLIS),
+      )
+    }
 
   @Composable
   private fun FirstResults(
@@ -259,12 +340,11 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
   ) {
     Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
       Column(Modifier.weight(1.1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        ResultsTitle(model, featured)
         FirstPodcasts(podcasts, featured, model)
       }
       if (showEpisodesBeside) {
         SampleEpisodes(
-          title = stringResource(Res.string.episodes_to_try),
+          title = null,
           podcasts = podcasts,
           modifier = Modifier.weight(1f),
         )
@@ -283,36 +363,71 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val visibilityScope = LocalAnimatedVisibilityScope.current
-    OutlinedTextField(
-      state = query,
-      modifier =
-        Modifier.fillMaxWidth()
-          .sharedNavigationBounds(SharedNavigationElement.SEARCH_FIELD)
-          .focusRequester(focusRequester)
-          .testTag("discovery-search"),
-      placeholder = { Text(stringResource(Res.string.search_podcasts)) },
-      leadingIcon = { Icon(Icons.Outlined.Search, null) },
-      trailingIcon = {
-        if (query.text.isNotEmpty()) {
-          IconButton(
-            onClick = { query.clearText() },
-            modifier = Modifier.testTag("discovery-clear"),
-          ) {
-            Icon(Icons.Filled.Close, stringResource(Res.string.clear_search))
+    val placeholder = stringResource(Res.string.search_podcasts)
+    val iconSlotWidth = 52.dp
+    Box(Modifier.sharedNavigationBounds(SharedNavigationElement.SEARCH_FIELD)) {
+      OutlinedTextField(
+        state = query,
+        modifier =
+          Modifier.fillMaxWidth()
+            .focusRequester(focusRequester)
+            .testTag("discovery-search")
+            .semantics { contentDescription = placeholder },
+        textStyle = AppTheme.typography.bodyLarge,
+        contentPadding = PaddingValues(vertical = 16.dp),
+        leadingIcon = {
+          Box(Modifier.width(iconSlotWidth)) {
+            Icon(Icons.Outlined.Search, null, Modifier.padding(start = 12.dp))
           }
-        }
-      },
-      lineLimits = TextFieldLineLimits.SingleLine,
-      keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-      onKeyboardAction = { focusManager.clearFocus() },
-      shape = RoundedCornerShape(12.dp),
-      colors =
-        OutlinedTextFieldDefaults.colors(
-          unfocusedBorderColor = AppTheme.colorScheme.outlineVariant,
-          unfocusedContainerColor = AppTheme.colorScheme.surface,
-          focusedContainerColor = AppTheme.colorScheme.surface,
-        ),
-    )
+        },
+        trailingIcon = {
+          Box(Modifier.width(iconSlotWidth), contentAlignment = Alignment.CenterEnd) {
+            AnimatedVisibility(
+              visible = query.text.isNotEmpty(),
+              enter = fadeIn(tween(FADE_DURATION_MILLIS)),
+              exit = fadeOut(tween(FADE_DURATION_MILLIS)),
+            ) {
+              IconButton(
+                onClick = { query.clearText() },
+                modifier = Modifier.testTag("discovery-clear"),
+              ) {
+                Icon(Icons.Filled.Close, stringResource(Res.string.clear_search))
+              }
+            }
+          }
+        },
+        lineLimits = TextFieldLineLimits.SingleLine,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        onKeyboardAction = { focusManager.clearFocus() },
+        shape = RoundedCornerShape(12.dp),
+        colors =
+          OutlinedTextFieldDefaults.colors(
+            unfocusedBorderColor = AppTheme.colorScheme.outlineVariant,
+            unfocusedContainerColor = AppTheme.colorScheme.surface,
+            focusedContainerColor = AppTheme.colorScheme.surface,
+          ),
+      )
+      // The Material placeholder slot is removed as soon as text is entered. Keep this overlay
+      // composed through its fade, using the same inset as the field's fixed icon slots.
+      AnimatedVisibility(
+        visible = query.text.isEmpty(),
+        modifier =
+          Modifier.align(Alignment.CenterStart)
+            .padding(horizontal = iconSlotWidth)
+            .testTag("discovery-search-placeholder"),
+        enter = fadeIn(tween(FADE_DURATION_MILLIS)),
+        exit = fadeOut(tween(FADE_DURATION_MILLIS)),
+      ) {
+        Text(
+          text = placeholder,
+          modifier = Modifier.clearAndSetSemantics {},
+          style = AppTheme.typography.bodyLarge,
+          color = AppTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+      }
+    }
     LaunchedEffect(requestFocus) {
       if (requestFocus) {
         // Keep keyboard insets from moving the shared elements during the screen transition.
@@ -372,16 +487,26 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
   }
 
   @Composable
-  private fun ResultsTitle(model: DiscoveryPresenterImpl.Model, featured: Boolean) {
-    SectionTitle(
-      stringResource(
-        when {
-          featured -> Res.string.featured_podcasts
-          model.topic != null -> Res.string.podcasts_to_explore
-          else -> Res.string.search_results
-        },
-      ),
-    )
+  private fun ResultsTitle(
+    model: DiscoveryPresenterImpl.Model,
+    featured: Boolean,
+    modifier: Modifier,
+  ) {
+    Crossfade(
+      targetState =
+        stringResource(
+          when {
+            featured -> Res.string.featured_podcasts
+            model.topic != null -> Res.string.podcasts_to_explore
+            else -> Res.string.search_results
+          },
+        ),
+      modifier = modifier.testTag("discovery-results-title"),
+      animationSpec = tween(FADE_DURATION_MILLIS),
+      label = "discovery-results-title",
+    ) { title ->
+      SectionTitle(title)
+    }
   }
 
   @Composable
@@ -533,4 +658,10 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
       )
     }
   }
+
+  private companion object {
+    const val FADE_DURATION_MILLIS = 120
+  }
+
+  private data class CatalogContent(val state: CatalogState, val featured: Boolean)
 }
