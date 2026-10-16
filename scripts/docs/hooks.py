@@ -62,7 +62,7 @@ def on_pre_build(config):
 
 def on_page_markdown(markdown, page, config, files):
     if page.file.src_uri == "index.md":
-        markdown = markdown.replace("{{ android_apk_url }}", "downloads/storymile.apk")
+        markdown = markdown.replace("{{ android_apk_url }}", android_apk_path(config))
         run_id = os.environ.get("GITHUB_RUN_ID")
         build_path = f"actions/runs/{run_id}" if run_id else "actions/workflows/ci.yml"
         markdown = markdown.replace(
@@ -96,4 +96,11 @@ def on_page_markdown(markdown, page, config, files):
 
 
 def android_apk_url(config):
-    return f"{config['site_url'].rstrip('/')}/downloads/storymile.apk"
+    return f"{config['site_url'].rstrip('/')}/{android_apk_path(config)}"
+
+
+def android_apk_path(config):
+    apks = list((Path(config["docs_dir"]) / "downloads").glob("*.apk"))
+    if len(apks) != 1 or not apks[0].is_file() or apks[0].stat().st_size == 0:
+        raise PluginError("Expected exactly one staged Android APK. Run scripts/docs/build.py first.")
+    return f"downloads/{apks[0].name}"
