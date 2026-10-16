@@ -51,7 +51,12 @@ choose_target() {
     TARGET_IDS+=("$identifier")
     TARGET_LABELS+=("$label")
   done < "$WORK_DIR/targets"
-  choose "${1:-Which device should run Storymile?}" 1 "${TARGET_LABELS[@]}"
+  if [[ "${2:-false}" == true ]]; then
+    SELECTION=0
+    echo "Using ${TARGET_LABELS[$SELECTION]}"
+  else
+    choose "${1:-Which device should run Storymile?}" 1 "${TARGET_LABELS[@]}"
+  fi
   TARGET_KIND="${TARGET_KINDS[$SELECTION]}"
   TARGET_ID="${TARGET_IDS[$SELECTION]}"
 }
@@ -89,7 +94,7 @@ find_running_avd() {
 }
 
 prepare_android() {
-  local emulators_only="${1:-false}"
+  local target_filter="${1:-all}" select_first="${2:-false}"
   ADB="$(find_android_tool adb platform-tools/adb)" || fail "Install Android SDK platform-tools and set ANDROID_HOME."
   EMULATOR="$(find_android_tool emulator emulator/emulator || true)"
   local serial state details name avd
@@ -98,7 +103,8 @@ prepare_android() {
   "$ADB" devices -l > "$WORK_DIR/adb-devices"
   while read -r serial state details; do
     [[ -n "$serial" && "$serial" != List ]] || continue
-    [[ "$emulators_only" == false || "$serial" == emulator-* ]] || continue
+    [[ "$target_filter" != emulator || "$serial" == emulator-* ]] || continue
+    [[ "$target_filter" != device || "$serial" != emulator-* ]] || continue
     if [[ "$state" != device ]]; then
       echo "Skipping $serial ($state). Unlock the device and authorize USB debugging if needed." >&2
       continue
@@ -112,7 +118,7 @@ prepare_android() {
       printf 'device\t%s\t%s — connected device (%s)\n' "$serial" "$name" "$serial" >> "$WORK_DIR/targets"
     fi
   done < "$WORK_DIR/adb-devices"
-  if [[ -n "$EMULATOR" ]]; then
+  if [[ "$target_filter" != device && -n "$EMULATOR" ]]; then
     "$EMULATOR" -list-avds > "$WORK_DIR/avds"
     while IFS= read -r avd; do
       avd="${avd%$'\r'}"
@@ -122,11 +128,14 @@ prepare_android() {
       fi
     done < "$WORK_DIR/avds"
   fi
-  if [[ "$emulators_only" == true ]]; then
+  if [[ "$target_filter" == emulator ]]; then
     [[ -s "$WORK_DIR/targets" ]] || fail "No available Android emulators. Create an AVD in Android Studio first."
-    choose_target "Which emulator should run the Android release tests?"
+    choose_target "Which emulator should run Storymile?" "$select_first"
   else
-    choose_target
+    if [[ "$target_filter" == device ]]; then
+      [[ -s "$WORK_DIR/targets" ]] || fail "No available Android physical devices. Connect a device and authorize USB debugging first."
+    fi
+    choose_target "Which device should run Storymile?" "$select_first"
   fi
   ANDROID_SERIAL_ID="$TARGET_ID"
   if [[ "$TARGET_KIND" == avd ]]; then
@@ -181,11 +190,13 @@ install_android_apk() {
 }
 
 run_android() {
-  local build_type=Debug
+  local target_filter="${1:-all}" select_first="${2:-false}" build_type=Debug
   require_command python3
-  prepare_android
-  choose "Which Android build should be installed?" 1 Debug Release
-  [[ "$SELECTION" == 0 ]] || build_type=Release
+  prepare_android "$target_filter" "$select_first"
+  if [[ "$select_first" == false ]]; then
+    choose "Which Android build should be installed?" 1 Debug Release
+    [[ "$SELECTION" == 0 ]] || build_type=Release
+  fi
   ./gradlew --quiet ":app:android:assemble$build_type"
   wait_for_android
   python3 - "$ROOT_DIR" "$build_type" > "$WORK_DIR/apk" <<'PY'
@@ -214,7 +225,7 @@ PY
 
 run_android_release_tests() {
   local test_status
-  prepare_android true
+  prepare_android emulator
   wait_for_android
   if ANDROID_SERIAL="$ANDROID_SERIAL_ID" \
     ./gradlew --quiet :app:android-blackbox-test:connectedReleaseAndroidTest; then
@@ -355,31 +366,39 @@ run_ios_tests() {
   fi
 }
 
+USAGE="Usage: ./run.sh [--hot | --emulator | --device | --web-test | --ios-test | --desktop-test]"
 if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then
-  echo "Usage: ./run.sh [--web-test | --ios-test | --desktop-test]"
+  echo "$USAGE"
   echo "Choose Android, Desktop (hot reload), iOS, Wasm, or platform tests."
   echo "Then choose a device, emulator, or window size."
+  echo "Use --hot to start Desktop hot reload without the menu."
+  echo "Use --emulator to launch Android Debug on the first available emulator without the menu."
+  echo "Use --device to launch Android Debug on the first available physical device without the menu."
   echo "Use --web-test to build and test the production web app without the menu."
   echo "Use --ios-test to run Release iOS smoke tests on a fresh simulator without the menu."
   echo "Use --desktop-test to run Desktop instrumented tests without the menu."
   exit 0
 fi
+[[ $# -le 1 ]] || fail "$USAGE"
+WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/storymile-run.XXXXXX")"
+trap 'rm -rf -- "$WORK_DIR"' EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 if [[ $# == 1 ]]; then
   case "$1" in
+    --hot) ./gradlew --quiet :app:desktop:hotRunDesktop --auto; exit 0 ;;
+    --emulator) run_android emulator true; exit 0 ;;
+    --device) run_android device true; exit 0 ;;
     --web-test) run_web_tests; exit 0 ;;
     --ios-test) run_ios_tests; exit 0 ;;
     --desktop-test) run_desktop_tests; exit 0 ;;
   esac
 fi
-[[ $# == 0 ]] || fail "Usage: ./run.sh [--web-test | --ios-test | --desktop-test]"
+[[ $# == 0 ]] || fail "$USAGE"
 
 choose "What would you like to run?" 2 Android Desktop iOS Wasm "Android release tests" \
   "Desktop instrumented tests" "iOS smoke tests" "Wasm browser smoke tests"
 PLATFORM="$SELECTION"
-WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/storymile-run.XXXXXX")"
-trap 'rm -rf -- "$WORK_DIR"' EXIT
-trap 'exit 130' INT
-trap 'exit 143' TERM
 case "$PLATFORM" in
   0) run_android ;;
   1) run_desktop ;;
