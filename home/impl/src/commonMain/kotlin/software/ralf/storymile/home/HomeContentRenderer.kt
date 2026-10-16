@@ -49,6 +49,8 @@ import software.ralf.storymile.home.impl.generated.resources.podcasts_and_episod
 import software.ralf.storymile.home.impl.generated.resources.welcome_to_storymile
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize
+import software.ralf.storymile.templates.SharedNavigationElement
+import software.ralf.storymile.templates.sharedNavigationBounds
 import software.ralf.storymile.theme.AppTheme
 
 @ContributesRenderer
@@ -72,6 +74,11 @@ class HomeContentRenderer : ComposeRenderer<HomeContentPresenter.Model>() {
           TabHeader(
             title = stringResource(Res.string.welcome_to_storymile),
             windowWidth = LocalScreenSize.current.width,
+            appBarTitleModifier =
+              Modifier.sharedNavigationBounds(SharedNavigationElement.APP_BAR_TITLE),
+            profileIconModifier =
+              Modifier.sharedNavigationBounds(SharedNavigationElement.PROFILE_ICON)
+                .testTag("home-profile-icon"),
           )
           Column(
             Modifier.weight(1f)
@@ -145,7 +152,10 @@ class HomeContentRenderer : ComposeRenderer<HomeContentPresenter.Model>() {
   private fun Search(onSearch: () -> Unit) {
     Surface(
       onClick = onSearch,
-      modifier = Modifier.fillMaxWidth().testTag("home-search"),
+      modifier =
+        Modifier.fillMaxWidth()
+          .sharedNavigationBounds(SharedNavigationElement.SEARCH_FIELD)
+          .testTag("home-search"),
       shape = RoundedCornerShape(12.dp),
       color = AppTheme.colorScheme.surface,
       contentColor = AppTheme.colorScheme.onSurfaceVariant,

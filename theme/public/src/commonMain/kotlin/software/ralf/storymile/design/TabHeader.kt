@@ -30,10 +30,16 @@ import software.ralf.storymile.theme.generated.resources.storymile
 /**
  * Shared tab title and profile control. Shows the app brand in tall phone layouts, using the full
  * [windowWidth] to avoid repeating the navigation sidebar's brand. [title] is localized by the
- * caller.
+ * caller. [appBarTitleModifier] applies to the brand name, or to [title] when the brand is hidden.
  */
 @Composable
-fun TabHeader(title: String, windowWidth: Dp, modifier: Modifier = Modifier) {
+fun TabHeader(
+  title: String,
+  windowWidth: Dp,
+  modifier: Modifier = Modifier,
+  appBarTitleModifier: Modifier = Modifier,
+  profileIconModifier: Modifier = Modifier,
+) {
   BoxWithConstraints(modifier.fillMaxWidth().testTag("tab-header")) {
     val fontScale = LocalDensity.current.fontScale
     val availableHeight = maxHeight / fontScale
@@ -60,6 +66,7 @@ fun TabHeader(title: String, windowWidth: Dp, modifier: Modifier = Modifier) {
             text = stringResource(Res.string.storymile),
             modifier =
               Modifier.weight(1f)
+                .then(appBarTitleModifier)
                 .testTag("tab-brand-name")
                 .hiddenLongPress(LocalOnToggleTheme.current),
             style = AppTheme.typography.headlineSmall,
@@ -68,7 +75,11 @@ fun TabHeader(title: String, windowWidth: Dp, modifier: Modifier = Modifier) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
           )
-          ProfileButton(onClick = {}, modifier = Modifier.testTag("tab-profile"))
+          ProfileButton(
+            onClick = {},
+            modifier = Modifier.testTag("tab-profile"),
+            iconModifier = profileIconModifier,
+          )
         }
         Spacer(Modifier.height(if (tight) 8.dp else 20.dp))
       }
@@ -79,7 +90,11 @@ fun TabHeader(title: String, windowWidth: Dp, modifier: Modifier = Modifier) {
       ) {
         Text(
           text = title,
-          modifier = Modifier.weight(1f).testTag("tab-title").semantics { heading() },
+          modifier =
+            Modifier.weight(1f)
+              .then(if (showBrand) Modifier else appBarTitleModifier)
+              .testTag("tab-title")
+              .semantics { heading() },
           style =
             when {
               fontScale > 1.3f -> AppTheme.typography.headlineMedium
@@ -90,7 +105,11 @@ fun TabHeader(title: String, windowWidth: Dp, modifier: Modifier = Modifier) {
           color = AppTheme.colorScheme.onBackground,
         )
         if (!showBrand) {
-          ProfileButton(onClick = {}, modifier = Modifier.testTag("tab-profile"))
+          ProfileButton(
+            onClick = {},
+            modifier = Modifier.testTag("tab-profile"),
+            iconModifier = profileIconModifier,
+          )
         }
       }
     }

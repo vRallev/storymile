@@ -34,6 +34,8 @@ fun TitleBar(
   onBack: () -> Unit,
   modifier: Modifier = Modifier,
   backButtonModifier: Modifier = Modifier,
+  titleModifier: Modifier = Modifier,
+  profileIconModifier: Modifier = Modifier,
 ) {
   BoxWithConstraints(modifier.fillMaxWidth().testTag("title-bar")) {
     Row(
@@ -48,12 +50,19 @@ fun TitleBar(
       }
       Text(
         text = title,
-        modifier = Modifier.weight(1f).testTag("title-bar-title").semantics { heading() },
+        modifier =
+          Modifier.weight(1f).then(titleModifier).testTag("title-bar-title").semantics {
+            heading()
+          },
         style = AppTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold,
         color = AppTheme.colorScheme.onSurface,
       )
-      ProfileButton(onClick = {}, modifier = Modifier.testTag("tab-profile"))
+      ProfileButton(
+        onClick = {},
+        modifier = Modifier.testTag("tab-profile"),
+        iconModifier = profileIconModifier,
+      )
     }
   }
 }
