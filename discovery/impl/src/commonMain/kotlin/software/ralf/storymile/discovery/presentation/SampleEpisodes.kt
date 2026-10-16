@@ -30,14 +30,16 @@ import software.ralf.storymile.discovery.impl.generated.resources.sample_episode
 import software.ralf.storymile.theme.AppTheme
 
 @Composable
-internal fun SampleEpisodes(title: String, podcasts: List<DiscoveredPodcast>, modifier: Modifier) {
+internal fun SampleEpisodes(title: String?, podcasts: List<DiscoveredPodcast>, modifier: Modifier) {
   Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-    Text(
-      text = title,
-      modifier = Modifier.semantics { heading() },
-      style = AppTheme.typography.titleLarge,
-      fontWeight = FontWeight.SemiBold,
-    )
+    if (title != null) {
+      Text(
+        text = title,
+        modifier = Modifier.semantics { heading() },
+        style = AppTheme.typography.titleLarge,
+        fontWeight = FontWeight.SemiBold,
+      )
+    }
     Text(
       text = stringResource(Res.string.sample_episodes_notice),
       style = AppTheme.typography.bodyMedium,
