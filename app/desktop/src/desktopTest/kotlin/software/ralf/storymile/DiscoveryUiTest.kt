@@ -135,6 +135,7 @@ class DiscoveryUiTest {
           composeRobot<ShowRobot> { pressPreviewActions() }
           assertThat(headerBounds("show-back")).isEqualTo(catalogHeader)
           composeRobot<ShowRobot> { back() }
+          onNodeWithTag("discovery-list").performScrollToIndex(0)
           assertThat(headerBounds("discovery-back")).isEqualTo(catalogHeader)
           composeRobot<AppShellRobot> { selectTab(Tab.HOME) }
         }
