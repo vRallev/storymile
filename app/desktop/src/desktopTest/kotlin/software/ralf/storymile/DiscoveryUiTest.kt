@@ -13,6 +13,7 @@ import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.DpSize
@@ -119,9 +120,9 @@ class DiscoveryUiTest {
             discover()
             seePodcast("quiet-current")
           }
+          onNodeWithTag("discovery-list").performScrollToIndex(0)
           val catalogHeader = headerBounds("discovery-back")
           assertThat(profileSize()).isEqualTo(homeProfileSize)
-          onNodeWithTag("discovery-list").performScrollToNode(hasTestTag("discovery-search"))
           onNodeWithTag("discovery-back").assertIsDisplayed()
           onNodeWithTag("discovery-search").assertIsDisplayed()
           saveScreenshot("catalog-${scenario.label()}")
