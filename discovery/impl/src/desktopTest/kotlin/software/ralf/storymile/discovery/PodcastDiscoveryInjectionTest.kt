@@ -1,15 +1,21 @@
 package software.ralf.storymile.discovery
 
+import app.cash.turbine.test
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNull
+import assertk.assertions.isSameInstanceAs
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
+import dev.zacsweers.metro.ForScope
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.createGraphFactory
 import kotlin.test.Test
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.http.HttpClient
 import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.runtimemode.RuntimeMode
@@ -18,6 +24,29 @@ import software.ralf.storymile.util.Device
 import software.ralf.storymile.util.testing.FakeDevice
 
 class PodcastDiscoveryInjectionTest {
+  @Test
+  fun `repository cache is shared within a graph and resets in a new app session`() = runTest {
+    val client = LocalHttpClient(body = """{"feed":{"entry":[]}}""")
+    val graph = graph(RuntimeMode.Real, client)
+    val repository: PodcastDiscoveryRepository = graph.repository
+
+    assertThat(graph.repository).isSameInstanceAs(repository)
+    repository.popular.test {
+      assertThat(awaitItem()).isEqualTo(State.Loading)
+      assertThat(awaitItem()).isEqualTo(State.Success(emptyList()))
+    }
+    graph.repository.popular.test {
+      assertThat(awaitItem()).isEqualTo(State.Success(emptyList()))
+    }
+    assertThat(client.requestCount).isEqualTo(1)
+
+    graph(RuntimeMode.Real, client).repository.popular.test {
+      assertThat(awaitItem()).isEqualTo(State.Loading)
+      assertThat(awaitItem()).isEqualTo(State.Success(emptyList()))
+    }
+    assertThat(client.requestCount).isEqualTo(2)
+  }
+
   @Test
   fun `graph binding selects the real catalog service in real mode`() = runTest {
     val client = LocalHttpClient()
@@ -50,7 +79,7 @@ class PodcastDiscoveryInjectionTest {
       .transform { it.data.single().title }
       .isEqualTo("Popular Result")
     assertThat(client.requestedUrl)
-      .isEqualTo("https://itunes.apple.com/us/rss/toppodcasts/limit=25/json")
+      .isEqualTo("https://itunes.apple.com/us/rss/toppodcasts/limit=200/json")
   }
 
   @Test
@@ -69,7 +98,7 @@ class PodcastDiscoveryInjectionTest {
     assertThat(client.requestedUrl).isNull()
   }
 
-  private fun graph(mode: RuntimeMode, client: HttpClient): Graph =
+  private fun TestScope.graph(mode: RuntimeMode, client: HttpClient): Graph =
     createGraphFactory<Graph.Factory>()
       .create(
         object : RuntimeModeController {
@@ -79,11 +108,13 @@ class PodcastDiscoveryInjectionTest {
         },
         client,
         FakeDevice("DE"),
+        backgroundScope,
       )
 
   @DependencyGraph(AppScope::class)
   interface Graph {
     val service: PodcastDiscoveryService
+    val repository: PodcastDiscoveryRepository
 
     @DependencyGraph.Factory
     fun interface Factory {
@@ -91,6 +122,7 @@ class PodcastDiscoveryInjectionTest {
         @Provides controller: RuntimeModeController,
         @Provides client: HttpClient,
         @Provides device: Device,
+        @Provides @ForScope(AppScope::class) coroutineScope: CoroutineScope,
       ): Graph
     }
   }

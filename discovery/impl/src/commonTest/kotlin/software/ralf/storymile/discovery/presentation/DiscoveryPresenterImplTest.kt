@@ -9,6 +9,8 @@ import assertk.assertions.isInstanceOf
 import kotlin.test.Test
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -19,37 +21,43 @@ import software.ralf.app.platform.presenter.backstack.nav3.withPresenterBackstac
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.app.platform.presenter.compose.test
 import software.ralf.storymile.discovery.DiscoveredPodcast
-import software.ralf.storymile.discovery.PodcastDiscoveryService
+import software.ralf.storymile.discovery.PodcastDiscoveryRepository
+import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.http.HttpResponse
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DiscoveryPresenterImplTest {
   @Test
-  fun `browsing loads popular podcasts and retry recovers from failure`() = runTest {
-    val service = TestCatalog()
-    service.response = HttpResponse.Error.Server(503)
-    val presenter = DiscoveryPresenterImpl(service)
+  fun `browsing observes recommendations and retry requests a manual refresh`() = runTest {
+    val repository = TestCatalog()
+    repository.updatePopular(State.Loading)
+    val presenter = DiscoveryPresenterImpl(repository)
 
     presenter.testCatalog(this) {
       assertThat(awaitItem().state).isEqualTo(CatalogState.Loading)
+      repository.updatePopular(State.Error)
       val failed = awaitItem()
       assertThat(failed.state).isEqualTo(CatalogState.Error)
-      service.response = HttpResponse.Success(listOf(podcast("popular")), 200)
       failed.onRetry()
+      assertThat(repository.refreshRequests).isEqualTo(1)
       assertThat(awaitItem().state).isEqualTo(CatalogState.Loading)
+      repository.updatePopular(State.Success(listOf(podcast("popular"))))
       assertThat(awaitItem().state).isEqualTo(CatalogState.Ready(listOf(podcast("popular"))))
-      assertThat(service.popularRequests).isEqualTo(2)
-      assertThat(service.queries).isEmpty()
+
+      repository.updatePopular(State.Loading)
+      assertThat(awaitItem().state).isEqualTo(CatalogState.Loading)
+      repository.updatePopular(State.Success(listOf(podcast("refreshed"))))
+      assertThat(awaitItem().state).isEqualTo(CatalogState.Ready(listOf(podcast("refreshed"))))
+      assertThat(repository.queries).isEmpty()
     }
   }
 
   @Test
   fun `typing replaces results after debounce and clearing returns to featured`() = runTest {
-    val service = TestCatalog()
-    val presenter = DiscoveryPresenterImpl(service)
+    val repository = TestCatalog()
+    val presenter = DiscoveryPresenterImpl(repository)
 
     presenter.testCatalog(this) {
-      awaitItem()
       val initial = awaitItem()
       initial.query.replaceText(" sci ")
       assertThat(awaitItem().state).isEqualTo(CatalogState.Loading)
@@ -58,37 +66,60 @@ class DiscoveryPresenterImplTest {
       runCurrent()
       advanceTimeBy(299)
       runCurrent()
-      assertThat(service.queries).isEmpty()
+      assertThat(repository.queries).isEmpty()
       advanceTimeBy(1)
       runCurrent()
       val results = expectMostRecentItem()
       assertThat(results.state).isInstanceOf<CatalogState.Ready>()
-      assertThat(service.queries).containsExactly("science")
+      assertThat(repository.queries).containsExactly("science")
 
+      repository.updatePopular(State.Success(listOf(podcast("refreshed"))))
+      runCurrent()
+      expectNoEvents()
       results.query.clearText()
+      assertThat(awaitItem().state).isEqualTo(CatalogState.Ready(listOf(podcast("refreshed"))))
+      assertThat(repository.refreshRequests).isEqualTo(0)
+    }
+  }
+
+  @Test
+  fun `retrying a search does not refresh recommendations`() = runTest {
+    val repository = TestCatalog()
+    val presenter = DiscoveryPresenterImpl(repository)
+
+    presenter.testCatalog(this) {
+      val initial = awaitItem()
+      repository.response = HttpResponse.Error.Server(503)
+      initial.query.replaceText("science")
       assertThat(awaitItem().state).isEqualTo(CatalogState.Loading)
-      assertThat(awaitItem().state).isInstanceOf<CatalogState.Ready>()
-      assertThat(service.popularRequests).isEqualTo(2)
+      val failed = awaitItem()
+      assertThat(failed.state).isEqualTo(CatalogState.Error)
+
+      repository.response = HttpResponse.Success(listOf(podcast("search")), 200)
+      failed.onRetry()
+      assertThat(awaitItem().state).isEqualTo(CatalogState.Loading)
+      assertThat(awaitItem().state).isEqualTo(CatalogState.Ready(listOf(podcast("search"))))
+      assertThat(repository.queries).containsExactly("science", "science")
+      assertThat(repository.refreshRequests).isEqualTo(0)
     }
   }
 
   @Test
   fun `superseded request cannot replace newer search results`() = runTest {
-    val service = TestCatalog()
+    val repository = TestCatalog()
     val oldResponse = CompletableDeferred<HttpResponse<List<DiscoveredPodcast>>>()
-    service.pending["old"] = oldResponse
-    val presenter = DiscoveryPresenterImpl(service)
+    repository.pending["old"] = oldResponse
+    val presenter = DiscoveryPresenterImpl(repository)
 
     presenter.testCatalog(this) {
-      awaitItem()
       val initial = awaitItem()
       initial.query.replaceText("old")
       awaitItem()
       advanceTimeBy(300)
       runCurrent()
-      assertThat(service.queries).containsExactly("old")
+      assertThat(repository.queries).containsExactly("old")
 
-      service.response = HttpResponse.Success(listOf(podcast("new")), 200)
+      repository.response = HttpResponse.Success(listOf(podcast("new")), 200)
       initial.query.replaceText("new")
       runCurrent()
       advanceTimeBy(300)
@@ -98,45 +129,44 @@ class DiscoveryPresenterImplTest {
       oldResponse.complete(HttpResponse.Success(listOf(podcast("old")), 200))
       runCurrent()
       expectNoEvents()
-      assertThat(service.queries).containsExactly("old", "new")
+      assertThat(repository.queries).containsExactly("old", "new")
     }
   }
 
   @Test
   fun `topic filters search their keywords and empty responses stay empty`() = runTest {
-    val service = TestCatalog()
-    service.response = HttpResponse.Success(emptyList(), 200)
-    val presenter = DiscoveryPresenterImpl(service, topic = DiscoveryTopic.NATURE)
+    val repository = TestCatalog()
+    repository.response = HttpResponse.Success(emptyList(), 200)
+    val presenter = DiscoveryPresenterImpl(repository, topic = DiscoveryTopic.NATURE)
 
     presenter.testCatalog(this) {
       awaitItem()
       val initial = awaitItem()
       assertThat(initial.state).isEqualTo(CatalogState.Ready(emptyList()))
-      assertThat(service.queries).containsExactly("Nature")
+      assertThat(repository.queries).containsExactly("Nature")
       initial.onFilterSelected(DiscoveryTopic.Filter.OCEANS)
       assertThat(awaitItem().state).isEqualTo(CatalogState.Loading)
       val filtered = awaitItem()
       assertThat(filtered.selectedFilter).isEqualTo(DiscoveryTopic.Filter.OCEANS)
-      assertThat(service.queries).containsExactly("Nature", "Nature Oceans")
+      assertThat(repository.queries).containsExactly("Nature", "Nature Oceans")
 
       filtered.onFilterSelected(DiscoveryTopic.Filter.ALL_NATURE)
       assertThat(awaitItem().state).isEqualTo(CatalogState.Loading)
       assertThat(awaitItem().selectedFilter).isEqualTo(DiscoveryTopic.Filter.ALL_NATURE)
-      assertThat(service.queries).containsExactly("Nature", "Nature Oceans", "Nature")
-      assertThat(service.popularRequests).isEqualTo(0)
+      assertThat(repository.queries).containsExactly("Nature", "Nature Oceans", "Nature")
+      assertThat(repository.refreshRequests).isEqualTo(0)
     }
   }
 
   @Test
   fun `opening a show preserves the response order and back returns to the catalog`() = runTest {
-    val service = TestCatalog()
+    val repository = TestCatalog()
     val podcasts = listOf(podcast("first"), podcast("second"))
-    service.response = HttpResponse.Success(podcasts, 200)
-    val presenter = DiscoveryPresenterImpl(service)
+    repository.updatePopular(State.Success(podcasts))
+    val presenter = DiscoveryPresenterImpl(repository)
     val backstack = FakePresenterBackstackScope(presenter)
 
     presenter.testCatalog(this, backstack) {
-      awaitItem()
       val model = awaitItem()
       model.onPodcastSelected(podcasts[1])
       val show = backstack.backstack.last()
@@ -158,14 +188,17 @@ class DiscoveryPresenterImplTest {
   @Test
   fun `show header keeps topic or search context`() = runTest {
     listOf(DiscoveryTopic.NATURE, null).forEach { topic ->
-      val service = TestCatalog()
+      val repository = TestCatalog()
       val selectedPodcast = podcast("first")
-      service.response = HttpResponse.Success(listOf(selectedPodcast), 200)
-      val presenter = DiscoveryPresenterImpl(service, topic = topic)
+      repository.response = HttpResponse.Success(listOf(selectedPodcast), 200)
+      repository.updatePopular(State.Success(listOf(selectedPodcast)))
+      val presenter = DiscoveryPresenterImpl(repository, topic = topic)
       val backstack = FakePresenterBackstackScope(presenter)
 
       presenter.testCatalog(this, backstack) {
-        awaitItem()
+        if (topic != null) {
+          awaitItem()
+        }
         var model = awaitItem()
         if (topic == null) {
           model.query.replaceText("Nature")
@@ -197,15 +230,21 @@ class DiscoveryPresenterImplTest {
   private fun podcast(id: String) =
     DiscoveredPodcast(id, "Podcast $id", "Publisher", null, null, null)
 
-  private class TestCatalog : PodcastDiscoveryService {
+  private class TestCatalog : PodcastDiscoveryRepository {
     var response: HttpResponse<List<DiscoveredPodcast>> = HttpResponse.Success(emptyList(), 200)
     val pending = mutableMapOf<String, CompletableDeferred<HttpResponse<List<DiscoveredPodcast>>>>()
     val queries = mutableListOf<String>()
-    var popularRequests = 0
+    var refreshRequests = 0
+    override val popular: StateFlow<State>
+      field = MutableStateFlow<State>(State.Success(emptyList()))
 
-    override suspend fun popular(): HttpResponse<List<DiscoveredPodcast>> {
-      popularRequests++
-      return response
+    fun updatePopular(state: State) {
+      popular.value = state
+    }
+
+    override fun refresh() {
+      refreshRequests++
+      popular.value = State.Loading
     }
 
     override suspend fun search(query: String): HttpResponse<List<DiscoveredPodcast>> {

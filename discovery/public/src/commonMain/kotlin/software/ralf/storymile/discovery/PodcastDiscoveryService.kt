@@ -12,7 +12,7 @@ interface PodcastDiscoveryService {
   suspend fun search(query: String): HttpResponse<List<DiscoveredPodcast>>
 
   /**
-   * Returns up to 25 podcasts from Apple's US Top Shows chart in rank order, or local samples in
+   * Returns up to 200 podcasts from Apple's US Top Shows chart in rank order, or local samples in
    * fake mode. Chart results have no RSS feed URL. HTTP, transport, and decoding failures are
    * returned; coroutine cancellation propagates.
    */
