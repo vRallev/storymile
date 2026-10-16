@@ -36,4 +36,5 @@ dependencies {
   commonMainImplementation project(':user:impl')
   commonMainImplementation project(':user:public')
   commonMainImplementation project(':util:impl')
+  commonMainImplementation libs.navigation.event.compose
 }

@@ -33,7 +33,7 @@ class DesktopApp(private val graph: (RootScopeProvider) -> AppGraph) : RootScope
     val template by templateProvider.templates.collectAsState()
     val rendererFactory = remember { ComposeRendererFactory(application) }
 
-    rendererFactory.renderCompose(template)
+    DesktopBackGesture { rendererFactory.renderCompose(template) }
   }
 
   /** Saves the opposite runtime mode and restarts the application. */
