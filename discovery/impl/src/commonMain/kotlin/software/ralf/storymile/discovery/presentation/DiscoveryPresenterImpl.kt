@@ -2,6 +2,7 @@ package software.ralf.storymile.discovery.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -17,6 +18,7 @@ import software.ralf.app.platform.presenter.compose.text.PresenterTextFieldState
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.DiscoveryPresenter
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository
+import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.http.HttpResponse
 
 class DiscoveryPresenterImpl(
@@ -31,20 +33,7 @@ class DiscoveryPresenterImpl(
     var selectedFilter by remember { mutableStateOf(topic?.filters?.firstOrNull()) }
     val term = query.value.trim()
     var retry by remember(term) { mutableIntStateOf(0) }
-    var state by remember(term, retry) { mutableStateOf<CatalogState>(CatalogState.Loading) }
-
-    LaunchedEffect(term, retry) {
-      if (term.isNotEmpty() && topic == null && retry == 0) {
-        delay(300)
-      }
-      val response = if (term.isEmpty()) repository.popular() else repository.search(term)
-      coroutineContext.ensureActive()
-      state =
-        when (response) {
-          is HttpResponse.Success -> CatalogState.Ready(response.data)
-          else -> CatalogState.Error
-        }
-    }
+    val state = catalogState(term, retry)
 
     return Model(
       topic = topic,
@@ -79,9 +68,43 @@ class DiscoveryPresenterImpl(
           ),
         )
       },
-      onRetry = { retry++ },
+      onRetry = {
+        if (term.isEmpty()) {
+          repository.refresh()
+        } else {
+          retry++
+        }
+      },
       onBack = { backstack.pop() },
     )
+  }
+
+  @Composable
+  private fun catalogState(term: String, retry: Int): CatalogState {
+    return if (term.isEmpty()) {
+      val popular by repository.popular.collectAsState()
+      when (val current = popular) {
+        State.Loading -> CatalogState.Loading
+        State.Error -> CatalogState.Error
+        is State.Success -> CatalogState.Ready(current.podcasts)
+      }
+    } else {
+      var searchState by
+        remember(term, retry) { mutableStateOf<CatalogState>(CatalogState.Loading) }
+      LaunchedEffect(term, retry) {
+        if (topic == null && retry == 0) {
+          delay(300)
+        }
+        val response = repository.search(term)
+        coroutineContext.ensureActive()
+        searchState =
+          when (response) {
+            is HttpResponse.Success -> CatalogState.Ready(response.data)
+            else -> CatalogState.Error
+          }
+      }
+      searchState
+    }
   }
 
   data class Model(
