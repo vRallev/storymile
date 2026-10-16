@@ -4,6 +4,7 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNull
+import assertk.assertions.isSameInstanceAs
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
@@ -18,6 +19,21 @@ import software.ralf.storymile.util.Device
 import software.ralf.storymile.util.testing.FakeDevice
 
 class PodcastDiscoveryInjectionTest {
+  @Test
+  fun `repository cache is shared within a graph and resets in a new app session`() = runTest {
+    val client = LocalHttpClient(body = """{"feed":{"entry":[]}}""")
+    val graph = graph(RuntimeMode.Real, client)
+    val repository: PodcastDiscoveryRepository = graph.repository
+
+    assertThat(graph.repository).isSameInstanceAs(repository)
+    assertThat(repository.popular()).isEqualTo(HttpResponse.Success(emptyList(), 200))
+    assertThat(graph.repository.popular()).isEqualTo(HttpResponse.Success(emptyList(), 200))
+    assertThat(client.requestCount).isEqualTo(1)
+
+    graph(RuntimeMode.Real, client).repository.popular()
+    assertThat(client.requestCount).isEqualTo(2)
+  }
+
   @Test
   fun `graph binding selects the real catalog service in real mode`() = runTest {
     val client = LocalHttpClient()
@@ -84,6 +100,7 @@ class PodcastDiscoveryInjectionTest {
   @DependencyGraph(AppScope::class)
   interface Graph {
     val service: PodcastDiscoveryService
+    val repository: PodcastDiscoveryRepository
 
     @DependencyGraph.Factory
     fun interface Factory {

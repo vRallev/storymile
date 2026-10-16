@@ -27,7 +27,7 @@ class DiscoveryRobot(private val service: TestPodcastDiscoveryService) : Compose
     if (failRequest) {
       service.failNextRequest()
     }
-    request("") {
+    request("", requireRequest = failRequest) {
       runOnUiThread(compose) { compose.onNodeWithTag("home-discover").performClick() }
     }
   }
@@ -119,7 +119,7 @@ class DiscoveryRobot(private val service: TestPodcastDiscoveryService) : Compose
 
   /** Retries a failed catalog request through the visible error state. */
   fun retry() {
-    request(requireNotNull(service.lastQuery)) {
+    request(requireNotNull(service.lastQuery), requireRequest = true) {
       scrollCatalogTo("discovery-retry")
       runOnUiThread(compose) { compose.onNodeWithTag("discovery-retry").performClick() }
     }
@@ -138,14 +138,26 @@ class DiscoveryRobot(private val service: TestPodcastDiscoveryService) : Compose
   private fun request(
     query: String,
     expectedFilter: Pair<String, String>? = null,
+    requireRequest: Boolean = query.isNotEmpty(),
     action: () -> Unit,
   ) {
     val previousRequestCount = service.completedRequestCount
     action()
-    compose.waitUntilCatching("Catalog request for $query completed") {
+    compose.waitUntilCatching("Catalog results for $query displayed") {
       compose.onNodeWithTag("discovery-screen").assertIsDisplayed()
-      assertThat(service.completedRequestCount).isGreaterThan(previousRequestCount)
-      assertThat(service.lastQuery).isEqualTo(query)
+      if (requireRequest) {
+        assertThat(service.completedRequestCount).isGreaterThan(previousRequestCount)
+        assertThat(service.lastQuery).isEqualTo(query)
+      }
+      if (query.isEmpty()) {
+        compose
+          .onNodeWithTag("discovery-search")
+          .assert(
+            SemanticsMatcher("Search field is empty") {
+              it.config[SemanticsProperties.EditableText].text.isEmpty()
+            },
+          )
+      }
       compose.onNodeWithTag("discovery-loading").assertDoesNotExist()
       expectedFilter?.let { (tag, label) -> compose.onNodeWithTag(tag).assertTextEquals(label) }
     }

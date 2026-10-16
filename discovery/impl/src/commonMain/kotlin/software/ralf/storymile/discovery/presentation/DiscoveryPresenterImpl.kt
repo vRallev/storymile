@@ -16,11 +16,11 @@ import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.app.platform.presenter.compose.text.PresenterTextFieldState
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.DiscoveryPresenter
-import software.ralf.storymile.discovery.PodcastDiscoveryService
+import software.ralf.storymile.discovery.PodcastDiscoveryRepository
 import software.ralf.storymile.http.HttpResponse
 
 class DiscoveryPresenterImpl(
-  private val service: PodcastDiscoveryService,
+  private val repository: PodcastDiscoveryRepository,
   private val topic: DiscoveryTopic? = null,
   private val focusSearch: Boolean = false,
 ) : DiscoveryPresenter<DiscoveryPresenterImpl.Model> {
@@ -37,7 +37,7 @@ class DiscoveryPresenterImpl(
       if (term.isNotEmpty() && topic == null && retry == 0) {
         delay(300)
       }
-      val response = if (term.isEmpty()) service.popular() else service.search(term)
+      val response = if (term.isEmpty()) repository.popular() else repository.search(term)
       coroutineContext.ensureActive()
       state =
         when (response) {
@@ -64,7 +64,7 @@ class DiscoveryPresenterImpl(
           )
         }
       },
-      onTopicSelected = { backstack.push(DiscoveryPresenterImpl(service, topic = it)) },
+      onTopicSelected = { backstack.push(DiscoveryPresenterImpl(repository, topic = it)) },
       onPodcastSelected = { podcast ->
         backstack.push(
           ShowPresenter(
