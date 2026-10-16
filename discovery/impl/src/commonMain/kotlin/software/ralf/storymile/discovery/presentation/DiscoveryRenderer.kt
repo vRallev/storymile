@@ -1,5 +1,6 @@
 package software.ralf.storymile.discovery.presentation
 
+import androidx.compose.animation.EnterExitState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -44,6 +45,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -66,6 +68,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
+import kotlinx.coroutines.flow.first
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.ExperimentalAppPlatform
@@ -96,6 +99,9 @@ import software.ralf.storymile.discovery.impl.generated.resources.topic_science_
 import software.ralf.storymile.discovery.impl.generated.resources.topic_technology_subtitle
 import software.ralf.storymile.discovery.impl.generated.resources.try_another_search
 import software.ralf.storymile.discovery.presentation.PodcastSharedElement.Companion.podcastSharedElement
+import software.ralf.storymile.templates.LocalAnimatedVisibilityScope
+import software.ralf.storymile.templates.SharedNavigationElement
+import software.ralf.storymile.templates.sharedNavigationBounds
 import software.ralf.storymile.theme.AppTheme
 
 @ContributesRenderer
@@ -197,6 +203,8 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
               title = stringResource(Res.string.discover_podcasts),
               onBack = model.onBack,
               backButtonModifier = Modifier.testTag("discovery-back"),
+              titleModifier =
+                Modifier.sharedNavigationBounds(SharedNavigationElement.APP_BAR_TITLE),
             )
             Box(Modifier.padding(horizontal = padding).padding(top = 16.dp, bottom = 20.dp)) {
               Search(model, model.focusSearch && !requestedFocus) { requestedFocus = true }
@@ -271,9 +279,14 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     val query = rememberPresenterBackedTextFieldState(model.query)
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
+    val visibilityScope = LocalAnimatedVisibilityScope.current
     OutlinedTextField(
       state = query,
-      modifier = Modifier.fillMaxWidth().focusRequester(focusRequester).testTag("discovery-search"),
+      modifier =
+        Modifier.fillMaxWidth()
+          .sharedNavigationBounds(SharedNavigationElement.SEARCH_FIELD)
+          .focusRequester(focusRequester)
+          .testTag("discovery-search"),
       placeholder = { Text(stringResource(Res.string.search_podcasts)) },
       leadingIcon = { Icon(Icons.Outlined.Search, null) },
       trailingIcon = {
@@ -299,6 +312,15 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     )
     LaunchedEffect(requestFocus) {
       if (requestFocus) {
+        // Keep keyboard insets from moving the shared elements during the screen transition.
+        if (visibilityScope != null) {
+          snapshotFlow {
+            visibilityScope.transition.currentState == EnterExitState.Visible &&
+              visibilityScope.transition.targetState == EnterExitState.Visible &&
+              !visibilityScope.transition.isRunning
+          }
+            .first { it }
+        }
         focusRequester.requestFocus()
         onFocused()
       }
