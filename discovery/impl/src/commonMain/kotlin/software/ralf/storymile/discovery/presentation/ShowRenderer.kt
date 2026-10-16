@@ -43,6 +43,7 @@ import software.ralf.storymile.discovery.impl.generated.resources.episodes
 import software.ralf.storymile.discovery.impl.generated.resources.follow
 import software.ralf.storymile.discovery.impl.generated.resources.podcasts_to_explore
 import software.ralf.storymile.discovery.impl.generated.resources.search_results
+import software.ralf.storymile.discovery.presentation.PodcastSharedElement.Companion.podcastSharedElement
 import software.ralf.storymile.theme.AppTheme
 
 @ContributesRenderer
@@ -133,7 +134,7 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
           Box(Modifier.weight(0.8f)) {
             PodcastArtwork(
               podcast,
-              PodcastSharedElement.Artwork.modifier(podcast, source)
+              Modifier.podcastSharedElement(podcast, source, PodcastSharedElement.Artwork)
                 .testTag("show-artwork")
                 .widthIn(max = 240.dp)
                 .fillMaxWidth()
@@ -150,7 +151,7 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
         ) {
           PodcastArtwork(
             podcast,
-            PodcastSharedElement.Artwork.modifier(podcast, source)
+            Modifier.podcastSharedElement(podcast, source, PodcastSharedElement.Artwork)
               .testTag("show-artwork")
               .widthIn(max = 320.dp)
               .fillMaxWidth()
@@ -173,16 +174,20 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
         Text(
           text = podcast.title,
           modifier =
-            PodcastSharedElement.Title.modifier(podcast, source).testTag("show-title").semantics {
-              heading()
-            },
+            Modifier.podcastSharedElement(podcast, source, PodcastSharedElement.Title)
+              .testTag("show-title")
+              .semantics {
+                heading()
+              },
           style = AppTheme.typography.headlineSmall,
           fontWeight = FontWeight.Bold,
         )
         podcast.author?.let { author ->
           Text(
             text = author,
-            modifier = PodcastSharedElement.Author.modifier(podcast, source).testTag("show-author"),
+            modifier =
+              Modifier.podcastSharedElement(podcast, source, PodcastSharedElement.Author)
+                .testTag("show-author"),
             style = AppTheme.typography.bodyLarge,
             color = AppTheme.colorScheme.onSurfaceVariant,
           )

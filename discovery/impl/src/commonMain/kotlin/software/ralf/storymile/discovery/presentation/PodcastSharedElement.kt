@@ -18,36 +18,42 @@ internal enum class PodcastSharedElement {
   Title,
   Author;
 
-  @OptIn(ExperimentalSharedTransitionApi::class)
-  @Composable
-  fun modifier(podcast: DiscoveredPodcast, source: ShowPresenter.Source?): Modifier {
-    // Sidebar rows and episode artwork must not compete with the show header for a match.
-    if (source == null) {
-      return Modifier
-    }
-    val sharedScope = LocalSharedTransitionScope.current ?: return Modifier
-    val visibilityScope = LocalAnimatedVisibilityScope.current ?: return Modifier
-    return with(sharedScope) {
-      val state = rememberSharedContentState(Key(podcast.id, source, this@PodcastSharedElement))
-      if (this@PodcastSharedElement == Artwork) {
-        Modifier.sharedElement(
-          sharedContentState = state,
-          animatedVisibilityScope = visibilityScope,
-          boundsTransform = { _, _ -> tween(350) },
-        )
-      } else {
-        Modifier.sharedBounds(
-          sharedContentState = state,
-          animatedVisibilityScope = visibilityScope,
-          enter = fadeIn(tween(100)),
-          exit = fadeOut(tween(100)),
-          boundsTransform = { _, _ -> tween(350) },
-          resizeMode =
-            SharedTransitionScope.ResizeMode.scaleToBounds(
-              contentScale = ContentScale.Fit,
-              alignment = Alignment.CenterStart,
-            ),
-        )
+  companion object {
+    @OptIn(ExperimentalSharedTransitionApi::class)
+    @Composable
+    fun Modifier.podcastSharedElement(
+      podcast: DiscoveredPodcast,
+      source: ShowPresenter.Source?,
+      element: PodcastSharedElement,
+    ): Modifier {
+      // Sidebar rows and episode artwork must not compete with the show header for a match.
+      if (source == null) {
+        return this
+      }
+      val sharedScope = LocalSharedTransitionScope.current ?: return this
+      val visibilityScope = LocalAnimatedVisibilityScope.current ?: return this
+      return with(sharedScope) {
+        val state = rememberSharedContentState(Key(podcast.id, source, element))
+        if (element == Artwork) {
+          this@podcastSharedElement.sharedElement(
+            sharedContentState = state,
+            animatedVisibilityScope = visibilityScope,
+            boundsTransform = { _, _ -> tween(350) },
+          )
+        } else {
+          this@podcastSharedElement.sharedBounds(
+            sharedContentState = state,
+            animatedVisibilityScope = visibilityScope,
+            enter = fadeIn(tween(100)),
+            exit = fadeOut(tween(100)),
+            boundsTransform = { _, _ -> tween(350) },
+            resizeMode =
+              SharedTransitionScope.ResizeMode.scaleToBounds(
+                contentScale = ContentScale.Fit,
+                alignment = Alignment.CenterStart,
+              ),
+          )
+        }
       }
     }
   }

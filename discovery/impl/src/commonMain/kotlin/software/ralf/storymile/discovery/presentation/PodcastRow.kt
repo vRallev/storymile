@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import software.ralf.storymile.discovery.DiscoveredPodcast
+import software.ralf.storymile.discovery.presentation.PodcastSharedElement.Companion.podcastSharedElement
 import software.ralf.storymile.theme.AppTheme
 
 @Composable
@@ -43,7 +44,7 @@ internal fun PodcastRow(
     ) {
       PodcastArtwork(
         podcast,
-        PodcastSharedElement.Artwork.modifier(podcast, transitionSource)
+        Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Artwork)
           .testTag("discovery-artwork-${podcast.id}")
           .size(76.dp),
       )
@@ -51,7 +52,7 @@ internal fun PodcastRow(
         Text(
           text = podcast.title,
           modifier =
-            PodcastSharedElement.Title.modifier(podcast, transitionSource)
+            Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Title)
               .testTag("discovery-title-${podcast.id}"),
           style = AppTheme.typography.titleMedium,
           fontWeight = FontWeight.SemiBold,
@@ -62,7 +63,7 @@ internal fun PodcastRow(
           Text(
             text = author,
             modifier =
-              PodcastSharedElement.Author.modifier(podcast, transitionSource)
+              Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Author)
                 .testTag("discovery-author-${podcast.id}"),
             style = AppTheme.typography.bodyMedium,
             color = AppTheme.colorScheme.onSurfaceVariant,

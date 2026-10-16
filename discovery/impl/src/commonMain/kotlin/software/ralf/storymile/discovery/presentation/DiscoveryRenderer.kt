@@ -81,6 +81,7 @@ import software.ralf.storymile.discovery.impl.generated.resources.topic_nature_s
 import software.ralf.storymile.discovery.impl.generated.resources.topic_science_subtitle
 import software.ralf.storymile.discovery.impl.generated.resources.topic_technology_subtitle
 import software.ralf.storymile.discovery.impl.generated.resources.try_another_search
+import software.ralf.storymile.discovery.presentation.PodcastSharedElement.Companion.podcastSharedElement
 import software.ralf.storymile.theme.AppTheme
 
 @ContributesRenderer
@@ -361,7 +362,11 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
       Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         PodcastArtwork(
           podcast,
-          PodcastSharedElement.Artwork.modifier(podcast, ShowPresenter.Source.Browse)
+          Modifier.podcastSharedElement(
+              podcast,
+              ShowPresenter.Source.Browse,
+              PodcastSharedElement.Artwork,
+            )
             .testTag("discovery-artwork-${podcast.id}")
             .fillMaxWidth()
             .aspectRatio(1f),
@@ -369,7 +374,11 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
         Text(
           text = podcast.title,
           modifier =
-            PodcastSharedElement.Title.modifier(podcast, ShowPresenter.Source.Browse)
+            Modifier.podcastSharedElement(
+                podcast,
+                ShowPresenter.Source.Browse,
+                PodcastSharedElement.Title,
+              )
               .testTag("discovery-title-${podcast.id}"),
           style = AppTheme.typography.titleMedium,
           fontWeight = FontWeight.SemiBold,
@@ -380,7 +389,11 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
           Text(
             text = author,
             modifier =
-              PodcastSharedElement.Author.modifier(podcast, ShowPresenter.Source.Browse)
+              Modifier.podcastSharedElement(
+                  podcast,
+                  ShowPresenter.Source.Browse,
+                  PodcastSharedElement.Author,
+                )
                 .testTag("discovery-author-${podcast.id}"),
             style = AppTheme.typography.bodyMedium,
             color = AppTheme.colorScheme.onSurfaceVariant,
