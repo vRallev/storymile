@@ -304,7 +304,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
         SampleEpisodes(
           title = stringResource(Res.string.episodes_to_try),
           podcasts = podcasts.take(2),
-          modifier = fadeItem().fillMaxWidth(),
+          modifier = Modifier.fadeItem(this).fillMaxWidth(),
         )
       }
     }
@@ -314,20 +314,22 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     ) { remaining ->
       val resultModifier =
         if (wide && showEpisodes) {
-          fadeItem().fillMaxWidth(0.52f)
+          Modifier.fadeItem(this).fillMaxWidth(0.52f)
         } else {
-          fadeItem().fillMaxWidth()
+          Modifier.fadeItem(this).fillMaxWidth()
         }
       Column(resultModifier) { FirstPodcasts(remaining, featured, model) }
     }
   }
 
-  private fun LazyItemScope.fadeItem(): Modifier =
-    Modifier.animateItem(
-      fadeInSpec = tween(FADE_DURATION_MILLIS),
-      placementSpec = null,
-      fadeOutSpec = tween(FADE_DURATION_MILLIS),
-    )
+  private fun Modifier.fadeItem(scope: LazyItemScope): Modifier =
+    with(scope) {
+      animateItem(
+        fadeInSpec = tween(FADE_DURATION_MILLIS),
+        placementSpec = null,
+        fadeOutSpec = tween(FADE_DURATION_MILLIS),
+      )
+    }
 
   @Composable
   private fun FirstResults(
