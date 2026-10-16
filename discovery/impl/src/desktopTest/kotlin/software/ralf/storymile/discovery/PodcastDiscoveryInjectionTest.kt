@@ -35,7 +35,13 @@ class PodcastDiscoveryInjectionTest {
   fun `graph binding selects the chart service in real mode`() = runTest {
     val client =
       LocalHttpClient(
-        body = """{"feed":{"results":[{"id":"123","name":"Popular Result"}]}}""",
+        body =
+          """
+          {"feed":{"entry":[{
+            "id":{"attributes":{"im:id":"123"}},"im:name":{"label":"Popular Result"}
+          }]}}
+          """
+            .trimIndent(),
       )
     val service: PodcastDiscoveryService = graph(RuntimeMode.Real, client).service
 
@@ -44,7 +50,7 @@ class PodcastDiscoveryInjectionTest {
       .transform { it.data.single().title }
       .isEqualTo("Popular Result")
     assertThat(client.requestedUrl)
-      .isEqualTo("https://rss.marketingtools.apple.com/api/v2/us/podcasts/top/25/podcasts.json")
+      .isEqualTo("https://itunes.apple.com/us/rss/toppodcasts/limit=25/json")
   }
 
   @Test

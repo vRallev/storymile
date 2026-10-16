@@ -8,12 +8,17 @@ import kotlin.test.Test
 
 class ApplePodcastChartResponseTest {
   @Test
-  fun `chart thumbnails use larger artwork for cards and show previews`() {
+  fun `chart thumbnails use the largest nonblank image and high resolution artwork`() {
     val body =
       """
-      {"feed":{"results":[{
-        "id":"123","name":"Science Weekly",
-        "artworkUrl100":"https://is1-ssl.mzstatic.com/image/thumb/cover.jpg/100x100bb.png"
+      {"feed":{"entry":[{
+        "id":{"attributes":{"im:id":"123"}},"im:name":{"label":"Science Weekly"},
+        "im:image":[
+          {"label":"https://is1-ssl.mzstatic.com/image/thumb/cover.jpg/170x170bb.png",
+           "attributes":{"height":"170"}},
+          {"label":"https://example.invalid/small.jpg","attributes":{"height":"55"}},
+          {"label":" ","attributes":{"height":"600"}}
+        ]
       }]}}
       """
         .trimIndent()
@@ -26,11 +31,12 @@ class ApplePodcastChartResponseTest {
   fun `chart fields map to podcasts in ranking order and unknown fields are ignored`() {
     val body =
       """
-      {"extra":true,"feed":{"title":"Top Shows","results":[
-        {"id":"123","name":"Science Weekly","artistName":"A Publisher",
-         "artworkUrl100":"https://example.invalid/artwork.jpg",
-         "url":"https://example.invalid/podcast","genres":[{"name":"Science"}]},
-        {"id":"12","name":"History Weekly"}
+      {"extra":true,"feed":{"title":{"label":"Top Podcasts"},"entry":[
+        {"id":{"label":"https://example.invalid/podcast","attributes":{"im:id":"123"}},
+         "im:name":{"label":"Science Weekly"},"im:artist":{"label":"A Publisher"},
+         "im:image":[{"label":"https://example.invalid/artwork.jpg"}],
+         "category":{"attributes":{"label":"Science"}}},
+        {"id":{"attributes":{"im:id":"12"}},"im:name":{"label":"History Weekly"}}
       ]}}
       """
         .trimIndent()
@@ -55,10 +61,13 @@ class ApplePodcastChartResponseTest {
   fun `optional chart fields may be absent null or blank`() {
     val body =
       """
-      {"feed":{"results":[
-        {"id":"1","name":"Absent"},
-        {"id":"2","name":"Null","artistName":null,"artworkUrl100":null,"url":null},
-        {"id":"3","name":"Blank","artistName":" ","artworkUrl100":"","url":" "}
+      {"feed":{"entry":[
+        {"id":{"attributes":{"im:id":"1"}},"im:name":{"label":"Absent"}},
+        {"id":{"attributes":{"im:id":"2"},"label":null},"im:name":{"label":"Null"},
+         "im:artist":null,"im:image":null},
+        {"id":{"attributes":{"im:id":"3"},"label":" "},"im:name":{"label":"Blank"},
+         "im:artist":{"label":" "},"im:image":[{"label":""}]},
+        {"id":{"attributes":{"im:id":"4"}},"im:name":{"label":"Empty"},"im:image":[]}
       ]}}
       """
         .trimIndent()
@@ -69,35 +78,50 @@ class ApplePodcastChartResponseTest {
           DiscoveredPodcast("1", "Absent", null, null, null, null),
           DiscoveredPodcast("2", "Null", null, null, null, null),
           DiscoveredPodcast("3", "Blank", null, null, null, null),
+          DiscoveredPodcast("4", "Empty", null, null, null, null),
         ),
       )
-    assertThat(ApplePodcastChartResponse().decode("""{"feed":{"results":[]}}"""))
+    assertThat(ApplePodcastChartResponse().decode("""{"feed":{"entry":[]}}"""))
       .isEqualTo(emptyList())
   }
 
   @Test
-  fun `malformed chart documents and incomplete podcasts fail decoding`() {
+  fun `malformed chart documents fail decoding`() {
     val bodies =
       listOf(
         "not json",
         "{}",
         """{"feed":null}""",
         """{"feed":{}}""",
-        """{"feed":{"results":null}}""",
-        """{"feed":{"results":{}}}""",
-        """{"feed":{"results":[{"name":"Missing ID"}]}}""",
-        """{"feed":{"results":[{"id":null,"name":"Null ID"}]}}""",
-        """{"feed":{"results":[{"id":"0","name":"Invalid ID"}]}}""",
-        """{"feed":{"results":[{"id":"-1","name":"Negative ID"}]}}""",
-        """{"feed":{"results":[{"id":"abc","name":"Non-numeric ID"}]}}""",
-        """{"feed":{"results":[{"id":"1"}]}}""",
-        """{"feed":{"results":[{"id":"1","name":null}]}}""",
-        """{"feed":{"results":[{"id":"1","name":" "}]}}""",
-        """{"feed":{"results":[{"id":"1","name":"Title","url":42}]}}""",
+        """{"feed":{"entry":null}}""",
+        """{"feed":{"entry":{}}}""",
       )
 
     bodies.forEach { body ->
       assertFailure { ApplePodcastChartResponse().decode(body) }
+        .isInstanceOf<IllegalArgumentException>()
+    }
+  }
+
+  @Test
+  fun `incomplete or invalid chart entries fail decoding`() {
+    val entries =
+      listOf(
+        """{"im:name":{"label":"Missing ID"}}""",
+        """{"id":null,"im:name":{"label":"Null ID"}}""",
+        """{"id":{"attributes":{}},"im:name":{"label":"Missing numeric ID"}}""",
+        """{"id":{"attributes":{"im:id":"0"}},"im:name":{"label":"Invalid ID"}}""",
+        """{"id":{"attributes":{"im:id":"-1"}},"im:name":{"label":"Negative ID"}}""",
+        """{"id":{"attributes":{"im:id":"abc"}},"im:name":{"label":"Non-numeric ID"}}""",
+        """{"id":{"attributes":{"im:id":"1"}}}""",
+        """{"id":{"attributes":{"im:id":"1"}},"im:name":null}""",
+        """{"id":{"attributes":{"im:id":"1"}},"im:name":{"label":" "}}""",
+        """{"id":{"attributes":{"im:id":"1"}},"im:name":{"label":null}}""",
+        """{"id":{"attributes":{"im:id":"1"}},"im:name":{"label":"Title"},"im:image":42}""",
+      )
+
+    entries.forEach { entry ->
+      assertFailure { ApplePodcastChartResponse().decode("""{"feed":{"entry":[$entry]}}""") }
         .isInstanceOf<IllegalArgumentException>()
     }
   }

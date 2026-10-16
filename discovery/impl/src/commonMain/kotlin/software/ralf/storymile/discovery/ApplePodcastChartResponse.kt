@@ -8,33 +8,47 @@ internal class ApplePodcastChartResponse {
   private val json = Json { ignoreUnknownKeys = true }
 
   fun decode(body: String): List<DiscoveredPodcast> =
-    json.decodeFromString<Response>(body).feed.results.map { it.toPodcast() }
+    json.decodeFromString<Response>(body).feed.entry.map { it.toPodcast() }
 
   @Serializable private data class Response(val feed: Feed)
 
-  @Serializable private data class Feed(val results: List<Podcast>)
+  @Serializable private data class Feed(val entry: List<Podcast>)
 
   @Serializable
   private data class Podcast(
-    val id: String,
-    @SerialName("name") val title: String,
-    @SerialName("artistName") val author: String? = null,
-    @SerialName("artworkUrl100") val artworkUrl: String? = null,
-    @SerialName("url") val catalogUrl: String? = null,
+    val id: Identifier,
+    @SerialName("im:name") val title: Label,
+    @SerialName("im:artist") val author: Label? = null,
+    @SerialName("im:image") val images: List<Image>? = null,
   ) {
     fun toPodcast(): DiscoveredPodcast {
-      require(id.toLongOrNull()?.let { it > 0 } == true) { "Missing or invalid podcast ID." }
-      require(title.isNotBlank()) { "Missing podcast title." }
+      val podcastId = id.attributes["im:id"]
+      require(podcastId?.toLongOrNull()?.let { it > 0 } == true) {
+        "Missing or invalid podcast ID."
+      }
+      require(title.label.isNotBlank()) { "Missing podcast title." }
+      val artwork =
+        images
+          ?.filter { it.label.isNotBlank() }
+          ?.maxByOrNull { it.attributes["height"]?.toIntOrNull() ?: 0 }
       return DiscoveredPodcast(
-        id = id,
-        title = title,
-        author = author.nonBlank(),
+        id = podcastId,
+        title = title.label,
+        author = author?.label.nonBlank(),
         feedUrl = null,
-        artworkUrl = artworkUrl.nonBlank()?.let { ApplePodcastArtwork.highResolutionUrl(it) },
-        catalogUrl = catalogUrl.nonBlank(),
+        artworkUrl = artwork?.let { ApplePodcastArtwork.highResolutionUrl(it.label) },
+        catalogUrl = id.label.nonBlank(),
       )
     }
 
     private fun String?.nonBlank(): String? = this?.takeIf { it.isNotBlank() }
   }
+
+  @Serializable private data class Label(val label: String)
+
+  @Serializable
+  private data class Identifier(val attributes: Map<String, String>, val label: String? = null)
+
+  @Serializable
+  private data class Image(val label: String, val attributes: Map<String, String> = emptyMap())
 }

@@ -47,7 +47,13 @@ class PodcastDiscoveryServiceTest {
   fun `popular requests the top 25 podcasts from the US chart`() = runTest {
     val client =
       LocalHttpClient(
-        body = """{"feed":{"results":[{"id":"123","name":"Popular Result"}]}}""",
+        body =
+          """
+          {"feed":{"entry":[{
+            "id":{"attributes":{"im:id":"123"}},"im:name":{"label":"Popular Result"}
+          }]}}
+          """
+            .trimIndent(),
       )
     val service: PodcastDiscoveryService = ApplePodcastDiscoveryService(client, FakeDevice())
 
@@ -59,7 +65,7 @@ class PodcastDiscoveryServiceTest {
         ),
       )
     assertThat(client.requestedUrl)
-      .isEqualTo("https://rss.marketingtools.apple.com/api/v2/us/podcasts/top/25/podcasts.json")
+      .isEqualTo("https://itunes.apple.com/us/rss/toppodcasts/limit=25/json")
     assertThat(client.requestedParameters).isEqualTo(emptyMap())
   }
 
