@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -113,11 +114,15 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
               HorizontalDivider(color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             }
             item {
-              SampleEpisodes(
-                title = stringResource(Res.string.episodes),
-                podcasts = List(3) { model.podcast },
-                modifier = Modifier.fillMaxWidth(),
-              )
+              Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                EpisodesHeading(stringResource(Res.string.episodes))
+                EpisodesStatus(model.episodes)
+              }
+            }
+            itemsIndexed(model.episodes.episodes, key = { _, episode -> episode.key }) {
+              index,
+              episode ->
+              EpisodeRow(episode, index)
             }
           }
         }

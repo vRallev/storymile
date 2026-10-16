@@ -27,6 +27,13 @@ class ApplePodcastDiscoveryService(private val client: HttpClient, private val d
     )
   }
 
+  override suspend fun lookup(id: String): HttpResponse<List<DiscoveredPodcast>> =
+    client.get(
+      url = "https://itunes.apple.com/lookup",
+      parameters = mapOf("id" to id, "entity" to "podcast", "country" to "US"),
+      decode = { body -> ApplePodcastSearchResponse().decode(body).filter { it.id == id } },
+    )
+
   override suspend fun popular(): HttpResponse<List<DiscoveredPodcast>> =
     client.get(
       // The Marketing Tools chart feed has no CORS headers; this feed supports browser requests.

@@ -231,6 +231,41 @@ class PodcastDiscoveryRepositoryImplTest {
     assertThat(service.popularRequests).isEqualTo(0)
   }
 
+  @Test
+  fun `catalog lookups share hourly snapshots and retry independently of recommendations`() =
+    runTest {
+      val service = TestService()
+      service.latency = 1.milliseconds
+      val repository: PodcastDiscoveryRepository =
+        PodcastDiscoveryRepositoryImpl(service, backgroundScope)
+      val lookup = repository.lookup("initial")
+      runCurrent()
+      assertThat(service.lookups).isEqualTo(emptyList())
+      lookup.test {
+        assertThat(awaitItem()).isEqualTo(State.Loading)
+        assertThat(awaitItem()).isEqualTo(State.Success(service.podcasts))
+        repository.lookup("initial").test {
+          assertThat(awaitItem()).isEqualTo(State.Success(service.podcasts))
+          expectNoEvents()
+        }
+        assertThat(service.lookups).containsExactly("initial")
+        advanceTimeBy(1.hours - 1.milliseconds)
+        runCurrent()
+        expectNoEvents()
+        service.failure = HttpResponse.Error.Server(503)
+        advanceTimeBy(1.milliseconds)
+        assertThat(awaitItem()).isEqualTo(State.Loading)
+        assertThat(awaitItem()).isEqualTo(State.Error)
+        service.failure = null
+        service.podcasts = emptyList()
+        repository.refresh("initial")
+        assertThat(awaitItem()).isEqualTo(State.Loading)
+        assertThat(awaitItem()).isEqualTo(State.Success(emptyList()))
+        assertThat(service.lookups).containsExactly("initial", "initial", "initial")
+        assertThat(service.popularRequests).isEqualTo(0)
+      }
+    }
+
   private fun podcast(id: String) = DiscoveredPodcast(id, "Podcast $id", null, null, null, null)
 
   private class TestService : PodcastDiscoveryService {
@@ -242,6 +277,7 @@ class PodcastDiscoveryRepositoryImplTest {
     var popularRequests = 0
     var cancelledRequests = 0
     val queries = mutableListOf<String>()
+    val lookups = mutableListOf<String>()
 
     override suspend fun popular(): HttpResponse<List<DiscoveredPodcast>> {
       popularRequests++
@@ -255,6 +291,12 @@ class PodcastDiscoveryRepositoryImplTest {
         cancelledRequests++
         throw exception
       }
+    }
+
+    override suspend fun lookup(id: String): HttpResponse<List<DiscoveredPodcast>> {
+      lookups += id
+      delay(latency)
+      return failure ?: HttpResponse.Success(podcasts.filter { it.id == id }, 200)
     }
 
     override suspend fun search(query: String): HttpResponse<List<DiscoveredPodcast>> {

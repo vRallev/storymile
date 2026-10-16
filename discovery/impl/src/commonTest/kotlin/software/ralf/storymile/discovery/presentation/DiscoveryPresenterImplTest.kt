@@ -9,8 +9,6 @@ import assertk.assertions.isInstanceOf
 import kotlin.test.Test
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -21,7 +19,6 @@ import software.ralf.app.platform.presenter.backstack.nav3.withPresenterBackstac
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.app.platform.presenter.compose.test
 import software.ralf.storymile.discovery.DiscoveredPodcast
-import software.ralf.storymile.discovery.PodcastDiscoveryRepository
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.http.HttpResponse
 
@@ -29,9 +26,9 @@ import software.ralf.storymile.http.HttpResponse
 class DiscoveryPresenterImplTest {
   @Test
   fun `browsing observes recommendations and retry requests a manual refresh`() = runTest {
-    val repository = TestCatalog()
+    val repository = TestPodcastCatalog()
     repository.updatePopular(State.Loading)
-    val presenter = DiscoveryPresenterImpl(repository)
+    val presenter = DiscoveryPresenterImpl(repository, TestPodcastFeeds())
 
     presenter.testCatalog(this) {
       assertThat(awaitItem().state).isEqualTo(CatalogState.Loading)
@@ -54,8 +51,8 @@ class DiscoveryPresenterImplTest {
 
   @Test
   fun `typing replaces results after debounce and clearing returns to featured`() = runTest {
-    val repository = TestCatalog()
-    val presenter = DiscoveryPresenterImpl(repository)
+    val repository = TestPodcastCatalog()
+    val presenter = DiscoveryPresenterImpl(repository, TestPodcastFeeds())
 
     presenter.testCatalog(this) {
       val initial = awaitItem()
@@ -84,8 +81,8 @@ class DiscoveryPresenterImplTest {
 
   @Test
   fun `retrying a search does not refresh recommendations`() = runTest {
-    val repository = TestCatalog()
-    val presenter = DiscoveryPresenterImpl(repository)
+    val repository = TestPodcastCatalog()
+    val presenter = DiscoveryPresenterImpl(repository, TestPodcastFeeds())
 
     presenter.testCatalog(this) {
       val initial = awaitItem()
@@ -106,10 +103,10 @@ class DiscoveryPresenterImplTest {
 
   @Test
   fun `superseded request cannot replace newer search results`() = runTest {
-    val repository = TestCatalog()
+    val repository = TestPodcastCatalog()
     val oldResponse = CompletableDeferred<HttpResponse<List<DiscoveredPodcast>>>()
     repository.pending["old"] = oldResponse
-    val presenter = DiscoveryPresenterImpl(repository)
+    val presenter = DiscoveryPresenterImpl(repository, TestPodcastFeeds())
 
     presenter.testCatalog(this) {
       val initial = awaitItem()
@@ -135,9 +132,10 @@ class DiscoveryPresenterImplTest {
 
   @Test
   fun `topic filters search their keywords and empty responses stay empty`() = runTest {
-    val repository = TestCatalog()
+    val repository = TestPodcastCatalog()
     repository.response = HttpResponse.Success(emptyList(), 200)
-    val presenter = DiscoveryPresenterImpl(repository, topic = DiscoveryTopic.NATURE)
+    val presenter =
+      DiscoveryPresenterImpl(repository, TestPodcastFeeds(), topic = DiscoveryTopic.NATURE)
 
     presenter.testCatalog(this) {
       awaitItem()
@@ -160,10 +158,10 @@ class DiscoveryPresenterImplTest {
 
   @Test
   fun `opening a show preserves the response order and back returns to the catalog`() = runTest {
-    val repository = TestCatalog()
+    val repository = TestPodcastCatalog()
     val podcasts = listOf(podcast("first"), podcast("second"))
     repository.updatePopular(State.Success(podcasts))
-    val presenter = DiscoveryPresenterImpl(repository)
+    val presenter = DiscoveryPresenterImpl(repository, TestPodcastFeeds())
     val backstack = FakePresenterBackstackScope(presenter)
 
     presenter.testCatalog(this, backstack) {
@@ -188,11 +186,11 @@ class DiscoveryPresenterImplTest {
   @Test
   fun `show header keeps topic or search context`() = runTest {
     listOf(DiscoveryTopic.NATURE, null).forEach { topic ->
-      val repository = TestCatalog()
+      val repository = TestPodcastCatalog()
       val selectedPodcast = podcast("first")
       repository.response = HttpResponse.Success(listOf(selectedPodcast), 200)
       repository.updatePopular(State.Success(listOf(selectedPodcast)))
-      val presenter = DiscoveryPresenterImpl(repository, topic = topic)
+      val presenter = DiscoveryPresenterImpl(repository, TestPodcastFeeds(), topic = topic)
       val backstack = FakePresenterBackstackScope(presenter)
 
       presenter.testCatalog(this, backstack) {
@@ -217,6 +215,66 @@ class DiscoveryPresenterImplTest {
     }
   }
 
+  @Test
+  fun `browse resolves the first two shows and search does not request more`() = runTest {
+    val repository = TestPodcastCatalog()
+    val feeds = TestPodcastFeeds()
+    val podcasts =
+      listOf(
+        podcast("missing"),
+        podcast("one").copy(feedUrl = "one"),
+        podcast("duplicate").copy(feedUrl = " one "),
+        podcast("two").copy(feedUrl = "two"),
+        podcast("three").copy(feedUrl = "three"),
+      )
+    repository.updatePopular(State.Success(podcasts))
+    repository.response = HttpResponse.Success(listOf(podcasts.last()), 200)
+    val presenter = DiscoveryPresenterImpl(repository, feeds)
+    presenter.testCatalog(this) {
+      val initial = awaitItem()
+      assertThat(feeds.requested).containsExactly("one")
+      assertThat(repository.lookedUp).containsExactly("missing")
+      initial.query.replaceText("search")
+      awaitItem()
+      advanceTimeBy(300)
+      runCurrent()
+      assertThat(expectMostRecentItem().episodes.episodes).isEmpty()
+      assertThat(feeds.requested).containsExactly("one")
+      assertThat(repository.lookedUp).containsExactly("missing")
+    }
+  }
+
+  @Test
+  fun `show selection observes the selected feed and drops the previous episodes`() = runTest {
+    val feeds = TestPodcastFeeds()
+    val first = podcast("one").copy(feedUrl = "one")
+    val second = podcast("two").copy(feedUrl = "two")
+    val presenter =
+      ShowPresenter(
+        TestPodcastCatalog(),
+        feeds,
+        first,
+        listOf(first, second),
+        ShowPresenter.Source.Browse,
+      )
+    presenter.withPresenterBackstackScope(FakePresenterBackstackScope()).test(this) {
+      val initial = awaitItem()
+      assertThat(initial.episodes.loading).isEqualTo(true)
+      assertThat(feeds.requested).containsExactly("one")
+      initial.onPodcastSelected(second)
+      val switched = awaitItem()
+      assertThat(switched.podcast).isEqualTo(second)
+      assertThat(switched.episodes.episodes).isEmpty()
+      assertThat(feeds.requested).containsExactly("one", "two")
+      feeds.update("two", software.ralf.storymile.rss.PodcastFeedRepository.State.Error)
+      val failed = awaitItem()
+      assertThat(failed.episodes.failed).isEqualTo(true)
+      failed.episodes.onRetry()
+      assertThat(feeds.refreshed).containsExactly("two")
+      assertThat(awaitItem().episodes.loading).isEqualTo(true)
+    }
+  }
+
   private suspend fun DiscoveryPresenterImpl.testCatalog(
     scope: TestScope,
     backstack: FakePresenterBackstackScope = FakePresenterBackstackScope(),
@@ -229,27 +287,4 @@ class DiscoveryPresenterImplTest {
 
   private fun podcast(id: String) =
     DiscoveredPodcast(id, "Podcast $id", "Publisher", null, null, null)
-
-  private class TestCatalog : PodcastDiscoveryRepository {
-    var response: HttpResponse<List<DiscoveredPodcast>> = HttpResponse.Success(emptyList(), 200)
-    val pending = mutableMapOf<String, CompletableDeferred<HttpResponse<List<DiscoveredPodcast>>>>()
-    val queries = mutableListOf<String>()
-    var refreshRequests = 0
-    override val popular: StateFlow<State>
-      field = MutableStateFlow<State>(State.Success(emptyList()))
-
-    fun updatePopular(state: State) {
-      popular.value = state
-    }
-
-    override fun refresh() {
-      refreshRequests++
-      popular.value = State.Loading
-    }
-
-    override suspend fun search(query: String): HttpResponse<List<DiscoveredPodcast>> {
-      queries += query
-      return pending[query]?.await() ?: response
-    }
-  }
 }

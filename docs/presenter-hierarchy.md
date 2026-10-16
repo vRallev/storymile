@@ -15,6 +15,7 @@ flowchart TD
   HomeContentPresenter["HomeContentPresenter\nempty home"]
   DiscoveryPresenterImpl["DiscoveryPresenterImpl\nbrowse, topics, and search"]
   ShowPresenter["ShowPresenter\npodcast preview"]
+  EpisodesPresenter["EpisodesPresenter\nfeed episodes"]
   DownloadsPresenter["DownloadsPresenterImpl\nempty downloads"]
   TabsPresenter["TabsPresenterImpl\ntabs"]
   LibraryPresenter["LibraryPresenterImpl\nempty library"]
@@ -28,6 +29,8 @@ flowchart TD
   HomePresenter -->|root| HomeContentPresenter
   HomePresenter -->|pushed entries| DiscoveryPresenterImpl
   HomePresenter -->|pushed entry| ShowPresenter
+  DiscoveryPresenterImpl -->|browse and topics| EpisodesPresenter
+  ShowPresenter --> EpisodesPresenter
   TabsPresenter -->|Library| LibraryPresenter
   TabsPresenter -->|Downloads| DownloadsPresenter
   UserPresenter --> PlaybackPresenter
@@ -59,6 +62,10 @@ Discover and Search push
 [DiscoveryPresenterImpl](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/DiscoveryPresenterImpl.kt).
 Topic selection pushes another catalog. Podcast selection pushes
 [ShowPresenter](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/ShowPresenter.kt).
+Both presenters compose
+[EpisodesPresenter](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/EpisodesPresenter.kt)
+for feed episodes, rendered by the shared
+[episode components](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/Episodes.kt).
 Back returns to the previous entry. Reselecting Home calls its model callback to pop to the welcome
 entry and keeps it in composition.
 [HomeRenderer](../home/impl/src/commonMain/kotlin/software/ralf/storymile/home/HomeRenderer.kt)

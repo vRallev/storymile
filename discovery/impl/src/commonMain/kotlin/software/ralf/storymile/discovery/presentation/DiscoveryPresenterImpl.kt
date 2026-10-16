@@ -20,9 +20,11 @@ import software.ralf.storymile.discovery.DiscoveryPresenter
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.http.HttpResponse
+import software.ralf.storymile.rss.PodcastFeedRepository
 
 class DiscoveryPresenterImpl(
   private val repository: PodcastDiscoveryRepository,
+  private val feeds: PodcastFeedRepository,
   private val topic: DiscoveryTopic? = null,
   private val focusSearch: Boolean = false,
 ) : DiscoveryPresenter<DiscoveryPresenterImpl.Model> {
@@ -34,11 +36,25 @@ class DiscoveryPresenterImpl(
     val term = query.value.trim()
     var retry by remember(term) { mutableIntStateOf(0) }
     val state = catalogState(term, retry)
+    val episodesPresenter = remember {
+      EpisodesPresenter(repository, feeds, episodesPerPodcast = 1)
+    }
+    val episodePodcasts =
+      if (term.isEmpty() || topic != null) {
+        (state as? CatalogState.Ready)
+          ?.podcasts
+          .orEmpty()
+          .distinctBy { it.feedUrl?.trim()?.takeIf { url -> url.isNotEmpty() } ?: it.id }
+          .take(2)
+      } else {
+        emptyList()
+      }
 
     return Model(
       topic = topic,
       query = query,
       state = state,
+      episodes = episodesPresenter.present(episodePodcasts),
       focusSearch = focusSearch,
       selectedFilter = selectedFilter,
       onFilterSelected = { filter ->
@@ -53,10 +69,12 @@ class DiscoveryPresenterImpl(
           )
         }
       },
-      onTopicSelected = { backstack.push(DiscoveryPresenterImpl(repository, topic = it)) },
+      onTopicSelected = { backstack.push(DiscoveryPresenterImpl(repository, feeds, topic = it)) },
       onPodcastSelected = { podcast ->
         backstack.push(
           ShowPresenter(
+            catalog = repository,
+            feeds = feeds,
             initialPodcast = podcast,
             podcasts = (state as? CatalogState.Ready)?.podcasts.orEmpty(),
             source =
@@ -111,6 +129,7 @@ class DiscoveryPresenterImpl(
     val topic: DiscoveryTopic?,
     val query: PresenterTextFieldState,
     val state: CatalogState,
+    val episodes: EpisodesPresenter.Model,
     val focusSearch: Boolean,
     val selectedFilter: DiscoveryTopic.Filter?,
     val onFilterSelected: (DiscoveryTopic.Filter) -> Unit,

@@ -20,6 +20,12 @@ class PodcastDiscoveryServiceImpl(
       RuntimeMode.Fake -> fake.value.search(query)
     }
 
+  override suspend fun lookup(id: String): HttpResponse<List<DiscoveredPodcast>> =
+    when (runtimeModeController.mode()) {
+      RuntimeMode.Real -> real.value.lookup(id)
+      RuntimeMode.Fake -> fake.value.lookup(id)
+    }
+
   override suspend fun popular(): HttpResponse<List<DiscoveredPodcast>> =
     when (runtimeModeController.mode()) {
       RuntimeMode.Real -> real.value.popular()

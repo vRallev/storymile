@@ -44,6 +44,32 @@ class PodcastDiscoveryServiceTest {
   }
 
   @Test
+  fun `lookup resolves the requested chart ID to its feed URL`() = runTest {
+    val client =
+      LocalHttpClient(
+        body =
+          """{"results":[
+      {"collectionId":123,"collectionName":"Chart Result","feedUrl":"https://feeds.test/show"},
+      {"collectionId":456,"collectionName":"Another Result"}
+    ]}""",
+      )
+    val service: PodcastDiscoveryService = ApplePodcastDiscoveryService(client, FakeDevice("DE"))
+    assertThat(service.lookup("123"))
+      .isEqualTo(
+        HttpResponse.Success(
+          listOf(
+            DiscoveredPodcast("123", "Chart Result", null, "https://feeds.test/show", null, null),
+          ),
+          200,
+        ),
+      )
+    assertThat(client.requestedUrl).isEqualTo("https://itunes.apple.com/lookup")
+    assertThat(client.requestedParameters)
+      .isEqualTo(mapOf("id" to "123", "entity" to "podcast", "country" to "US"))
+    assertThat(service.lookup("789")).isEqualTo(HttpResponse.Success(emptyList(), 200))
+  }
+
+  @Test
   fun `popular requests the top 200 podcasts from the US chart`() = runTest {
     val client =
       LocalHttpClient(
@@ -105,6 +131,7 @@ class PodcastDiscoveryServiceTest {
 
     assertThat(service.search("science")).isSameInstanceAs(failure)
     assertThat(service.popular()).isSameInstanceAs(failure)
+    assertThat(service.lookup("123")).isSameInstanceAs(failure)
   }
 
   @Test

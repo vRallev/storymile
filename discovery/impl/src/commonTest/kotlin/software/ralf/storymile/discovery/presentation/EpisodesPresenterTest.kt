@@ -1,0 +1,160 @@
+package software.ralf.storymile.discovery.presentation
+
+import assertk.assertThat
+import assertk.assertions.containsExactly
+import assertk.assertions.isEmpty
+import assertk.assertions.isFalse
+import assertk.assertions.isTrue
+import kotlin.test.Test
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
+import software.ralf.app.platform.presenter.compose.ComposePresenter
+import software.ralf.app.platform.presenter.compose.test
+import software.ralf.storymile.discovery.DiscoveredPodcast
+import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State as CatalogState
+import software.ralf.storymile.rss.PodcastEnclosure
+import software.ralf.storymile.rss.PodcastEpisode
+import software.ralf.storymile.rss.PodcastFeed
+import software.ralf.storymile.rss.PodcastFeedRepository.State
+
+class EpisodesPresenterTest {
+  @Test
+  fun `shows episodes in feed order and updates the snapshot`() = runTest {
+    val feeds = TestPodcastFeeds()
+    val presenter: ComposePresenter<List<DiscoveredPodcast>, EpisodesPresenter.Model> =
+      EpisodesPresenter(TestPodcastCatalog(), feeds)
+    presenter.test(this, listOf(podcast("one"))) {
+      assertThat(awaitItem().loading).isTrue()
+      feeds.update("one", State.Success(feed("one", "second", "first")))
+      val ready = awaitItem()
+      assertThat(ready.loading).isFalse()
+      assertThat(ready.episodes.map { it.episode.title }).containsExactly("second", "first")
+      assertThat(ready.episodes.map { it.podcastTitle }).containsExactly("Show one", "Show one")
+      feeds.update("one", State.Success(feed("one", "new")))
+      assertThat(awaitItem().episodes.map { it.episode.title }).containsExactly("new")
+    }
+  }
+
+  @Test
+  fun `discovery keeps successes while another feed loads or fails and retries only failures`() =
+    runTest {
+      val feeds = TestPodcastFeeds()
+      val presenter: ComposePresenter<List<DiscoveredPodcast>, EpisodesPresenter.Model> =
+        EpisodesPresenter(TestPodcastCatalog(), feeds, episodesPerPodcast = 1)
+      presenter.test(this, listOf(podcast("one"), podcast("two"))) {
+        awaitItem()
+        feeds.update("one", State.Success(feed("one", "first", "older")))
+        val partial = awaitItem()
+        assertThat(partial.loading).isTrue()
+        assertThat(partial.episodes.map { it.episode.title }).containsExactly("first")
+        feeds.update("two", State.Error)
+        val failed = awaitItem()
+        assertThat(failed.failed).isTrue()
+        assertThat(failed.loading).isFalse()
+        assertThat(failed.episodes.map { it.episode.title }).containsExactly("first")
+        failed.onRetry()
+        assertThat(feeds.refreshed).containsExactly("two")
+        assertThat(awaitItem().loading).isTrue()
+        feeds.update("two", State.Success(feed("two", "latest", "older")))
+        val ready = awaitItem()
+        assertThat(ready.failed).isFalse()
+        assertThat(ready.episodes.map { it.episode.title }).containsExactly("first", "latest")
+      }
+    }
+
+  @Test
+  fun `switching podcasts drops previous episodes and ignores old feed updates`() = runTest {
+    val feeds = TestPodcastFeeds()
+    feeds.update("one", State.Success(feed("one", "old")))
+    val input = MutableStateFlow(listOf(podcast("one")))
+    val presenter: ComposePresenter<List<DiscoveredPodcast>, EpisodesPresenter.Model> =
+      EpisodesPresenter(TestPodcastCatalog(), feeds)
+    presenter.test(this, input) {
+      assertThat(awaitItem().episodes.map { it.episode.title }).containsExactly("old")
+      input.value = listOf(podcast("two"))
+      val changed = awaitItem()
+      assertThat(changed.loading).isTrue()
+      assertThat(changed.episodes).isEmpty()
+      feeds.update("one", State.Success(feed("one", "late")))
+      expectNoEvents()
+      feeds.update("two", State.Success(feed("two", "current")))
+      assertThat(awaitItem().episodes.map { it.episode.title }).containsExactly("current")
+    }
+  }
+
+  @Test
+  fun `missing feeds and feeds without episodes produce an empty state`() = runTest {
+    val feeds = TestPodcastFeeds()
+    val presenter: ComposePresenter<List<DiscoveredPodcast>, EpisodesPresenter.Model> =
+      EpisodesPresenter(TestPodcastCatalog(), feeds)
+    presenter.test(this, listOf(podcast(null), podcast(" "))) {
+      val empty = awaitItem()
+      assertThat(empty.episodes).isEmpty()
+      assertThat(empty.loading).isFalse()
+      assertThat(empty.failed).isFalse()
+      assertThat(feeds.requested).isEmpty()
+    }
+    feeds.update("one", State.Success(feed("one")))
+    presenter.test(this, listOf(podcast("one"), podcast(" one "))) {
+      val empty = awaitItem()
+      assertThat(empty.episodes).isEmpty()
+      assertThat(empty.loading).isFalse()
+      assertThat(empty.failed).isFalse()
+      assertThat(feeds.requested).containsExactly("one")
+    }
+  }
+
+  @Test
+  fun `chart entries resolve feed URLs before loading episodes and lookup failures can retry`() =
+    runTest {
+      val catalog = TestPodcastCatalog()
+      val feeds = TestPodcastFeeds()
+      catalog.updateLookup("one", CatalogState.Loading)
+      val presenter: ComposePresenter<List<DiscoveredPodcast>, EpisodesPresenter.Model> =
+        EpisodesPresenter(catalog, feeds)
+      presenter.test(this, listOf(podcast("one").copy(feedUrl = null))) {
+        assertThat(awaitItem().loading).isTrue()
+        assertThat(feeds.requested).isEmpty()
+        catalog.updateLookup("one", CatalogState.Error)
+        val failed = awaitItem()
+        assertThat(failed.failed).isTrue()
+        failed.onRetry()
+        assertThat(catalog.refreshedLookups).containsExactly("one")
+        assertThat(awaitItem().loading).isTrue()
+        catalog.updateLookup("one", CatalogState.Success(listOf(podcast("one"))))
+        // Both lookup and RSS loading render as loading; model emissions may be conflated.
+        feeds.update("one", State.Success(feed("one", "resolved episode")))
+        var ready = awaitItem()
+        while (ready.loading) {
+          ready = awaitItem()
+        }
+        assertThat(ready.episodes.map { it.episode.title }).containsExactly("resolved episode")
+        assertThat(feeds.requested).containsExactly("one")
+      }
+    }
+
+  private fun podcast(url: String?) =
+    DiscoveredPodcast("$url", "Catalog title", null, url, null, null)
+
+  private fun feed(url: String, vararg titles: String) =
+    PodcastFeed(
+      url,
+      "Show $url",
+      null,
+      null,
+      null,
+      null,
+      titles.map { title ->
+        PodcastEpisode(
+          title,
+          title,
+          null,
+          null,
+          null,
+          null,
+          null,
+          PodcastEnclosure("https://audio.test/$title.mp3", "audio/mpeg", null),
+        )
+      },
+    )
+}
