@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('loads real-mode charts after retry and searches topics in the browser', async ({ page }) => {
-  const chartUrl = 'https://itunes.apple.com/us/rss/toppodcasts/limit=25/json';
+  const chartUrl = 'https://itunes.apple.com/us/rss/toppodcasts/limit=200/json';
   const unexpectedRequests = [];
   const searches = [];
   let chartRequests = 0;
