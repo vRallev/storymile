@@ -87,7 +87,7 @@ prepare_android() {
   local emulators_only="${1:-false}"
   ADB="$(find_android_tool adb platform-tools/adb)" || fail "Install Android SDK platform-tools and set ANDROID_HOME."
   EMULATOR="$(find_android_tool emulator emulator/emulator || true)"
-  local serial state details name avd deadline emulator_pid booted
+  local serial state details name avd
   : > "$WORK_DIR/targets"
   : > "$WORK_DIR/running-avds"
   "$ADB" devices -l > "$WORK_DIR/adb-devices"
@@ -128,10 +128,16 @@ prepare_android() {
     echo "Starting $TARGET_ID..."
     mkdir -p "$ROOT_DIR/build/run"
     nohup "$EMULATOR" -avd "$TARGET_ID" > "$ROOT_DIR/build/run/android-emulator.log" 2>&1 < /dev/null &
-    emulator_pid=$!
+    ANDROID_EMULATOR_PID=$!
+  fi
+}
+
+wait_for_android() {
+  local deadline booted
+  if [[ "$TARGET_KIND" == avd ]]; then
     deadline=$((SECONDS + 180))
     until find_running_avd; do
-      kill -0 "$emulator_pid" 2>/dev/null || fail "Emulator exited. See build/run/android-emulator.log."
+      kill -0 "$ANDROID_EMULATOR_PID" 2>/dev/null || fail "Emulator exited. See build/run/android-emulator.log."
       (( SECONDS < deadline )) || fail "Emulator connection timed out. See build/run/android-emulator.log."
       sleep 2
     done
@@ -153,6 +159,7 @@ run_android() {
   choose "Which Android build should be installed?" 1 Debug Release
   [[ "$SELECTION" == 0 ]] || build_type=Release
   ./gradlew --quiet ":app:android:assemble$build_type"
+  wait_for_android
   python3 - "$ROOT_DIR" "$build_type" > "$WORK_DIR/apk" <<'PY'
 import json
 import pathlib
@@ -180,6 +187,7 @@ PY
 run_android_release_tests() {
   local test_status
   prepare_android true
+  wait_for_android
   if ANDROID_SERIAL="$ANDROID_SERIAL_ID" \
     ./gradlew --quiet :app:android-blackbox-test:connectedReleaseAndroidTest; then
     echo "✅ Android release tests passed."
