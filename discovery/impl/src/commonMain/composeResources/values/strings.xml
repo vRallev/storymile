@@ -23,6 +23,13 @@
   <string name="episodes_error">Could not load episodes.</string>
   <string name="no_episodes">No episodes available.</string>
   <string name="play_episode">Play %1$s</string>
+  <string name="show_episode_details">Show episode details</string>
+  <string name="hide_episode_details">Hide episode details</string>
+  <string name="episode_expanded">Expanded</string>
+  <string name="episode_collapsed">Collapsed</string>
+  <string name="episode_author">By %1$s</string>
+  <string name="episode_published">Published %1$s</string>
+  <string name="episode_no_description">No description available.</string>
   <string name="follow">Follow</string>
   <string name="loading_podcasts">Loading podcasts</string>
   <string name="load_error">Could not load podcasts.</string>
