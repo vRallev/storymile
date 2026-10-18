@@ -2,4 +2,6 @@
   <string name="storymile">Storymile</string>
   <string name="profile">Profile</string>
   <string name="back">Back</string>
+  <string name="search_podcasts">Search podcasts</string>
+  <string name="clear_search">Clear search</string>
 </resources>

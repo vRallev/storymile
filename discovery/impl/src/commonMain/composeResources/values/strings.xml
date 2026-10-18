@@ -1,7 +1,5 @@
 <resources>
   <string name="discover_podcasts">Discover podcasts</string>
-  <string name="search_podcasts">Search podcasts</string>
-  <string name="clear_search">Clear search</string>
   <string name="browse_topics">Browse topics</string>
   <string name="topic_nature">Nature</string>
   <string name="topic_nature_subtitle">Stories from the natural world</string>

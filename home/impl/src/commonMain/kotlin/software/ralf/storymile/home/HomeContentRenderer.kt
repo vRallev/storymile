@@ -1,6 +1,5 @@
 package software.ralf.storymile.home
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,13 +16,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,6 +34,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
+import software.ralf.storymile.design.SearchField
 import software.ralf.storymile.design.TabHeader
 import software.ralf.storymile.home.impl.generated.resources.Res
 import software.ralf.storymile.home.impl.generated.resources.discover_podcasts
@@ -45,7 +42,6 @@ import software.ralf.storymile.home.impl.generated.resources.explore_topics
 import software.ralf.storymile.home.impl.generated.resources.find_your_first_podcast
 import software.ralf.storymile.home.impl.generated.resources.home_illustration
 import software.ralf.storymile.home.impl.generated.resources.listen_without_account
-import software.ralf.storymile.home.impl.generated.resources.podcasts_and_episodes
 import software.ralf.storymile.home.impl.generated.resources.welcome_to_storymile
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize
@@ -150,29 +146,13 @@ class HomeContentRenderer : ComposeRenderer<HomeContentPresenter.Model>() {
 
   @Composable
   private fun Search(onSearch: () -> Unit) {
-    Surface(
+    SearchField(
       onClick = onSearch,
       modifier =
         Modifier.fillMaxWidth()
           .sharedNavigationBounds(SharedNavigationElement.SEARCH_FIELD)
           .testTag("home-search"),
-      shape = RoundedCornerShape(12.dp),
-      color = AppTheme.colorScheme.surface,
-      contentColor = AppTheme.colorScheme.onSurfaceVariant,
-      border = BorderStroke(1.dp, AppTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
-    ) {
-      Row(
-        modifier = Modifier.heightIn(min = 52.dp).padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Icon(imageVector = Icons.Outlined.Search, contentDescription = null)
-        Text(
-          text = stringResource(Res.string.podcasts_and_episodes),
-          style = AppTheme.typography.bodyLarge,
-        )
-      }
-    }
+    )
   }
 
   @Composable

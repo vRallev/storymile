@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
@@ -29,20 +28,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.TextFieldLineLimits
-import androidx.compose.foundation.text.input.clearText
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -67,14 +56,10 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -86,11 +71,11 @@ import software.ralf.app.platform.ExperimentalAppPlatform
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.app.platform.renderer.text.rememberPresenterBackedTextFieldState
+import software.ralf.storymile.design.SearchField
 import software.ralf.storymile.design.TitleBar
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.impl.generated.resources.Res
 import software.ralf.storymile.discovery.impl.generated.resources.browse_topics
-import software.ralf.storymile.discovery.impl.generated.resources.clear_search
 import software.ralf.storymile.discovery.impl.generated.resources.discover_podcasts
 import software.ralf.storymile.discovery.impl.generated.resources.episodes_to_try
 import software.ralf.storymile.discovery.impl.generated.resources.featured_podcasts
@@ -102,7 +87,6 @@ import software.ralf.storymile.discovery.impl.generated.resources.loading_podcas
 import software.ralf.storymile.discovery.impl.generated.resources.no_podcasts
 import software.ralf.storymile.discovery.impl.generated.resources.podcasts_to_explore
 import software.ralf.storymile.discovery.impl.generated.resources.retry
-import software.ralf.storymile.discovery.impl.generated.resources.search_podcasts
 import software.ralf.storymile.discovery.impl.generated.resources.search_results
 import software.ralf.storymile.discovery.impl.generated.resources.topic_culture_subtitle
 import software.ralf.storymile.discovery.impl.generated.resources.topic_nature_subtitle
@@ -361,73 +345,14 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
   ) {
     val query = rememberPresenterBackedTextFieldState(model.query)
     val focusRequester = remember { FocusRequester() }
-    val focusManager = LocalFocusManager.current
     val visibilityScope = LocalAnimatedVisibilityScope.current
-    val placeholder = stringResource(Res.string.search_podcasts)
-    val iconSlotWidth = 52.dp
-    Box(Modifier.sharedNavigationBounds(SharedNavigationElement.SEARCH_FIELD)) {
-      OutlinedTextField(
-        state = query,
-        modifier =
-          Modifier.fillMaxWidth()
-            .focusRequester(focusRequester)
-            .testTag("discovery-search")
-            .semantics { contentDescription = placeholder },
-        textStyle = AppTheme.typography.bodyLarge,
-        contentPadding = PaddingValues(vertical = 16.dp),
-        leadingIcon = {
-          Box(Modifier.width(iconSlotWidth)) {
-            Icon(Icons.Outlined.Search, null, Modifier.padding(start = 12.dp))
-          }
-        },
-        trailingIcon = {
-          Box(Modifier.width(iconSlotWidth), contentAlignment = Alignment.CenterEnd) {
-            AnimatedVisibility(
-              visible = query.text.isNotEmpty(),
-              enter = fadeIn(tween(FADE_DURATION_MILLIS)),
-              exit = fadeOut(tween(FADE_DURATION_MILLIS)),
-            ) {
-              IconButton(
-                onClick = { query.clearText() },
-                modifier = Modifier.testTag("discovery-clear"),
-              ) {
-                Icon(Icons.Filled.Close, stringResource(Res.string.clear_search))
-              }
-            }
-          }
-        },
-        lineLimits = TextFieldLineLimits.SingleLine,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        onKeyboardAction = { focusManager.clearFocus() },
-        shape = RoundedCornerShape(12.dp),
-        colors =
-          OutlinedTextFieldDefaults.colors(
-            unfocusedBorderColor = AppTheme.colorScheme.outlineVariant,
-            unfocusedContainerColor = AppTheme.colorScheme.surface,
-            focusedContainerColor = AppTheme.colorScheme.surface,
-          ),
-      )
-      // The Material placeholder slot is removed as soon as text is entered. Keep this overlay
-      // composed through its fade, using the same inset as the field's fixed icon slots.
-      AnimatedVisibility(
-        visible = query.text.isEmpty(),
-        modifier =
-          Modifier.align(Alignment.CenterStart)
-            .padding(horizontal = iconSlotWidth)
-            .testTag("discovery-search-placeholder"),
-        enter = fadeIn(tween(FADE_DURATION_MILLIS)),
-        exit = fadeOut(tween(FADE_DURATION_MILLIS)),
-      ) {
-        Text(
-          text = placeholder,
-          modifier = Modifier.clearAndSetSemantics {},
-          style = AppTheme.typography.bodyLarge,
-          color = AppTheme.colorScheme.onSurfaceVariant,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-        )
-      }
-    }
+    SearchField(
+      state = query,
+      modifier = Modifier.sharedNavigationBounds(SharedNavigationElement.SEARCH_FIELD),
+      fieldModifier = Modifier.focusRequester(focusRequester).testTag("discovery-search"),
+      placeholderModifier = Modifier.testTag("discovery-search-placeholder"),
+      clearButtonModifier = Modifier.testTag("discovery-clear"),
+    )
     LaunchedEffect(requestFocus) {
       if (requestFocus) {
         // Keep keyboard insets from moving the shared elements during the screen transition.

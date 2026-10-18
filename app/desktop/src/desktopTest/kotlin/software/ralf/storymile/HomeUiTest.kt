@@ -163,7 +163,7 @@ class HomeUiTest {
       }
     listOf(
         "Welcome to Storymile",
-        "Podcasts and episodes",
+        "Search podcasts",
         "Find your first podcast",
         "Explore topics and find a story worth listening to.",
         "Discover podcasts",
