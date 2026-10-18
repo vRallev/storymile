@@ -30,7 +30,12 @@ fun Modifier.sharedNavigationBounds(element: SharedNavigationElement): Modifier 
       sharedContentState = rememberSharedContentState(element),
       animatedVisibilityScope = visibilityScope,
       resizeMode =
-        SharedTransitionScope.ResizeMode.scaleToBounds(alignment = Alignment.CenterStart),
+        if (element == SharedNavigationElement.SEARCH_FIELD) {
+          // Keep the icon and text insets fixed while the field changes width.
+          SharedTransitionScope.ResizeMode.RemeasureToBounds
+        } else {
+          SharedTransitionScope.ResizeMode.scaleToBounds(alignment = Alignment.CenterStart)
+        },
     )
   }
 }

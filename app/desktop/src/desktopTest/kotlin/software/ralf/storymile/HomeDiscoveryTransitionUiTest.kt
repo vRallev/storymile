@@ -8,13 +8,20 @@ import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.MouseInjectionScope
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotFocused
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import assertk.assertThat
@@ -85,6 +92,70 @@ class HomeDiscoveryTransitionUiTest {
       }
   }
 
+  @Test
+  fun `search stays aligned while a back gesture reverses cancels and completes`() {
+    listOf(DesktopWindowSizes.phone, DesktopWindowSizes.desktop).forEach { size ->
+      listOf(false, true).forEach { darkTheme ->
+        uiTestRule.runRobotTest(windowSize = size, darkTheme = darkTheme) {
+          onNodeWithTag("home-search").assertIsEnabled().assertHasClickAction().performClick()
+          waitUntil(timeoutMillis = 5_000) {
+            onAllNodes(hasTestTag("discovery-search")).fetchSemanticsNodes().isNotEmpty()
+          }
+          onNodeWithTag("discovery-search").performTextReplacement("Nature")
+          val root = onRoot().fetchSemanticsNode().boundsInRoot
+          val distance = minOf(300f, root.width / 2)
+          mouse {
+            moveTo(Offset(2f, root.height / 2))
+            press()
+            moveTo(Offset(2f + distance * 0.7f, root.height / 2))
+          }
+          assertSearchIconsAligned("discovery-search", "home-search", "back preview")
+          mouse { moveTo(Offset(2f + distance * 0.2f, root.height / 2)) }
+          assertSearchIconsAligned("discovery-search", "home-search", "back reversal")
+          mouse { release() }
+          onNodeWithTag("home-search").assertDoesNotExist()
+          onNodeWithTag("discovery-search").assertTextContains("Nature")
+
+          mouse {
+            moveTo(Offset(2f, root.height / 2))
+            press()
+            moveTo(Offset(2f + distance * 0.7f, root.height / 2))
+          }
+          assertSearchIconsAligned("discovery-search", "home-search", "back completion")
+          mouse { release() }
+          onNodeWithTag("discovery-search").assertDoesNotExist()
+          onNodeWithTag("home-search").assertIsEnabled().assertHasClickAction()
+        }
+      }
+    }
+  }
+
+  private fun ComposeUiTest.mouse(block: MouseInjectionScope.() -> Unit) {
+    runOnUiThread { onRoot().performMouseInput(block) }
+    waitForIdle()
+  }
+
+  private fun ComposeUiTest.assertSearchIconsAligned(
+    sourceSearch: String,
+    targetSearch: String,
+    name: String,
+  ) {
+    val sourceIcon = searchIconBounds(sourceSearch)
+    val targetIcon = searchIconBounds(targetSearch)
+    // The shared overlay moves both fields. Compare their content within those bounds.
+    val sourceInset = sourceIcon.center - bounds(sourceSearch).topLeft
+    val targetInset = targetIcon.center - bounds(targetSearch).topLeft
+    assertThat(
+        (sourceInset - targetInset).getDistance(),
+        "Search icons stay aligned during $sourceSearch to $targetSearch in $name",
+      )
+      .isLessThan(0.5f)
+    assertThat(abs(sourceIcon.width - targetIcon.width), "Search icon widths match in $name")
+      .isLessThan(0.5f)
+    assertThat(abs(sourceIcon.height - targetIcon.height), "Search icon heights match in $name")
+      .isLessThan(0.5f)
+  }
+
   private fun ComposeUiTest.transition(
     sourceSearch: String,
     targetSearch: String,
@@ -110,6 +181,7 @@ class HomeDiscoveryTransitionUiTest {
       val frames =
         (1..2).map {
           mainClock.advanceTimeBy(48)
+          assertSearchIconsAligned(sourceSearch, targetSearch, name)
           if (targetSearch == "discovery-search") {
             onNodeWithTag(targetSearch).assertIsNotFocused()
           }
@@ -176,6 +248,18 @@ class HomeDiscoveryTransitionUiTest {
   private fun ComposeUiTest.titlePosition(tag: String): Offset {
     val bounds = bounds(tag)
     return Offset(bounds.left, bounds.center.y)
+  }
+
+  private fun ComposeUiTest.searchIconBounds(searchTag: String): Rect = runOnUiThread {
+    val coordinates =
+      onNode(
+          hasTestTag("search-icon") and hasAnyAncestor(hasTestTag(searchTag)),
+          useUnmergedTree = true,
+        )
+        .fetchSemanticsNode()
+        .layoutInfo
+        .coordinates
+    coordinates.findRootCoordinates().localBoundingBoxOf(coordinates, clipBounds = false)
   }
 
   private data class Frame(val search: Rect, val title: Offset, val profile: Rect)

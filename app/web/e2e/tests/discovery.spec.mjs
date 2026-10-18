@@ -71,7 +71,8 @@ test('loads real-mode charts after retry and searches topics in the browser', as
   await expect(retry).toBeVisible();
   await retry.click({ force: true });
 
-  const chart = page.locator('[id="discovery-podcast-123"]');
+  const discoveryList = page.locator('[id="discovery-list"]');
+  const chart = discoveryList.locator('[id="discovery-podcast-123"]');
   await expect(chart).toContainText('Chart Podcast');
   await expect(chart).toContainText('Chart Publisher');
   await expect(retry).not.toBeAttached();
@@ -87,7 +88,7 @@ test('loads real-mode charts after retry and searches topics in the browser', as
   const science = page.locator('[id="discovery-topic-SCIENCE"]');
   await expect(science).toBeVisible();
   await science.click({ force: true });
-  await expect(page.locator('[id="discovery-podcast-456"]')).toContainText('Science Podcast');
+  await expect(discoveryList.locator('[id="discovery-podcast-456"]')).toContainText('Science Podcast');
   expect(searches).toEqual([{
     term: 'Science', media: 'podcast', entity: 'podcast', country: 'US', limit: '200',
   }]);
