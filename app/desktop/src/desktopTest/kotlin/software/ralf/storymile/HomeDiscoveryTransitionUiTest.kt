@@ -9,7 +9,6 @@ import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
-import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -18,7 +17,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import assertk.assertThat
+import assertk.assertions.isEqualTo
 import assertk.assertions.isLessThan
+import assertk.assertions.isLessThanOrEqualTo
 import assertk.assertions.isTrue
 import java.io.File
 import javax.imageio.ImageIO
@@ -59,7 +60,7 @@ class HomeDiscoveryTransitionUiTest {
             }
           transition(
             "home-search",
-            "discovery-search",
+            "discovery-search-bounds",
             homeTitle,
             "title-bar-title",
             "home-profile-icon",
@@ -70,7 +71,7 @@ class HomeDiscoveryTransitionUiTest {
           }
           onNodeWithTag("discovery-search").assertIsFocused()
           transition(
-            "discovery-search",
+            "discovery-search-bounds",
             "home-search",
             "title-bar-title",
             homeTitle,
@@ -83,6 +84,29 @@ class HomeDiscoveryTransitionUiTest {
           onNodeWithTag("discovery-screen").assertDoesNotExist()
         }
       }
+  }
+
+  @Test
+  fun `tapping the search preview while browsing focuses the editor after entering`() {
+    uiTestRule.runPhoneRobotTest(darkTheme = false) {
+      onNodeWithTag("home-discover").assertExists()
+      mainClock.autoAdvance = false
+      try {
+        runOnUiThread { onNodeWithTag("home-discover").performClick() }
+        waitUntil(timeoutMillis = 5_000) {
+          mainClock.advanceTimeByFrame()
+          runOnUiThread {
+            onAllNodes(hasTestTag("discovery-search-preview")).fetchSemanticsNodes().isNotEmpty()
+          }
+        }
+        runOnUiThread { onNodeWithTag("discovery-search-preview").performClick() }
+        onNodeWithTag("discovery-search").assertDoesNotExist()
+        mainClock.advanceTimeBy(2_000)
+        onNodeWithTag("discovery-search").assertIsFocused()
+      } finally {
+        mainClock.autoAdvance = true
+      }
+    }
   }
 
   private fun ComposeUiTest.transition(
@@ -107,11 +131,24 @@ class HomeDiscoveryTransitionUiTest {
           onAllNodes(hasTestTag(targetSearch)).fetchSemanticsNodes().isNotEmpty()
         }
       }
+      val previewSize =
+        if (targetSearch == "discovery-search-bounds") {
+          runOnUiThread {
+            onNodeWithTag("discovery-search-preview")
+              .fetchSemanticsNode()
+              .layoutInfo
+              .coordinates
+              .size
+          }
+        } else {
+          null
+        }
       val frames =
         (1..2).map {
           mainClock.advanceTimeBy(48)
-          if (targetSearch == "discovery-search") {
-            onNodeWithTag(targetSearch).assertIsNotFocused()
+          if (targetSearch == "discovery-search-bounds") {
+            onNodeWithTag("discovery-search-preview").assertExists()
+            onNodeWithTag("discovery-search").assertDoesNotExist()
           }
           Frame(bounds(targetSearch), titlePosition(targetTitle), bounds(targetProfile))
         }
@@ -120,6 +157,15 @@ class HomeDiscoveryTransitionUiTest {
       screenshot.parentFile.mkdirs()
       ImageIO.write(onRoot().captureToImage().toAwtImage(), "png", screenshot)
       mainClock.advanceTimeBy(2_000)
+      if (previewSize != null) {
+        onNodeWithTag("discovery-search-preview").assertDoesNotExist()
+        val editorSize = runOnUiThread {
+          onNodeWithTag("discovery-search").fetchSemanticsNode().layoutInfo.coordinates.size
+        }
+        assertThat(editorSize.width).isEqualTo(previewSize.width)
+        assertThat(abs(editorSize.height - previewSize.height), "Preview height matches in $name")
+          .isLessThanOrEqualTo(2)
+      }
       val endSearch = bounds(targetSearch)
       val endTitle = titlePosition(targetTitle)
       val endProfile = bounds(targetProfile)

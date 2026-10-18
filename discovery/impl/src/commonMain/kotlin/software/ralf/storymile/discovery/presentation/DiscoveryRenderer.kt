@@ -8,6 +8,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -352,9 +354,76 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     }
   }
 
-  @OptIn(ExperimentalAppPlatform::class)
   @Composable
   private fun Search(
+    model: DiscoveryPresenterImpl.Model,
+    requestFocus: Boolean,
+    onFocused: () -> Unit,
+  ) {
+    val visibilityScope = LocalAnimatedVisibilityScope.current
+    // Text input is costly on first use. Animate its preview before creating the editor.
+    var editorReady by rememberSaveable { mutableStateOf(visibilityScope == null) }
+    var previewClicked by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(visibilityScope) {
+      if (visibilityScope != null) {
+        // Keep keyboard insets from moving shared elements during navigation.
+        snapshotFlow {
+          visibilityScope.transition.currentState == EnterExitState.Visible &&
+            visibilityScope.transition.targetState == EnterExitState.Visible &&
+            !visibilityScope.transition.isRunning
+        }
+          .first { it }
+      }
+      editorReady = true
+    }
+    Box(
+      Modifier.sharedNavigationBounds(SharedNavigationElement.SEARCH_FIELD)
+        .testTag("discovery-search-bounds"),
+    ) {
+      if (editorReady) {
+        SearchEditor(model, requestFocus || previewClicked) {
+          previewClicked = false
+          onFocused()
+        }
+      } else {
+        SearchPreview { previewClicked = true }
+      }
+    }
+  }
+
+  @Composable
+  private fun SearchPreview(onClick: () -> Unit) {
+    Surface(
+      onClick = onClick,
+      modifier = Modifier.fillMaxWidth().testTag("discovery-search-preview"),
+      shape = RoundedCornerShape(12.dp),
+      color = AppTheme.colorScheme.surface,
+      border = BorderStroke(1.dp, AppTheme.colorScheme.outlineVariant),
+      contentColor = AppTheme.colorScheme.onSurfaceVariant,
+    ) {
+      Row(
+        modifier =
+          Modifier.heightIn(min = OutlinedTextFieldDefaults.MinHeight).padding(vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Box(Modifier.width(SEARCH_ICON_SLOT_WIDTH)) {
+          Icon(Icons.Outlined.Search, null, Modifier.padding(start = 12.dp))
+        }
+        Text(
+          text = stringResource(Res.string.search_podcasts),
+          modifier = Modifier.weight(1f).padding(end = SEARCH_ICON_SLOT_WIDTH),
+          style = AppTheme.typography.bodyLarge,
+          color = AppTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+      }
+    }
+  }
+
+  @OptIn(ExperimentalAppPlatform::class)
+  @Composable
+  private fun SearchEditor(
     model: DiscoveryPresenterImpl.Model,
     requestFocus: Boolean,
     onFocused: () -> Unit,
@@ -362,10 +431,8 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     val query = rememberPresenterBackedTextFieldState(model.query)
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
-    val visibilityScope = LocalAnimatedVisibilityScope.current
     val placeholder = stringResource(Res.string.search_podcasts)
-    val iconSlotWidth = 52.dp
-    Box(Modifier.sharedNavigationBounds(SharedNavigationElement.SEARCH_FIELD)) {
+    Box {
       OutlinedTextField(
         state = query,
         modifier =
@@ -376,12 +443,12 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
         textStyle = AppTheme.typography.bodyLarge,
         contentPadding = PaddingValues(vertical = 16.dp),
         leadingIcon = {
-          Box(Modifier.width(iconSlotWidth)) {
+          Box(Modifier.width(SEARCH_ICON_SLOT_WIDTH)) {
             Icon(Icons.Outlined.Search, null, Modifier.padding(start = 12.dp))
           }
         },
         trailingIcon = {
-          Box(Modifier.width(iconSlotWidth), contentAlignment = Alignment.CenterEnd) {
+          Box(Modifier.width(SEARCH_ICON_SLOT_WIDTH), contentAlignment = Alignment.CenterEnd) {
             AnimatedVisibility(
               visible = query.text.isNotEmpty(),
               enter = fadeIn(tween(FADE_DURATION_MILLIS)),
@@ -413,7 +480,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
         visible = query.text.isEmpty(),
         modifier =
           Modifier.align(Alignment.CenterStart)
-            .padding(horizontal = iconSlotWidth)
+            .padding(horizontal = SEARCH_ICON_SLOT_WIDTH)
             .testTag("discovery-search-placeholder"),
         enter = fadeIn(tween(FADE_DURATION_MILLIS)),
         exit = fadeOut(tween(FADE_DURATION_MILLIS)),
@@ -430,15 +497,6 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     }
     LaunchedEffect(requestFocus) {
       if (requestFocus) {
-        // Keep keyboard insets from moving the shared elements during the screen transition.
-        if (visibilityScope != null) {
-          snapshotFlow {
-            visibilityScope.transition.currentState == EnterExitState.Visible &&
-              visibilityScope.transition.targetState == EnterExitState.Visible &&
-              !visibilityScope.transition.isRunning
-          }
-            .first { it }
-        }
         focusRequester.requestFocus()
         onFocused()
       }
@@ -661,6 +719,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
 
   private companion object {
     const val FADE_DURATION_MILLIS = 120
+    val SEARCH_ICON_SLOT_WIDTH = 52.dp
   }
 
   private data class CatalogContent(val state: CatalogState, val featured: Boolean)
