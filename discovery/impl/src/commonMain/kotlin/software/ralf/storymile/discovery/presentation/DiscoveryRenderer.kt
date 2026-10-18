@@ -301,9 +301,9 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     val showEpisodes = featured || model.topic != null
     if (!wide && showEpisodes) {
       item(key = "episodes") {
-        SampleEpisodes(
+        Episodes(
           title = stringResource(Res.string.episodes_to_try),
-          podcasts = podcasts.take(2),
+          model = model.episodes,
           modifier = Modifier.fadeItem(this).fillMaxWidth(),
         )
       }
@@ -343,9 +343,9 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
         FirstPodcasts(podcasts, featured, model)
       }
       if (showEpisodesBeside) {
-        SampleEpisodes(
+        Episodes(
           title = null,
-          podcasts = podcasts,
+          model = model.episodes,
           modifier = Modifier.weight(1f),
         )
       }
