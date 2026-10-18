@@ -26,6 +26,9 @@ class FakePodcastDiscoveryService : PodcastDiscoveryService {
     return HttpResponse.Success(results, statusCode = 200)
   }
 
+  override suspend fun lookup(id: String): HttpResponse<List<DiscoveredPodcast>> =
+    HttpResponse.Success(podcasts.filter { it.id == id }, statusCode = 200)
+
   override suspend fun popular(): HttpResponse<List<DiscoveredPodcast>> =
     HttpResponse.Success(podcasts, statusCode = 200)
 

@@ -48,6 +48,9 @@ class TestPodcastDiscoveryService : PodcastDiscoveryService {
     return response(results, term)
   }
 
+  override suspend fun lookup(id: String): HttpResponse<List<DiscoveredPodcast>> =
+    HttpResponse.Success(podcasts.filter { it.id == id }, statusCode = 200)
+
   override suspend fun popular(): HttpResponse<List<DiscoveredPodcast>> = response(podcasts, "")
 
   private fun response(
@@ -68,7 +71,7 @@ class TestPodcastDiscoveryService : PodcastDiscoveryService {
       id = id,
       title = title,
       author = author,
-      feedUrl = null,
+      feedUrl = "https://feeds.test/$id",
       artworkUrl = null,
       catalogUrl = null,
     )

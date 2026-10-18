@@ -70,6 +70,7 @@ class DiscoveryRendererTest {
         val renderer = DiscoveryRenderer()
         val model =
           DiscoveryPresenterImpl.Model(
+            episodes = EpisodesPresenter.Model(emptyList(), false, false, {}),
             topic = null,
             query = PresenterTextFieldState(),
             state = CatalogState.Loading,
@@ -304,6 +305,7 @@ class DiscoveryRendererTest {
 
   private fun model(query: PresenterTextFieldState, state: CatalogState) =
     DiscoveryPresenterImpl.Model(
+      episodes = EpisodesPresenter.Model(emptyList(), false, false, {}),
       topic = null,
       query = query,
       state = state,
@@ -415,6 +417,7 @@ class DiscoveryRendererTest {
 
   private fun model() =
     DiscoveryPresenterImpl.Model(
+      episodes = EpisodesPresenter.Model(emptyList(), false, false, {}),
       topic = null,
       query = PresenterTextFieldState("Podcast"),
       state =

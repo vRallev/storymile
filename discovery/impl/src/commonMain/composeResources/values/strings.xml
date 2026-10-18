@@ -19,9 +19,10 @@
   <string name="search_results">Search results</string>
   <string name="episodes_to_try">Episodes to try</string>
   <string name="episodes">Episodes</string>
-  <string name="sample_episodes_notice">Sample episodes. Episode details are not available yet.</string>
-  <string name="sample_episode">Sample episode %1$d</string>
-  <string name="play_sample_episode">Play sample episode %1$d</string>
+  <string name="loading_episodes">Loading episodes</string>
+  <string name="episodes_error">Could not load episodes.</string>
+  <string name="no_episodes">No episodes available.</string>
+  <string name="play_episode">Play %1$s</string>
   <string name="follow">Follow</string>
   <string name="loading_podcasts">Loading podcasts</string>
   <string name="load_error">Could not load podcasts.</string>
