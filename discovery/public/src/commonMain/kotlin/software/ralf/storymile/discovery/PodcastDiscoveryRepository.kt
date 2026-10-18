@@ -21,7 +21,11 @@ interface PodcastDiscoveryRepository {
   /** Refreshes one catalog lookup, replacing an active fetch and restarting its hourly interval. */
   fun refresh(id: String)
 
-  /** Searches through [PodcastDiscoveryService.search] without caching results. */
+  /**
+   * Returns up to 200 podcasts from Apple's US catalog, or local samples in fake mode, without
+   * caching. Trims [query]; a blank query returns an empty success without a request. Returns HTTP,
+   * transport, and decoding failures; coroutine cancellation propagates.
+   */
   suspend fun search(query: String): HttpResponse<List<DiscoveredPodcast>>
 
   /**
