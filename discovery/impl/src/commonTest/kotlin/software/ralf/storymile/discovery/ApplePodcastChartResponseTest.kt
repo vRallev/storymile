@@ -35,6 +35,7 @@ class ApplePodcastChartResponseTest {
         {"id":{"label":"https://example.invalid/podcast","attributes":{"im:id":"123"}},
          "im:name":{"label":"Science Weekly"},"im:artist":{"label":"A Publisher"},
          "im:image":[{"label":"https://example.invalid/artwork.jpg"}],
+         "summary":{"label":"<p>Stories &amp; science.</p><p>Each week.</p>"},
          "category":{"attributes":{"label":"Science"}}},
         {"id":{"attributes":{"im:id":"12"}},"im:name":{"label":"History Weekly"}}
       ]}}
@@ -45,12 +46,13 @@ class ApplePodcastChartResponseTest {
       .isEqualTo(
         listOf(
           DiscoveredPodcast(
-            "123",
-            "Science Weekly",
-            "A Publisher",
-            null,
-            "https://example.invalid/artwork.jpg",
-            "https://example.invalid/podcast",
+            id = "123",
+            title = "Science Weekly",
+            author = "A Publisher",
+            feedUrl = null,
+            artworkUrl = "https://example.invalid/artwork.jpg",
+            catalogUrl = "https://example.invalid/podcast",
+            description = "Stories & science.\n\nEach week.",
           ),
           DiscoveredPodcast("12", "History Weekly", null, null, null, null),
         ),
@@ -64,10 +66,11 @@ class ApplePodcastChartResponseTest {
       {"feed":{"entry":[
         {"id":{"attributes":{"im:id":"1"}},"im:name":{"label":"Absent"}},
         {"id":{"attributes":{"im:id":"2"},"label":null},"im:name":{"label":"Null"},
-         "im:artist":null,"im:image":null},
+         "im:artist":null,"im:image":null,"summary":null},
         {"id":{"attributes":{"im:id":"3"},"label":" "},"im:name":{"label":"Blank"},
-         "im:artist":{"label":" "},"im:image":[{"label":""}]},
-        {"id":{"attributes":{"im:id":"4"}},"im:name":{"label":"Empty"},"im:image":[]}
+         "im:artist":{"label":" "},"im:image":[{"label":""}],"summary":{"label":" "}},
+        {"id":{"attributes":{"im:id":"4"}},"im:name":{"label":"Empty"},"im:image":[],
+         "summary":{"label":"<p>&nbsp;</p>"}}
       ]}}
       """
         .trimIndent()

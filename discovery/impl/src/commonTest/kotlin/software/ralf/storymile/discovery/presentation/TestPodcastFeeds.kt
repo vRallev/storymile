@@ -23,6 +23,8 @@ class TestPodcastFeeds : PodcastFeedRepository {
     state(url).value = value
   }
 
+  fun isObserved(url: String): Boolean = state(url).subscriptionCount.value > 0
+
   private fun state(url: String) =
     states.getOrPut(url) { MutableStateFlow(PodcastFeedRepository.State.Loading) }
 }

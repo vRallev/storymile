@@ -20,6 +20,7 @@ internal class ApplePodcastChartResponse {
     @SerialName("im:name") val title: Label,
     @SerialName("im:artist") val author: Label? = null,
     @SerialName("im:image") val images: List<Image>? = null,
+    val summary: Label? = null,
   ) {
     fun toPodcast(): DiscoveredPodcast {
       val podcastId = id.attributes["im:id"]
@@ -38,6 +39,7 @@ internal class ApplePodcastChartResponse {
         feedUrl = null,
         artworkUrl = artwork?.let { ApplePodcastArtwork.highResolutionUrl(it.label) },
         catalogUrl = id.label.nonBlank(),
+        description = PodcastDescription.plainText(summary?.label),
       )
     }
 

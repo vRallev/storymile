@@ -82,12 +82,14 @@ class EpisodesRendererTest {
             DiscoveredPodcast("show", "The Quiet Current", "A publisher", "feed", null, null)
           val model =
             ShowPresenter.Model(
-              podcast,
-              listOf(podcast),
-              ShowPresenter.Source.Browse,
-              EpisodesPresenter.Model(List(100) { episode(it) }, false, false, {}),
-              {},
-              {},
+              podcast = podcast,
+              podcasts = listOf(podcast),
+              source = ShowPresenter.Source.Browse,
+              episodes = EpisodesPresenter.Model(List(100) { episode(it) }, false, false, {}),
+              descriptionExpanded = false,
+              onToggleDescription = {},
+              onPodcastSelected = {},
+              onBack = {},
             )
           setContent {
             ThemedContent(fontScale) {

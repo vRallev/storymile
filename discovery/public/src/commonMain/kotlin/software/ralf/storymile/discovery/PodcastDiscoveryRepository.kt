@@ -13,18 +13,24 @@ interface PodcastDiscoveryRepository {
   val popular: StateFlow<State>
 
   /**
-   * Shares a catalog lookup by ID, including the feed URL omitted by chart results. Uses the same
-   * lazy loading and hourly refresh policy as [popular]. Success contains zero or one podcast.
+   * Shares metadata by ID, with cached chart, search, or RSS data available immediately. On first
+   * collection, resolves a missing feed URL and fills a missing description from RSS. Retains
+   * metadata during loading or failures. Uses the hourly refresh policy of [popular]. Success
+   * contains zero or one podcast; a null description means missing or not yet loaded.
    */
   fun lookup(id: String): StateFlow<State>
 
-  /** Refreshes one catalog lookup, replacing an active fetch and restarting its hourly interval. */
+  /**
+   * Refreshes a podcast's catalog lookup and known RSS feed, restarting their hourly intervals.
+   * Defers work until the first collection of [lookup].
+   */
   fun refresh(id: String)
 
   /**
    * Returns up to 200 podcasts from Apple's US catalog, or local samples in fake mode, without
-   * caching. Trims [query]; a blank query returns an empty success without a request. Returns HTTP,
-   * transport, and decoding failures; coroutine cancellation propagates.
+   * caching search requests. Retains returned metadata for [lookup]. Trims [query]; a blank query
+   * returns an empty success without a request. Returns HTTP, transport, and decoding failures;
+   * coroutine cancellation propagates.
    */
   suspend fun search(query: String): HttpResponse<List<DiscoveredPodcast>>
 
@@ -34,7 +40,7 @@ interface PodcastDiscoveryRepository {
    */
   fun refresh()
 
-  /** The shared catalog fetch state. */
+  /** The shared recommendations or podcast metadata state. */
   sealed interface State {
     /** The initial state or a fetch in progress. */
     data object Loading : State
@@ -44,7 +50,7 @@ interface PodcastDiscoveryRepository {
 
     /** Chart recommendations, a catalog lookup result, or local samples in fake mode. */
     data class Success(
-      /** Podcasts returned by the latest successful fetch. */
+      /** Available podcasts, including cached descriptions when supplied by [lookup]. */
       val podcasts: List<DiscoveredPodcast>,
     ) : State
   }
