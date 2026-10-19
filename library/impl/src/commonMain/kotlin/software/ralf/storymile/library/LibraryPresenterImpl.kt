@@ -17,32 +17,32 @@ import software.ralf.storymile.user.UserScope
 class LibraryPresenterImpl : LibraryPresenter<LibraryPresenterImpl.Model> {
   @Composable
   override fun present(input: Unit): Model {
-    var selectedFilter by
+    var selectedTab by
       rememberSaveable(
-        stateSaver =
-          Saver(save = { filter: Filter -> filter.name }, restore = { Filter.valueOf(it) }),
+        stateSaver = Saver(save = { tab: Tab -> tab.name }, restore = { Tab.valueOf(it) }),
       ) {
-        mutableStateOf(Filter.EPISODES)
+        mutableStateOf(Tab.QUEUE)
       }
     return Model(
-      selectedFilter = selectedFilter,
-      onSelectFilter = { selectedFilter = it },
+      selectedTab = selectedTab,
+      onSelectTab = { selectedTab = it },
       onDiscoverPodcasts = {},
     )
   }
 
-  enum class Filter {
-    EPISODES,
+  enum class Tab {
+    QUEUE,
     SHOWS,
+    SAVED,
   }
 
   /**
-   * Renderer-only state starts with episodes and retains the selected filter across tab changes.
+   * Renderer-only state starts with Queue and retains the selected tab when leaving Library.
    * Discovery is a placeholder action.
    */
   data class Model(
-    val selectedFilter: Filter,
-    val onSelectFilter: (Filter) -> Unit,
+    val selectedTab: Tab,
+    val onSelectTab: (Tab) -> Unit,
     val onDiscoverPodcasts: () -> Unit,
   ) : BaseModel
 }

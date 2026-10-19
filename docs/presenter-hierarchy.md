@@ -105,7 +105,7 @@ shows the catalog beside the selected podcast in wide panes. Narrow previews sho
 podcast. Both layouts use the same presenter stack.
 
 [LibraryRenderer](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryRenderer.kt)
-adapts the empty library to phone, tablet, and desktop widths.
+shows Queue, Shows, and Saved placeholders at phone, tablet, and desktop widths.
 
 [PlaybackScreenRenderer](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackScreenRenderer.kt)
 shows artwork, episode details, playback controls, and chapters. Its collapse button calls the template's
