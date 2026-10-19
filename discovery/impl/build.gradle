@@ -11,7 +11,7 @@ storymile {
 dependencies {
   commonMainImplementation project(':episode-details:public')
   commonMainImplementation project(':http:public')
-  commonMainImplementation project(':rss:public')
+  commonMainImplementation project(':podcast:public')
   commonMainImplementation project(':runtime-mode:public')
   commonMainImplementation project(':templates:public')
   commonMainImplementation project(':theme:public')

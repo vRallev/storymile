@@ -11,9 +11,9 @@ import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.coroutine.CoroutineScopeScoped
 import software.ralf.app.platform.scope.coroutine.addCoroutineScopeScoped
 import software.ralf.app.platform.scope.register
-import software.ralf.storymile.rss.PodcastEnclosure
-import software.ralf.storymile.rss.PodcastEpisode
-import software.ralf.storymile.rss.PodcastFeed
+import software.ralf.storymile.podcast.PodcastEnclosure
+import software.ralf.storymile.podcast.PodcastEpisode
+import software.ralf.storymile.podcast.PodcastFeed
 import software.ralf.storymile.storage.FileStorage
 import software.ralf.storymile.storage.Storage
 

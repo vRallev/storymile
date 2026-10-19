@@ -19,7 +19,7 @@ import kotlinx.coroutines.withContext
 import software.ralf.app.platform.inject.metro.ContributesScoped
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.Scoped
-import software.ralf.storymile.rss.PodcastFeed
+import software.ralf.storymile.podcast.PodcastFeed
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.user.UserScope
 

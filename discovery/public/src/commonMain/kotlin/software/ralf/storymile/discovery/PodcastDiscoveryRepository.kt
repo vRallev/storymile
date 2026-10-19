@@ -13,16 +13,16 @@ interface PodcastDiscoveryRepository {
   val popular: StateFlow<State>
 
   /**
-   * Shares metadata by ID, with cached chart, search, or RSS data available immediately. On first
-   * collection, resolves a missing feed URL and fills a missing description from RSS. Retains
+   * Shares metadata by ID, with cached chart, search, or feed data available immediately. On first
+   * collection, resolves a missing feed URL and fills a missing description from the feed. Retains
    * metadata during loading or failures. Uses the hourly refresh policy of [popular]. Success
    * contains zero or one podcast; a null description means missing or not yet loaded.
    */
   fun lookup(id: String): StateFlow<State>
 
   /**
-   * Refreshes a podcast's catalog lookup and known RSS feed, restarting their hourly intervals.
-   * Defers work until the first collection of [lookup].
+   * Refreshes a podcast's catalog lookup and known feed, restarting their hourly intervals. Defers
+   * work until the first collection of [lookup].
    */
   fun refresh(id: String)
 

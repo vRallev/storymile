@@ -14,8 +14,8 @@ import software.ralf.storymile.discovery.PodcastDiscoveryRepository
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State as CatalogState
 import software.ralf.storymile.episodedetails.EpisodeDetails
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
-import software.ralf.storymile.rss.PodcastFeedRepository
-import software.ralf.storymile.rss.PodcastFeedRepository.State
+import software.ralf.storymile.podcast.PodcastFeedRepository
+import software.ralf.storymile.podcast.PodcastFeedRepository.State
 
 class EpisodesPresenter(
   private val catalog: PodcastDiscoveryRepository,

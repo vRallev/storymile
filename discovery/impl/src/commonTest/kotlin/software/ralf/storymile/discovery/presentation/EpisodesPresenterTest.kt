@@ -16,10 +16,10 @@ import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.app.platform.presenter.compose.test
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State as CatalogState
-import software.ralf.storymile.rss.PodcastEnclosure
-import software.ralf.storymile.rss.PodcastEpisode
-import software.ralf.storymile.rss.PodcastFeed
-import software.ralf.storymile.rss.PodcastFeedRepository.State
+import software.ralf.storymile.podcast.PodcastEnclosure
+import software.ralf.storymile.podcast.PodcastEpisode
+import software.ralf.storymile.podcast.PodcastFeed
+import software.ralf.storymile.podcast.PodcastFeedRepository.State
 
 class EpisodesPresenterTest {
   @Test

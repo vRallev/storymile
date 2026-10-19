@@ -19,7 +19,7 @@ import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.discovery.presentation.TestPodcastFeeds
 import software.ralf.storymile.http.HttpClient
 import software.ralf.storymile.http.HttpResponse
-import software.ralf.storymile.rss.PodcastFeedRepository
+import software.ralf.storymile.podcast.PodcastFeedRepository
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.util.Device

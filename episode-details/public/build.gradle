@@ -8,7 +8,7 @@ storymile {
 }
 
 dependencies {
-  commonMainApi project(':rss:public')
+  commonMainApi project(':podcast:public')
 
   commonMainImplementation project(':templates:public')
   commonMainImplementation project(':util:public')

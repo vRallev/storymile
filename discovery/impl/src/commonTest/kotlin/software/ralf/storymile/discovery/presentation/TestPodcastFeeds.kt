@@ -2,7 +2,7 @@ package software.ralf.storymile.discovery.presentation
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import software.ralf.storymile.rss.PodcastFeedRepository
+import software.ralf.storymile.podcast.PodcastFeedRepository
 
 class TestPodcastFeeds : PodcastFeedRepository {
   private val states = mutableMapOf<String, MutableStateFlow<PodcastFeedRepository.State>>()
