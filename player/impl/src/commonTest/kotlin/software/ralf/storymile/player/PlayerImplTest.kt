@@ -7,7 +7,6 @@ import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import kotlin.test.Test
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -23,7 +22,6 @@ import software.ralf.storymile.playlist.PlaylistName
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class PlayerImplTest {
   @Test
   fun `waits for fake mode then prepares the first episode paused at normal speed`() =

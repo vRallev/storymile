@@ -11,7 +11,6 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
 import kotlin.js.JsException
 import kotlin.js.Promise
@@ -25,7 +24,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 
 /** Stores preferences in browser local storage and files in origin-private storage. */
-@OptIn(ExperimentalWasmJsInterop::class)
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
 class WasmJsStoragePlatform : StoragePlatform() {

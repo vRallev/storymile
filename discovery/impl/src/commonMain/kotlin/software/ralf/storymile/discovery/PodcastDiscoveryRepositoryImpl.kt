@@ -7,7 +7,6 @@ import dev.zacsweers.metro.SingleIn
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -80,7 +79,6 @@ class PodcastDiscoveryRepositoryImpl(
   private inner class Request(request: suspend () -> HttpResponse<List<DiscoveredPodcast>>) {
     val refreshRequests = MutableStateFlow(0)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val state: StateFlow<State> by lazy {
       refreshRequests
         .transformLatest {

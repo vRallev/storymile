@@ -6,7 +6,6 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.take
@@ -15,7 +14,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class StateFlowMapTest {
   @Test
   fun `a StateFlow can be mapped to another StateFlow`() = runTest {

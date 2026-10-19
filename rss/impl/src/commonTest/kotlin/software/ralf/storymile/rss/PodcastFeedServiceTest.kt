@@ -10,7 +10,6 @@ import assertk.assertions.isSameInstanceAs
 import kotlin.test.Test
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -261,7 +260,6 @@ class PodcastFeedServiceTest {
       .isEqualTo(HttpResponse.Error.Client(404))
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `load waits for saved fake mode without constructing the real service`() = runTest {
     val savedMode = CompletableDeferred<RuntimeMode>()

@@ -7,7 +7,6 @@ import dev.zacsweers.metro.SingleIn
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -56,7 +55,6 @@ class PodcastFeedRepositoryImpl(
     val refreshRequests = MutableStateFlow(0)
 
     // Map updates can race. Start sharing only on the entry retained in the map.
-    @OptIn(ExperimentalCoroutinesApi::class)
     val state: StateFlow<State> by lazy {
       refreshRequests
         .transformLatest {

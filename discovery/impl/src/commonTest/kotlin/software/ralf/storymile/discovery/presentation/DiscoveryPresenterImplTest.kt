@@ -8,7 +8,6 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
 import kotlin.test.Test
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -22,7 +21,6 @@ import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.http.HttpResponse
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class DiscoveryPresenterImplTest {
   @Test
   fun `browsing observes recommendations and retry requests a manual refresh`() = runTest {

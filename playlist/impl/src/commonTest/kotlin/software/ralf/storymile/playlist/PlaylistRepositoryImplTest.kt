@@ -13,7 +13,6 @@ import assertk.assertions.isTrue
 import kotlin.test.Test
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.runTestWithScope
@@ -22,7 +21,6 @@ import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.storage.FileStorage
 import software.ralf.storymile.storage.Storage
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class PlaylistRepositoryImplTest {
   @Test
   fun `fake mode seeds three ordered episodes before queued edits`() = runTestWithScope { scope ->

@@ -12,14 +12,12 @@ import kotlin.math.abs
 import kotlin.math.sin
 import kotlin.test.Test
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class DesktopAudioPlayerTest {
   @Test
   fun `preparing does not open the audio device and playing waits for preparation`() = runTest {

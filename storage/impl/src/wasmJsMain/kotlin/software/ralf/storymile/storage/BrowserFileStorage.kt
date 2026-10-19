@@ -1,8 +1,5 @@
-@file:OptIn(ExperimentalWasmJsInterop::class)
-
 package software.ralf.storymile.storage
 
-import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
 import kotlin.js.Promise
 

@@ -10,7 +10,6 @@ import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -20,7 +19,6 @@ import kotlinx.coroutines.test.runTest
 import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.rss.PodcastFeedRepository.State
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class PodcastFeedRepositoryTest {
   @Test
   fun `collectors share one lazy fetch per trimmed URL`() = runTest {

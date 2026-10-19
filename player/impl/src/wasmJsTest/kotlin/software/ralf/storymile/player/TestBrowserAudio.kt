@@ -1,8 +1,5 @@
-@file:OptIn(ExperimentalWasmJsInterop::class)
-
 package software.ralf.storymile.player
 
-import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
 
 internal external interface TestBrowserAudio : JsAny {

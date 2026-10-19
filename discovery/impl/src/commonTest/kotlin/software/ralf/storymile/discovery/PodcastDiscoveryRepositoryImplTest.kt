@@ -15,7 +15,6 @@ import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -28,7 +27,6 @@ import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.rss.PodcastFeed
 import software.ralf.storymile.rss.PodcastFeedRepository.State as FeedState
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class PodcastDiscoveryRepositoryImplTest {
   @Test
   fun `first collection starts one shared fetch and later collectors reuse its state`() = runTest {

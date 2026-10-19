@@ -8,7 +8,6 @@ import assertk.assertions.isNull
 import assertk.assertions.isSameInstanceAs
 import kotlin.test.Test
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -163,7 +162,6 @@ class PodcastDiscoveryServiceTest {
       .isEqualTo(HttpResponse.Success(emptyList(), statusCode = 200))
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `search waits for the saved mode and fake mode never constructs the real service`() =
     runTest {
@@ -191,7 +189,6 @@ class PodcastDiscoveryServiceTest {
         .isEqualTo("Small Science")
     }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `popular waits for the saved mode and fake mode never constructs the real service`() =
     runTest {

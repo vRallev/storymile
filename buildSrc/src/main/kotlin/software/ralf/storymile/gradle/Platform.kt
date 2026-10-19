@@ -60,11 +60,14 @@ internal sealed interface Platform {
         implementation(project.libs.findLibrary("coroutines-swing").get().get().toString())
         implementation(desktopArtifact)
       }
-      project.kmpExtension.sourceSets.getByName("desktopTest").dependencies {
-        implementation(
-          project.libs.findLibrary("compose-multiplatform-ui-test-junit4").get().get().toString(),
-        )
-        implementation(desktopArtifact)
+      project.kmpExtension.sourceSets.getByName("desktopTest").apply {
+        languageSettings.optIn("androidx.compose.ui.test.ExperimentalTestApi")
+        dependencies {
+          implementation(
+            project.libs.findLibrary("compose-multiplatform-ui-test-junit4").get().get().toString(),
+          )
+          implementation(desktopArtifact)
+        }
       }
     }
 
@@ -165,6 +168,7 @@ internal sealed interface Platform {
     @OptIn(ExperimentalWasmDsl::class)
     override fun configurePlatform() {
       project.kmpExtension.wasmJs {
+        compilerOptions { optIn.add("kotlin.js.ExperimentalWasmJsInterop") }
         browser {
           outputModuleName.set(project.safePathString)
 

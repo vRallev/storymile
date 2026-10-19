@@ -6,7 +6,6 @@ import assertk.assertions.isFalse
 import assertk.assertions.isTrue
 import kotlin.test.Test
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
@@ -21,7 +20,6 @@ import software.ralf.app.platform.scope.coroutine.launch
 import software.ralf.app.platform.scope.onExit
 import software.ralf.app.platform.scope.runTestWithScope
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class DefaultApplicationRestarterTest {
   @Test
   fun `restart waits for the outgoing caller to finish cleanup`() = runTestWithScope { scope ->

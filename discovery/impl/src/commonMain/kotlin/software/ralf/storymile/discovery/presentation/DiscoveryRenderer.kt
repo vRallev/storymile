@@ -30,7 +30,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -67,7 +66,6 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.first
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import software.ralf.app.platform.ExperimentalAppPlatform
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.app.platform.renderer.text.rememberPresenterBackedTextFieldState
@@ -118,7 +116,6 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
         DiscoveryTopic.Filter.OUTDOORS -> Res.string.filter_outdoors
       }
 
-  @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Compose(model: DiscoveryPresenterImpl.Model, modifier: Modifier) {
     BoxWithConstraints(
@@ -336,7 +333,6 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     }
   }
 
-  @OptIn(ExperimentalAppPlatform::class)
   @Composable
   private fun Search(
     model: DiscoveryPresenterImpl.Model,

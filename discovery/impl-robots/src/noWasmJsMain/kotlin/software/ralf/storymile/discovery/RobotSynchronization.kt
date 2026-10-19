@@ -1,9 +1,6 @@
-@file:OptIn(ExperimentalTestApi::class)
-
 package software.ralf.storymile.discovery
 
 import androidx.compose.ui.test.ComposeUiTest
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
 import kotlin.time.Duration.Companion.seconds
 import software.ralf.app.platform.robot.waitUntilCatching
