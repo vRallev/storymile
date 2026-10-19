@@ -25,17 +25,35 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
@@ -67,7 +85,6 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
         rememberLazyListState(
           initialFirstVisibleItemIndex = if (selectedIndex == 0) 0 else selectedIndex + 1,
         )
-      val detailState = key(model.podcast.id) { rememberLazyListState() }
       Column(Modifier.fillMaxSize()) {
         TitleBar(
           title =
@@ -110,62 +127,123 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
             }
             VerticalDivider(color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
           }
-          LazyColumn(
-            modifier = Modifier.weight(1.35f).testTag("show-detail"),
-            state = detailState,
-            contentPadding = PaddingValues(vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-          ) {
-            item {
-              Column(contentModifier) {
-                Box(Modifier.fillMaxWidth()) {
-                  PodcastDetails(
-                    podcast = model.podcast,
-                    source = model.source,
-                    modifier = Modifier.padding(end = 48.dp),
-                  )
-                  IconToggleButton(
-                    checked = model.descriptionExpanded,
-                    onCheckedChange = { model.onToggleDescription() },
-                    modifier = Modifier.align(Alignment.TopEnd).testTag("show-info"),
-                  ) {
-                    Icon(
-                      imageVector = Icons.Outlined.Info,
-                      contentDescription =
-                        stringResource(
-                          if (model.descriptionExpanded) {
-                            Res.string.hide_description
-                          } else {
-                            Res.string.show_description
-                          },
-                        ),
-                    )
-                  }
-                }
-                AnimatedVisibility(visible = model.descriptionExpanded) {
-                  Description(model)
-                }
-              }
-            }
-            item {
-              HorizontalDivider(
-                modifier = contentModifier,
-                color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+          key(model.podcast.id) {
+            EpisodeList(
+              model = model,
+              edgeToEdgeEpisodes = edgeToEdgeEpisodes,
+              contentModifier = contentModifier,
+              modifier = Modifier.weight(1.35f),
+            )
+          }
+        }
+      }
+    }
+  }
+
+  @Composable
+  private fun EpisodeList(
+    model: ShowPresenter.Model,
+    edgeToEdgeEpisodes: Boolean,
+    contentModifier: Modifier,
+    modifier: Modifier,
+  ) {
+    val detailState = rememberLazyListState()
+    var titleVisible by remember { mutableStateOf(true) }
+    val titleScrolledAway by remember {
+      derivedStateOf { detailState.firstVisibleItemIndex > 0 || !titleVisible }
+    }
+    val scrollBehavior =
+      TopAppBarDefaults.enterAlwaysScrollBehavior(
+        state = rememberTopAppBarState(initialHeightOffset = -Float.MAX_VALUE),
+      )
+    val scrollConnection =
+      remember(scrollBehavior) {
+        object : NestedScrollConnection by scrollBehavior.nestedScrollConnection {
+          // Keep the episodes moving while the title returns above them.
+          override fun onPreScroll(available: Offset, source: NestedScrollSource) = Offset.Zero
+        }
+      }
+    Box(modifier.clipToBounds()) {
+      LazyColumn(
+        modifier = Modifier.fillMaxSize().nestedScroll(scrollConnection).testTag("show-detail"),
+        state = detailState,
+        contentPadding = PaddingValues(vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+      ) {
+        item {
+          Column(contentModifier) {
+            Box(Modifier.fillMaxWidth()) {
+              PodcastDetails(
+                podcast = model.podcast,
+                source = model.source,
+                modifier = Modifier.padding(end = 48.dp),
+                titleModifier =
+                  Modifier.onGloballyPositioned { titleVisible = it.boundsInRoot().height > 0f },
               )
-            }
-            item {
-              Column(contentModifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                EpisodesHeading(stringResource(Res.string.episodes))
-                EpisodesStatus(model.episodes)
+              IconToggleButton(
+                checked = model.descriptionExpanded,
+                onCheckedChange = { model.onToggleDescription() },
+                modifier = Modifier.align(Alignment.TopEnd).testTag("show-info"),
+              ) {
+                Icon(
+                  imageVector = Icons.Outlined.Info,
+                  contentDescription =
+                    stringResource(
+                      if (model.descriptionExpanded) {
+                        Res.string.hide_description
+                      } else {
+                        Res.string.show_description
+                      },
+                    ),
+                )
               }
             }
-            itemsIndexed(model.episodes.episodes, key = { _, episode -> episode.key }) {
-              index,
-              episode ->
-              EpisodeRow(item = episode, index = index, edgeToEdge = edgeToEdgeEpisodes)
+            AnimatedVisibility(visible = model.descriptionExpanded) {
+              Description(model)
             }
           }
         }
+        item {
+          HorizontalDivider(
+            modifier = contentModifier,
+            color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+          )
+        }
+        item {
+          Column(contentModifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            EpisodesHeading(stringResource(Res.string.episodes))
+            EpisodesStatus(model.episodes)
+          }
+        }
+        itemsIndexed(model.episodes.episodes, key = { _, episode -> episode.key }) { index, episode
+          ->
+          EpisodeRow(item = episode, index = index, edgeToEdge = edgeToEdgeEpisodes)
+        }
+      }
+      Surface(
+        modifier =
+          Modifier.fillMaxWidth()
+            .graphicsLayer {
+              translationY =
+                if (titleScrolledAway) scrollBehavior.state.heightOffset else -size.height
+            }
+            .onSizeChanged {
+              scrollBehavior.state.heightOffsetLimit = -it.height.toFloat()
+              scrollBehavior.state.heightOffset =
+                scrollBehavior.state.heightOffset.coerceIn(-it.height.toFloat(), 0f)
+            }
+            .testTag("show-sticky-title"),
+        color = AppTheme.colorScheme.background,
+        shadowElevation = 2.dp,
+      ) {
+        Text(
+          text = model.podcast.title,
+          modifier = contentModifier.padding(vertical = 16.dp).semantics { heading() },
+          style = AppTheme.typography.titleLarge,
+          fontWeight = FontWeight.Bold,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis,
+        )
       }
     }
   }
@@ -175,6 +253,7 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
     podcast: DiscoveredPodcast,
     source: ShowPresenter.Source,
     modifier: Modifier,
+    titleModifier: Modifier,
   ) {
     BoxWithConstraints(Modifier.fillMaxWidth()) {
       if (maxWidth / LocalDensity.current.fontScale >= 440.dp) {
@@ -193,7 +272,12 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
                 .aspectRatio(1f),
             )
           }
-          Metadata(podcast, source, Modifier.weight(1.2f))
+          Metadata(
+            podcast = podcast,
+            source = source,
+            modifier = Modifier.weight(1.2f),
+            titleModifier = titleModifier,
+          )
         }
       } else {
         Column(
@@ -209,7 +293,12 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
               .fillMaxWidth()
               .aspectRatio(1f),
           )
-          Metadata(podcast, source, Modifier.fillMaxWidth())
+          Metadata(
+            podcast = podcast,
+            source = source,
+            modifier = Modifier.fillMaxWidth(),
+            titleModifier = titleModifier,
+          )
         }
       }
     }
@@ -230,6 +319,7 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
     podcast: DiscoveredPodcast,
     source: ShowPresenter.Source,
     modifier: Modifier,
+    titleModifier: Modifier,
   ) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
       Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -237,6 +327,7 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
           text = podcast.title,
           modifier =
             Modifier.podcastSharedElement(podcast, source, PodcastSharedElement.Title)
+              .then(titleModifier)
               .testTag("show-title")
               .semantics {
                 heading()
