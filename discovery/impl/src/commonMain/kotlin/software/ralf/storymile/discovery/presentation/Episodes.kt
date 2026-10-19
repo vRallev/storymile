@@ -1,5 +1,6 @@
 package software.ralf.storymile.discovery.presentation
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,21 +16,26 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextMotion
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import software.ralf.storymile.design.PodcastArtwork
 import software.ralf.storymile.discovery.impl.generated.resources.Res
 import software.ralf.storymile.discovery.impl.generated.resources.episodes_error
 import software.ralf.storymile.discovery.impl.generated.resources.loading_episodes
 import software.ralf.storymile.discovery.impl.generated.resources.no_episodes
 import software.ralf.storymile.discovery.impl.generated.resources.play_episode
 import software.ralf.storymile.discovery.impl.generated.resources.retry
+import software.ralf.storymile.episodedetails.EpisodeSharedElement
+import software.ralf.storymile.episodedetails.episodeSharedElement
 import software.ralf.storymile.theme.AppTheme
 
 @Composable
@@ -43,7 +49,7 @@ internal fun Episodes(title: String?, model: EpisodesPresenter.Model, modifier: 
       if (index > 0) {
         HorizontalDivider(color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
       }
-      EpisodeRow(episode, index)
+      key(episode.key) { EpisodeRow(episode, index) }
     }
   }
 }
@@ -93,33 +99,61 @@ internal fun EpisodesStatus(model: EpisodesPresenter.Model) {
 
 @Composable
 internal fun EpisodeRow(item: EpisodesPresenter.Episode, index: Int) {
+  val details = item.details
   Row(
-    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).testTag("episode-$index"),
+    modifier =
+      Modifier.fillMaxWidth()
+        .clickable(onClick = item.onClick)
+        .padding(vertical = 4.dp)
+        .testTag("episode-$index"),
     horizontalArrangement = Arrangement.spacedBy(12.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    PodcastArtwork(item.artworkUrl, Modifier.size(56.dp))
+    PodcastArtwork(
+      artworkUrl = details.artworkUrl,
+      modifier =
+        Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Artwork)
+          .testTag("episode-artwork-$index")
+          .size(56.dp),
+    )
     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-      Text(text = item.episode.title, style = AppTheme.typography.titleSmall)
       Text(
-        text = item.podcastTitle,
-        style = AppTheme.typography.bodySmall,
+        text = details.episode.title,
+        modifier =
+          Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Title)
+            .testTag("episode-title-$index"),
+        style = AppTheme.typography.titleSmall.copy(textMotion = TextMotion.Animated),
+      )
+      Text(
+        text = details.podcastTitle,
+        modifier =
+          Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Subtitle)
+            .testTag("episode-subtitle-$index"),
+        style = AppTheme.typography.bodySmall.copy(textMotion = TextMotion.Animated),
         color = AppTheme.colorScheme.onSurfaceVariant,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
       )
-      item.episode.duration?.let { duration ->
+      details.duration?.let { duration ->
         Text(
-          text =
-            duration.toComponents { hours, minutes, seconds, _ ->
-              if (hours > 0) {
-                "$hours:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
-              } else {
-                "$minutes:${seconds.toString().padStart(2, '0')}"
-              }
-            },
-          style = AppTheme.typography.bodySmall,
+          text = duration,
+          modifier =
+            Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Duration)
+              .testTag("episode-duration-$index"),
+          style = AppTheme.typography.bodySmall.copy(textMotion = TextMotion.Animated),
           color = AppTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+      if (details.description.isNotBlank()) {
+        Text(
+          text = details.description,
+          modifier =
+            Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Description)
+              .testTag("episode-description-$index"),
+          style = AppTheme.typography.bodyMedium.copy(textMotion = TextMotion.Animated),
+          color = AppTheme.colorScheme.onSurfaceVariant,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis,
         )
       }
     }
@@ -128,7 +162,7 @@ internal fun EpisodeRow(item: EpisodesPresenter.Episode, index: Int) {
       enabled = false,
       modifier = Modifier.testTag("episode-play-$index"),
     ) {
-      Icon(Icons.Filled.PlayArrow, stringResource(Res.string.play_episode, item.episode.title))
+      Icon(Icons.Filled.PlayArrow, stringResource(Res.string.play_episode, details.episode.title))
     }
   }
 }

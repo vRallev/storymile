@@ -30,6 +30,7 @@ import javax.imageio.ImageIO
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.minutes
 import software.ralf.storymile.discovery.DiscoveredPodcast
+import software.ralf.storymile.episodedetails.EpisodeDetails
 import software.ralf.storymile.rss.PodcastEnclosure
 import software.ralf.storymile.rss.PodcastEpisode
 import software.ralf.storymile.theme.AppTheme
@@ -121,18 +122,28 @@ class EpisodesRendererTest {
 
   private fun episode(index: Int) =
     EpisodesPresenter.Episode(
-      "feed",
-      "The Quiet Current",
-      null,
-      PodcastEpisode(
-        "$index",
-        "Episode $index: Stories from the natural world",
-        null,
-        null,
-        null,
-        null,
-        42.minutes,
-        PodcastEnclosure("https://audio.test/$index.mp3", "audio/mpeg", null),
-      ),
+      details =
+        EpisodeDetails(
+          feedUrl = "feed",
+          podcastTitle = "The Quiet Current",
+          artworkUrl = null,
+          episode =
+            PodcastEpisode(
+              id = "$index",
+              title = "Episode $index: Stories from the natural world",
+              description = "<p>A journey through nature and science.</p>",
+              author = "A storyteller",
+              artworkUrl = null,
+              publishedAt = "Sun, 18 Oct 2026 08:00:00 GMT",
+              duration = 42.minutes,
+              enclosure =
+                PodcastEnclosure(
+                  url = "https://audio.test/$index.mp3",
+                  type = "audio/mpeg",
+                  length = null,
+                ),
+            ),
+        ),
+      onClick = {},
     )
 }

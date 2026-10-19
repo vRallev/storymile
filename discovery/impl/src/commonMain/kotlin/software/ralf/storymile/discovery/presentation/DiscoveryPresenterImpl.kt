@@ -19,12 +19,14 @@ import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.DiscoveryPresenter
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
+import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.rss.PodcastFeedRepository
 
 class DiscoveryPresenterImpl(
   private val repository: PodcastDiscoveryRepository,
   private val feeds: PodcastFeedRepository,
+  private val episodeDetailsFactory: EpisodeDetailsPresenter.Factory,
   private val topic: DiscoveryTopic? = null,
   private val focusSearch: Boolean = false,
 ) : DiscoveryPresenter<DiscoveryPresenterImpl.Model> {
@@ -37,7 +39,7 @@ class DiscoveryPresenterImpl(
     var retry by remember(term) { mutableIntStateOf(0) }
     val state = catalogState(term, retry)
     val episodesPresenter = remember {
-      EpisodesPresenter(repository, feeds, episodesPerPodcast = 1)
+      EpisodesPresenter(repository, feeds, episodeDetailsFactory, episodesPerPodcast = 1)
     }
     val episodePodcasts =
       if (term.isEmpty() || topic != null) {
@@ -69,12 +71,15 @@ class DiscoveryPresenterImpl(
           )
         }
       },
-      onTopicSelected = { backstack.push(DiscoveryPresenterImpl(repository, feeds, topic = it)) },
+      onTopicSelected = {
+        backstack.push(DiscoveryPresenterImpl(repository, feeds, episodeDetailsFactory, topic = it))
+      },
       onPodcastSelected = { podcast ->
         backstack.push(
           ShowPresenter(
             catalog = repository,
             feeds = feeds,
+            episodeDetailsFactory = episodeDetailsFactory,
             initialPodcast = podcast,
             podcasts = (state as? CatalogState.Ready)?.podcasts.orEmpty(),
             source =

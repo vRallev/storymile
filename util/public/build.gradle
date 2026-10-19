@@ -5,3 +5,7 @@ plugins {
 storymile {
   addPublicModuleDependencies true
 }
+
+dependencies {
+  commonMainImplementation libs.ksoup
+}

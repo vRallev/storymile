@@ -24,6 +24,7 @@ import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.rss.PodcastFeedRepository
 import software.ralf.storymile.rss.PodcastFeedRepository.State as FeedState
+import software.ralf.storymile.util.HtmlDescription
 
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
@@ -155,7 +156,7 @@ class PodcastDiscoveryRepositoryImpl(
           val cachedFeed = feed?.value as? FeedState.Success
           val description =
             if (cachedFeed != null) {
-              PodcastDescription.plainText(cachedFeed.feed.description)
+              HtmlDescription.plainText(cachedFeed.feed.description)
             } else {
               podcast.description
                 ?: (previous as? State.Success)
@@ -184,7 +185,7 @@ class PodcastDiscoveryRepositoryImpl(
         val feedUrl = podcast?.feedUrl
         if (podcast != null && podcast.description == null && feedUrl != null) {
           feeds.feed(feedUrl).filterIsInstance<FeedState.Success>().collect { result ->
-            val description = PodcastDescription.plainText(result.feed.description)
+            val description = HtmlDescription.plainText(result.feed.description)
             state.update { previous ->
               if (metadata.value == podcast) {
                 State.Success(listOf(podcast.copy(description = description)))

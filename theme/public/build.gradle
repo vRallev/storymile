@@ -5,3 +5,7 @@ plugins {
 storymile {
   enableComposeUi true
 }
+
+dependencies {
+  commonMainImplementation libs.coil.compose
+}

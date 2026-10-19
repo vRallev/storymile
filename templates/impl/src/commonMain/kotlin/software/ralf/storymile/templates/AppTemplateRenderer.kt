@@ -1,5 +1,6 @@
 package software.ralf.storymile.templates
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
@@ -187,6 +188,18 @@ class AppTemplateRenderer(
     }
   }
 
+  @OptIn(ExperimentalSharedTransitionApi::class)
+  @Composable
+  private fun Modifier.aboveNavigationTransitions(): Modifier {
+    val sharedScope = LocalSharedTransitionScope.current ?: return this
+    return with(sharedScope) {
+      // Keep moving text below the fixed navigation tabs.
+      this@aboveNavigationTransitions.renderInSharedTransitionScopeOverlay(zIndexInOverlay = 1f) {
+        isTransitionActive
+      }
+    }
+  }
+
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   private fun AppShell(
@@ -232,11 +245,12 @@ class AppTemplateRenderer(
         subcompose("tabs") {
             Box(
               modifier =
-                Modifier.clipBehindPlayback(
-                  playbackOffset,
-                  tabsAtStart && renderedTemplate.playback != null,
-                  cornerRadius,
-                ),
+                Modifier.aboveNavigationTransitions()
+                  .clipBehindPlayback(
+                    playbackOffset = playbackOffset,
+                    enabled = tabsAtStart && renderedTemplate.playback != null,
+                    cornerRadius = cornerRadius,
+                  ),
               propagateMinConstraints = true,
             ) {
               CompositionLocalProvider(LocalTabPlacement provides tabPlacement) {

@@ -28,7 +28,8 @@ class DiscoveryPresenterImplTest {
   fun `browsing observes recommendations and retry requests a manual refresh`() = runTest {
     val repository = TestPodcastCatalog()
     repository.updatePopular(State.Loading)
-    val presenter = DiscoveryPresenterImpl(repository, TestPodcastFeeds())
+    val presenter =
+      DiscoveryPresenterImpl(repository, TestPodcastFeeds(), TestEpisodeDetailsFactory())
 
     presenter.testCatalog(this) {
       assertThat(awaitItem().state).isEqualTo(CatalogState.Loading)
@@ -52,7 +53,8 @@ class DiscoveryPresenterImplTest {
   @Test
   fun `typing replaces results after debounce and clearing returns to featured`() = runTest {
     val repository = TestPodcastCatalog()
-    val presenter = DiscoveryPresenterImpl(repository, TestPodcastFeeds())
+    val presenter =
+      DiscoveryPresenterImpl(repository, TestPodcastFeeds(), TestEpisodeDetailsFactory())
 
     presenter.testCatalog(this) {
       val initial = awaitItem()
@@ -82,7 +84,8 @@ class DiscoveryPresenterImplTest {
   @Test
   fun `retrying a search does not refresh recommendations`() = runTest {
     val repository = TestPodcastCatalog()
-    val presenter = DiscoveryPresenterImpl(repository, TestPodcastFeeds())
+    val presenter =
+      DiscoveryPresenterImpl(repository, TestPodcastFeeds(), TestEpisodeDetailsFactory())
 
     presenter.testCatalog(this) {
       val initial = awaitItem()
@@ -106,7 +109,8 @@ class DiscoveryPresenterImplTest {
     val repository = TestPodcastCatalog()
     val oldResponse = CompletableDeferred<HttpResponse<List<DiscoveredPodcast>>>()
     repository.pending["old"] = oldResponse
-    val presenter = DiscoveryPresenterImpl(repository, TestPodcastFeeds())
+    val presenter =
+      DiscoveryPresenterImpl(repository, TestPodcastFeeds(), TestEpisodeDetailsFactory())
 
     presenter.testCatalog(this) {
       val initial = awaitItem()
@@ -135,7 +139,12 @@ class DiscoveryPresenterImplTest {
     val repository = TestPodcastCatalog()
     repository.response = HttpResponse.Success(emptyList(), 200)
     val presenter =
-      DiscoveryPresenterImpl(repository, TestPodcastFeeds(), topic = DiscoveryTopic.NATURE)
+      DiscoveryPresenterImpl(
+        repository = repository,
+        feeds = TestPodcastFeeds(),
+        episodeDetailsFactory = TestEpisodeDetailsFactory(),
+        topic = DiscoveryTopic.NATURE,
+      )
 
     presenter.testCatalog(this) {
       awaitItem()
@@ -161,7 +170,8 @@ class DiscoveryPresenterImplTest {
     val repository = TestPodcastCatalog()
     val podcasts = listOf(podcast("first"), podcast("second"))
     repository.updatePopular(State.Success(podcasts))
-    val presenter = DiscoveryPresenterImpl(repository, TestPodcastFeeds())
+    val presenter =
+      DiscoveryPresenterImpl(repository, TestPodcastFeeds(), TestEpisodeDetailsFactory())
     val backstack = FakePresenterBackstackScope(presenter)
 
     presenter.testCatalog(this, backstack) {
@@ -190,7 +200,13 @@ class DiscoveryPresenterImplTest {
       val selectedPodcast = podcast("first")
       repository.response = HttpResponse.Success(listOf(selectedPodcast), 200)
       repository.updatePopular(State.Success(listOf(selectedPodcast)))
-      val presenter = DiscoveryPresenterImpl(repository, TestPodcastFeeds(), topic = topic)
+      val presenter =
+        DiscoveryPresenterImpl(
+          repository = repository,
+          feeds = TestPodcastFeeds(),
+          episodeDetailsFactory = TestEpisodeDetailsFactory(),
+          topic = topic,
+        )
       val backstack = FakePresenterBackstackScope(presenter)
 
       presenter.testCatalog(this, backstack) {
@@ -229,7 +245,7 @@ class DiscoveryPresenterImplTest {
       )
     repository.updatePopular(State.Success(podcasts))
     repository.response = HttpResponse.Success(listOf(podcasts.last()), 200)
-    val presenter = DiscoveryPresenterImpl(repository, feeds)
+    val presenter = DiscoveryPresenterImpl(repository, feeds, TestEpisodeDetailsFactory())
     presenter.testCatalog(this) {
       val initial = awaitItem()
       assertThat(feeds.requested).containsExactly("one")
@@ -251,11 +267,12 @@ class DiscoveryPresenterImplTest {
     val second = podcast("two").copy(feedUrl = "two")
     val presenter =
       ShowPresenter(
-        TestPodcastCatalog(),
-        feeds,
-        first,
-        listOf(first, second),
-        ShowPresenter.Source.Browse,
+        catalog = TestPodcastCatalog(),
+        feeds = feeds,
+        episodeDetailsFactory = TestEpisodeDetailsFactory(),
+        initialPodcast = first,
+        podcasts = listOf(first, second),
+        source = ShowPresenter.Source.Browse,
       )
     presenter.withPresenterBackstackScope(FakePresenterBackstackScope()).test(this) {
       val initial = awaitItem()
