@@ -179,7 +179,7 @@ class EpisodeDetailsUiTest {
           assertThat(frame.title.didOverflowHeight).isFalse()
           assertThat(frame.title.getLineEnd(frame.title.lineCount - 1))
             .isEqualTo(title.layoutInput.text.length)
-          (0 until frame.title.lineCount).forEach { line ->
+          for (line in 0 until frame.title.lineCount) {
             assertThat(frame.title.isLineEllipsized(line)).isFalse()
           }
         }
