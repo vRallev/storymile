@@ -1,6 +1,8 @@
 package software.ralf.storymile.discovery
 
-/** A catalog result. A missing feed URL means the catalog did not supply an RSS feed. */
+/**
+ * A catalog result with a summary when available. [PodcastDiscoveryRepository.lookup] fills gaps.
+ */
 data class DiscoveredPodcast(
   /** Stable identifier within the discovery catalog. */
   val id: String,
@@ -14,4 +16,6 @@ data class DiscoveredPodcast(
   val artworkUrl: String?,
   /** Catalog page URL, when available. */
   val catalogUrl: String?,
+  /** Plain-text catalog summary or RSS description. Null when missing or not yet loaded. */
+  val description: String? = null,
 )

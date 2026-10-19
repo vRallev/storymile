@@ -22,6 +22,9 @@
   <string name="no_episodes">No episodes available.</string>
   <string name="play_episode">Play %1$s</string>
   <string name="follow">Follow</string>
+  <string name="show_description">Show podcast description</string>
+  <string name="hide_description">Hide podcast description</string>
+  <string name="no_description">No description available.</string>
   <string name="loading_podcasts">Loading podcasts</string>
   <string name="load_error">Could not load podcasts.</string>
   <string name="retry">Try again</string>

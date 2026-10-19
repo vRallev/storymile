@@ -32,6 +32,7 @@ jvm-target = "11"
 kermit = "2.2.0"
 kotlin = "2.4.21"
 kotlin-hierarchy = "1.1"
+ksoup = "0.2.6"
 ktfmt = "0.65"
 ktor = "3.6.0"
 metro = "1.4.5"
@@ -88,6 +89,7 @@ kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-hierarchy-plugin = { module = "io.github.terrakok:kmp-hierarchy", version.ref = "kotlin-hierarchy" }
 kotlin-serialization-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }

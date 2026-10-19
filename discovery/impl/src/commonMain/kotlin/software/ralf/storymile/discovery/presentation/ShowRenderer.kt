@@ -1,5 +1,6 @@
 package software.ralf.storymile.discovery.presentation
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -19,9 +20,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -43,8 +46,11 @@ import software.ralf.storymile.discovery.impl.generated.resources.Res
 import software.ralf.storymile.discovery.impl.generated.resources.discover_podcasts
 import software.ralf.storymile.discovery.impl.generated.resources.episodes
 import software.ralf.storymile.discovery.impl.generated.resources.follow
+import software.ralf.storymile.discovery.impl.generated.resources.hide_description
+import software.ralf.storymile.discovery.impl.generated.resources.no_description
 import software.ralf.storymile.discovery.impl.generated.resources.podcasts_to_explore
 import software.ralf.storymile.discovery.impl.generated.resources.search_results
+import software.ralf.storymile.discovery.impl.generated.resources.show_description
 import software.ralf.storymile.discovery.presentation.PodcastSharedElement.Companion.podcastSharedElement
 import software.ralf.storymile.theme.AppTheme
 
@@ -109,7 +115,37 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
             contentPadding = PaddingValues(vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
           ) {
-            item { PodcastDetails(model.podcast, model.source) }
+            item {
+              Column {
+                Box(Modifier.fillMaxWidth()) {
+                  PodcastDetails(
+                    podcast = model.podcast,
+                    source = model.source,
+                    modifier = Modifier.padding(end = 48.dp),
+                  )
+                  IconToggleButton(
+                    checked = model.descriptionExpanded,
+                    onCheckedChange = { model.onToggleDescription() },
+                    modifier = Modifier.align(Alignment.TopEnd).testTag("show-info"),
+                  ) {
+                    Icon(
+                      imageVector = Icons.Outlined.Info,
+                      contentDescription =
+                        stringResource(
+                          if (model.descriptionExpanded) {
+                            Res.string.hide_description
+                          } else {
+                            Res.string.show_description
+                          },
+                        ),
+                    )
+                  }
+                }
+                AnimatedVisibility(visible = model.descriptionExpanded) {
+                  Description(model)
+                }
+              }
+            }
             item {
               HorizontalDivider(color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             }
@@ -132,11 +168,15 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
   }
 
   @Composable
-  private fun PodcastDetails(podcast: DiscoveredPodcast, source: ShowPresenter.Source) {
+  private fun PodcastDetails(
+    podcast: DiscoveredPodcast,
+    source: ShowPresenter.Source,
+    modifier: Modifier,
+  ) {
     BoxWithConstraints(Modifier.fillMaxWidth()) {
       if (maxWidth / LocalDensity.current.fontScale >= 440.dp) {
         Row(
-          modifier = Modifier.fillMaxWidth(),
+          modifier = modifier.fillMaxWidth(),
           horizontalArrangement = Arrangement.spacedBy(24.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -154,7 +194,7 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
         }
       } else {
         Column(
-          modifier = Modifier.fillMaxWidth(),
+          modifier = modifier.fillMaxWidth(),
           verticalArrangement = Arrangement.spacedBy(16.dp),
           horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -170,6 +210,16 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
         }
       }
     }
+  }
+
+  @Composable
+  private fun Description(model: ShowPresenter.Model) {
+    Text(
+      text = model.podcast.description ?: stringResource(Res.string.no_description),
+      modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("show-description"),
+      style = AppTheme.typography.bodyLarge,
+      color = AppTheme.colorScheme.onSurfaceVariant,
+    )
   }
 
   @Composable

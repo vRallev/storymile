@@ -16,8 +16,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
+import software.ralf.storymile.discovery.presentation.TestPodcastFeeds
 import software.ralf.storymile.http.HttpClient
 import software.ralf.storymile.http.HttpResponse
+import software.ralf.storymile.rss.PodcastFeedRepository
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.util.Device
@@ -101,14 +103,16 @@ class PodcastDiscoveryInjectionTest {
   private fun TestScope.graph(mode: RuntimeMode, client: HttpClient): Graph =
     createGraphFactory<Graph.Factory>()
       .create(
-        object : RuntimeModeController {
-          override suspend fun mode(): RuntimeMode = mode
+        controller =
+          object : RuntimeModeController {
+            override suspend fun mode(): RuntimeMode = mode
 
-          override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
-        },
-        client,
-        FakeDevice("DE"),
-        backgroundScope,
+            override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
+          },
+        client = client,
+        device = FakeDevice("DE"),
+        coroutineScope = backgroundScope,
+        feeds = TestPodcastFeeds(),
       )
 
   @DependencyGraph(AppScope::class)
@@ -123,6 +127,7 @@ class PodcastDiscoveryInjectionTest {
         @Provides client: HttpClient,
         @Provides device: Device,
         @Provides @ForScope(AppScope::class) coroutineScope: CoroutineScope,
+        @Provides feeds: PodcastFeedRepository,
       ): Graph
     }
   }

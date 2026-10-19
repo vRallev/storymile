@@ -20,6 +20,7 @@ dependencies {
   commonMainImplementation project(':util:public')
   commonMainImplementation libs.coil.compose
   commonMainImplementation libs.coil.network.ktor3
+  commonMainImplementation libs.ksoup
   commonMainImplementation libs.ktor.client.core
   commonMainImplementation libs.serialization.json
 
