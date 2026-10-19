@@ -1,8 +1,13 @@
 <resources>
   <string name="library_title">Library</string>
-  <string name="library_episodes">Episodes</string>
+  <string name="library_queue">Queue</string>
   <string name="library_shows">Shows</string>
-  <string name="library_empty_title">Your library starts here</string>
-  <string name="library_empty_description">Save episodes or follow shows to find them here.</string>
+  <string name="library_saved">Saved</string>
+  <string name="library_queue_empty_title">Your queue is empty</string>
+  <string name="library_queue_empty_description">Add episodes to choose what plays next.</string>
+  <string name="library_shows_empty_title">No followed shows</string>
+  <string name="library_shows_empty_description">Follow podcasts to see them here.</string>
+  <string name="library_saved_empty_title">No saved episodes</string>
+  <string name="library_saved_empty_description">Save episodes to find them here.</string>
   <string name="library_discover">Discover podcasts</string>
 </resources>

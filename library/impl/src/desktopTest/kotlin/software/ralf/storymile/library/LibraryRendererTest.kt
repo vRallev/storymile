@@ -33,8 +33,8 @@ import assertk.assertions.isGreaterThanOrEqualTo
 import assertk.assertions.isLessThan
 import assertk.assertions.isLessThanOrEqualTo
 import kotlin.test.Test
-import software.ralf.storymile.library.LibraryPresenterImpl.Filter
 import software.ralf.storymile.library.LibraryPresenterImpl.Model
+import software.ralf.storymile.library.LibraryPresenterImpl.Tab
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.StorymileTheme
 import software.ralf.storymile.theme.ThemeEnvironment
@@ -54,11 +54,15 @@ class LibraryRendererTest {
       (width, height, fontScale) ->
       runDesktopComposeUiTest(width = width, height = height) {
         val renderer = LibraryRenderer()
+        var tab by mutableStateOf(Tab.QUEUE)
         setContent {
-          ThemedContent(fontScale) { renderer.renderCompose(model(), Modifier.fillMaxSize()) }
+          ThemedContent(fontScale) { renderer.renderCompose(model(tab), Modifier.fillMaxSize()) }
         }
-        assertContentFits()
-        assertReadableLabels()
+        Tab.entries.forEach { next ->
+          runOnIdle { tab = next }
+          assertContentFits()
+          assertReadableLabels()
+        }
         val illustration =
           onNodeWithTag("library-illustration", useUnmergedTree = true).getUnclippedBoundsInRoot()
         val message =
@@ -96,7 +100,7 @@ class LibraryRendererTest {
     onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsActions.ScrollBy), useUnmergedTree = true)
       .assertCountEquals(0)
     val root = onNodeWithTag("library-empty").getUnclippedBoundsInRoot()
-    listOf("filter-episodes", "filter-shows", "illustration", "empty-message", "discover")
+    listOf("tab-queue", "tab-shows", "tab-saved", "illustration", "empty-message", "discover")
       .forEach { tag ->
         val bounds =
           onNodeWithTag("library-$tag", useUnmergedTree = true)
@@ -133,8 +137,8 @@ class LibraryRendererTest {
     }
   }
 
-  private fun model() =
-    Model(selectedFilter = Filter.EPISODES, onSelectFilter = {}, onDiscoverPodcasts = {})
+  private fun model(tab: Tab = Tab.QUEUE) =
+    Model(selectedTab = tab, onSelectTab = {}, onDiscoverPodcasts = {})
 
   @Composable
   private fun ThemedContent(fontScale: Float = 1f, content: @Composable () -> Unit) {

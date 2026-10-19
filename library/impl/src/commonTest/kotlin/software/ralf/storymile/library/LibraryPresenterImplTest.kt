@@ -17,7 +17,7 @@ import software.ralf.app.platform.presenter.compose.test
 
 class LibraryPresenterImplTest {
   @Test
-  fun `filter survives leaving composition and creating a new presenter`() = runTest {
+  fun `tab survives leaving composition and creating a new presenter`() = runTest {
     val visible = MutableStateFlow(true)
     val presenter =
       ComposePresenter<Boolean, LibraryVisibilityModel> { showLibrary ->
@@ -36,10 +36,10 @@ class LibraryPresenterImplTest {
 
     presenter.test(this, visible) {
       assertThat(awaitItem().library).isNotNull().given {
-        it.onSelectFilter(LibraryPresenterImpl.Filter.SHOWS)
+        it.onSelectTab(LibraryPresenterImpl.Tab.SAVED)
       }
       assertThat(awaitItem().library).isNotNull().given {
-        assertThat(it.selectedFilter).isEqualTo(LibraryPresenterImpl.Filter.SHOWS)
+        assertThat(it.selectedTab).isEqualTo(LibraryPresenterImpl.Tab.SAVED)
       }
 
       visible.value = false
@@ -47,26 +47,30 @@ class LibraryPresenterImplTest {
 
       visible.value = true
       assertThat(awaitItem().library).isNotNull().given {
-        assertThat(it.selectedFilter).isEqualTo(LibraryPresenterImpl.Filter.SHOWS)
+        assertThat(it.selectedTab).isEqualTo(LibraryPresenterImpl.Tab.SAVED)
       }
     }
   }
 
   @Test
-  fun `filters select episodes or shows without leaving the library`() = runTest {
+  fun `tabs select queue shows or saved without leaving the library`() = runTest {
     val presenter = LibraryPresenterImpl()
 
     presenter.testLibrary(this) {
       var model = awaitItem()
-      assertThat(model.selectedFilter).isEqualTo(LibraryPresenterImpl.Filter.EPISODES)
+      assertThat(model.selectedTab).isEqualTo(LibraryPresenterImpl.Tab.QUEUE)
 
-      model.onSelectFilter(LibraryPresenterImpl.Filter.SHOWS)
+      model.onSelectTab(LibraryPresenterImpl.Tab.SHOWS)
       model = awaitItem()
-      assertThat(model.selectedFilter).isEqualTo(LibraryPresenterImpl.Filter.SHOWS)
+      assertThat(model.selectedTab).isEqualTo(LibraryPresenterImpl.Tab.SHOWS)
 
-      model.onSelectFilter(LibraryPresenterImpl.Filter.EPISODES)
+      model.onSelectTab(LibraryPresenterImpl.Tab.SAVED)
       model = awaitItem()
-      assertThat(model.selectedFilter).isEqualTo(LibraryPresenterImpl.Filter.EPISODES)
+      assertThat(model.selectedTab).isEqualTo(LibraryPresenterImpl.Tab.SAVED)
+
+      model.onSelectTab(LibraryPresenterImpl.Tab.QUEUE)
+      model = awaitItem()
+      assertThat(model.selectedTab).isEqualTo(LibraryPresenterImpl.Tab.QUEUE)
     }
   }
 

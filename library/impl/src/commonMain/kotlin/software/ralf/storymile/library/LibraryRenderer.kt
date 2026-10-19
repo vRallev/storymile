@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -19,7 +20,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
+import androidx.compose.material.icons.filled.Podcasts
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -32,18 +34,25 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.storymile.design.TabHeader
+import software.ralf.storymile.library.LibraryPresenterImpl.Tab
 import software.ralf.storymile.library.impl.generated.resources.Res
 import software.ralf.storymile.library.impl.generated.resources.library_discover
-import software.ralf.storymile.library.impl.generated.resources.library_empty_description
-import software.ralf.storymile.library.impl.generated.resources.library_empty_title
-import software.ralf.storymile.library.impl.generated.resources.library_episodes
 import software.ralf.storymile.library.impl.generated.resources.library_illustration
+import software.ralf.storymile.library.impl.generated.resources.library_queue
+import software.ralf.storymile.library.impl.generated.resources.library_queue_empty_description
+import software.ralf.storymile.library.impl.generated.resources.library_queue_empty_title
+import software.ralf.storymile.library.impl.generated.resources.library_saved
+import software.ralf.storymile.library.impl.generated.resources.library_saved_empty_description
+import software.ralf.storymile.library.impl.generated.resources.library_saved_empty_title
 import software.ralf.storymile.library.impl.generated.resources.library_shows
+import software.ralf.storymile.library.impl.generated.resources.library_shows_empty_description
+import software.ralf.storymile.library.impl.generated.resources.library_shows_empty_title
 import software.ralf.storymile.library.impl.generated.resources.library_title
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.theme.AppTheme
@@ -66,21 +75,20 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
           windowWidth = LocalScreenSize.current.width,
         )
         Column(Modifier.weight(1f).padding(horizontal = sidePadding)) {
-          Filters(model)
+          Tabs(model)
           if (horizontal) {
             Row(
               modifier = Modifier.fillMaxWidth().weight(1f).padding(vertical = 8.dp),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.Center,
             ) {
-              Image(
-                painter = painterResource(Res.drawable.library_illustration),
-                contentDescription = null,
+              Illustration(
+                tab = model.selectedTab,
                 modifier =
                   Modifier.padding(end = 24.dp).size(144.dp).testTag("library-illustration"),
               )
               EmptyMessage(
-                model,
+                model = model,
                 compact = true,
                 large = false,
                 horizontal = true,
@@ -94,16 +102,15 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
               horizontalAlignment = Alignment.CenterHorizontally,
               verticalArrangement = Arrangement.Center,
             ) {
-              Image(
-                painter = painterResource(Res.drawable.library_illustration),
-                contentDescription = null,
+              Illustration(
+                tab = model.selectedTab,
                 modifier =
                   Modifier.weight(1f, fill = false)
                     .size(if (compact) 164.dp else if (large) 256.dp else 216.dp)
                     .testTag("library-illustration"),
               )
               Spacer(Modifier.height(if (short) 8.dp else 24.dp))
-              EmptyMessage(model, compact, large, horizontal = false)
+              EmptyMessage(model = model, compact = compact, large = large, horizontal = false)
             }
           }
         }
@@ -112,36 +119,29 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
   }
 
   @Composable
-  private fun Filters(model: LibraryPresenterImpl.Model) {
+  private fun Tabs(model: LibraryPresenterImpl.Model) {
     FlowRow(
-      Modifier.padding(top = 8.dp, bottom = 8.dp),
+      modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      LibraryPresenterImpl.Filter.entries.forEach { filter ->
-        val selected = model.selectedFilter == filter
+      Tab.entries.forEach { tab ->
+        val selected = model.selectedTab == tab
         FilterChip(
           selected = selected,
-          onClick = { model.onSelectFilter(filter) },
+          onClick = { model.onSelectTab(tab) },
           label = {
             Text(
-              stringResource(
-                if (filter == LibraryPresenterImpl.Filter.EPISODES) Res.string.library_episodes
-                else Res.string.library_shows,
-              ),
+              text =
+                stringResource(
+                  when (tab) {
+                    Tab.QUEUE -> Res.string.library_queue
+                    Tab.SHOWS -> Res.string.library_shows
+                    Tab.SAVED -> Res.string.library_saved
+                  },
+                ),
               style = AppTheme.typography.bodyLarge,
-              modifier = Modifier.padding(horizontal = if (selected) 8.dp else 16.dp),
             )
           },
-          leadingIcon =
-            if (selected) {
-              {
-                Icon(
-                  Icons.Default.Check,
-                  contentDescription = null,
-                  modifier = Modifier.size(20.dp),
-                )
-              }
-            } else null,
           shape = CircleShape,
           colors =
             FilterChipDefaults.filterChipColors(
@@ -149,16 +149,42 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
               labelColor = AppTheme.colorScheme.primary,
               selectedContainerColor = AppTheme.colorScheme.primary,
               selectedLabelColor = AppTheme.colorScheme.onPrimary,
-              selectedLeadingIconColor = AppTheme.colorScheme.onPrimary,
             ),
           border =
             BorderStroke(
-              1.dp,
-              if (selected) AppTheme.colorScheme.primary else AppTheme.colorScheme.outlineVariant,
+              width = 1.dp,
+              color =
+                if (selected) AppTheme.colorScheme.primary else AppTheme.colorScheme.outlineVariant,
             ),
-          modifier =
-            Modifier.heightIn(min = 48.dp).testTag("library-filter-${filter.name.lowercase()}"),
+          modifier = Modifier.heightIn(min = 48.dp).testTag("library-tab-${tab.name.lowercase()}"),
         )
+      }
+    }
+  }
+
+  @Composable
+  private fun Illustration(tab: Tab, modifier: Modifier) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+      when (tab) {
+        Tab.QUEUE,
+        Tab.SHOWS ->
+          Icon(
+            imageVector =
+              if (tab == Tab.QUEUE) {
+                Icons.AutoMirrored.Filled.FormatListBulleted
+              } else {
+                Icons.Default.Podcasts
+              },
+            contentDescription = null,
+            tint = AppTheme.colorScheme.secondary,
+            modifier = Modifier.fillMaxSize(0.65f),
+          )
+        Tab.SAVED ->
+          Image(
+            painter = painterResource(Res.drawable.library_illustration),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+          )
       }
     }
   }
@@ -174,11 +200,12 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
     val alignment = if (horizontal) Alignment.Start else Alignment.CenterHorizontally
     val textAlign = if (horizontal) TextAlign.Start else TextAlign.Center
     Column(
-      modifier.widthIn(max = if (large) 720.dp else 560.dp).testTag("library-empty-message"),
+      modifier =
+        modifier.widthIn(max = if (large) 720.dp else 560.dp).testTag("library-empty-message"),
       horizontalAlignment = alignment,
     ) {
       Text(
-        stringResource(Res.string.library_empty_title),
+        text = stringResource(model.selectedTab.emptyTitle()),
         style =
           when {
             compact -> AppTheme.typography.headlineSmall
@@ -190,7 +217,7 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
         color = AppTheme.colorScheme.onBackground,
       )
       Text(
-        stringResource(Res.string.library_empty_description),
+        text = stringResource(model.selectedTab.emptyDescription()),
         modifier = Modifier.padding(top = 12.dp),
         style =
           when {
@@ -211,11 +238,25 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
         contentPadding = PaddingValues(horizontal = 32.dp, vertical = 12.dp),
       ) {
         Text(
-          stringResource(Res.string.library_discover),
+          text = stringResource(Res.string.library_discover),
           style = AppTheme.typography.bodyLarge,
           textAlign = TextAlign.Center,
         )
       }
     }
   }
+
+  private fun Tab.emptyTitle(): StringResource =
+    when (this) {
+      Tab.QUEUE -> Res.string.library_queue_empty_title
+      Tab.SHOWS -> Res.string.library_shows_empty_title
+      Tab.SAVED -> Res.string.library_saved_empty_title
+    }
+
+  private fun Tab.emptyDescription(): StringResource =
+    when (this) {
+      Tab.QUEUE -> Res.string.library_queue_empty_description
+      Tab.SHOWS -> Res.string.library_shows_empty_description
+      Tab.SAVED -> Res.string.library_saved_empty_description
+    }
 }
