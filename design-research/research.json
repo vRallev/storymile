@@ -135,7 +135,7 @@
     },
     {
       "id": "library",
-      "title": "Library",
+      "title": "Library · Saved",
       "note": "Android uses Material category pills; iOS uses a segmented control, SF Symbols, and the floating tab bar.",
       "sources": [
         {
@@ -206,7 +206,7 @@
     },
     {
       "id": "tablet-library",
-      "title": "Library",
+      "title": "Library · Saved",
       "note": "Both keep saved episodes beside details; iPad uses a continuous segmented control and a wider sidebar.",
       "sources": [
         {
@@ -254,6 +254,7 @@
     "Viewports are layout targets. PNG dimensions come from the generated images; the gallery preserves their native proportions.",
     "The supplied blue paper boat remains the brand mark. Profile opens from the avatar; primary destinations are Home, Library, and Downloads.",
     "Phone detail screens become neighboring panes in larger windows. Playback and selection persist when the window changes.",
+    "Library tabs are Queue, Shows, and Saved. The player shortcut opens the same queue. Queuing does not save or download an episode.",
     "Queue and Chapters are separate choices from the player; they do not form an automatic sequence.",
     "Saving keeps a Library bookmark. Downloading stores audio locally. Removing a download keeps the bookmark.",
     "Generated screens are design references. Exact typography, platform components, and accessibility need implementation validation."
