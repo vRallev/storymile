@@ -1,8 +1,5 @@
-@file:OptIn(ExperimentalTestApi::class)
-
 package software.ralf.storymile
 
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import kotlin.test.Test

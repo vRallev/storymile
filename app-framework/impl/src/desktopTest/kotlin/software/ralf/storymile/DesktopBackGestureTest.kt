@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalTestApi::class)
-
 package software.ralf.storymile
 
 import androidx.compose.foundation.ScrollState
@@ -30,7 +28,6 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.test.ComposeUiTest
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.MouseButton
 import androidx.compose.ui.test.MouseInjectionScope
 import androidx.compose.ui.test.onRoot

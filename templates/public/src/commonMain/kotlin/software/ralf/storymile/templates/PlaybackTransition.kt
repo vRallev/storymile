@@ -1,6 +1,5 @@
 package software.ralf.storymile.templates
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.layout.Box
@@ -150,7 +149,6 @@ class PlaybackTransition(private val progress: () -> Float) {
     }
   }
 
-  @OptIn(ExperimentalSharedTransitionApi::class)
   @Composable
   private fun SharedContent(
     key: Any,

@@ -7,7 +7,6 @@ import assertk.assertions.isFalse
 import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.presenter.backstack.nav3.FakePresenterBackstackScope
@@ -16,7 +15,6 @@ import software.ralf.app.platform.presenter.compose.test
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class ShowPresenterTest {
   @Test
   fun `description preloads when the show opens and expands without another request`() = runTest {

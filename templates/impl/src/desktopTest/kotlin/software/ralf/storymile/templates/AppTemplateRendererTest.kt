@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalTestApi::class, InternalComposeUiApi::class)
+@file:OptIn(InternalComposeUiApi::class)
 
 package software.ralf.storymile.templates
 
@@ -39,7 +39,6 @@ import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertTextEquals

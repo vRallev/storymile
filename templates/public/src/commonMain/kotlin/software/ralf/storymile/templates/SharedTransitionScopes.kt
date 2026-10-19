@@ -1,9 +1,6 @@
-@file:OptIn(ExperimentalSharedTransitionApi::class)
-
 package software.ralf.storymile.templates
 
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.compositionLocalOf
 

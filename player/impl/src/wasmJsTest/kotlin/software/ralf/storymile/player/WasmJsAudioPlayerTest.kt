@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalWasmJsInterop::class)
-
 package software.ralf.storymile.player
 
 import assertk.assertThat
@@ -7,7 +5,6 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isNull
 import assertk.assertions.isTrue
-import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.test.AfterTest
 import kotlin.test.Test
 

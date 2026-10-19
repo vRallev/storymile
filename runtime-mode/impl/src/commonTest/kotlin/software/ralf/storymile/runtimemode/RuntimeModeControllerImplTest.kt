@@ -13,7 +13,6 @@ import assertk.assertions.isSameInstanceAs
 import kotlin.test.Test
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
@@ -31,7 +30,6 @@ import software.ralf.storymile.restart.ApplicationRestarter
 import software.ralf.storymile.storage.FileStorage
 import software.ralf.storymile.storage.ScopedStorage
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class RuntimeModeControllerImplTest {
   @Test
   fun `a missing saved mode uses Real without restarting`() = runTestWithScope { scope ->

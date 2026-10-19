@@ -28,7 +28,6 @@ import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LibraryMusic
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -74,7 +73,6 @@ import software.ralf.storymile.theme.appLayerShadow
 @ContributesRenderer
 class TabsRenderer : ComposeRenderer<TabsPresenter.Model>() {
   @Composable
-  @OptIn(ExperimentalMaterial3Api::class)
   override fun Compose(model: TabsPresenter.Model, modifier: Modifier) {
     val colors = AppTheme.colorScheme
     val insets = WindowInsets.safeDrawing
@@ -238,7 +236,6 @@ class TabsRenderer : ComposeRenderer<TabsPresenter.Model>() {
       },
     )
 
-  @OptIn(ExperimentalMaterial3Api::class)
   private class HoverTooltipState(private val state: TooltipState) : TooltipState by state {
     private var hoverJob: Job? = null
 

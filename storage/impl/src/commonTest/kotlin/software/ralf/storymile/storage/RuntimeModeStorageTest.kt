@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package software.ralf.storymile.storage
 
 import androidx.datastore.preferences.core.edit
@@ -15,7 +13,6 @@ import assertk.assertions.isNull
 import kotlin.test.Test
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel

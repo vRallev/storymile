@@ -1,8 +1,4 @@
-@file:OptIn(ExperimentalWasmJsInterop::class)
-
 package software.ralf.storymile.util
-
-import kotlin.js.ExperimentalWasmJsInterop
 
 @JsFun(
   """() => {

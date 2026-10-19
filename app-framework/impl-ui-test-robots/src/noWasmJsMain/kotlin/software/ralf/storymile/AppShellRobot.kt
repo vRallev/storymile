@@ -3,7 +3,6 @@ package software.ralf.storymile
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertCountEquals
@@ -92,7 +91,6 @@ class AppShellRobot : ComposeRobot() {
     }
   }
 
-  @OptIn(ExperimentalTestApi::class)
   private fun waitForSelection(tab: TabsPresenter.Tab, assertion: () -> Unit) {
     val description = "Tab $tab selected"
     val uiTest = compose as? ComposeUiTest

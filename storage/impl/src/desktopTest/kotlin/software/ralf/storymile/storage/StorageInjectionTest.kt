@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package software.ralf.storymile.storage
 
 import androidx.datastore.preferences.core.edit
@@ -21,7 +19,6 @@ import dev.zacsweers.metro.createGraphFactory
 import kotlin.test.Test
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runCurrent

@@ -9,7 +9,6 @@ import assertk.assertions.isNull
 import assertk.assertions.isSameInstanceAs
 import assertk.assertions.isTrue
 import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -24,7 +23,6 @@ class PlaybackPresenterImplTest {
   private val PlaybackPresenterImpl.Model.player: PlaybackPresenterImpl.PlayerModel
     get() = requireNotNull(expanded).player
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `playback is absent until a playlist contains episodes`() = runTest {
     val repository = TestPlaylistRepository(emptyList())

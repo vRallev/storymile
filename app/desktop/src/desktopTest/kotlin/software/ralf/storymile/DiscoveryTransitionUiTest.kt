@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalTestApi::class)
-
 package software.ralf.storymile
 
 import androidx.compose.ui.geometry.Rect
@@ -8,7 +6,6 @@ import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.test.ComposeUiTest
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag

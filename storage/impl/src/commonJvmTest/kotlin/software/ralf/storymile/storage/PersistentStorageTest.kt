@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package software.ralf.storymile.storage
 
 import androidx.datastore.preferences.core.edit
@@ -17,7 +15,6 @@ import java.nio.file.Files
 import kotlin.test.Test
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.job

@@ -1,9 +1,6 @@
-@file:OptIn(ExperimentalWasmJsInterop::class)
-
 package software.ralf.storymile.player
 
 import dev.zacsweers.metro.ContributesBinding
-import kotlin.js.ExperimentalWasmJsInterop
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import software.ralf.storymile.user.UserScope

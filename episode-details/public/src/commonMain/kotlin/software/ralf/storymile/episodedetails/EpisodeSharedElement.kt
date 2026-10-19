@@ -1,6 +1,5 @@
 package software.ralf.storymile.episodedetails
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -35,7 +34,6 @@ enum class EpisodeSharedElement {
  * on details to match the preceding entry's episode row. Does nothing without a matching navigation
  * identity and shared transition scopes.
  */
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun Modifier.episodeSharedElement(
   episodeKey: String,

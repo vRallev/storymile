@@ -1,12 +1,9 @@
-@file:OptIn(ExperimentalTestApi::class)
-
 package software.ralf.storymile
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed

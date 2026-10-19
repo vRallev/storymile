@@ -1,6 +1,5 @@
 package software.ralf.storymile.templates
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
@@ -27,7 +26,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
@@ -188,7 +186,6 @@ class AppTemplateRenderer(
     }
   }
 
-  @OptIn(ExperimentalSharedTransitionApi::class)
   @Composable
   private fun Modifier.aboveNavigationTransitions(): Modifier {
     val sharedScope = LocalSharedTransitionScope.current ?: return this
@@ -200,7 +197,6 @@ class AppTemplateRenderer(
     }
   }
 
-  @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   private fun AppShell(
     template: AppTemplate.AdaptiveTemplate,
@@ -299,7 +295,6 @@ class AppTemplateRenderer(
     }
   }
 
-  @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   private fun rememberPlaybackTemplate(
     template: AppTemplate.AdaptiveTemplate,
@@ -334,7 +329,6 @@ class AppTemplateRenderer(
     return template.copy(playback = retainedPlayback, expandedPlayback = retainedExpandedPlayback)
   }
 
-  @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   private fun CollapseWithoutExpandedContent(
     template: AppTemplate.AdaptiveTemplate,
@@ -352,7 +346,6 @@ class AppTemplateRenderer(
     }
   }
 
-  @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   private fun PlaybackScaffold(
     template: AppTemplate.AdaptiveTemplate,
@@ -436,11 +429,9 @@ class AppTemplateRenderer(
     }
   }
 
-  @OptIn(ExperimentalMaterial3Api::class)
   private fun SheetState.offsetOr(fallback: Float): Float =
     if (hasPartiallyExpandedState) requireOffset() else fallback
 
-  @OptIn(ExperimentalMaterial3Api::class)
   private fun playbackCornerRadius(sheetState: SheetState, collapsedOffset: Float): Dp =
     if (sheetState.hasExpandedState && collapsedOffset > 0f) {
       24.dp * (sheetState.requireOffset() / collapsedOffset).coerceIn(0f, 1f)
@@ -462,7 +453,6 @@ class AppTemplateRenderer(
     }
   }
 
-  @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   private fun PlaybackLayer(
     collapsedContent: BaseModel,

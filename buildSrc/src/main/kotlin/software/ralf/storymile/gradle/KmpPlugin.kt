@@ -33,6 +33,7 @@ internal class KmpPlugin : Plugin<Project> {
     kmpExtension.compilerOptions {
       extraWarnings.set(false)
       allWarningsAsErrors.set(ci)
+      optIn.add("kotlinx.coroutines.ExperimentalCoroutinesApi")
     }
 
     platforms().forEach { it.configurePlatform() }
@@ -94,6 +95,14 @@ internal class KmpPlugin : Plugin<Project> {
 
   private fun Project.configureComposeDependencies() {
     plugins.withId(Plugins.COMPOSE_MULTIPLATFORM) {
+      kmpExtension.compilerOptions.optIn.addAll(
+        "androidx.compose.animation.ExperimentalSharedTransitionApi",
+        "androidx.compose.material3.ExperimentalMaterial3Api",
+      )
+      if (moduleType.isRobotsModule) {
+        kmpExtension.compilerOptions.optIn.add("androidx.compose.ui.test.ExperimentalTestApi")
+      }
+
       kmpExtension.sourceSets.getByName("commonMain").dependencies {
         implementation(libs.findLibrary("compose-material").get().get().toString())
         implementation(libs.findLibrary("compose-material-icons").get().get().toString())

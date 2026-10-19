@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalTestApi::class)
-
 package software.ralf.storymile
 
 import androidx.compose.animation.core.EaseOutCubic
@@ -8,7 +6,6 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performScrollTo

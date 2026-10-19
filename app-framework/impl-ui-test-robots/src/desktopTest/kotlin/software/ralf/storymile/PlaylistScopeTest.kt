@@ -14,7 +14,6 @@ import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.createGraphFactory
 import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -34,7 +33,6 @@ import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.user.UserScope
 
 class PlaylistScopeTest {
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `playback is available only while at least one playlist contains episodes`() = runTest {
     withApplication { graph ->

@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.DownloadForOffline
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -147,7 +146,6 @@ internal object PlaybackControls {
     }
   }
 
-  @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   fun Seek(
     player: PlayerModel,
