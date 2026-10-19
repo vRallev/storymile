@@ -8,13 +8,15 @@ storymile {
 }
 
 dependencies {
-  commonJvmMainImplementation libs.ktor.client.okhttp
-
-  commonMainImplementation libs.coil.network.ktor3
   commonMainImplementation libs.compose.multiplatform.ui
-  commonMainImplementation libs.ktor.client.core
 
+  // Kotlin/Native links libraries from the compile classpath.
+  iosMainImplementation libs.coil.network.ktor3
   iosMainImplementation libs.ktor.client.darwin
+
+  commonJvmMainRuntimeOnly libs.ktor.client.okhttp
+
+  commonMainRuntimeOnly libs.coil.network.ktor3
 }
 
 // Compose shares its system-theme API across the Skiko targets.
