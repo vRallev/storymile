@@ -281,7 +281,7 @@ class DiscoveryPresenterImplTest {
       assertThat(switched.podcast).isEqualTo(second)
       assertThat(switched.episodes.episodes).isEmpty()
       assertThat(feeds.requested.distinct()).containsExactly("one", "two")
-      feeds.update("two", software.ralf.storymile.rss.PodcastFeedRepository.State.Error)
+      feeds.update("two", software.ralf.storymile.podcast.PodcastFeedRepository.State.Error)
       val failed = awaitItem()
       assertThat(failed.episodes.failed).isEqualTo(true)
       failed.episodes.onRetry()

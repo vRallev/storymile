@@ -1,7 +1,7 @@
 package software.ralf.storymile.database
 
 import kotlinx.coroutines.flow.Flow
-import software.ralf.storymile.rss.PodcastFeed
+import software.ralf.storymile.podcast.PodcastFeed
 
 /**
  * One user's saved podcasts. Real mode persists data; fake mode keeps it in memory. Access ends

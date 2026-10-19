@@ -3,8 +3,8 @@ package software.ralf.storymile.database
 import androidx.room3.Embedded
 import androidx.room3.Relation
 import kotlin.time.Duration.Companion.milliseconds
-import software.ralf.storymile.rss.PodcastEpisode
-import software.ralf.storymile.rss.PodcastFeed
+import software.ralf.storymile.podcast.PodcastEpisode
+import software.ralf.storymile.podcast.PodcastFeed
 
 data class StoredPodcast(
   @Embedded val show: ShowEntity,

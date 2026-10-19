@@ -21,8 +21,8 @@ import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.http.HttpResponse
-import software.ralf.storymile.rss.PodcastFeedRepository
-import software.ralf.storymile.rss.PodcastFeedRepository.State as FeedState
+import software.ralf.storymile.podcast.PodcastFeedRepository
+import software.ralf.storymile.podcast.PodcastFeedRepository.State as FeedState
 import software.ralf.storymile.util.HtmlDescription
 
 @SingleIn(AppScope::class)

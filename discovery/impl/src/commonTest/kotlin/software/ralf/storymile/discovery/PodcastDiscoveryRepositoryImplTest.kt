@@ -24,8 +24,8 @@ import kotlinx.coroutines.test.runTest
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.discovery.presentation.TestPodcastFeeds
 import software.ralf.storymile.http.HttpResponse
-import software.ralf.storymile.rss.PodcastFeed
-import software.ralf.storymile.rss.PodcastFeedRepository.State as FeedState
+import software.ralf.storymile.podcast.PodcastFeed
+import software.ralf.storymile.podcast.PodcastFeedRepository.State as FeedState
 
 class PodcastDiscoveryRepositoryImplTest {
   @Test

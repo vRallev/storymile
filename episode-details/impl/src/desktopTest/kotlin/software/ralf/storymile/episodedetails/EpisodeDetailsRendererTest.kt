@@ -22,8 +22,8 @@ import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.minutes
-import software.ralf.storymile.rss.PodcastEnclosure
-import software.ralf.storymile.rss.PodcastEpisode
+import software.ralf.storymile.podcast.PodcastEnclosure
+import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.StorymileTheme
 import software.ralf.storymile.theme.ThemeEnvironment

@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-  commonMainApi project(':rss:public')
+  commonMainApi project(':podcast:public')
 }

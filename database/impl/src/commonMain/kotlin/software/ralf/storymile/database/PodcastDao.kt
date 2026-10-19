@@ -6,7 +6,7 @@ import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Transaction
 import kotlinx.coroutines.flow.Flow
-import software.ralf.storymile.rss.PodcastFeed
+import software.ralf.storymile.podcast.PodcastFeed
 
 @Dao
 interface PodcastDao {

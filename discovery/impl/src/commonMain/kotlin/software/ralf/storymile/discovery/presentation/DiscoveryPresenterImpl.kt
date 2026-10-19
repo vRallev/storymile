@@ -21,7 +21,7 @@ import software.ralf.storymile.discovery.PodcastDiscoveryRepository
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.http.HttpResponse
-import software.ralf.storymile.rss.PodcastFeedRepository
+import software.ralf.storymile.podcast.PodcastFeedRepository
 
 class DiscoveryPresenterImpl(
   private val repository: PodcastDiscoveryRepository,

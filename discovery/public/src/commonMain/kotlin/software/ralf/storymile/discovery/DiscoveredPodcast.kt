@@ -10,12 +10,12 @@ data class DiscoveredPodcast(
   val title: String,
   /** Publisher or author, when available. */
   val author: String?,
-  /** RSS feed URL, when available. */
+  /** Podcast feed URL, when available. */
   val feedUrl: String?,
   /** Cover image URL, when available. */
   val artworkUrl: String?,
   /** Catalog page URL, when available. */
   val catalogUrl: String?,
-  /** Plain-text catalog summary or RSS description. Null when missing or not yet loaded. */
+  /** Plain-text catalog summary or feed description. Null when missing or not yet loaded. */
   val description: String? = null,
 )

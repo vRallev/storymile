@@ -1,6 +1,6 @@
 package software.ralf.storymile.episodedetails
 
-import software.ralf.storymile.rss.PodcastEpisode
+import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.util.HtmlDescription
 
 /** A feed episode and the show metadata needed to display it outside its source list. */
