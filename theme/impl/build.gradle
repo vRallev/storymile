@@ -17,6 +17,8 @@ dependencies {
   commonJvmMainRuntimeOnly libs.ktor.client.okhttp
 
   commonMainRuntimeOnly libs.coil.network.ktor3
+  // Keep Coil's Ktor client on the app version.
+  commonMainRuntimeOnly libs.ktor.client.core
 }
 
 // Compose shares its system-theme API across the Skiko targets.
