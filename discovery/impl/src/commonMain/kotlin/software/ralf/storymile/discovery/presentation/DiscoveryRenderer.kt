@@ -509,10 +509,10 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     Surface(
       onClick = { onSelected(podcast) },
       modifier = modifier.testTag("discovery-podcast-${podcast.id}"),
-      shape = RoundedCornerShape(12.dp),
+      shape = RoundedCornerShape(16.dp),
       color = Color.Transparent,
     ) {
-      Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+      Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         PodcastArtwork(
           podcast,
           Modifier.podcastSharedElement(
