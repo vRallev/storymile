@@ -28,7 +28,7 @@ import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -66,7 +66,7 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
         rememberLazyListState(
           initialFirstVisibleItemIndex = if (selectedIndex == 0) 0 else selectedIndex + 1,
         )
-      val detailState = rememberLazyListState()
+      val detailState = key(model.podcast.id) { rememberLazyListState() }
       Column(Modifier.fillMaxSize()) {
         TitleBar(
           title =
@@ -163,7 +163,6 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
           }
         }
       }
-      LaunchedEffect(model.podcast.id) { detailState.scrollToItem(0) }
     }
   }
 

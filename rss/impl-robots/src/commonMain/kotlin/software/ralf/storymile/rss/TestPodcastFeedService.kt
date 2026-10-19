@@ -29,10 +29,11 @@ class TestPodcastFeedService : PodcastFeedService {
               PodcastEpisode(
                 id = "$index",
                 title = "$title episode ${index + 1}",
-                description = null,
-                author = null,
+                description =
+                  "<p>Explore the stories behind $title.</p><p>Hear new ideas and perspectives in this episode.</p>",
+                author = "A storyteller",
                 artworkUrl = null,
-                publishedAt = null,
+                publishedAt = "Sun, 18 Oct 2026 08:00:00 GMT",
                 duration = 30.minutes,
                 enclosure =
                   PodcastEnclosure(

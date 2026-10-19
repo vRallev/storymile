@@ -14,11 +14,13 @@ import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
+import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.rss.PodcastFeedRepository
 
 class ShowPresenter(
   private val catalog: PodcastDiscoveryRepository,
   private val feeds: PodcastFeedRepository,
+  private val episodeDetailsFactory: EpisodeDetailsPresenter.Factory,
   private val initialPodcast: DiscoveredPodcast,
   private val podcasts: List<DiscoveredPodcast>,
   private val source: Source,
@@ -33,7 +35,7 @@ class ShowPresenter(
         val state by remember { catalog.lookup(podcast.id) }.collectAsState()
         state
       }
-    val episodesPresenter = remember { EpisodesPresenter(catalog, feeds) }
+    val episodesPresenter = remember { EpisodesPresenter(catalog, feeds, episodeDetailsFactory) }
     return Model(
       podcast =
         (lookup as? State.Success)?.podcasts?.firstOrNull { it.id == podcast.id } ?: podcast,

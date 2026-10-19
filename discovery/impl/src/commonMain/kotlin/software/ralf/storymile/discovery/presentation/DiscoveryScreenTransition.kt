@@ -18,7 +18,7 @@ internal fun Modifier.discoveryScreenTransition(): Modifier {
     } else {
       with(visibilityScope) {
         animateEnterExit(
-          enter = fadeIn(tween(250, delayMillis = 100)),
+          enter = fadeIn(tween(durationMillis = 100, delayMillis = 350)),
           exit = fadeOut(tween(100)),
         )
       }

@@ -11,6 +11,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Path
@@ -26,6 +27,8 @@ import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.backstack.nav3.PresenterBackstackRenderer
 import software.ralf.app.platform.renderer.Render
 import software.ralf.storymile.templates.LocalAnimatedVisibilityScope
+import software.ralf.storymile.templates.LocalNavigationEntryIdentity
+import software.ralf.storymile.templates.NavigationEntryIdentity
 
 /**
  * Renders the active entry from [DefaultBackstackModel].
@@ -41,13 +44,28 @@ class DefaultBackstackRenderer : PresenterBackstackRenderer<DefaultBackstackMode
     entryProvider: (Int) -> NavEntry<Int>,
     modifier: Modifier,
   ) {
+    val host = remember { Any() }
     val distance = with(LocalDensity.current) { 30.dp.roundToPx() }
     val forwardOffset =
       if (LocalLayoutDirection.current == LayoutDirection.Ltr) distance else -distance
     NavDisplay(
       backStack = backstack,
       onBack = onBack,
-      entryProvider = entryProvider,
+      entryProvider = { entryId ->
+        val entry = entryProvider(entryId)
+        // Capture before pop removes the entry. Navigation 3 retains this closure for its exit.
+        val identity =
+          NavigationEntryIdentity(
+            current = EntryIdentity(host, entryId),
+            previous =
+              backstack.getOrNull(backstack.indexOf(entryId) - 1)?.let { EntryIdentity(host, it) },
+          )
+        NavEntry(navEntry = entry) {
+          CompositionLocalProvider(LocalNavigationEntryIdentity provides identity) {
+            entry.Content()
+          }
+        }
+      },
       modifier = modifier.clipToBounds(),
       transitionSpec = { sharedAxisTransition(forwardOffset) },
       popTransitionSpec = { sharedAxisTransition(-forwardOffset) },
@@ -91,4 +109,6 @@ class DefaultBackstackRenderer : PresenterBackstackRenderer<DefaultBackstackMode
     }
     val fadeOutEasing = Easing { (emphasized.transform(it) / FADE_THRESHOLD).coerceIn(0f, 1f) }
   }
+
+  private data class EntryIdentity(val host: Any, val entryId: Int)
 }

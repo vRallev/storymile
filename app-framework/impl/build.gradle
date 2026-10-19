@@ -19,6 +19,7 @@ dependencies {
 
   commonMainImplementation project(':discovery:impl')
   commonMainImplementation project(':downloads:impl')
+  commonMainImplementation project(':episode-details:impl')
   commonMainImplementation project(':home:impl')
   commonMainImplementation project(':http:impl')
   commonMainImplementation project(':library:impl')

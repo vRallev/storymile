@@ -23,6 +23,7 @@ dependencies {
   commonMainImplementation project(':discovery:impl')
   commonMainImplementation project(':discovery:impl-robots')
   commonMainImplementation project(':downloads:impl')
+  commonMainImplementation project(':episode-details:impl')
   commonMainImplementation project(':home:impl')
   commonMainImplementation project(':library:impl')
   commonMainImplementation project(':playback:impl')

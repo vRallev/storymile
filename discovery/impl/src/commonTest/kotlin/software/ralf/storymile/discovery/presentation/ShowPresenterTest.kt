@@ -132,6 +132,7 @@ class ShowPresenterTest {
     ShowPresenter(
       catalog = catalog,
       feeds = TestPodcastFeeds(),
+      episodeDetailsFactory = TestEpisodeDetailsFactory(),
       initialPodcast = initialPodcast,
       podcasts = listOf(podcast("one"), podcast("two")),
       source = ShowPresenter.Source.Browse,

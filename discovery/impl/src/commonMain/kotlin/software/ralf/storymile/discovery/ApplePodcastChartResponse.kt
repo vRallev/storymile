@@ -3,6 +3,7 @@ package software.ralf.storymile.discovery
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import software.ralf.storymile.util.HtmlDescription
 
 internal class ApplePodcastChartResponse {
   private val json = Json { ignoreUnknownKeys = true }
@@ -39,7 +40,7 @@ internal class ApplePodcastChartResponse {
         feedUrl = null,
         artworkUrl = artwork?.let { ApplePodcastArtwork.highResolutionUrl(it.label) },
         catalogUrl = id.label.nonBlank(),
-        description = PodcastDescription.plainText(summary?.label),
+        description = HtmlDescription.plainText(summary?.label),
       )
     }
 

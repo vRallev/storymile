@@ -1,8 +1,10 @@
-package software.ralf.storymile.discovery
+package software.ralf.storymile.util
 
 import com.fleeksoft.ksoup.Ksoup
 
-internal object PodcastDescription {
+/** Converts HTML descriptions to readable text with paragraph and line breaks. */
+object HtmlDescription {
+  /** Omits hidden content, decodes HTML entities, and returns null when no text remains. */
   fun plainText(description: String?): String? {
     if (description.isNullOrBlank()) {
       return null

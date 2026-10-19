@@ -15,6 +15,7 @@ flowchart TD
   HomeContentPresenter["HomeContentPresenter\nempty home"]
   DiscoveryPresenterImpl["DiscoveryPresenterImpl\nbrowse, topics, and search"]
   ShowPresenter["ShowPresenter\npodcast preview"]
+  EpisodeDetailsPresenter["EpisodeDetailsPresenterImpl\nepisode details"]
   EpisodesPresenter["EpisodesPresenter\nfeed episodes"]
   DownloadsPresenter["DownloadsPresenterImpl\nempty downloads"]
   TabsPresenter["TabsPresenterImpl\ntabs"]
@@ -29,6 +30,7 @@ flowchart TD
   HomePresenter -->|root| HomeContentPresenter
   HomePresenter -->|pushed entries| DiscoveryPresenterImpl
   HomePresenter -->|pushed entry| ShowPresenter
+  HomePresenter -->|pushed entry| EpisodeDetailsPresenter
   DiscoveryPresenterImpl -->|browse and topics| EpisodesPresenter
   ShowPresenter --> EpisodesPresenter
   TabsPresenter -->|Library| LibraryPresenter
@@ -66,6 +68,13 @@ Both presenters compose
 [EpisodesPresenter](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/EpisodesPresenter.kt)
 for feed episodes, rendered by the shared
 [episode components](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/Episodes.kt).
+Episode selection pushes the reusable
+[episode details presenter](../episode-details/impl/src/commonMain/kotlin/software/ralf/storymile/episodedetails/EpisodeDetailsPresenterImpl.kt)
+through its [public factory](../episode-details/public/src/commonMain/kotlin/software/ralf/storymile/episodedetails/EpisodeDetailsPresenter.kt).
+Its [renderer](../episode-details/impl/src/commonMain/kotlin/software/ralf/storymile/episodedetails/EpisodeDetailsRenderer.kt)
+shares artwork and episode text with the source row.
+The [backstack renderer](../presenter-navigation/impl/src/commonMain/kotlin/software/ralf/storymile/presenternavigation/DefaultBackstackRenderer.kt)
+supplies navigation entry identities for these UI transitions.
 Back returns to the previous entry. Reselecting Home calls its model callback to pop to the welcome
 entry and keeps it in composition.
 [HomeRenderer](../home/impl/src/commonMain/kotlin/software/ralf/storymile/home/HomeRenderer.kt)

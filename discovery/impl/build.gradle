@@ -9,8 +9,7 @@ storymile {
 }
 
 dependencies {
-  androidMainImplementation libs.ktor.client.okhttp
-
+  commonMainImplementation project(':episode-details:public')
   commonMainImplementation project(':http:public')
   commonMainImplementation project(':rss:public')
   commonMainImplementation project(':runtime-mode:public')
@@ -18,15 +17,7 @@ dependencies {
   commonMainImplementation project(':theme:public')
   commonMainImplementation project(':user:public')
   commonMainImplementation project(':util:public')
-  commonMainImplementation libs.coil.compose
-  commonMainImplementation libs.coil.network.ktor3
-  commonMainImplementation libs.ksoup
-  commonMainImplementation libs.ktor.client.core
   commonMainImplementation libs.serialization.json
 
   commonTestImplementation project(':util:testing')
-
-  desktopMainImplementation libs.ktor.client.okhttp
-
-  iosMainImplementation libs.ktor.client.darwin
 }
