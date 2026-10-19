@@ -10,6 +10,7 @@ import org.gradle.api.plugins.BasePluginExtension
 import org.gradle.api.plugins.ExtensionAware
 import org.jetbrains.compose.ComposeExtension
 import org.jetbrains.compose.resources.ResourcesExtension
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import software.ralf.app.platform.gradle.ModuleStructurePlugin.Companion.namespace
 import software.ralf.app.platform.gradle.moduleType
 import software.ralf.storymile.gradle.Platform.Companion.platforms
@@ -29,7 +30,6 @@ internal class KmpPlugin : Plugin<Project> {
 
   private fun Project.configureKotlin() {
     extensions.getByType(BasePluginExtension::class.java).archivesName.set(safePathString)
-    kmpExtension.applyDefaultHierarchyTemplate()
     kmpExtension.compilerOptions {
       extraWarnings.set(false)
       allWarningsAsErrors.set(ci)
@@ -39,7 +39,19 @@ internal class KmpPlugin : Plugin<Project> {
     platforms().forEach { it.configurePlatform() }
   }
 
+  @OptIn(ExperimentalKotlinGradlePluginApi::class)
   private fun Project.addExtraSourceSets() {
+    kmpExtension.applyDefaultHierarchyTemplate {
+      common {
+        // Compose shares its system-theme API across the Skiko targets.
+        group("skiko") {
+          withJvm()
+          withIos()
+          withWasmJs()
+        }
+      }
+    }
+
     val sourceSets = kmpExtension.sourceSets
     if (
       sourceSets.findByName("androidMain") == null || sourceSets.findByName("desktopMain") == null
