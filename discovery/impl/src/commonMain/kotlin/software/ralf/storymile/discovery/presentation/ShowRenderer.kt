@@ -60,7 +60,8 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
   override fun Compose(model: ShowPresenter.Model, modifier: Modifier) {
     BoxWithConstraints(modifier.fillMaxSize().discoveryScreenTransition().testTag("show-screen")) {
       val wide = maxWidth / LocalDensity.current.fontScale >= 760.dp
-      val padding = if (maxWidth < 600.dp) 16.dp else 32.dp
+      val edgeToEdgeEpisodes = maxWidth < 600.dp
+      val contentModifier = Modifier.padding(horizontal = if (edgeToEdgeEpisodes) 16.dp else 0.dp)
       val selectedIndex = model.podcasts.indexOfFirst { it.id == model.podcast.id }.coerceAtLeast(0)
       val listState =
         rememberLazyListState(
@@ -81,7 +82,7 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
           backButtonModifier = Modifier.testTag("show-back"),
         )
         Row(
-          Modifier.weight(1f).padding(horizontal = padding),
+          Modifier.weight(1f).padding(horizontal = if (edgeToEdgeEpisodes) 0.dp else 32.dp),
           horizontalArrangement = Arrangement.spacedBy(24.dp),
         ) {
           if (wide) {
@@ -116,7 +117,7 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
             verticalArrangement = Arrangement.spacedBy(24.dp),
           ) {
             item {
-              Column {
+              Column(contentModifier) {
                 Box(Modifier.fillMaxWidth()) {
                   PodcastDetails(
                     podcast = model.podcast,
@@ -147,10 +148,13 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
               }
             }
             item {
-              HorizontalDivider(color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+              HorizontalDivider(
+                modifier = contentModifier,
+                color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+              )
             }
             item {
-              Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+              Column(contentModifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 EpisodesHeading(stringResource(Res.string.episodes))
                 EpisodesStatus(model.episodes)
               }
@@ -158,7 +162,7 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
             itemsIndexed(model.episodes.episodes, key = { _, episode -> episode.key }) {
               index,
               episode ->
-              EpisodeRow(episode, index)
+              EpisodeRow(item = episode, index = index, edgeToEdge = edgeToEdgeEpisodes)
             }
           }
         }
