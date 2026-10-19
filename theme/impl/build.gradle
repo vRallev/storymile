@@ -12,6 +12,7 @@ dependencies {
 
   commonMainImplementation libs.coil.network.ktor3
   commonMainImplementation libs.compose.multiplatform.ui
+  commonMainImplementation libs.ktor.client.core
 
   iosMainImplementation libs.ktor.client.darwin
 }
