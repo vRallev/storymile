@@ -54,7 +54,7 @@ jobs:
           printf '%s\n' "$NEEDS_RESULTS" | jq -e '
             all(to_entries[];
               .value.result == "success" or
-              ((.key == "test-ios" or .key == "build-ios-release") and .value.result == "skipped" and env.GITHUB_REF != "refs/heads/main")
+              (.key == "build-ios-release" and .value.result == "skipped" and env.GITHUB_REF != "refs/heads/main")
             )'
 
   check-build-src:
@@ -242,7 +242,6 @@ jobs:
             **/build/test-results/
 
   test-ios:
-    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: macos-latest
     timeout-minutes: 30
     steps:
@@ -253,7 +252,11 @@ jobs:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           select-xcode-26: "true"
       - name: Run iOS simulator tests
+        if: ${{ github.ref == 'refs/heads/main' }}
         run: ./gradlew $GRADLE_ARGS iosSimulatorArm64Test
+      - name: Verify podcast database on iOS
+        if: ${{ github.ref != 'refs/heads/main' }}
+        run: ./gradlew $GRADLE_ARGS :database:impl:iosSimulatorArm64Test
       - name: Upload test results
         uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}

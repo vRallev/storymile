@@ -33,4 +33,11 @@ interface Storage {
    * hyphens. Preference keys belong to the caller. Repeated calls return the same store.
    */
   suspend fun preferences(name: String): DataStore<Preferences>
+
+  /**
+   * Returns a stable database path in this scope, or null for in-memory storage. Names contain only
+   * letters, digits, underscores, and hyphens. Native platforms create the parent directory; the
+   * browser returns a virtual filename for its SQLite filesystem. The caller owns the database.
+   */
+  suspend fun databasePath(name: String): String?
 }

@@ -12,6 +12,7 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
+import assertk.assertions.isTrue
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlinx.coroutines.CancellationException
@@ -35,6 +36,32 @@ import software.ralf.app.platform.scope.coroutine.addCoroutineScopeScoped
 import software.ralf.app.platform.scope.runTestWithScope
 
 class PersistentStorageTest {
+  @Test
+  fun `database paths survive reopening and isolate user and database names`() =
+    storageTest { scope, platform, _ ->
+      val originalScope = scope.child(this)
+      val original: Storage = originalScope.storage(namespace = "user-alice", platform = platform)
+      val path = requireNotNull(original.databasePath("podcasts")).toPath()
+      val otherUser: Storage =
+        scope.child(this).storage(namespace = "user-Alice", platform = platform)
+      val paths =
+        setOf(
+          path.toString(),
+          original.databasePath("Podcasts"),
+          otherUser.databasePath("podcasts"),
+        )
+
+      assertThat(paths.size).isEqualTo(3)
+      assertThat(path.isAbsolute).isTrue()
+      assertThat(FileSystem.SYSTEM.metadata(requireNotNull(path.parent)).isDirectory).isTrue()
+      assertThat(FileSystem.SYSTEM.exists(path)).isFalse()
+
+      originalScope.destroy()
+      val reopened: Storage =
+        scope.child(this).storage(namespace = "user-alice", platform = platform)
+      assertThat(reopened.databasePath("podcasts")).isEqualTo(path.toString())
+    }
+
   @Test
   fun `app and user namespaces keep identical preference and file names separate`() =
     storageTest { scope, platform, _ ->

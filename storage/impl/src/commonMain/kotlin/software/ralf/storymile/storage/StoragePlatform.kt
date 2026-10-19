@@ -31,6 +31,8 @@ abstract class StoragePlatform {
     coroutineScope: CoroutineScope,
   ): DataStore<Preferences>
 
+  internal abstract suspend fun databasePath(namespace: String, name: String): String?
+
   internal abstract suspend fun readFile(
     namespace: String,
     area: FileStorageArea,

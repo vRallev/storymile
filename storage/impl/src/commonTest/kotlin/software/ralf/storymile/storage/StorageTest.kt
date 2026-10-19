@@ -79,6 +79,7 @@ class StorageTest {
       assertFailure { directory.read("chapter") }.isInstanceOf<CancellationException>()
       assertFailure { storage.cache.read("file") }.isInstanceOf<CancellationException>()
       assertFailure { storage.preferences("settings") }.isInstanceOf<CancellationException>()
+      assertFailure { storage.databasePath("podcasts") }.isInstanceOf<CancellationException>()
       assertFailure { preferences.updateData { it } }.isInstanceOf<CancellationException>()
       assertFailure { preferences.data.first() }.isInstanceOf<CancellationException>()
       assertFailure { scope.storage("app", platform) }.isInstanceOf<IllegalStateException>()
@@ -179,6 +180,7 @@ class StorageTest {
     invalidNames.forEach { name ->
       assertFailure { scope.storage(name, platform) }.isInstanceOf<IllegalArgumentException>()
       assertFailure { storage.preferences(name) }.isInstanceOf<IllegalArgumentException>()
+      assertFailure { storage.databasePath(name) }.isInstanceOf<IllegalArgumentException>()
       assertFailure { storage.files.read(name) }.isInstanceOf<IllegalArgumentException>()
       assertFailure { storage.files.write(name, byteArrayOf(1)) }
         .isInstanceOf<IllegalArgumentException>()
@@ -207,6 +209,8 @@ class StorageTest {
     val writeCanceled = CompletableDeferred<Unit>()
     val finishWrite = CompletableDeferred<Unit>()
     private val files = mutableMapOf<Triple<String, FileStorageArea, String>, ByteArray>()
+
+    override suspend fun databasePath(namespace: String, name: String): String? = null
 
     override fun createPreferences(
       namespace: String,

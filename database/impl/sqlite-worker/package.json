@@ -1,0 +1,9 @@
+{
+  "name": "@storymile/sqlite-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@sqlite.org/sqlite-wasm": "3.53.4-build2"
+  }
+}

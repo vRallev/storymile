@@ -104,6 +104,10 @@ Delete files explicitly. Keep preference keys in the owning feature.
 Use `Storage.cache` for data the system can remove.
 Integration-test graphs must use a new `InMemoryStorageFactory` for each graph.
 
+Use `:database:public` for saved podcasts. Its implementation owns one Room database per user scope.
+`Storage.databasePath(name)` supplies its location; `null` selects an in-memory database.
+The database module is not connected to app assembly yet.
+
 ### Icons
 
 After changing `images/icon.png`, run `./scripts/app-icon/generate-icons.sh` on macOS to update

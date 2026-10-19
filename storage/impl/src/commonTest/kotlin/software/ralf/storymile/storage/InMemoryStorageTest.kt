@@ -26,6 +26,14 @@ import software.ralf.app.platform.scope.runTestWithScope
 
 class InMemoryStorageTest {
   @Test
+  fun `in-memory storage does not return a database file`() = runTestWithScope { scope ->
+    val storage: Storage =
+      scope.storage(factory = InMemoryStorageFactory(), namespace = "user-guest")
+
+    assertThat(storage.databasePath("podcasts")).isNull()
+  }
+
+  @Test
   fun `data survives scope exit within a factory and new factories start empty`() =
     runTestWithScope { scope ->
       val factory: ScopedStorage.Factory = InMemoryStorageFactory()

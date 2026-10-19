@@ -68,6 +68,7 @@ gradlePlugin {
 
 dependencies {
   implementation libs.android.gradle.plugin
+  implementation libs.androidx.room.gradle.plugin
   implementation libs.app.platform.gradle.plugin
   implementation libs.buildconfig.gradle.plugin
   implementation libs.compose.gradle.plugin
@@ -77,6 +78,7 @@ dependencies {
   implementation libs.kotlin.gradle.plugin
   implementation libs.kotlin.hierarchy.plugin
   implementation libs.kotlin.serialization.gradle.plugin
+  implementation libs.ksp.gradle.plugin
   implementation libs.metro.gradle.plugin
   implementation libs.sort.dependencies.gradle.plugin
 

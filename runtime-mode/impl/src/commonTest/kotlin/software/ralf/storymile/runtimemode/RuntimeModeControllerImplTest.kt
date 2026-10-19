@@ -273,6 +273,8 @@ class RuntimeModeControllerImplTest {
       check(name == "runtime_mode")
       return preferences
     }
+
+    override suspend fun databasePath(name: String): String? = error("Databases are not used")
   }
 
   private class FakePreferences(savedMode: String?) : DataStore<Preferences> {

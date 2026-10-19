@@ -1,0 +1,18 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  enableMetro true
+  enableRoom true
+  enableBrowserDatabaseDriver true
+}
+
+dependencies {
+  commonMainImplementation project(':storage:public')
+  commonMainImplementation project(':user:public')
+  commonMainImplementation libs.androidx.room.runtime
+
+  noWasmJsMainImplementation libs.androidx.sqlite.bundled
+  noWasmJsTestImplementation libs.okio
+}

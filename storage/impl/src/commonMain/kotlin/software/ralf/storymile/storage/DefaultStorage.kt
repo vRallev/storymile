@@ -86,6 +86,15 @@ private constructor(
     }
   }
 
+  override suspend fun databasePath(name: String): String? = operation { platform ->
+    require(name.matches(namePattern)) {
+      "Database name must contain only letters, digits, underscores, and hyphens."
+    }
+    filesMutex.withLock {
+      platform.databasePath(namespace = encodedNamespace, name = name.encodeUtf8().hex())
+    }
+  }
+
   override fun onEnterScope(scope: Scope) {
     check(enteredScope.complete(Unit)) { "Storage has already entered a scope." }
   }

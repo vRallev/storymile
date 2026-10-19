@@ -15,6 +15,19 @@ import software.ralf.app.platform.scope.runTestWithScope
 
 class WasmJsStorageTest {
   @Test
+  fun `database filenames are stable and isolate user and database names`() =
+    runTestWithScope { scope ->
+      val platform = WasmJsStoragePlatform()
+      val first: Storage = scope.storage(namespace = "user-alice", platform = platform)
+      val second: Storage = scope.storage(namespace = "user-Alice", platform = platform)
+      val path = first.databasePath("podcasts")
+
+      assertThat(path).isNotNull().isEqualTo(first.databasePath("podcasts"))
+      assertThat(setOf(path, first.databasePath("Podcasts"), second.databasePath("podcasts")).size)
+        .isEqualTo(3)
+    }
+
+  @Test
   fun `browser files preserve all byte values and empty replacements`() =
     runTestWithScope { scope ->
       val platform = WasmJsStoragePlatform()
