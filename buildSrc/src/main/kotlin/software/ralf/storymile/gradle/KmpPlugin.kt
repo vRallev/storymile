@@ -29,7 +29,16 @@ internal class KmpPlugin : Plugin<Project> {
 
   private fun Project.configureKotlin() {
     extensions.getByType(BasePluginExtension::class.java).archivesName.set(safePathString)
-    kmpExtension.applyDefaultHierarchyTemplate()
+    kmpExtension.applyDefaultHierarchyTemplate {
+      common {
+        // Compose shares its system-theme API across the Skiko targets.
+        group("skiko") {
+          withJvm()
+          withIos()
+          withWasmJs()
+        }
+      }
+    }
     kmpExtension.compilerOptions {
       extraWarnings.set(false)
       allWarningsAsErrors.set(ci)
