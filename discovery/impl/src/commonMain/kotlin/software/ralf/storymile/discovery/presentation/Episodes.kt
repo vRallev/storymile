@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
@@ -19,6 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -39,34 +42,43 @@ import software.ralf.storymile.episodedetails.episodeSharedElement
 import software.ralf.storymile.theme.AppTheme
 
 @Composable
-internal fun Episodes(title: String?, model: EpisodesPresenter.Model, modifier: Modifier) {
+internal fun Episodes(
+  title: String?,
+  model: EpisodesPresenter.Model,
+  modifier: Modifier,
+  edgeToEdge: Boolean = false,
+) {
+  val contentModifier = Modifier.padding(horizontal = if (edgeToEdge) 16.dp else 0.dp)
   Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
     if (title != null) {
-      EpisodesHeading(title)
+      EpisodesHeading(title, contentModifier)
     }
-    EpisodesStatus(model)
+    EpisodesStatus(model, contentModifier)
     model.episodes.forEachIndexed { index, episode ->
       if (index > 0) {
-        HorizontalDivider(color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        HorizontalDivider(
+          modifier = contentModifier,
+          color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+        )
       }
-      key(episode.key) { EpisodeRow(episode, index) }
+      key(episode.key) { EpisodeRow(item = episode, index = index, edgeToEdge = edgeToEdge) }
     }
   }
 }
 
 @Composable
-internal fun EpisodesHeading(title: String) {
+internal fun EpisodesHeading(title: String, modifier: Modifier = Modifier) {
   Text(
     text = title,
-    modifier = Modifier.semantics { heading() },
+    modifier = modifier.semantics { heading() },
     style = AppTheme.typography.titleLarge,
     fontWeight = FontWeight.SemiBold,
   )
 }
 
 @Composable
-internal fun EpisodesStatus(model: EpisodesPresenter.Model) {
-  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+internal fun EpisodesStatus(model: EpisodesPresenter.Model, modifier: Modifier = Modifier) {
+  Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
     if (model.loading) {
       Row(
         Modifier.testTag("episodes-loading"),
@@ -98,14 +110,22 @@ internal fun EpisodesStatus(model: EpisodesPresenter.Model) {
 }
 
 @Composable
-internal fun EpisodeRow(item: EpisodesPresenter.Episode, index: Int) {
+internal fun EpisodeRow(
+  item: EpisodesPresenter.Episode,
+  index: Int,
+  edgeToEdge: Boolean = false,
+) {
   val details = item.details
   Row(
     modifier =
       Modifier.fillMaxWidth()
+        .clip(if (edgeToEdge) RectangleShape else RoundedCornerShape(16.dp))
         .clickable(onClick = item.onClick)
-        .padding(vertical = 4.dp)
-        .testTag("episode-$index"),
+        .testTag("episode-$index")
+        .padding(
+          horizontal = if (edgeToEdge) 16.dp else 8.dp,
+          vertical = if (edgeToEdge) 4.dp else 8.dp,
+        ),
     horizontalArrangement = Arrangement.spacedBy(12.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {

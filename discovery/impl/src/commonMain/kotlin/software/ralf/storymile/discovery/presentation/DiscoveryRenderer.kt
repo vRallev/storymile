@@ -122,7 +122,8 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
       modifier.fillMaxSize().discoveryScreenTransition().clipToBounds().testTag("discovery-screen"),
     ) {
       val wide = maxWidth / LocalDensity.current.fontScale >= 760.dp
-      val padding = if (maxWidth < 600.dp) 16.dp else 32.dp
+      val edgeToEdgeEpisodes = maxWidth < 600.dp
+      val padding = if (edgeToEdgeEpisodes) 16.dp else 32.dp
       val listState = rememberLazyListState()
       var requestedFocus by rememberSaveable { mutableStateOf(false) }
       val floatingSearch = model.topic == null
@@ -156,15 +157,19 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
           state = listState,
           contentPadding =
             PaddingValues(
-              start = padding,
-              end = padding,
+              start = if (edgeToEdgeEpisodes) 0.dp else padding,
+              end = if (edgeToEdgeEpisodes) 0.dp else padding,
               top =
                 if (floatingSearch) with(LocalDensity.current) { headerHeight.toDp() } else 16.dp,
               bottom = 16.dp,
             ),
           verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-          catalogItems(model, wide)
+          catalogItems(
+            model = model,
+            wide = wide,
+            edgeToEdgeEpisodes = edgeToEdgeEpisodes,
+          )
         }
       }
       if (floatingSearch) {
@@ -201,10 +206,14 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     }
   }
 
-  private fun LazyListScope.catalogItems(model: DiscoveryPresenterImpl.Model, wide: Boolean) {
+  private fun LazyListScope.catalogItems(
+    model: DiscoveryPresenterImpl.Model,
+    wide: Boolean,
+    edgeToEdgeEpisodes: Boolean,
+  ) {
     val featured = model.topic == null && model.query.value.isBlank()
     item(key = "catalog") {
-      Column {
+      Column(Modifier.padding(horizontal = if (edgeToEdgeEpisodes) 16.dp else 0.dp)) {
         if (model.topic == null) {
           AnimatedVisibility(
             visible = featured,
@@ -226,7 +235,13 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     }
     val state = model.state
     if (state is CatalogState.Ready && state.podcasts.isNotEmpty()) {
-      results(model, state.podcasts, featured, wide)
+      results(
+        model = model,
+        podcasts = state.podcasts,
+        featured = featured,
+        wide = wide,
+        edgeToEdgeEpisodes = edgeToEdgeEpisodes,
+      )
     }
   }
 
@@ -278,6 +293,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     podcasts: List<DiscoveredPodcast>,
     featured: Boolean,
     wide: Boolean,
+    edgeToEdgeEpisodes: Boolean,
   ) {
     val showEpisodes = featured || model.topic != null
     if (!wide && showEpisodes) {
@@ -286,6 +302,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
           title = stringResource(Res.string.episodes_to_try),
           model = model.episodes,
           modifier = Modifier.fadeItem(this).fillMaxWidth(),
+          edgeToEdge = edgeToEdgeEpisodes,
         )
       }
     }
@@ -299,7 +316,9 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
         } else {
           Modifier.fadeItem(this).fillMaxWidth()
         }
-      Column(resultModifier) { FirstPodcasts(remaining, featured, model) }
+      Column(resultModifier.padding(horizontal = if (edgeToEdgeEpisodes) 16.dp else 0.dp)) {
+        FirstPodcasts(remaining, featured, model)
+      }
     }
   }
 
