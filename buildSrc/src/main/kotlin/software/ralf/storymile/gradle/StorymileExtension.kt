@@ -64,6 +64,20 @@ public open class StorymileExtension(private val project: Project) {
     }
   }
 
+  /** Generates Room databases and exports their schemas. */
+  public fun enableRoom(enabled: Boolean) {
+    if (enabled) {
+      project.plugins.apply(RoomPlugin::class.java)
+    }
+  }
+
+  /** Bundles the SQLite worker and browser driver when Wasm is enabled. */
+  public fun enableBrowserDatabaseDriver(enabled: Boolean) {
+    if (enabled) {
+      RoomPlugin.configureBrowserDatabaseDriver(project)
+    }
+  }
+
   public fun enableComposePresenters(enabled: Boolean) {
     project.appPlatform.enableComposePresenters(enabled)
     if (enabled) {

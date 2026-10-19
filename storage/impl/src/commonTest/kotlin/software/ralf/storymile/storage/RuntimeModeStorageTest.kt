@@ -78,6 +78,7 @@ class RuntimeModeStorageTest {
           assertThat(storage.cache.read("cover")).isNull()
           storage.cache.write("cover", byteArrayOf(4))
         },
+        async { assertThat(storage.databasePath("podcasts")).isNull() },
       )
     runCurrent()
 

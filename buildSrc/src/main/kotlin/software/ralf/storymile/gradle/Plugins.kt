@@ -14,6 +14,8 @@ internal object Plugins {
   const val KOTLIN_HIERARCHY = "io.github.terrakok.kmp-hierarchy"
   const val KOTLIN_MULTIPLATFORM = "org.jetbrains.kotlin.multiplatform"
   const val KOTLIN_SERIALIZATION = "org.jetbrains.kotlin.plugin.serialization"
+  const val KSP = "com.google.devtools.ksp"
   const val METRO = "dev.zacsweers.metro"
+  const val ROOM = "androidx.room3"
   const val SORT_DEPENDENCIES = "com.squareup.sort-dependencies"
 }

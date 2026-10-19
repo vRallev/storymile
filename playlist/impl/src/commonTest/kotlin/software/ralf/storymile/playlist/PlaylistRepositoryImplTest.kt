@@ -428,6 +428,8 @@ class PlaylistRepositoryImplTest {
     override suspend fun preferences(name: String): DataStore<Preferences> =
       error("Preferences are not used")
 
+    override suspend fun databasePath(name: String): String? = error("Databases are not used")
+
     private inner class Files(private val path: String) : FileStorage {
       override fun directory(name: String): FileStorage = Files("$path$name/")
 
