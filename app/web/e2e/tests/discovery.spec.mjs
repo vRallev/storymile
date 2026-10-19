@@ -82,6 +82,7 @@ test('loads real-mode charts after retry and searches topics in the browser', as
   await chart.click({ force: true });
   await expect(page.locator('[id="show-title"]')).toContainText('Chart Podcast');
   await page.locator('[id="show-back"]').click({ force: true });
+  await expect(page.locator('[id="show-screen"]')).not.toBeAttached();
   await expect(chart).toBeVisible();
   expect(lookups).toEqual(['123']);
   expect(feeds).toEqual(['/chart.xml']);
