@@ -43,7 +43,7 @@ metro = "1.4.5"
 navigation-event = "1.1.0"
 okio = "3.18.2"
 process-phoenix = "3.0.0"
-serialization = "1.11.0"
+serialization = "1.12.0"
 sort-dependencies = "0.21.0"
 xmlutil = "1.0.2"
 
