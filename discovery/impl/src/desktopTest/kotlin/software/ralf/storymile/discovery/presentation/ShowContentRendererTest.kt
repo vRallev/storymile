@@ -33,7 +33,7 @@ import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.StorymileTheme
 import software.ralf.storymile.theme.ThemeEnvironment
 
-class ShowRendererTest {
+class ShowContentRendererTest {
   private val themeEnvironment =
     object : ThemeEnvironment {
       @Composable
@@ -65,7 +65,7 @@ class ShowRendererTest {
             )
           setContent {
             ThemedContent(fontScale) {
-              ShowRenderer().renderCompose(state.value, Modifier.fillMaxSize())
+              ShowContentRenderer().renderCompose(state.value, Modifier.fillMaxSize())
             }
           }
           onNodeWithTag("show-description").assertDoesNotExist()
@@ -100,7 +100,7 @@ class ShowRendererTest {
       val loaded = model().copy(descriptionExpanded = true)
       val state = mutableStateOf(loaded.copy(podcast = loaded.podcast.copy(description = null)))
       setContent {
-        ThemedContent { ShowRenderer().renderCompose(state.value, Modifier.fillMaxSize()) }
+        ThemedContent { ShowContentRenderer().renderCompose(state.value, Modifier.fillMaxSize()) }
       }
       onNodeWithText("No description available.").assertIsDisplayed()
       runOnIdle { state.value = loaded }
@@ -117,7 +117,7 @@ class ShowRendererTest {
     }
   }
 
-  private fun model(): ShowPresenter.Model {
+  private fun model(): ShowContentPresenter.Model {
     val podcast =
       DiscoveredPodcast(
         id = "show",
@@ -128,7 +128,7 @@ class ShowRendererTest {
         catalogUrl = null,
         description = "Stories about science and the natural world.\nNew conversations every week.",
       )
-    return ShowPresenter.Model(
+    return ShowContentPresenter.Model(
       podcast = podcast,
       podcasts = listOf(podcast),
       source = ShowPresenter.Source.Browse,

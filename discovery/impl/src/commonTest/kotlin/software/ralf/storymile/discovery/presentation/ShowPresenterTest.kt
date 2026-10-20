@@ -1,137 +1,107 @@
 package software.ralf.storymile.discovery.presentation
 
+import androidx.compose.runtime.Composable
 import assertk.assertThat
 import assertk.assertions.containsExactly
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFalse
-import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import kotlin.test.Test
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.backstack.nav3.FakePresenterBackstackScope
+import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
+import software.ralf.app.platform.presenter.backstack.nav3.backstack
+import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.app.platform.presenter.backstack.nav3.withPresenterBackstackScope
 import software.ralf.app.platform.presenter.compose.test
 import software.ralf.storymile.discovery.DiscoveredPodcast
-import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
+import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State as CatalogState
+import software.ralf.storymile.episodedetails.EpisodeDetails
+import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
+import software.ralf.storymile.podcast.PodcastEnclosure
+import software.ralf.storymile.podcast.PodcastEpisode
+import software.ralf.storymile.podcast.PodcastFeed
+import software.ralf.storymile.podcast.PodcastFeedRepository.State as FeedState
 
 class ShowPresenterTest {
   @Test
-  fun `description preloads when the show opens and expands without another request`() = runTest {
+  fun `episode back preserves the selected show and updates its metadata while open`() = runTest {
     val catalog = TestPodcastCatalog()
-    presenter(catalog).withPresenterBackstackScope(FakePresenterBackstackScope()).test(this) {
+    val feeds = TestPodcastFeeds()
+    feeds.update("two", FeedState.Success(feed("two")))
+    val presenter = presenter(catalog = catalog, feeds = feeds)
+    val outerBackstack = FakePresenterBackstackScope()
+    val outerRoot = outerBackstack.backstack.single()
+    outerBackstack.push(presenter)
+
+    presenter.withPresenterBackstackScope(outerBackstack).test(this) {
       val initial = awaitItem()
-      assertThat(initial.descriptionExpanded).isFalse()
-      runCurrent()
-      assertThat(catalog.lookedUp).containsExactly("one")
-
-      val podcast = podcast("one").copy(description = "Stories & science.")
-      catalog.updateLookup(id = podcast.id, state = State.Success(listOf(podcast)))
-      val loaded = awaitItem()
-      assertThat(loaded.podcast).isEqualTo(podcast)
-      assertThat(loaded.descriptionExpanded).isFalse()
-      assertThat(catalog.lookedUp).containsExactly("one")
-      loaded.onToggleDescription()
+      assertThat(initial.backstack.size).isEqualTo(1)
+      initial.content.onPodcastSelected(podcast("two"))
+      val selected = awaitItem()
+      selected.content.onToggleDescription()
       val expanded = awaitItem()
-      assertThat(expanded.descriptionExpanded).isTrue()
-      assertThat(expanded.podcast.description).isEqualTo("Stories & science.")
-      expanded.onToggleDescription()
-      val collapsed = awaitItem()
-      assertThat(collapsed.descriptionExpanded).isFalse()
-      assertThat(collapsed.podcast.description).isEqualTo("Stories & science.")
-      collapsed.onToggleDescription()
-      assertThat(awaitItem().podcast.description).isEqualTo("Stories & science.")
-      assertThat(catalog.lookedUp).containsExactly("one")
+      expanded.content.episodes.episodes.first().onClick()
+
+      val opened = awaitItem()
+      assertThat(opened.backstack.size).isEqualTo(2)
+      assertThat(opened.content.podcast.id).isEqualTo("two")
+      assertThat(opened.content.descriptionExpanded).isTrue()
+      assertThat((opened.backstack.last() as EpisodeModel).details.episode.title)
+        .isEqualTo("Episode one")
+      assertThat(outerBackstack.backstack).containsExactly(outerRoot, presenter)
+
+      val enriched = podcast("two").copy(description = "The selected show's description.")
+      catalog.updateLookup(id = "two", state = CatalogState.Success(listOf(enriched)))
+      val updated = awaitItem()
+      assertThat(updated.content.podcast).isEqualTo(enriched)
+      assertThat(updated.content.descriptionExpanded).isTrue()
+      (updated.backstack.last() as EpisodeModel).onBack()
+
+      val returned = awaitItem()
+      assertThat(returned.backstack.size).isEqualTo(1)
+      assertThat(returned.content.podcast).isEqualTo(enriched)
+      assertThat(returned.content.descriptionExpanded).isTrue()
+      assertThat(returned.content.episodes.episodes.map { it.details.episode.title })
+        .containsExactly("Episode one", "Episode two")
+      returned.onBack()
+      assertThat(outerBackstack.backstack).containsExactly(outerRoot)
     }
   }
 
   @Test
-  fun `initial model uses the repository metadata and keeps it on expansion`() = runTest {
-    listOf("Cached description", null).forEach { description ->
-      val catalog = TestPodcastCatalog()
-      val cached = podcast("one").copy(title = "Cached title", description = description)
-      catalog.updateLookup(id = cached.id, state = State.Success(listOf(cached)))
-      presenter(catalog).withPresenterBackstackScope(FakePresenterBackstackScope()).test(this) {
-        val initial = awaitItem()
-        assertThat(initial.podcast).isEqualTo(cached)
-        initial.onToggleDescription()
-        val expanded = awaitItem()
-        assertThat(expanded.descriptionExpanded).isTrue()
-        assertThat(expanded.podcast).isEqualTo(cached)
+  fun `selecting another episode replaces the detail entry and back returns to the show`() =
+    runTest {
+      val feeds = TestPodcastFeeds()
+      feeds.update("one", FeedState.Success(feed("one")))
+      val presenter = presenter(catalog = TestPodcastCatalog(), feeds = feeds)
+      val outerBackstack = FakePresenterBackstackScope()
+
+      presenter.withPresenterBackstackScope(outerBackstack).test(this) {
+        awaitItem().content.episodes.episodes.first().onClick()
+        val first = awaitItem()
+        assertThat(first.backstack.size).isEqualTo(2)
+        first.content.episodes.episodes.last().onClick()
+
+        val second = awaitItem()
+        assertThat(second.backstack.size).isEqualTo(2)
+        assertThat((second.backstack.last() as EpisodeModel).details.episode.title)
+          .isEqualTo("Episode two")
+        second.onBack()
+
+        val returned = awaitItem()
+        assertThat(returned.backstack.size).isEqualTo(1)
+        assertThat(returned.content.podcast.id).isEqualTo("one")
+        assertThat(outerBackstack.backstack.size).isEqualTo(1)
       }
     }
-  }
 
-  @Test
-  fun `selecting another podcast clears its description and preloads while collapsed`() = runTest {
-    val catalog = TestPodcastCatalog()
-    presenter(catalog).withPresenterBackstackScope(FakePresenterBackstackScope()).test(this) {
-      awaitItem().onToggleDescription()
-      awaitItem()
-      catalog.updateLookup(
-        id = "one",
-        state = State.Success(listOf(podcast("one").copy(description = "First description"))),
-      )
-      awaitItem().onPodcastSelected(podcast("two"))
-      val switched = awaitItem()
-      assertThat(switched.descriptionExpanded).isFalse()
-      assertThat(switched.podcast.description).isNull()
-      runCurrent()
-      assertThat(catalog.lookedUp).containsExactly("one", "two")
-      catalog.updateLookup(
-        id = "one",
-        state = State.Success(listOf(podcast("one").copy(description = "Old update"))),
-      )
-      runCurrent()
-      expectNoEvents()
-      catalog.updateLookup(
-        id = "two",
-        state = State.Success(listOf(podcast("two").copy(description = "Second description"))),
-      )
-      val preloaded = awaitItem()
-      assertThat(preloaded.descriptionExpanded).isFalse()
-      assertThat(preloaded.podcast.description).isEqualTo("Second description")
-      preloaded.onToggleDescription()
-      assertThat(awaitItem().descriptionExpanded).isTrue()
-      assertThat(catalog.lookedUp).containsExactly("one", "two")
-    }
-  }
-
-  @Test
-  fun `selected metadata remains visible until lookup provides a matching podcast`() = runTest {
-    val catalog = TestPodcastCatalog()
-    val selected = podcast("one").copy(description = "Chart summary")
-    catalog.updateLookup(id = selected.id, state = State.Loading)
-    presenter(catalog = catalog, initialPodcast = selected)
-      .withPresenterBackstackScope(FakePresenterBackstackScope())
-      .test(this) {
-        val initial = awaitItem()
-        assertThat(initial.podcast).isEqualTo(selected)
-        initial.onToggleDescription()
-        val expanded = awaitItem()
-        assertThat(expanded.podcast.description).isEqualTo("Chart summary")
-        catalog.updateLookup(id = selected.id, state = State.Error)
-        assertThat(awaitItem().podcast).isEqualTo(selected)
-        catalog.updateLookup(
-          id = selected.id,
-          state = State.Success(listOf(podcast("two").copy(description = "Another show"))),
-        )
-        assertThat(awaitItem().podcast).isEqualTo(selected)
-        val loaded = selected.copy(description = "Updated summary")
-        catalog.updateLookup(id = selected.id, state = State.Success(listOf(loaded)))
-        assertThat(awaitItem().podcast).isEqualTo(loaded)
-      }
-  }
-
-  private fun presenter(
-    catalog: TestPodcastCatalog,
-    initialPodcast: DiscoveredPodcast = podcast("one"),
-  ) =
+  private fun presenter(catalog: TestPodcastCatalog, feeds: TestPodcastFeeds) =
     ShowPresenter(
       catalog = catalog,
-      feeds = TestPodcastFeeds(),
-      episodeDetailsFactory = TestEpisodeDetailsFactory(),
-      initialPodcast = initialPodcast,
+      feeds = feeds,
+      episodeDetailsFactory = DetailsFactory(),
+      initialPodcast = podcast("one"),
       podcasts = listOf(podcast("one"), podcast("two")),
       source = ShowPresenter.Source.Browse,
     )
@@ -145,4 +115,45 @@ class ShowPresenterTest {
       artworkUrl = null,
       catalogUrl = null,
     )
+
+  private fun feed(id: String) =
+    PodcastFeed(
+      feedUrl = id,
+      title = "Show $id",
+      description = null,
+      author = null,
+      artworkUrl = null,
+      link = null,
+      episodes =
+        listOf("one", "two").map { episode ->
+          PodcastEpisode(
+            id = episode,
+            title = "Episode $episode",
+            description = null,
+            author = null,
+            artworkUrl = null,
+            publishedAt = null,
+            duration = null,
+            enclosure =
+              PodcastEnclosure(
+                url = "https://audio.test/$episode.mp3",
+                type = "audio/mpeg",
+                length = null,
+              ),
+          )
+        },
+    )
+
+  private class DetailsFactory : EpisodeDetailsPresenter.Factory {
+    override fun create(details: EpisodeDetails): EpisodeDetailsPresenter<*> =
+      object : EpisodeDetailsPresenter<EpisodeModel> {
+        @Composable
+        override fun present(input: Unit): EpisodeModel {
+          val backstack = LocalBackstackScope.requireNotNull()
+          return EpisodeModel(details = details, onBack = { backstack.pop() })
+        }
+      }
+  }
+
+  private data class EpisodeModel(val details: EpisodeDetails, val onBack: () -> Unit) : BaseModel
 }

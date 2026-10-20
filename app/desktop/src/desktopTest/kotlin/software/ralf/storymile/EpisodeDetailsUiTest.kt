@@ -45,8 +45,8 @@ class EpisodeDetailsUiTest {
   }
 
   @Test
-  fun `show episode opens reusable details and returns to the selected show`() {
-    assertNavigation(fromShow = true, size = DpSize(width = 1280.dp, height = 800.dp))
+  fun `compact show episode opens reusable details and returns to the selected show`() {
+    assertNavigation(fromShow = true, size = DpSize(width = 600.dp, height = 800.dp))
   }
 
   @Test
