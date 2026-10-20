@@ -179,12 +179,12 @@ class DiscoveryPresenterImplTest {
       assertThat(show).isInstanceOf<ShowPresenter>()
       // ShowPresenter's model is renderer-only; inspect it through its presenter output.
       (show as ShowPresenter).withPresenterBackstackScope(backstack).test(this@runTest) {
-        val detail = awaitItem()
+        val detail = awaitItem().content
         assertThat(detail.podcast).isEqualTo(podcasts[1])
         assertThat(detail.podcasts).isEqualTo(podcasts)
         assertThat(detail.source).isEqualTo(ShowPresenter.Source.Browse)
         detail.onPodcastSelected(podcasts[0])
-        assertThat(awaitItem().podcast).isEqualTo(podcasts[0])
+        assertThat(awaitItem().content.podcast).isEqualTo(podcasts[0])
         detail.onBack()
         assertThat(backstack.backstack).containsExactly(presenter)
       }
@@ -223,7 +223,7 @@ class DiscoveryPresenterImplTest {
         show.withPresenterBackstackScope(backstack).test(this@runTest) {
           val expectedSource =
             if (topic == null) ShowPresenter.Source.Search else ShowPresenter.Source.Topic(topic)
-          assertThat(awaitItem().source).isEqualTo(expectedSource)
+          assertThat(awaitItem().content.source).isEqualTo(expectedSource)
         }
       }
     }
@@ -273,20 +273,20 @@ class DiscoveryPresenterImplTest {
         source = ShowPresenter.Source.Browse,
       )
     presenter.withPresenterBackstackScope(FakePresenterBackstackScope()).test(this) {
-      val initial = awaitItem()
+      val initial = awaitItem().content
       assertThat(initial.episodes.loading).isEqualTo(true)
       assertThat(feeds.requested.distinct()).containsExactly("one")
       initial.onPodcastSelected(second)
-      val switched = awaitItem()
+      val switched = awaitItem().content
       assertThat(switched.podcast).isEqualTo(second)
       assertThat(switched.episodes.episodes).isEmpty()
       assertThat(feeds.requested.distinct()).containsExactly("one", "two")
       feeds.update("two", software.ralf.storymile.podcast.PodcastFeedRepository.State.Error)
-      val failed = awaitItem()
+      val failed = awaitItem().content
       assertThat(failed.episodes.failed).isEqualTo(true)
       failed.episodes.onRetry()
       assertThat(feeds.refreshed).containsExactly("two")
-      assertThat(awaitItem().episodes.loading).isEqualTo(true)
+      assertThat(awaitItem().content.episodes.loading).isEqualTo(true)
     }
   }
 

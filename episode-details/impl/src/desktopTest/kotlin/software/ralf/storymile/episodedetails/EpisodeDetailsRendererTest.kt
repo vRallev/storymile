@@ -3,10 +3,13 @@ package software.ralf.storymile.episodedetails
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
@@ -14,6 +17,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.Density
 import assertk.assertThat
@@ -79,6 +83,39 @@ class EpisodeDetailsRendererTest {
         }
       }
   }
+
+  @Test
+  fun `selecting another episode resets an embedded pane to the top`() =
+    runDesktopComposeUiTest(width = 480, height = 600) {
+      val first = details("<p>A long episode description.</p>".repeat(100))
+      val model = mutableStateOf(EpisodeDetailsPresenterImpl.Model(details = first, onBack = {}))
+      setContent {
+        CompositionLocalProvider(
+          LocalDensity provides Density(1f),
+          LocalEpisodeDetailsPane provides true,
+        ) {
+          StorymileTheme(environment = environment, darkTheme = false) {
+            EpisodeDetailsRenderer().renderCompose(model.value, Modifier)
+          }
+        }
+      }
+      onNodeWithTag("episode-details-content").performSemanticsAction(SemanticsActions.ScrollBy) {
+        it(0f, 1_500f)
+      }
+      onNodeWithTag("episode-details-artwork").assertIsNotDisplayed()
+      onNodeWithTag("episode-details-title").assertIsNotDisplayed()
+
+      runOnIdle {
+        model.value =
+          model.value.copy(
+            details = first.copy(episode = first.episode.copy(id = "two", title = "Next episode")),
+          )
+      }
+
+      onNodeWithTag("episode-details-artwork").assertIsDisplayed()
+      onNodeWithTag("episode-details-title").assertIsDisplayed().assertTextEquals("Next episode")
+      onNodeWithTag("episode-details-back").assertDoesNotExist()
+    }
 
   @Test
   fun `missing optional metadata shows a description fallback`() =

@@ -7,6 +7,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
+import software.ralf.app.platform.presenter.backstack.nav3.backstack
 import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.storymile.discovery.DiscoveredPodcast
@@ -22,6 +23,7 @@ class EpisodesPresenter(
   private val repository: PodcastFeedRepository,
   private val episodeDetailsFactory: EpisodeDetailsPresenter.Factory,
   private val episodesPerPodcast: Int = Int.MAX_VALUE,
+  private val replaceOpenEpisode: Boolean = false,
 ) : ComposePresenter<List<DiscoveredPodcast>, EpisodesPresenter.Model> {
   @Composable
   override fun present(input: List<DiscoveredPodcast>): Model {
@@ -65,7 +67,14 @@ class EpisodesPresenter(
                 )
               Episode(
                 details = details,
-                onClick = { backstack.push(episodeDetailsFactory.create(details)) },
+                onClick = {
+                  val presenter = episodeDetailsFactory.create(details)
+                  if (replaceOpenEpisode && backstack.backstack.size > 1) {
+                    backstack.replaceTop(presenter)
+                  } else {
+                    backstack.push(presenter)
+                  }
+                },
               )
             }
           } else {

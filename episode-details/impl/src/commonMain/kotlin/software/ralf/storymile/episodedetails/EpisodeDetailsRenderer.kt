@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -42,22 +43,28 @@ class EpisodeDetailsRenderer : ComposeRenderer<EpisodeDetailsPresenterImpl.Model
   @Composable
   override fun Compose(model: EpisodeDetailsPresenterImpl.Model, modifier: Modifier) {
     BoxWithConstraints(
-      modifier.fillMaxSize().screenTransition().testTag("episode-details-screen"),
+      modifier
+        .fillMaxSize()
+        .then(if (LocalEpisodeDetailsPane.current) Modifier else Modifier.screenTransition())
+        .testTag("episode-details-screen"),
     ) {
+      val scrollState = key(model.details.key) { rememberScrollState() }
       val artworkSize = if (maxHeight < 500.dp) 160.dp else 280.dp
       val padding = if (maxWidth < 600.dp) 16.dp else 32.dp
       Column(Modifier.fillMaxSize()) {
-        TitleBar(
-          title = stringResource(Res.string.episode_details),
-          onBack = model.onBack,
-          backButtonModifier = Modifier.testTag("episode-details-back"),
-        )
+        if (!LocalEpisodeDetailsPane.current) {
+          TitleBar(
+            title = stringResource(Res.string.episode_details),
+            onBack = model.onBack,
+            backButtonModifier = Modifier.testTag("episode-details-back"),
+          )
+        }
         Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
           Column(
             modifier =
               Modifier.widthIn(max = 800.dp)
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .testTag("episode-details-content")
                 .padding(padding),
             verticalArrangement = Arrangement.spacedBy(20.dp),

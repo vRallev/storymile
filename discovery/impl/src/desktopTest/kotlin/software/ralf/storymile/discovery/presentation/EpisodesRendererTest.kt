@@ -66,7 +66,7 @@ class EpisodesRendererTest {
     }
 
   @Test
-  fun `show episodes scroll in narrow wide and large text layouts`() {
+  fun `show episodes scroll across widths and large text layouts`() {
     listOf(
         Triple(412, 916, 1f),
         Triple(759, 600, 1f),
@@ -79,7 +79,7 @@ class EpisodesRendererTest {
           val podcast =
             DiscoveredPodcast("show", "The Quiet Current", "A publisher", "feed", null, null)
           val model =
-            ShowPresenter.Model(
+            ShowContentPresenter.Model(
               podcast = podcast,
               podcasts = listOf(podcast),
               source = ShowPresenter.Source.Browse,
@@ -91,7 +91,7 @@ class EpisodesRendererTest {
             )
           setContent {
             ThemedContent(fontScale) {
-              ShowRenderer().renderCompose(model, Modifier.fillMaxSize())
+              ShowContentRenderer().renderCompose(model, Modifier.fillMaxSize())
             }
           }
           onNodeWithTag("show-detail").performScrollToNode(hasTestTag("episode-0"))

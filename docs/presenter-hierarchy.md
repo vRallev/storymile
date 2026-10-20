@@ -14,7 +14,8 @@ flowchart TD
   HomePresenter["HomePresenterImpl\nbackstack"]
   HomeContentPresenter["HomeContentPresenter\nempty home"]
   DiscoveryPresenterImpl["DiscoveryPresenterImpl\nbrowse, topics, and search"]
-  ShowPresenter["ShowPresenter\npodcast preview"]
+  ShowPresenter["ShowPresenter\nshow backstack"]
+  ShowContentPresenter["ShowContentPresenter\npodcast preview"]
   EpisodeDetailsPresenter["EpisodeDetailsPresenterImpl\nepisode details"]
   EpisodesPresenter["EpisodesPresenter\nfeed episodes"]
   DownloadsPresenter["DownloadsPresenterImpl\nempty downloads"]
@@ -32,7 +33,9 @@ flowchart TD
   HomePresenter -->|pushed entry| ShowPresenter
   HomePresenter -->|pushed entry| EpisodeDetailsPresenter
   DiscoveryPresenterImpl -->|browse and topics| EpisodesPresenter
-  ShowPresenter --> EpisodesPresenter
+  ShowPresenter -->|root| ShowContentPresenter
+  ShowPresenter -->|pushed entry| EpisodeDetailsPresenter
+  ShowContentPresenter --> EpisodesPresenter
   TabsPresenter -->|Library| LibraryPresenter
   TabsPresenter -->|Downloads| DownloadsPresenter
   UserPresenter --> PlaybackPresenter
@@ -64,7 +67,9 @@ Discover and Search push
 [DiscoveryPresenterImpl](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/DiscoveryPresenterImpl.kt).
 Topic selection pushes another catalog. Podcast selection pushes
 [ShowPresenter](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/ShowPresenter.kt).
-Both presenters compose
+It owns a nested backstack rooted at
+[ShowContentPresenter](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/ShowContentPresenter.kt).
+Discovery and show content compose
 [EpisodesPresenter](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/EpisodesPresenter.kt)
 for feed episodes, rendered by the shared
 [episode components](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/Episodes.kt).
@@ -72,7 +77,7 @@ Episode selection pushes the reusable
 [episode details presenter](../episode-details/impl/src/commonMain/kotlin/software/ralf/storymile/episodedetails/EpisodeDetailsPresenterImpl.kt)
 through its [public factory](../episode-details/public/src/commonMain/kotlin/software/ralf/storymile/episodedetails/EpisodeDetailsPresenter.kt).
 Its [renderer](../episode-details/impl/src/commonMain/kotlin/software/ralf/storymile/episodedetails/EpisodeDetailsRenderer.kt)
-shares artwork and episode text with the source row.
+shares artwork and episode text with the source row in narrow layouts.
 The [backstack renderer](../presenter-navigation/impl/src/commonMain/kotlin/software/ralf/storymile/presenternavigation/DefaultBackstackRenderer.kt)
 supplies navigation entry identities for these UI transitions.
 Back returns to the previous entry. Reselecting Home calls its model callback to pop to the welcome
@@ -110,8 +115,12 @@ wide panes. The illustration shrinks to keep the content within the window.
 [DiscoveryRenderer](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/DiscoveryRenderer.kt)
 adapts browsing, topics, and search to the available width.
 [ShowRenderer](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/ShowRenderer.kt)
-shows the catalog beside the selected podcast in wide panes. Narrow previews show only the selected
-podcast. Both layouts use the same presenter stack.
+renders the show backstack. In wide layouts, its navigation scene shows the catalog beside
+the podcast. Episode selection slides the catalog out, moves the podcast left, and opens episode
+details on the right. Back reverses the transition.
+[ShowContentRenderer](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/ShowContentRenderer.kt)
+renders the podcast and its episodes. Narrow layouts show one destination at a time.
+Resizing preserves the selected episode and presenter stack.
 
 [LibraryRenderer](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryRenderer.kt)
 shows Queue, Shows, and Saved placeholders at phone, tablet, and desktop widths.
