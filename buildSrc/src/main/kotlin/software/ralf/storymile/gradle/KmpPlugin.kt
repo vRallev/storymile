@@ -45,9 +45,12 @@ internal class KmpPlugin : Plugin<Project> {
       common {
         // Compose shares its system-theme API across the Skiko targets.
         group("skiko") {
-          withJvm()
-          withIos()
-          withWasmJs()
+          group("appleAndDesktop") {
+            withJvm()
+            group("apple")
+          }
+          group("native")
+          group("web")
         }
       }
     }
@@ -64,10 +67,8 @@ internal class KmpPlugin : Plugin<Project> {
       noWasmJs.dependsOn(sourceSets.getByName("common$suffix"))
       sourceSets.named("native$suffix").configure { it.dependsOn(noWasmJs) }
 
-      val appleAndDesktop = sourceSets.create("appleAndDesktop$suffix")
+      val appleAndDesktop = sourceSets.getByName("appleAndDesktop$suffix")
       appleAndDesktop.dependsOn(noWasmJs)
-      sourceSets.named("apple$suffix").configure { it.dependsOn(appleAndDesktop) }
-      sourceSets.named("desktop$suffix").configure { it.dependsOn(appleAndDesktop) }
 
       val commonJvm = sourceSets.create("commonJvm$suffix")
       commonJvm.dependsOn(noWasmJs)

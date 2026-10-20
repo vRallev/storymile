@@ -1,365 +1,345 @@
-<svg width="1398px" height="404px"
- viewBox="0.00 0.00 1397.72 404.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="1258px" height="404px"
+ viewBox="0.00 0.00 1258.01 404.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1.0 1.0) rotate(0.0) translate(4.0 400.0)">
 <title>http&#45;impl</title>
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-400 1393.72,-400 1393.72,4 -4,4"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-400 1254.01,-400 1254.01,4 -4,4"/>
 <!-- commonTest -->
 <g id="node1" class="node">
 <title>commonTest</title>
-<ellipse fill="none" stroke="black" cx="141.7" cy="-378" rx="61.42" ry="18"/>
-<text text-anchor="middle" x="141.7" y="-373.8" font-family="Times,serif" font-size="14.00">commonTest</text>
-</g>
-<!-- webTest -->
-<g id="node2" class="node">
-<title>webTest</title>
-<ellipse fill="none" stroke="black" cx="67.7" cy="-306" rx="44" ry="18"/>
-<text text-anchor="middle" x="67.7" y="-301.8" font-family="Times,serif" font-size="14.00">webTest</text>
-</g>
-<!-- commonTest&#45;&#45;webTest -->
-<g id="edge1" class="edge">
-<title>commonTest&#45;&#45;webTest</title>
-<path fill="none" stroke="black" d="M124.16,-360.41C112.11,-349.01 96.2,-333.97 84.35,-322.75"/>
+<ellipse fill="none" stroke="black" cx="354.55" cy="-378" rx="61.42" ry="18"/>
+<text text-anchor="middle" x="354.55" y="-373.8" font-family="Times,serif" font-size="14.00">commonTest</text>
 </g>
 <!-- skikoTest -->
-<g id="node3" class="node">
+<g id="node2" class="node">
 <title>skikoTest</title>
-<ellipse fill="none" stroke="black" cx="141.7" cy="-234" rx="48.67" ry="18"/>
-<text text-anchor="middle" x="141.7" y="-229.8" font-family="Times,serif" font-size="14.00">skikoTest</text>
+<ellipse fill="none" stroke="black" cx="422.55" cy="-306" rx="48.67" ry="18"/>
+<text text-anchor="middle" x="422.55" y="-301.8" font-family="Times,serif" font-size="14.00">skikoTest</text>
 </g>
 <!-- commonTest&#45;&#45;skikoTest -->
-<g id="edge2" class="edge">
+<g id="edge1" class="edge">
 <title>commonTest&#45;&#45;skikoTest</title>
-<path fill="none" stroke="black" d="M141.7,-359.87C141.7,-332.58 141.7,-279.52 141.7,-252.19"/>
+<path fill="none" stroke="black" d="M370.67,-360.41C381.51,-349.25 395.74,-334.6 406.56,-323.47"/>
 </g>
 <!-- noWasmJsTest -->
-<g id="node4" class="node">
+<g id="node3" class="node">
 <title>noWasmJsTest</title>
-<ellipse fill="none" stroke="black" cx="382.7" cy="-306" rx="69.5" ry="18"/>
-<text text-anchor="middle" x="382.7" y="-301.8" font-family="Times,serif" font-size="14.00">noWasmJsTest</text>
+<ellipse fill="none" stroke="black" cx="278.55" cy="-306" rx="69.5" ry="18"/>
+<text text-anchor="middle" x="278.55" y="-301.8" font-family="Times,serif" font-size="14.00">noWasmJsTest</text>
 </g>
 <!-- commonTest&#45;&#45;noWasmJsTest -->
-<g id="edge3" class="edge">
+<g id="edge2" class="edge">
 <title>commonTest&#45;&#45;noWasmJsTest</title>
-<path fill="none" stroke="black" d="M183.68,-364.81C226.97,-352.23 294.21,-332.7 338.35,-319.88"/>
-</g>
-<!-- wasmJsTest -->
-<g id="node24" class="node">
-<title>wasmJsTest</title>
-<ellipse fill="none" stroke="black" cx="57.7" cy="-162" rx="57.9" ry="18"/>
-<text text-anchor="middle" x="57.7" y="-157.8" font-family="Times,serif" font-size="14.00">wasmJsTest</text>
-</g>
-<!-- webTest&#45;&#45;wasmJsTest -->
-<g id="edge38" class="edge">
-<title>webTest&#45;&#45;wasmJsTest</title>
-<path fill="none" stroke="black" d="M66.49,-287.87C64.57,-260.58 60.83,-207.52 58.91,-180.19"/>
-</g>
-<!-- desktopTest -->
-<g id="node8" class="node">
-<title>desktopTest</title>
-<ellipse fill="none" stroke="black" cx="435.7" cy="-162" rx="57.9" ry="18"/>
-<text text-anchor="middle" x="435.7" y="-157.8" font-family="Times,serif" font-size="14.00">desktopTest</text>
-</g>
-<!-- skikoTest&#45;&#45;desktopTest -->
-<g id="edge28" class="edge">
-<title>skikoTest&#45;&#45;desktopTest</title>
-<path fill="none" stroke="black" d="M177.76,-221.76C184.68,-219.74 191.89,-217.73 198.7,-216 273.54,-196.95 293.48,-197.5 368.7,-180 376.53,-178.18 384.85,-176.15 392.87,-174.14"/>
-</g>
-<!-- skikoTest&#45;&#45;wasmJsTest -->
-<g id="edge25" class="edge">
-<title>skikoTest&#45;&#45;wasmJsTest</title>
-<path fill="none" stroke="black" d="M122.64,-217.12C108.99,-205.74 90.67,-190.48 76.98,-179.06"/>
-</g>
-<!-- iosSimulatorArm64Test -->
-<g id="node25" class="node">
-<title>iosSimulatorArm64Test</title>
-<ellipse fill="none" stroke="black" cx="143.7" cy="-18" rx="104.25" ry="18"/>
-<text text-anchor="middle" x="143.7" y="-13.8" font-family="Times,serif" font-size="14.00">iosSimulatorArm64Test</text>
-</g>
-<!-- skikoTest&#45;&#45;iosSimulatorArm64Test -->
-<g id="edge26" class="edge">
-<title>skikoTest&#45;&#45;iosSimulatorArm64Test</title>
-<path fill="none" stroke="black" d="M141.86,-215.85C142.23,-175.78 143.16,-76.38 143.54,-36.23"/>
-</g>
-<!-- iosArm64Test -->
-<g id="node26" class="node">
-<title>iosArm64Test</title>
-<ellipse fill="none" stroke="black" cx="332.7" cy="-18" rx="66.07" ry="18"/>
-<text text-anchor="middle" x="332.7" y="-13.8" font-family="Times,serif" font-size="14.00">iosArm64Test</text>
-</g>
-<!-- skikoTest&#45;&#45;iosArm64Test -->
-<g id="edge27" class="edge">
-<title>skikoTest&#45;&#45;iosArm64Test</title>
-<path fill="none" stroke="black" d="M151.3,-216.13C162.2,-197.62 181.02,-167.41 200.7,-144 236.44,-101.48 285.43,-58.34 312.56,-35.53"/>
+<path fill="none" stroke="black" d="M336.54,-360.41C324.43,-349.25 308.52,-334.6 296.44,-323.47"/>
 </g>
 <!-- nativeTest -->
-<g id="node5" class="node">
+<g id="node4" class="node">
 <title>nativeTest</title>
-<ellipse fill="none" stroke="black" cx="645.7" cy="-234" rx="51.02" ry="18"/>
-<text text-anchor="middle" x="645.7" y="-229.8" font-family="Times,serif" font-size="14.00">nativeTest</text>
+<ellipse fill="none" stroke="black" cx="437.55" cy="-234" rx="51.02" ry="18"/>
+<text text-anchor="middle" x="437.55" y="-229.8" font-family="Times,serif" font-size="14.00">nativeTest</text>
 </g>
-<!-- noWasmJsTest&#45;&#45;nativeTest -->
-<g id="edge4" class="edge">
-<title>noWasmJsTest&#45;&#45;nativeTest</title>
-<path fill="none" stroke="black" d="M430.1,-292.78C471.07,-282.17 531.85,-266.3 584.7,-252 591.92,-250.05 599.6,-247.93 607,-245.88"/>
+<!-- skikoTest&#45;&#45;nativeTest -->
+<g id="edge21" class="edge">
+<title>skikoTest&#45;&#45;nativeTest</title>
+<path fill="none" stroke="black" d="M426.26,-287.7C428.59,-276.85 431.57,-262.92 433.89,-252.1"/>
 </g>
 <!-- appleAndDesktopTest -->
-<g id="node6" class="node">
+<g id="node5" class="node">
 <title>appleAndDesktopTest</title>
-<ellipse fill="none" stroke="black" cx="478.7" cy="-234" rx="97.27" ry="18"/>
-<text text-anchor="middle" x="478.7" y="-229.8" font-family="Times,serif" font-size="14.00">appleAndDesktopTest</text>
+<ellipse fill="none" stroke="black" cx="270.55" cy="-234" rx="97.27" ry="18"/>
+<text text-anchor="middle" x="270.55" y="-229.8" font-family="Times,serif" font-size="14.00">appleAndDesktopTest</text>
+</g>
+<!-- skikoTest&#45;&#45;appleAndDesktopTest -->
+<g id="edge22" class="edge">
+<title>skikoTest&#45;&#45;appleAndDesktopTest</title>
+<path fill="none" stroke="black" d="M393.25,-291.5C368.06,-279.9 331.69,-263.16 305.09,-250.91"/>
+</g>
+<!-- webTest -->
+<g id="node19" class="node">
+<title>webTest</title>
+<ellipse fill="none" stroke="black" cx="550.55" cy="-234" rx="44" ry="18"/>
+<text text-anchor="middle" x="550.55" y="-229.8" font-family="Times,serif" font-size="14.00">webTest</text>
+</g>
+<!-- skikoTest&#45;&#45;webTest -->
+<g id="edge20" class="edge">
+<title>skikoTest&#45;&#45;webTest</title>
+<path fill="none" stroke="black" d="M448.77,-290.67C471.15,-278.43 503.13,-260.93 525.25,-248.84"/>
+</g>
+<!-- noWasmJsTest&#45;&#45;nativeTest -->
+<g id="edge3" class="edge">
+<title>noWasmJsTest&#45;&#45;nativeTest</title>
+<path fill="none" stroke="black" d="M312.27,-290.15C340.26,-277.83 379.73,-260.46 406.84,-248.52"/>
 </g>
 <!-- noWasmJsTest&#45;&#45;appleAndDesktopTest -->
-<g id="edge5" class="edge">
+<g id="edge4" class="edge">
 <title>noWasmJsTest&#45;&#45;appleAndDesktopTest</title>
-<path fill="none" stroke="black" d="M404.96,-288.76C420.25,-277.62 440.48,-262.87 455.89,-251.63"/>
+<path fill="none" stroke="black" d="M276.58,-287.7C275.34,-276.85 273.74,-262.92 272.51,-252.1"/>
 </g>
 <!-- commonJvmTest -->
-<g id="node7" class="node">
+<g id="node6" class="node">
 <title>commonJvmTest</title>
-<ellipse fill="none" stroke="black" cx="285.7" cy="-234" rx="77.61" ry="18"/>
-<text text-anchor="middle" x="285.7" y="-229.8" font-family="Times,serif" font-size="14.00">commonJvmTest</text>
+<ellipse fill="none" stroke="black" cx="77.55" cy="-234" rx="77.61" ry="18"/>
+<text text-anchor="middle" x="77.55" y="-229.8" font-family="Times,serif" font-size="14.00">commonJvmTest</text>
 </g>
 <!-- noWasmJsTest&#45;&#45;commonJvmTest -->
-<g id="edge6" class="edge">
+<g id="edge5" class="edge">
 <title>noWasmJsTest&#45;&#45;commonJvmTest</title>
-<path fill="none" stroke="black" d="M360.2,-288.76C344.64,-277.54 324.02,-262.65 308.41,-251.39"/>
+<path fill="none" stroke="black" d="M238.84,-291.17C204.06,-279.06 153.72,-261.53 118.56,-249.28"/>
 </g>
 <!-- appleTest -->
-<g id="node23" class="node">
+<g id="node20" class="node">
 <title>appleTest</title>
-<ellipse fill="none" stroke="black" cx="559.7" cy="-162" rx="48.65" ry="18"/>
-<text text-anchor="middle" x="559.7" y="-157.8" font-family="Times,serif" font-size="14.00">appleTest</text>
+<ellipse fill="none" stroke="black" cx="410.55" cy="-162" rx="48.65" ry="18"/>
+<text text-anchor="middle" x="410.55" y="-157.8" font-family="Times,serif" font-size="14.00">appleTest</text>
 </g>
 <!-- nativeTest&#45;&#45;appleTest -->
-<g id="edge33" class="edge">
+<g id="edge29" class="edge">
 <title>nativeTest&#45;&#45;appleTest</title>
-<path fill="none" stroke="black" d="M626.18,-217.12C612.01,-205.58 592.93,-190.05 578.84,-178.58"/>
+<path fill="none" stroke="black" d="M431.02,-216.05C426.84,-205.21 421.43,-191.18 417.22,-180.28"/>
+</g>
+<!-- desktopTest -->
+<g id="node7" class="node">
+<title>desktopTest</title>
+<ellipse fill="none" stroke="black" cx="249.55" cy="-162" rx="57.9" ry="18"/>
+<text text-anchor="middle" x="249.55" y="-157.8" font-family="Times,serif" font-size="14.00">desktopTest</text>
 </g>
 <!-- appleAndDesktopTest&#45;&#45;desktopTest -->
 <g id="edge24" class="edge">
 <title>appleAndDesktopTest&#45;&#45;desktopTest</title>
-<path fill="none" stroke="black" d="M468.29,-216.05C461.53,-205.05 452.75,-190.76 446.01,-179.79"/>
+<path fill="none" stroke="black" d="M265.36,-215.7C262.11,-204.85 257.93,-190.92 254.69,-180.1"/>
 </g>
 <!-- appleAndDesktopTest&#45;&#45;appleTest -->
 <g id="edge23" class="edge">
 <title>appleAndDesktopTest&#45;&#45;appleTest</title>
-<path fill="none" stroke="black" d="M498.31,-216.05C511.42,-204.73 528.55,-189.92 541.38,-178.83"/>
+<path fill="none" stroke="black" d="M302.67,-216.94C326.89,-204.83 359.77,-188.39 382.84,-176.86"/>
 </g>
 <!-- commonJvmTest&#45;&#45;desktopTest -->
-<g id="edge7" class="edge">
+<g id="edge6" class="edge">
 <title>commonJvmTest&#45;&#45;desktopTest</title>
-<path fill="none" stroke="black" d="M318.62,-217.64C344.32,-205.65 379.76,-189.1 404.9,-177.37"/>
+<path fill="none" stroke="black" d="M114.45,-217.98C144.56,-205.73 186.74,-188.56 215.92,-176.69"/>
 </g>
 <!-- androidHostTest -->
-<g id="node9" class="node">
+<g id="node8" class="node">
 <title>androidHostTest</title>
-<ellipse fill="none" stroke="black" cx="284.7" cy="-162" rx="75.3" ry="18"/>
-<text text-anchor="middle" x="284.7" y="-157.8" font-family="Times,serif" font-size="14.00">androidHostTest</text>
+<ellipse fill="none" stroke="black" cx="77.55" cy="-162" rx="75.3" ry="18"/>
+<text text-anchor="middle" x="77.55" y="-157.8" font-family="Times,serif" font-size="14.00">androidHostTest</text>
 </g>
 <!-- commonJvmTest&#45;&#45;androidHostTest -->
-<g id="edge8" class="edge">
+<g id="edge7" class="edge">
 <title>commonJvmTest&#45;&#45;androidHostTest</title>
-<path fill="none" stroke="black" d="M285.45,-215.7C285.3,-204.85 285.1,-190.92 284.94,-180.1"/>
+<path fill="none" stroke="black" d="M77.55,-215.7C77.55,-204.85 77.55,-190.92 77.55,-180.1"/>
 </g>
 <!-- commonMain -->
-<g id="node10" class="node">
+<g id="node9" class="node">
 <title>commonMain</title>
-<ellipse fill="none" stroke="black" cx="808.7" cy="-378" rx="65.43" ry="18"/>
-<text text-anchor="middle" x="808.7" y="-373.8" font-family="Times,serif" font-size="14.00">commonMain</text>
-</g>
-<!-- webMain -->
-<g id="node11" class="node">
-<title>webMain</title>
-<ellipse fill="none" stroke="black" cx="730.7" cy="-306" rx="47.51" ry="18"/>
-<text text-anchor="middle" x="730.7" y="-301.8" font-family="Times,serif" font-size="14.00">webMain</text>
-</g>
-<!-- commonMain&#45;&#45;webMain -->
-<g id="edge9" class="edge">
-<title>commonMain&#45;&#45;webMain</title>
-<path fill="none" stroke="black" d="M790.21,-360.41C777.51,-349.01 760.75,-333.97 748.25,-322.75"/>
+<ellipse fill="none" stroke="black" cx="979.55" cy="-378" rx="65.43" ry="18"/>
+<text text-anchor="middle" x="979.55" y="-373.8" font-family="Times,serif" font-size="14.00">commonMain</text>
 </g>
 <!-- skikoMain -->
-<g id="node12" class="node">
+<g id="node10" class="node">
 <title>skikoMain</title>
-<ellipse fill="none" stroke="black" cx="808.7" cy="-234" rx="52.19" ry="18"/>
-<text text-anchor="middle" x="808.7" y="-229.8" font-family="Times,serif" font-size="14.00">skikoMain</text>
+<ellipse fill="none" stroke="black" cx="1059.55" cy="-306" rx="52.19" ry="18"/>
+<text text-anchor="middle" x="1059.55" y="-301.8" font-family="Times,serif" font-size="14.00">skikoMain</text>
 </g>
 <!-- commonMain&#45;&#45;skikoMain -->
-<g id="edge10" class="edge">
+<g id="edge8" class="edge">
 <title>commonMain&#45;&#45;skikoMain</title>
-<path fill="none" stroke="black" d="M808.7,-359.87C808.7,-332.58 808.7,-279.52 808.7,-252.19"/>
+<path fill="none" stroke="black" d="M998.51,-360.41C1011.45,-349.09 1028.49,-334.18 1041.28,-322.99"/>
 </g>
 <!-- noWasmJsMain -->
-<g id="node13" class="node">
+<g id="node11" class="node">
 <title>noWasmJsMain</title>
-<ellipse fill="none" stroke="black" cx="1060.7" cy="-306" rx="73.02" ry="18"/>
-<text text-anchor="middle" x="1060.7" y="-301.8" font-family="Times,serif" font-size="14.00">noWasmJsMain</text>
+<ellipse fill="none" stroke="black" cx="900.55" cy="-306" rx="73.02" ry="18"/>
+<text text-anchor="middle" x="900.55" y="-301.8" font-family="Times,serif" font-size="14.00">noWasmJsMain</text>
 </g>
 <!-- commonMain&#45;&#45;noWasmJsMain -->
-<g id="edge11" class="edge">
+<g id="edge9" class="edge">
 <title>commonMain&#45;&#45;noWasmJsMain</title>
-<path fill="none" stroke="black" d="M852.88,-364.73C898.05,-352.18 967.94,-332.77 1014,-319.97"/>
-</g>
-<!-- wasmJsMain -->
-<g id="node20" class="node">
-<title>wasmJsMain</title>
-<ellipse fill="none" stroke="black" cx="721.7" cy="-162" rx="61.41" ry="18"/>
-<text text-anchor="middle" x="721.7" y="-157.8" font-family="Times,serif" font-size="14.00">wasmJsMain</text>
-</g>
-<!-- webMain&#45;&#45;wasmJsMain -->
-<g id="edge37" class="edge">
-<title>webMain&#45;&#45;wasmJsMain</title>
-<path fill="none" stroke="black" d="M729.61,-287.87C727.88,-260.58 724.52,-207.52 722.79,-180.19"/>
-</g>
-<!-- desktopMain -->
-<g id="node17" class="node">
-<title>desktopMain</title>
-<ellipse fill="none" stroke="black" cx="1077.7" cy="-162" rx="61.42" ry="18"/>
-<text text-anchor="middle" x="1077.7" y="-157.8" font-family="Times,serif" font-size="14.00">desktopMain</text>
-</g>
-<!-- skikoMain&#45;&#45;desktopMain -->
-<g id="edge22" class="edge">
-<title>skikoMain&#45;&#45;desktopMain</title>
-<path fill="none" stroke="black" d="M848.03,-222.11C855.55,-220.06 863.36,-217.94 870.7,-216 926.28,-201.27 990.44,-184.94 1032.42,-174.36"/>
-</g>
-<!-- skikoMain&#45;&#45;wasmJsMain -->
-<g id="edge19" class="edge">
-<title>skikoMain&#45;&#45;wasmJsMain</title>
-<path fill="none" stroke="black" d="M788.96,-217.12C774.82,-205.74 755.85,-190.48 741.66,-179.06"/>
-</g>
-<!-- iosSimulatorArm64Main -->
-<g id="node21" class="node">
-<title>iosSimulatorArm64Main</title>
-<ellipse fill="none" stroke="black" cx="810.7" cy="-18" rx="108.26" ry="18"/>
-<text text-anchor="middle" x="810.7" y="-13.8" font-family="Times,serif" font-size="14.00">iosSimulatorArm64Main</text>
-</g>
-<!-- skikoMain&#45;&#45;iosSimulatorArm64Main -->
-<g id="edge20" class="edge">
-<title>skikoMain&#45;&#45;iosSimulatorArm64Main</title>
-<path fill="none" stroke="black" d="M808.86,-215.85C809.23,-175.78 810.16,-76.38 810.54,-36.23"/>
-</g>
-<!-- iosArm64Main -->
-<g id="node22" class="node">
-<title>iosArm64Main</title>
-<ellipse fill="none" stroke="black" cx="1006.7" cy="-18" rx="70.08" ry="18"/>
-<text text-anchor="middle" x="1006.7" y="-13.8" font-family="Times,serif" font-size="14.00">iosArm64Main</text>
-</g>
-<!-- skikoMain&#45;&#45;iosArm64Main -->
-<g id="edge21" class="edge">
-<title>skikoMain&#45;&#45;iosArm64Main</title>
-<path fill="none" stroke="black" d="M818.19,-216.04C828.98,-197.44 847.72,-167.16 867.7,-144 905.01,-100.75 956.72,-57.89 985.39,-35.32"/>
+<path fill="none" stroke="black" d="M960.83,-360.41C948.24,-349.25 931.71,-334.6 919.14,-323.47"/>
 </g>
 <!-- nativeMain -->
-<g id="node14" class="node">
+<g id="node12" class="node">
 <title>nativeMain</title>
-<ellipse fill="none" stroke="black" cx="1334.7" cy="-234" rx="55.03" ry="18"/>
-<text text-anchor="middle" x="1334.7" y="-229.8" font-family="Times,serif" font-size="14.00">nativeMain</text>
+<ellipse fill="none" stroke="black" cx="1067.55" cy="-234" rx="55.03" ry="18"/>
+<text text-anchor="middle" x="1067.55" y="-229.8" font-family="Times,serif" font-size="14.00">nativeMain</text>
 </g>
-<!-- noWasmJsMain&#45;&#45;nativeMain -->
-<g id="edge12" class="edge">
-<title>noWasmJsMain&#45;&#45;nativeMain</title>
-<path fill="none" stroke="black" d="M1110.39,-292.64C1152.97,-282.01 1215.92,-266.19 1270.7,-252 1278.04,-250.1 1285.86,-248.05 1293.41,-246.05"/>
+<!-- skikoMain&#45;&#45;nativeMain -->
+<g id="edge16" class="edge">
+<title>skikoMain&#45;&#45;nativeMain</title>
+<path fill="none" stroke="black" d="M1061.53,-287.7C1062.77,-276.85 1064.36,-262.92 1065.6,-252.1"/>
 </g>
 <!-- appleAndDesktopMain -->
-<g id="node15" class="node">
+<g id="node13" class="node">
 <title>appleAndDesktopMain</title>
-<ellipse fill="none" stroke="black" cx="1160.7" cy="-234" rx="101.29" ry="18"/>
-<text text-anchor="middle" x="1160.7" y="-229.8" font-family="Times,serif" font-size="14.00">appleAndDesktopMain</text>
+<ellipse fill="none" stroke="black" cx="893.55" cy="-234" rx="101.29" ry="18"/>
+<text text-anchor="middle" x="893.55" y="-229.8" font-family="Times,serif" font-size="14.00">appleAndDesktopMain</text>
+</g>
+<!-- skikoMain&#45;&#45;appleAndDesktopMain -->
+<g id="edge17" class="edge">
+<title>skikoMain&#45;&#45;appleAndDesktopMain</title>
+<path fill="none" stroke="black" d="M1027.55,-291.5C999.94,-279.86 960.05,-263.04 930.98,-250.78"/>
+</g>
+<!-- webMain -->
+<g id="node17" class="node">
+<title>webMain</title>
+<ellipse fill="none" stroke="black" cx="1188.55" cy="-234" rx="47.51" ry="18"/>
+<text text-anchor="middle" x="1188.55" y="-229.8" font-family="Times,serif" font-size="14.00">webMain</text>
+</g>
+<!-- skikoMain&#45;&#45;webMain -->
+<g id="edge15" class="edge">
+<title>skikoMain&#45;&#45;webMain</title>
+<path fill="none" stroke="black" d="M1086.28,-290.5C1108.57,-278.4 1140.15,-261.27 1162.3,-249.25"/>
+</g>
+<!-- noWasmJsMain&#45;&#45;nativeMain -->
+<g id="edge10" class="edge">
+<title>noWasmJsMain&#45;&#45;nativeMain</title>
+<path fill="none" stroke="black" d="M935.97,-290.15C965.27,-277.87 1006.55,-260.57 1035.02,-248.64"/>
 </g>
 <!-- noWasmJsMain&#45;&#45;appleAndDesktopMain -->
-<g id="edge13" class="edge">
+<g id="edge11" class="edge">
 <title>noWasmJsMain&#45;&#45;appleAndDesktopMain</title>
-<path fill="none" stroke="black" d="M1083.89,-288.76C1099.82,-277.62 1120.89,-262.87 1136.94,-251.63"/>
+<path fill="none" stroke="black" d="M898.82,-287.7C897.74,-276.85 896.35,-262.92 895.26,-252.1"/>
 </g>
 <!-- commonJvmMain -->
-<g id="node16" class="node">
+<g id="node14" class="node">
 <title>commonJvmMain</title>
-<ellipse fill="none" stroke="black" cx="960.7" cy="-234" rx="81.12" ry="18"/>
-<text text-anchor="middle" x="960.7" y="-229.8" font-family="Times,serif" font-size="14.00">commonJvmMain</text>
+<ellipse fill="none" stroke="black" cx="693.55" cy="-234" rx="81.12" ry="18"/>
+<text text-anchor="middle" x="693.55" y="-229.8" font-family="Times,serif" font-size="14.00">commonJvmMain</text>
 </g>
 <!-- noWasmJsMain&#45;&#45;commonJvmMain -->
-<g id="edge14" class="edge">
+<g id="edge12" class="edge">
 <title>noWasmJsMain&#45;&#45;commonJvmMain</title>
-<path fill="none" stroke="black" d="M1037.51,-288.76C1021.47,-277.54 1000.2,-262.65 984.11,-251.39"/>
+<path fill="none" stroke="black" d="M859.16,-291C823.53,-278.95 772.32,-261.63 736.3,-249.45"/>
 </g>
 <!-- appleMain -->
-<g id="node19" class="node">
+<g id="node18" class="node">
 <title>appleMain</title>
-<ellipse fill="none" stroke="black" cx="1209.7" cy="-162" rx="52.17" ry="18"/>
-<text text-anchor="middle" x="1209.7" y="-157.8" font-family="Times,serif" font-size="14.00">appleMain</text>
+<ellipse fill="none" stroke="black" cx="1025.55" cy="-162" rx="52.17" ry="18"/>
+<text text-anchor="middle" x="1025.55" y="-157.8" font-family="Times,serif" font-size="14.00">appleMain</text>
 </g>
 <!-- nativeMain&#45;&#45;appleMain -->
-<g id="edge29" class="edge">
+<g id="edge25" class="edge">
 <title>nativeMain&#45;&#45;appleMain</title>
-<path fill="none" stroke="black" d="M1308.19,-218.15C1286.98,-206.28 1257.37,-189.7 1236.17,-177.82"/>
+<path fill="none" stroke="black" d="M1057.39,-216.05C1050.78,-205.05 1042.21,-190.76 1035.63,-179.79"/>
+</g>
+<!-- desktopMain -->
+<g id="node15" class="node">
+<title>desktopMain</title>
+<ellipse fill="none" stroke="black" cx="863.55" cy="-162" rx="61.42" ry="18"/>
+<text text-anchor="middle" x="863.55" y="-157.8" font-family="Times,serif" font-size="14.00">desktopMain</text>
 </g>
 <!-- appleAndDesktopMain&#45;&#45;desktopMain -->
-<g id="edge18" class="edge">
+<g id="edge19" class="edge">
 <title>appleAndDesktopMain&#45;&#45;desktopMain</title>
-<path fill="none" stroke="black" d="M1140.61,-216.05C1127.37,-204.89 1110.12,-190.34 1097.03,-179.31"/>
+<path fill="none" stroke="black" d="M886.14,-215.7C881.49,-204.85 875.52,-190.92 870.88,-180.1"/>
 </g>
 <!-- appleAndDesktopMain&#45;&#45;appleMain -->
-<g id="edge17" class="edge">
+<g id="edge18" class="edge">
 <title>appleAndDesktopMain&#45;&#45;appleMain</title>
-<path fill="none" stroke="black" d="M1172.56,-216.05C1180.26,-205.05 1190.26,-190.76 1197.95,-179.79"/>
+<path fill="none" stroke="black" d="M924.17,-216.76C946.56,-204.89 976.67,-188.93 998.24,-177.48"/>
 </g>
 <!-- commonJvmMain&#45;&#45;desktopMain -->
-<g id="edge15" class="edge">
+<g id="edge13" class="edge">
 <title>commonJvmMain&#45;&#45;desktopMain</title>
-<path fill="none" stroke="black" d="M987.54,-216.94C1006.84,-205.4 1032.71,-189.92 1051.79,-178.5"/>
+<path fill="none" stroke="black" d="M730.44,-217.81C759.84,-205.71 800.67,-188.89 829.34,-177.09"/>
 </g>
 <!-- androidMain -->
-<g id="node18" class="node">
+<g id="node16" class="node">
 <title>androidMain</title>
-<ellipse fill="none" stroke="black" cx="937.7" cy="-162" rx="60.84" ry="18"/>
-<text text-anchor="middle" x="937.7" y="-157.8" font-family="Times,serif" font-size="14.00">androidMain</text>
+<ellipse fill="none" stroke="black" cx="693.55" cy="-162" rx="60.84" ry="18"/>
+<text text-anchor="middle" x="693.55" y="-157.8" font-family="Times,serif" font-size="14.00">androidMain</text>
 </g>
 <!-- commonJvmMain&#45;&#45;androidMain -->
-<g id="edge16" class="edge">
+<g id="edge14" class="edge">
 <title>commonJvmMain&#45;&#45;androidMain</title>
-<path fill="none" stroke="black" d="M955.01,-215.7C951.45,-204.85 946.87,-190.92 943.32,-180.1"/>
+<path fill="none" stroke="black" d="M693.55,-215.7C693.55,-204.85 693.55,-190.92 693.55,-180.1"/>
+</g>
+<!-- wasmJsMain -->
+<g id="node27" class="node">
+<title>wasmJsMain</title>
+<ellipse fill="none" stroke="black" cx="1188.55" cy="-162" rx="61.41" ry="18"/>
+<text text-anchor="middle" x="1188.55" y="-157.8" font-family="Times,serif" font-size="14.00">wasmJsMain</text>
+</g>
+<!-- webMain&#45;&#45;wasmJsMain -->
+<g id="edge33" class="edge">
+<title>webMain&#45;&#45;wasmJsMain</title>
+<path fill="none" stroke="black" d="M1188.55,-215.7C1188.55,-204.85 1188.55,-190.92 1188.55,-180.1"/>
 </g>
 <!-- iosMain -->
-<g id="node27" class="node">
+<g id="node21" class="node">
 <title>iosMain</title>
-<ellipse fill="none" stroke="black" cx="1006.7" cy="-90" rx="42.88" ry="18"/>
-<text text-anchor="middle" x="1006.7" y="-85.8" font-family="Times,serif" font-size="14.00">iosMain</text>
+<ellipse fill="none" stroke="black" cx="1025.55" cy="-90" rx="42.88" ry="18"/>
+<text text-anchor="middle" x="1025.55" y="-85.8" font-family="Times,serif" font-size="14.00">iosMain</text>
 </g>
 <!-- appleMain&#45;&#45;iosMain -->
-<g id="edge30" class="edge">
+<g id="edge26" class="edge">
 <title>appleMain&#45;&#45;iosMain</title>
-<path fill="none" stroke="black" d="M1173.87,-148.65C1135.63,-135.46 1075.58,-114.75 1038.82,-102.08"/>
+<path fill="none" stroke="black" d="M1025.55,-143.7C1025.55,-132.85 1025.55,-118.92 1025.55,-108.1"/>
+</g>
+<!-- wasmJsTest -->
+<g id="node28" class="node">
+<title>wasmJsTest</title>
+<ellipse fill="none" stroke="black" cx="550.55" cy="-162" rx="57.9" ry="18"/>
+<text text-anchor="middle" x="550.55" y="-157.8" font-family="Times,serif" font-size="14.00">wasmJsTest</text>
+</g>
+<!-- webTest&#45;&#45;wasmJsTest -->
+<g id="edge34" class="edge">
+<title>webTest&#45;&#45;wasmJsTest</title>
+<path fill="none" stroke="black" d="M550.55,-215.7C550.55,-204.85 550.55,-190.92 550.55,-180.1"/>
 </g>
 <!-- iosTest -->
-<g id="node28" class="node">
+<g id="node24" class="node">
 <title>iosTest</title>
-<ellipse fill="none" stroke="black" cx="332.7" cy="-90" rx="38.86" ry="18"/>
-<text text-anchor="middle" x="332.7" y="-85.8" font-family="Times,serif" font-size="14.00">iosTest</text>
+<ellipse fill="none" stroke="black" cx="410.55" cy="-90" rx="38.86" ry="18"/>
+<text text-anchor="middle" x="410.55" y="-85.8" font-family="Times,serif" font-size="14.00">iosTest</text>
 </g>
 <!-- appleTest&#45;&#45;iosTest -->
-<g id="edge34" class="edge">
+<g id="edge30" class="edge">
 <title>appleTest&#45;&#45;iosTest</title>
-<path fill="none" stroke="black" d="M523.48,-149.83C479.54,-136.28 406.19,-113.66 364.4,-100.77"/>
+<path fill="none" stroke="black" d="M410.55,-143.7C410.55,-132.85 410.55,-118.92 410.55,-108.1"/>
+</g>
+<!-- iosSimulatorArm64Main -->
+<g id="node22" class="node">
+<title>iosSimulatorArm64Main</title>
+<ellipse fill="none" stroke="black" cx="927.55" cy="-18" rx="108.26" ry="18"/>
+<text text-anchor="middle" x="927.55" y="-13.8" font-family="Times,serif" font-size="14.00">iosSimulatorArm64Main</text>
 </g>
 <!-- iosMain&#45;&#45;iosSimulatorArm64Main -->
-<g id="edge31" class="edge">
+<g id="edge27" class="edge">
 <title>iosMain&#45;&#45;iosSimulatorArm64Main</title>
-<path fill="none" stroke="black" d="M975.21,-77.75C942.42,-66.04 890.82,-47.62 854.17,-34.52"/>
+<path fill="none" stroke="black" d="M1004.77,-74.15C989.04,-62.92 967.42,-47.48 951.06,-35.79"/>
+</g>
+<!-- iosArm64Main -->
+<g id="node23" class="node">
+<title>iosArm64Main</title>
+<ellipse fill="none" stroke="black" cx="1123.55" cy="-18" rx="70.08" ry="18"/>
+<text text-anchor="middle" x="1123.55" y="-13.8" font-family="Times,serif" font-size="14.00">iosArm64Main</text>
 </g>
 <!-- iosMain&#45;&#45;iosArm64Main -->
-<g id="edge32" class="edge">
+<g id="edge28" class="edge">
 <title>iosMain&#45;&#45;iosArm64Main</title>
-<path fill="none" stroke="black" d="M1006.7,-71.7C1006.7,-60.85 1006.7,-46.92 1006.7,-36.1"/>
+<path fill="none" stroke="black" d="M1046.34,-74.15C1062.29,-62.76 1084.31,-47.03 1100.75,-35.29"/>
+</g>
+<!-- iosSimulatorArm64Test -->
+<g id="node25" class="node">
+<title>iosSimulatorArm64Test</title>
+<ellipse fill="none" stroke="black" cx="316.55" cy="-18" rx="104.25" ry="18"/>
+<text text-anchor="middle" x="316.55" y="-13.8" font-family="Times,serif" font-size="14.00">iosSimulatorArm64Test</text>
 </g>
 <!-- iosTest&#45;&#45;iosSimulatorArm64Test -->
-<g id="edge35" class="edge">
+<g id="edge31" class="edge">
 <title>iosTest&#45;&#45;iosSimulatorArm64Test</title>
-<path fill="none" stroke="black" d="M303.17,-78.06C271.61,-66.37 221.3,-47.74 185.64,-34.54"/>
+<path fill="none" stroke="black" d="M390.62,-74.15C375.53,-62.92 354.79,-47.48 339.1,-35.79"/>
+</g>
+<!-- iosArm64Test -->
+<g id="node26" class="node">
+<title>iosArm64Test</title>
+<ellipse fill="none" stroke="black" cx="505.55" cy="-18" rx="66.07" ry="18"/>
+<text text-anchor="middle" x="505.55" y="-13.8" font-family="Times,serif" font-size="14.00">iosArm64Test</text>
 </g>
 <!-- iosTest&#45;&#45;iosArm64Test -->
-<g id="edge36" class="edge">
+<g id="edge32" class="edge">
 <title>iosTest&#45;&#45;iosArm64Test</title>
-<path fill="none" stroke="black" d="M332.7,-71.7C332.7,-60.85 332.7,-46.92 332.7,-36.1"/>
+<path fill="none" stroke="black" d="M430.7,-74.15C446.28,-62.68 467.81,-46.81 483.78,-35.04"/>
 </g>
 </g>
 </svg>
