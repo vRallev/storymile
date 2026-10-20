@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 
 internal fun configureAndroidLint(lint: Lint) {
   lint.warningsAsErrors = true
-  lint.disable += setOf("GradleDependency", "NewerVersionAvailable")
+  lint.disable += setOf("AndroidGradlePluginVersion", "GradleDependency", "NewerVersionAvailable")
 }
 
 internal fun configureAndroidPackaging(packaging: Packaging) {
