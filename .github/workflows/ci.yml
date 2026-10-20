@@ -346,8 +346,10 @@ jobs:
         uses: ./.github/actions/setup-action
         with:
           gradle-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-      - name: Build Desktop app
-        run: ./gradlew $GRADLE_ARGS :app:desktop:desktopMainClasses
+      - name: Build Desktop release app
+        run: ./gradlew $GRADLE_ARGS :app:desktop:createReleaseDistributable
+      - name: Verify Desktop release app launch
+        run: xvfb-run -a scripts/desktop-smoke-test.sh app/desktop/build/compose/binaries/main-release/app/Storymile/bin/Storymile
 
   build-web-release:
     runs-on: ubuntu-24.04
