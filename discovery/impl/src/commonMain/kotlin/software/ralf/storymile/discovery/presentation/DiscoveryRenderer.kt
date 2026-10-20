@@ -92,6 +92,8 @@ import software.ralf.storymile.discovery.impl.generated.resources.topic_science_
 import software.ralf.storymile.discovery.impl.generated.resources.topic_technology_subtitle
 import software.ralf.storymile.discovery.impl.generated.resources.try_another_search
 import software.ralf.storymile.discovery.presentation.PodcastSharedElement.Companion.podcastSharedElement
+import software.ralf.storymile.screen.LocalScreenSize
+import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.templates.LocalAnimatedVisibilityScope
 import software.ralf.storymile.templates.SharedNavigationElement
 import software.ralf.storymile.templates.sharedNavigationBounds
@@ -118,11 +120,11 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
 
   @Composable
   override fun Compose(model: DiscoveryPresenterImpl.Model, modifier: Modifier) {
-    BoxWithConstraints(
+    Box(
       modifier.fillMaxSize().discoveryScreenTransition().clipToBounds().testTag("discovery-screen"),
     ) {
-      val wide = maxWidth / LocalDensity.current.fontScale >= 760.dp
-      val edgeToEdgeEpisodes = maxWidth < 600.dp
+      val wide = LocalScreenSize.current.category != ScreenSize.Category.PHONE
+      val edgeToEdgeEpisodes = !wide
       val padding = if (edgeToEdgeEpisodes) 16.dp else 32.dp
       val listState = rememberLazyListState()
       var requestedFocus by rememberSaveable { mutableStateOf(false) }

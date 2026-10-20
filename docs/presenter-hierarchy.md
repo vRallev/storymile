@@ -113,13 +113,13 @@ Home stacks its illustration and discovery prompt in narrow panes and places the
 wide panes. The illustration shrinks to keep the content within the window.
 
 [DiscoveryRenderer](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/DiscoveryRenderer.kt)
-adapts browsing, topics, and search to the available width.
+adapts browsing, topics, and search to the screen category.
 [ShowRenderer](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/ShowRenderer.kt)
-renders the show backstack. In wide layouts, its navigation scene shows the catalog beside
+renders the show backstack. On tablets, its navigation scene shows the catalog beside
 the podcast. Episode selection slides the catalog out, moves the podcast left, and opens episode
 details on the right. Back reverses the transition.
 [ShowContentRenderer](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/ShowContentRenderer.kt)
-renders the podcast and its episodes. Narrow layouts show one destination at a time.
+renders the podcast and its episodes. Phones show one destination at a time.
 Resizing preserves the selected episode and presenter stack.
 
 [LibraryRenderer](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryRenderer.kt)

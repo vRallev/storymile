@@ -7,5 +7,6 @@ storymile {
 }
 
 dependencies {
+  commonMainImplementation project(':templates:public')
   commonMainImplementation libs.coil.compose
 }

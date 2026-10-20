@@ -74,7 +74,7 @@ internal object PlaybackSpeed {
             text = stringResource(Res.string.speed),
             key = "speed-label",
             expanded = expanded,
-            shared = size.category != ScreenSize.Category.PHONE && size.width >= 1000.dp,
+            shared = size.category == ScreenSize.Category.TABLET_LARGE,
             style = if (expanded) AppTheme.typography.bodyMedium else AppTheme.typography.bodySmall,
             color =
               if (expanded) AppTheme.colorScheme.onSurfaceVariant else AppTheme.colorScheme.primary,

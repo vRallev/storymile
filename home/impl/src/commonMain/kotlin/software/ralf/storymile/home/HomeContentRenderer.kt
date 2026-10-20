@@ -55,10 +55,9 @@ class HomeContentRenderer : ComposeRenderer<HomeContentPresenter.Model>() {
   override fun Compose(model: HomeContentPresenter.Model, modifier: Modifier) {
     Box(modifier.fillMaxSize().testTag("tab-content")) {
       BoxWithConstraints(Modifier.fillMaxSize().testTag("home-screen")) {
-        val wide =
-          maxWidth >= 760.dp &&
-            LocalScreenSize.current.orientation == ScreenSize.Orientation.LANDSCAPE
-        val phone = maxWidth < 600.dp
+        val screenSize = LocalScreenSize.current
+        val phone = screenSize.category == ScreenSize.Category.PHONE
+        val wide = screenSize.orientation == ScreenSize.Orientation.LANDSCAPE
         val compact = maxHeight < 700.dp || LocalDensity.current.fontScale > 1.3f
         val promptSpacing =
           when {
@@ -69,7 +68,6 @@ class HomeContentRenderer : ComposeRenderer<HomeContentPresenter.Model>() {
         Column(Modifier.fillMaxSize()) {
           TabHeader(
             title = stringResource(Res.string.welcome_to_storymile),
-            windowWidth = LocalScreenSize.current.width,
             appBarTitleModifier =
               Modifier.sharedNavigationBounds(SharedNavigationElement.APP_BAR_TITLE),
             profileIconModifier =

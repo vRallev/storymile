@@ -422,7 +422,7 @@ class AppTemplateRendererTest {
               DpSize(1200.dp, 900.dp) to "START_EXPANDED",
               DpSize(1200.dp, 839.dp) to "START_EXPANDED",
               DpSize(1200.dp, 840.dp) to "START_EXPANDED",
-              DpSize(1200.dp, 400.dp) to "START_EXPANDED",
+              DpSize(1200.dp, 400.dp) to "BOTTOM",
               DpSize(1199.dp, 400.dp) to "BOTTOM",
               DpSize(400.dp, 900.dp) to "BOTTOM",
             )

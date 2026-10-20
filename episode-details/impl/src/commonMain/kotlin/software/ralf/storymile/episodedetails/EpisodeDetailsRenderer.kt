@@ -35,6 +35,8 @@ import software.ralf.storymile.episode.details.impl.generated.resources.episode_
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_details
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_no_description
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_published
+import software.ralf.storymile.screen.LocalScreenSize
+import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.templates.LocalAnimatedVisibilityScope
 import software.ralf.storymile.theme.AppTheme
 
@@ -50,7 +52,8 @@ class EpisodeDetailsRenderer : ComposeRenderer<EpisodeDetailsPresenterImpl.Model
     ) {
       val scrollState = key(model.details.key) { rememberScrollState() }
       val artworkSize = if (maxHeight < 500.dp) 160.dp else 280.dp
-      val padding = if (maxWidth < 600.dp) 16.dp else 32.dp
+      val phone = LocalScreenSize.current.category == ScreenSize.Category.PHONE
+      val padding = if (phone) 16.dp else 32.dp
       Column(Modifier.fillMaxSize()) {
         if (!LocalEpisodeDetailsPane.current) {
           TitleBar(

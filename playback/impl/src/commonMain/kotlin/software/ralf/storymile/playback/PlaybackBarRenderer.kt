@@ -27,7 +27,7 @@ class PlaybackBarRenderer : ComposeRenderer<PlaybackPresenterImpl.BarModel>() {
   override fun Compose(model: PlaybackPresenterImpl.BarModel, modifier: Modifier) {
     val size = LocalScreenSize.current
     val tablet = size.category != ScreenSize.Category.PHONE
-    val wide = size.width >= 1000.dp
+    val wide = size.category == ScreenSize.Category.TABLET_LARGE
     val player = model.player
     var panel by remember { mutableStateOf<PlaybackOptions.Panel?>(null) }
     Row(

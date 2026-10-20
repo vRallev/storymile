@@ -19,23 +19,23 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import software.ralf.storymile.screen.LocalScreenSize
+import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.LocalOnToggleTheme
 import software.ralf.storymile.theme.generated.resources.Res
 import software.ralf.storymile.theme.generated.resources.storymile
 
 /**
- * Shared tab title and profile control. Shows the app brand in tall phone layouts, using the full
- * [windowWidth] to avoid repeating the navigation sidebar's brand. [title] is localized by the
- * caller. [appBarTitleModifier] applies to the brand name, or to [title] when the brand is hidden.
+ * Shared tab title and profile control. Shows the app brand in tall phone layouts. [title] is
+ * localized by the caller. [appBarTitleModifier] applies to the brand name, or to [title] when the
+ * brand is hidden.
  */
 @Composable
 fun TabHeader(
   title: String,
-  windowWidth: Dp,
   modifier: Modifier = Modifier,
   appBarTitleModifier: Modifier = Modifier,
   profileIconModifier: Modifier = Modifier,
@@ -44,13 +44,14 @@ fun TabHeader(
     val fontScale = LocalDensity.current.fontScale
     val availableHeight = maxHeight / fontScale
     val tight = availableHeight < 700.dp
-    val compact = maxWidth < 600.dp || availableHeight < 600.dp
-    val showBrand = windowWidth < 600.dp && availableHeight >= 400.dp
+    val phone = LocalScreenSize.current.category == ScreenSize.Category.PHONE
+    val compact = phone || availableHeight < 600.dp
+    val showBrand = phone && availableHeight >= 400.dp
     Column(
       Modifier.fillMaxWidth()
         .padding(
-          start = if (maxWidth < 600.dp) 20.dp else 32.dp,
-          end = if (maxWidth < 600.dp) 20.dp else 32.dp,
+          start = if (phone) 20.dp else 32.dp,
+          end = if (phone) 20.dp else 32.dp,
           top = if (tight) 8.dp else 24.dp,
           bottom = if (tight) 8.dp else 20.dp,
         ),

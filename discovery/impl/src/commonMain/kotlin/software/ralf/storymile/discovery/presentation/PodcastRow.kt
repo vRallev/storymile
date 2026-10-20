@@ -1,6 +1,7 @@
 package software.ralf.storymile.discovery.presentation
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,46 +39,69 @@ internal fun PodcastRow(
     color = if (selected) AppTheme.colorScheme.secondaryContainer else Color.Transparent,
     shape = RoundedCornerShape(16.dp),
   ) {
-    Row(
-      Modifier.padding(8.dp),
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      PodcastArtwork(
-        podcast,
-        Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Artwork)
-          .testTag("discovery-artwork-${podcast.id}")
-          .size(76.dp),
-      )
-      Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
-          text = podcast.title,
-          modifier =
-            Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Title)
-              .testTag("discovery-title-${podcast.id}"),
-          style = AppTheme.typography.titleMedium,
-          fontWeight = FontWeight.SemiBold,
-          maxLines = 3,
-          overflow = TextOverflow.Ellipsis,
+    BoxWithConstraints {
+      val stacked = maxWidth / LocalDensity.current.fontScale < 240.dp
+      val artwork: @Composable () -> Unit = {
+        PodcastArtwork(
+          podcast,
+          Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Artwork)
+            .testTag("discovery-artwork-${podcast.id}")
+            .size(76.dp),
         )
-        podcast.author?.let { author ->
+      }
+      val labels: @Composable (Modifier) -> Unit = { modifier ->
+        Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
           Text(
-            text = author,
+            text = podcast.title,
             modifier =
-              Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Author)
-                .testTag("discovery-author-${podcast.id}"),
-            style = AppTheme.typography.bodyMedium,
-            color = AppTheme.colorScheme.onSurfaceVariant,
-            maxLines = 2,
+              Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Title)
+                .testTag("discovery-title-${podcast.id}"),
+            style = AppTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 3,
             overflow = TextOverflow.Ellipsis,
+          )
+          podcast.author?.let { author ->
+            Text(
+              text = author,
+              modifier =
+                Modifier.podcastSharedElement(
+                    podcast,
+                    transitionSource,
+                    PodcastSharedElement.Author,
+                  )
+                  .testTag("discovery-author-${podcast.id}"),
+              style = AppTheme.typography.bodyMedium,
+              color = AppTheme.colorScheme.onSurfaceVariant,
+              maxLines = 2,
+              overflow = TextOverflow.Ellipsis,
+            )
+          }
+        }
+      }
+      if (stacked) {
+        Column(
+          modifier = Modifier.padding(8.dp),
+          verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          artwork()
+          labels(Modifier.fillMaxWidth())
+        }
+      } else {
+        Row(
+          modifier = Modifier.padding(8.dp),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          artwork()
+          labels(Modifier.weight(1f))
+          Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = AppTheme.colorScheme.primary,
           )
         }
       }
-      Icon(
-        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-        contentDescription = null,
-        tint = AppTheme.colorScheme.primary,
-      )
     }
   }
 }

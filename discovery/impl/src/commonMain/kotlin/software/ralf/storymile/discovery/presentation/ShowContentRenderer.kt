@@ -48,6 +48,8 @@ import software.ralf.storymile.discovery.impl.generated.resources.hide_descripti
 import software.ralf.storymile.discovery.impl.generated.resources.no_description
 import software.ralf.storymile.discovery.impl.generated.resources.show_description
 import software.ralf.storymile.discovery.presentation.PodcastSharedElement.Companion.podcastSharedElement
+import software.ralf.storymile.screen.LocalScreenSize
+import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.templates.LocalAnimatedVisibilityScope
 import software.ralf.storymile.theme.AppTheme
 
@@ -61,7 +63,7 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
         .then(if (LocalShowPane.current) Modifier else Modifier.discoveryScreenTransition())
         .testTag(if (LocalShowPane.current) "show-content" else "show-screen"),
     ) {
-      val edgeToEdgeEpisodes = !LocalShowPane.current && maxWidth < 600.dp
+      val edgeToEdgeEpisodes = LocalScreenSize.current.category == ScreenSize.Category.PHONE
       val contentModifier = Modifier.padding(horizontal = if (edgeToEdgeEpisodes) 16.dp else 0.dp)
       val detailState = key(model.podcast.id) { rememberLazyListState() }
       Column(Modifier.fillMaxSize()) {
@@ -147,7 +149,8 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
         (LocalShowParentVisibilityScope.current ?: LocalAnimatedVisibilityScope.current),
     ) {
       BoxWithConstraints(Modifier.fillMaxWidth()) {
-        if (LocalShowPane.current || maxWidth / LocalDensity.current.fontScale >= 440.dp) {
+        val horizontalWidth = if (LocalShowPane.current) 240.dp else 440.dp
+        if (maxWidth / LocalDensity.current.fontScale >= horizontalWidth) {
           Row(
             modifier = modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(24.dp),
@@ -167,7 +170,7 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
           }
         } else {
           Column(
-            modifier = modifier.fillMaxWidth(),
+            modifier = (if (LocalShowPane.current) Modifier else modifier).fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
           ) {
@@ -175,6 +178,7 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
               podcast,
               Modifier.podcastSharedElement(podcast, source, PodcastSharedElement.Artwork)
                 .testTag("show-artwork")
+                .padding(end = if (LocalShowPane.current) 48.dp else 0.dp)
                 .widthIn(max = 320.dp)
                 .fillMaxWidth()
                 .aspectRatio(1f),

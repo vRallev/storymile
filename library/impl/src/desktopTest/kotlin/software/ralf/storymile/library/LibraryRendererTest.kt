@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.SemanticsMatcher
@@ -32,6 +33,8 @@ import assertk.assertions.isLessThanOrEqualTo
 import kotlin.test.Test
 import software.ralf.storymile.library.LibraryPresenterImpl.Model
 import software.ralf.storymile.library.LibraryPresenterImpl.Tab
+import software.ralf.storymile.screen.LocalScreenSize
+import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.StorymileTheme
 import software.ralf.storymile.theme.ThemeEnvironment
@@ -46,7 +49,7 @@ class LibraryRendererTest {
     }
 
   @Test
-  fun `phone short wide and enlarged text layouts fit without scrolling`() {
+  fun `phone layouts fit in either orientation and with enlarged text`() {
     listOf(Triple(320, 568, 1f), Triple(900, 360, 1f), Triple(480, 700, 1.5f)).forEach {
       (width, height, fontScale) ->
       runDesktopComposeUiTest(width = width, height = height) {
@@ -64,11 +67,7 @@ class LibraryRendererTest {
           onNodeWithTag("library-illustration", useUnmergedTree = true).getUnclippedBoundsInRoot()
         val message =
           onNodeWithTag("library-empty-message", useUnmergedTree = true).getUnclippedBoundsInRoot()
-        if (width >= 600 && height < 480) {
-          assertThat(illustration.right).isLessThanOrEqualTo(message.left)
-        } else {
-          assertThat(illustration.bottom).isLessThanOrEqualTo(message.top)
-        }
+        assertThat(illustration.bottom).isLessThanOrEqualTo(message.top)
       }
     }
   }
@@ -139,7 +138,11 @@ class LibraryRendererTest {
 
   @Composable
   private fun ThemedContent(fontScale: Float = 1f, content: @Composable () -> Unit) {
-    CompositionLocalProvider(LocalDensity provides Density(1f, fontScale)) {
+    val size = LocalWindowInfo.current.containerDpSize
+    CompositionLocalProvider(
+      LocalDensity provides Density(1f, fontScale),
+      LocalScreenSize provides ScreenSize.from(width = size.width, height = size.height),
+    ) {
       StorymileTheme(environment = themeEnvironment, darkTheme = false) {
         Box(Modifier.fillMaxSize().background(AppTheme.colorScheme.background)) { content() }
       }

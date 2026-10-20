@@ -68,10 +68,11 @@ internal object PlaybackControls {
   @Composable
   fun Details(player: PlayerModel, large: Boolean) {
     val screen = LocalScreenSize.current
-    val stacked = screen.width < 600.dp || screen.width <= screen.height
+    val phone = screen.category == ScreenSize.Category.PHONE
+    val stacked = screen.orientation == ScreenSize.Orientation.PORTRAIT
     // Keep both labels beside the growing artwork until they can pass below it.
     val horizontalArc = if (stacked) screen.width * 0.1f else 0.dp
-    val verticalArc = if (!stacked) 0.dp else if (screen.width < 600.dp) 64.dp else 96.dp
+    val verticalArc = if (!stacked) 0.dp else if (phone) 64.dp else 96.dp
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
       Column(Modifier.weight(1f)) {
         Label(
@@ -156,7 +157,7 @@ internal object PlaybackControls {
   ) {
     val screen = LocalScreenSize.current
     val inputEnabled = inputEnabled(expanded)
-    val shared = screen.category != ScreenSize.Category.PHONE || screen.width >= 1000.dp
+    val shared = screen.category != ScreenSize.Category.PHONE
     val suffix = if (expanded) "expanded" else "collapsed"
     val interaction = remember { MutableInteractionSource() }
     val description = stringResource(Res.string.playback_position)
@@ -221,6 +222,7 @@ internal object PlaybackControls {
 
   @Composable
   private fun Time(seconds: Int, key: String, expanded: Boolean, shared: Boolean) {
+    val large = LocalScreenSize.current.category == ScreenSize.Category.TABLET_LARGE
     Label(
       time(seconds),
       key = key,
@@ -231,10 +233,12 @@ internal object PlaybackControls {
       shared = shared,
       maxLines = 1,
       verticalArc =
-        if (key != "duration") 0.dp
-        else if (LocalScreenSize.current.width >= 1000.dp) (-56).dp else (-28).dp,
-      horizontalArc =
-        if (key == "duration" && LocalScreenSize.current.width < 1000.dp) (-72).dp else 0.dp,
+        when {
+          key != "duration" -> 0.dp
+          large -> (-56).dp
+          else -> (-28).dp
+        },
+      horizontalArc = if (key == "duration" && !large) (-72).dp else 0.dp,
     )
   }
 
@@ -268,7 +272,7 @@ internal object PlaybackControls {
   @Composable
   fun Skip(player: PlayerModel, forward: Boolean, compact: Boolean = false) {
     val direction = if (forward) "forward" else "back"
-    val shared = LocalScreenSize.current.width >= 1000.dp
+    val shared = LocalScreenSize.current.category == ScreenSize.Category.TABLET_LARGE
     val expanded = !compact
     val suffix = if (expanded) "expanded" else "collapsed"
     val description =

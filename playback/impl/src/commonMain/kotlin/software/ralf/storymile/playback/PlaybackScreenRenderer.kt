@@ -53,7 +53,7 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
   @Composable
   override fun Compose(model: PlaybackPresenterImpl.ScreenModel, modifier: Modifier) {
     val screenSize = LocalScreenSize.current
-    val tablet = screenSize.width >= 600.dp
+    val tablet = screenSize.category != ScreenSize.Category.PHONE
     val controlsScroll = rememberScrollState()
     var panel by remember { mutableStateOf<PlaybackOptions.Panel?>(null) }
     val transition = LocalPlaybackTransition.current
@@ -61,14 +61,14 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
     Column(modifier.fillMaxSize()) {
       PlayerHeader(
         tablet = tablet,
-        showProfile = screenSize.category != ScreenSize.Category.PHONE,
-        landscape = screenSize.width > screenSize.height,
+        showProfile = tablet,
+        landscape = screenSize.orientation == ScreenSize.Orientation.LANDSCAPE,
         onMore = { panel = PlaybackOptions.Panel.INFO },
       )
       Spacer(Modifier.height(if (screenSize.height < 600.dp) 8.dp else 24.dp))
       BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
-        val landscape = maxWidth >= 600.dp && screenSize.width > screenSize.height
-        val largeControls = tablet && maxWidth >= 1000.dp
+        val landscape = screenSize.orientation == ScreenSize.Orientation.LANDSCAPE
+        val largeControls = screenSize.category == ScreenSize.Category.TABLET_LARGE
         if (landscape) {
           val artworkSize =
             minOf((maxWidth - 64.dp) * 0.44f, (maxHeight - 24.dp).coerceAtLeast(0.dp))

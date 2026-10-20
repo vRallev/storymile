@@ -172,8 +172,8 @@ class AppTemplateRenderer(
       val screenSize = LocalScreenSize.current
       val tabPlacement =
         when {
-          screenSize.width >= 1200.dp -> TabPlacement.START_EXPANDED
           screenSize.category == ScreenSize.Category.PHONE -> TabPlacement.BOTTOM
+          screenSize.width >= 1200.dp -> TabPlacement.START_EXPANDED
           else -> TabPlacement.START
         }
 

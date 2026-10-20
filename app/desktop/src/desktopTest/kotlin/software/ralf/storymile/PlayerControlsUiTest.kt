@@ -26,6 +26,24 @@ class PlayerControlsUiTest {
   private val uiTestRule = DesktopUiTestRule(withEpisodes = true)
 
   @Test
+  fun `collapsed player adds skip controls only for large tablets in either orientation`() {
+    listOf(599 to false, 600 to false, 839 to false, 840 to true).forEach { (shortSide, large) ->
+      listOf(DpSize(shortSide.dp, 1200.dp), DpSize(1200.dp, shortSide.dp)).forEach { size ->
+        uiTestRule.runRobotTest(windowSize = size) {
+          onNodeWithTag("playback-bar-play-pause").assertIsDisplayed()
+          listOf("playback-bar-back", "playback-bar-forward").forEach { tag ->
+            if (large) {
+              onNodeWithTag(tag).assertIsDisplayed()
+            } else {
+              onNodeWithTag(tag).assertDoesNotExist()
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @Test
   fun `player controls share state across collapsed and expanded layouts`() {
     listOf(DesktopWindowSizes.phone, DesktopWindowSizes.tablet, DpSize(1440.dp, 900.dp)).forEach {
       size ->

@@ -98,9 +98,10 @@ class DiscoveryUiTest {
   fun `catalog and show headers align and controls remain reachable across sizes themes and large text`() {
     listOf(
         Scenario(DpSize(412.dp, 916.dp)),
-        Scenario(DpSize(800.dp, 1280.dp), darkTheme = true),
-        Scenario(DpSize(1280.dp, 800.dp)),
-        Scenario(DpSize(1600.dp, 900.dp), darkTheme = true),
+        Scenario(DpSize(800.dp, 1280.dp), darkTheme = true, sideBySide = true),
+        Scenario(DpSize(800.dp, 1280.dp), fontScale = 1.5f, sideBySide = true),
+        Scenario(DpSize(1280.dp, 800.dp), sideBySide = true),
+        Scenario(DpSize(1600.dp, 900.dp), darkTheme = true, sideBySide = true),
         Scenario(DpSize(900.dp, 360.dp)),
         Scenario(DpSize(599.dp, 480.dp)),
         Scenario(DpSize(600.dp, 480.dp)),
@@ -125,6 +126,11 @@ class DiscoveryUiTest {
           saveScreenshot("catalog-${scenario.label()}")
           composeRobot<DiscoveryRobot> { openPodcast("quiet-current") }
           composeRobot<ShowRobot> { seeShow() }
+          if (scenario.sideBySide) {
+            onNodeWithTag("show-list").assertIsDisplayed()
+          } else {
+            onNodeWithTag("show-list").assertDoesNotExist()
+          }
           onNodeWithTag("show-back").assertIsDisplayed()
           assertThat(headerBounds("show-back")).isEqualTo(catalogHeader)
           assertThat(profileSize()).isEqualTo(homeProfileSize)
@@ -161,8 +167,14 @@ class DiscoveryUiTest {
           DpSize(412.dp, 916.dp),
           DpSize(800.dp, 1280.dp),
           DpSize(1280.dp, 800.dp),
-          DpSize(599.dp, 480.dp),
-          DpSize(600.dp, 480.dp),
+          DpSize(599.dp, 960.dp),
+          DpSize(960.dp, 599.dp),
+          DpSize(600.dp, 960.dp),
+          DpSize(960.dp, 600.dp),
+          DpSize(839.dp, 1200.dp),
+          DpSize(1200.dp, 839.dp),
+          DpSize(840.dp, 1200.dp),
+          DpSize(1200.dp, 840.dp),
           DpSize(1600.dp, 900.dp),
         )
         .forEach { next ->
@@ -172,8 +184,10 @@ class DiscoveryUiTest {
           onNodeWithTag("show-title", useUnmergedTree = true)
             .assertIsDisplayed()
             .assertTextEquals("Field Notes")
-          if (next.width < 800.dp) {
+          if (next.width < 600.dp || next.height < 600.dp) {
             onNodeWithTag("show-list").assertDoesNotExist()
+          } else {
+            onNodeWithTag("show-list").assertIsDisplayed()
           }
           saveScreenshot("resized-${next.width.value.toInt()}x${next.height.value.toInt()}")
         }
@@ -207,6 +221,7 @@ class DiscoveryUiTest {
     val size: DpSize,
     val darkTheme: Boolean = false,
     val fontScale: Float = 1f,
+    val sideBySide: Boolean = false,
   ) {
     fun label(): String =
       "${size.width.value.toInt()}x${size.height.value.toInt()}-${if (darkTheme) "dark" else "light"}-$fontScale"

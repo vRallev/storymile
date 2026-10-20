@@ -1,7 +1,7 @@
 package software.ralf.storymile.design
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,6 +20,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import software.ralf.storymile.screen.LocalScreenSize
+import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.generated.resources.Res
 import software.ralf.storymile.theme.generated.resources.back
@@ -37,11 +39,11 @@ fun TitleBar(
   titleModifier: Modifier = Modifier,
   profileIconModifier: Modifier = Modifier,
 ) {
-  BoxWithConstraints(modifier.fillMaxWidth().testTag("title-bar")) {
+  val phone = LocalScreenSize.current.category == ScreenSize.Category.PHONE
+  Box(modifier.fillMaxWidth().testTag("title-bar")) {
     Row(
       modifier =
-        Modifier.fillMaxWidth()
-          .padding(horizontal = if (maxWidth < 600.dp) 16.dp else 32.dp, vertical = 16.dp),
+        Modifier.fillMaxWidth().padding(horizontal = if (phone) 16.dp else 32.dp, vertical = 16.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {

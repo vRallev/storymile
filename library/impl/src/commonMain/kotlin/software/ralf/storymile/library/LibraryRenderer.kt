@@ -55,6 +55,7 @@ import software.ralf.storymile.library.impl.generated.resources.library_shows_em
 import software.ralf.storymile.library.impl.generated.resources.library_shows_empty_title
 import software.ralf.storymile.library.impl.generated.resources.library_title
 import software.ralf.storymile.screen.LocalScreenSize
+import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.theme.AppTheme
 
 @ContributesRenderer
@@ -64,16 +65,14 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
     BoxWithConstraints(
       modifier.fillMaxSize().background(AppTheme.colorScheme.background).testTag("library-empty"),
     ) {
-      val compact = maxWidth < 600.dp
+      val screenSize = LocalScreenSize.current
+      val compact = screenSize.category == ScreenSize.Category.PHONE
       val short = maxHeight < 480.dp
       val horizontal = !compact && short
-      val large = maxWidth >= 1000.dp && !short
+      val large = screenSize.category == ScreenSize.Category.TABLET_LARGE && !short
       val sidePadding = if (compact) 20.dp else 32.dp
       Column(Modifier.fillMaxSize()) {
-        TabHeader(
-          title = stringResource(Res.string.library_title),
-          windowWidth = LocalScreenSize.current.width,
-        )
+        TabHeader(title = stringResource(Res.string.library_title))
         Column(Modifier.weight(1f).padding(horizontal = sidePadding)) {
           Tabs(model)
           if (horizontal) {

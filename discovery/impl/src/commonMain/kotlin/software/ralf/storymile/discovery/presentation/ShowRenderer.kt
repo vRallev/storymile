@@ -1,7 +1,7 @@
 package software.ralf.storymile.discovery.presentation
 
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -11,9 +11,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
@@ -21,6 +19,8 @@ import software.ralf.storymile.design.TitleBar
 import software.ralf.storymile.discovery.impl.generated.resources.Res
 import software.ralf.storymile.discovery.impl.generated.resources.discover_podcasts
 import software.ralf.storymile.discovery.impl.generated.resources.search_results
+import software.ralf.storymile.screen.LocalScreenSize
+import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.templates.LocalAnimatedVisibilityScope
 import software.ralf.storymile.templates.LocalSharedTransitionScope
 
@@ -40,8 +40,8 @@ internal val ShowPresenter.Source.titleResource
 class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
   @Composable
   override fun Compose(model: ShowPresenter.Model, modifier: Modifier) {
-    BoxWithConstraints(modifier.fillMaxSize().discoveryScreenTransition().clipToBounds()) {
-      val wide = maxWidth / LocalDensity.current.fontScale >= 760.dp
+    Box(modifier.fillMaxSize().discoveryScreenTransition().clipToBounds()) {
+      val wide = LocalScreenSize.current.category != ScreenSize.Category.PHONE
       val selectedIndex = model.content.podcasts.indexOfFirst { it.id == model.content.podcast.id }
       val catalogState =
         rememberLazyListState(
