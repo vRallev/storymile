@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.scene.Scene
@@ -64,7 +65,7 @@ internal data class ShowScene(
       if (!episode) {
         LazyColumn(
           modifier =
-            Modifier.offset(x = -travel * progress)
+            Modifier.offset { IntOffset(x = (-travel * progress).roundToPx(), y = 0) }
               .width(catalogWidth)
               .fillMaxHeight()
               .testTag("show-list"),
