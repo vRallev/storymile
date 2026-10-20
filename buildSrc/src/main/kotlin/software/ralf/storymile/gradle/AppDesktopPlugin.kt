@@ -19,8 +19,10 @@ public open class AppDesktopPlugin : Plugin<Project> {
     val composeExtension = extensions.getByType(ComposeExtension::class.java)
     composeExtension.extensions.getByType(DesktopExtension::class.java).application.apply {
       mainClass = "software.ralf.storymile.MainKt"
+      buildTypes.release.proguard.configurationFiles.from(file("proguard-rules.pro"))
 
       nativeDistributions.apply {
+        modules("jdk.unsupported")
         targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
         packageName = "Storymile"
         packageVersion = versionName

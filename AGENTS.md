@@ -134,6 +134,7 @@ Wasm is disabled and Isolated Projects is enabled by default. Wasm commands need
 ```sh
 ./gradlew :app:android:installDebug
 ./gradlew :app:desktop:run
+./gradlew :app:desktop:runRelease
 ./gradlew :app:desktop:hotRunDesktop --auto
 ./gradlew -Pstorymile.enableWasm=true --no-isolated-projects :app:web:wasmJsBrowserDevelopmentRun
 open app/ios/iosApp.xcodeproj
