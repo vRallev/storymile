@@ -8,6 +8,8 @@ storymile {
 }
 
 dependencies {
+  commonMainImplementation project(':storage:public')
+  commonMainImplementation libs.coil.compose
   commonMainImplementation libs.compose.multiplatform.ui
 
   // Kotlin/Native links libraries from the compile classpath.
