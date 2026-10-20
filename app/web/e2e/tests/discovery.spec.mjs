@@ -81,7 +81,10 @@ test('loads real-mode charts after retry and searches topics in the browser', as
   await expect(page.locator('[id="episode-0"]')).toContainText('A real feed episode');
   await chart.click({ force: true });
   await expect(page.locator('[id="show-title"]')).toContainText('Chart Podcast');
-  await page.locator('[id="show-back"]').click({ force: true });
+  const back = page.locator('[id="show-back"]');
+  // Forced canvas clicks need stable coordinates after navigation.
+  await (await back.elementHandle()).waitForElementState('stable');
+  await back.click({ force: true });
   await expect(page.locator('[id="show-screen"]')).not.toBeAttached();
   await expect(chart).toBeVisible();
   expect(lookups).toEqual(['123']);
