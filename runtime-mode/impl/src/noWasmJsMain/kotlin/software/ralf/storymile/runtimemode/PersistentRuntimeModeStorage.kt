@@ -9,25 +9,21 @@ import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import software.ralf.app.platform.scope.RootScopeProvider
-import software.ralf.storymile.storage.ScopedStorage
+import software.ralf.storymile.storage.Storage
 
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
 class PersistentRuntimeModeStorage(
-  factory: ScopedStorage.Factory,
+  factory: Storage.Factory,
   @ForScope(AppScope::class) coroutineScope: CoroutineScope,
-  private val rootScopeProvider: RootScopeProvider,
 ) : RuntimeModeStorage {
   private val storage = factory.create("runtime-mode", coroutineScope, mustBePersistent = true)
 
   override fun read(): String? = runBlocking {
-    rootScopeProvider.rootScope.register(storage)
     storage.preferences("runtime_mode").data.first()[modeKey]
   }
 
   override suspend fun write(mode: String) {
-    rootScopeProvider.rootScope.register(storage)
     storage.preferences("runtime_mode").edit { it[modeKey] = mode }
   }
 

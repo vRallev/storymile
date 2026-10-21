@@ -24,19 +24,17 @@ class RuntimeModeStorageTest {
   @Test
   fun `persistent storage bypasses runtime mode loading`() = runTestWithScope { scope ->
     val platform = InMemoryStoragePlatform()
-    val factory: ScopedStorage.Factory =
+    val factory: Storage.Factory =
       DefaultStorage.Factory(platform, lazy { error("Runtime mode must not be checked") })
     val owner = scope.coroutineScope()
-    val storage: ScopedStorage = factory.create("runtime-mode", owner, mustBePersistent = true)
-    scope.register(storage)
+    val storage: Storage = factory.create("runtime-mode", owner, mustBePersistent = true)
     val key = stringPreferencesKey("runtime_mode")
     storage.preferences("settings").edit { it[key] = "Fake" }
     storage.files.write("state", byteArrayOf(1))
     storage.cache.write("state", byteArrayOf(2))
     owner.cancel()
 
-    val reopened: Storage =
-      DefaultStorage("runtime-mode", scope.coroutineScope(), platform).also { scope.register(it) }
+    val reopened: Storage = DefaultStorage("runtime-mode", scope.coroutineScope(), platform)
     assertThat(reopened.preferences("settings").data.first()[key]).isEqualTo("Fake")
     assertThat(reopened.files.read("state")).isNotNull().isEqualTo(byteArrayOf(1))
     assertThat(reopened.cache.read("state")).isNotNull().isEqualTo(byteArrayOf(2))
@@ -51,7 +49,7 @@ class RuntimeModeStorageTest {
     real.files.directory("books").write("chapter", byteArrayOf(1))
     real.cache.write("cover", byteArrayOf(2))
     val mode = RuntimeMode.Fake
-    val factory: ScopedStorage.Factory =
+    val factory: Storage.Factory =
       DefaultStorage.Factory(realPlatform, lazy { FakeRuntimeModeController(mode) })
     val storage: Storage = scope.storage(factory)
     val operations =
@@ -95,7 +93,7 @@ class RuntimeModeStorageTest {
       real.cache.write("cover", byteArrayOf(2))
       val failure = IllegalStateException("Mode unavailable")
       val controller = FakeRuntimeModeController(RuntimeMode.Fake).apply { modeFailure = failure }
-      val factory: ScopedStorage.Factory = DefaultStorage.Factory(realPlatform, lazy { controller })
+      val factory: Storage.Factory = DefaultStorage.Factory(realPlatform, lazy { controller })
       val storage: Storage = scope.storage(factory)
 
       assertFailure { storage.preferences("settings").edit { it[key] = "fake" } }
@@ -128,8 +126,8 @@ class RuntimeModeStorageTest {
     }
 
   private fun Scope.storage(platform: StoragePlatform): Storage =
-    DefaultStorage("app", coroutineScope(), platform).also { register(it) }
+    DefaultStorage("app", coroutineScope(), platform)
 
-  private fun Scope.storage(factory: ScopedStorage.Factory): Storage =
-    factory.create("app", coroutineScope()).also { register(it) }
+  private fun Scope.storage(factory: Storage.Factory): Storage =
+    factory.create("app", coroutineScope())
 }

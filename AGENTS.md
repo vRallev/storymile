@@ -96,9 +96,9 @@ Use `:storage:public` for preferences, files, and caches. App assembly selects `
 Inject `@ForScope(AppScope::class) storage: Storage` for app data.
 Inject `@ForScope(UserScope::class) storage: Storage` for user data, including guest data.
 `UserManager` starts a guest user and owns its child scope. Guest data uses `user-guest`.
-For future scopes, inject `ScopedStorage.Factory` in the owning module's binding container.
-Create one `ScopedStorage` with a dedicated scope coroutine owner and stable `user-<id>` namespace.
-Bind that instance to the scope-qualified `Storage` and `Scoped` set.
+For future scopes, inject `Storage.Factory` in the owning module's binding container.
+Create one scope-qualified `Storage` with a dedicated child coroutine scope and stable `user-<id>` namespace.
+The caller owns cancellation. Storage needs no lifecycle registration.
 Do not reuse the app handle for user data. Scope exit cancels storage work and preserves saved data.
 Delete files explicitly. Keep preference keys in the owning feature.
 Use `Storage.cache` for data the system can remove.

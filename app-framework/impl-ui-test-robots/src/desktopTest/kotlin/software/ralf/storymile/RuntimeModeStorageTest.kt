@@ -33,7 +33,6 @@ import software.ralf.storymile.runtimemode.TestRuntimeModeController
 import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.DesktopStoragePlatform
 import software.ralf.storymile.storage.InMemoryStoragePlatform
-import software.ralf.storymile.storage.ScopedStorage
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.storage.StoragePlatform
 import software.ralf.storymile.user.UserManager
@@ -165,8 +164,7 @@ class RuntimeModeStorageTest {
     block: suspend (Storage) -> Unit,
   ) {
     val scope = Scope.buildTestScope(this)
-    val storage: ScopedStorage = DefaultStorage(namespace, scope.coroutineScope(), platform)
-    scope.register(storage)
+    val storage: Storage = DefaultStorage(namespace, scope.coroutineScope(), platform)
     try {
       block(storage)
     } finally {

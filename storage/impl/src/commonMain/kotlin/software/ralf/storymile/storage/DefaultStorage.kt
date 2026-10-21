@@ -6,11 +6,9 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
@@ -18,16 +16,14 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.ByteString.Companion.encodeUtf8
-import software.ralf.app.platform.scope.Scope
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
 
 /**
- * Scope-owned implementation used by [ScopedStorage.Factory].
+ * Scope-owned implementation used by [Storage.Factory].
  *
- * The graph can construct storage before its App Platform scope exists. The first operation waits
- * for [onEnterScope], then claims the namespace once. A claim rejects an active owner and waits for
- * a canceled owner's work to finish, including DataStore cleanup.
+ * The first operation selects the backend and claims the namespace once. A claim rejects an active
+ * owner and waits for a canceled owner's work to finish, including DataStore cleanup.
  *
  * UTF-8 hex encoding preserves namespace and name identity on case-insensitive filesystems.
  * Directory handles encode single path segments and share the same owner. Durable files and cache
@@ -40,7 +36,7 @@ import software.ralf.storymile.runtimemode.RuntimeModeController
  * cancellation cancels that operation.
  *
  * Child coroutines return [Result] so failures reach the caller without canceling the injected
- * scope's regular [Job]. Exit cancels the dedicated scope, stopping actors and operations while
+ * scope's regular [Job]. The caller cancels the scope to stop actors and operations while
  * preserving saved data.
  */
 class DefaultStorage
@@ -48,7 +44,7 @@ private constructor(
   namespace: String,
   private val coroutineScope: CoroutineScope,
   private val selectPlatform: suspend () -> StoragePlatform,
-) : ScopedStorage {
+) : Storage {
   init {
     require(namespace.matches(namePattern)) {
       "Storage namespace must contain only letters, digits, underscores, and hyphens."
@@ -57,7 +53,6 @@ private constructor(
 
   private val encodedNamespace = namespace.encodeUtf8().hex()
   private val job = checkNotNull(coroutineScope.coroutineContext[Job])
-  private val enteredScope = CompletableDeferred<Unit>()
   private val initializationMutex = Mutex()
   private var initializedPlatform: StoragePlatform? = null
   private val preferencesMutex = Mutex()
@@ -95,14 +90,6 @@ private constructor(
     }
   }
 
-  override fun onEnterScope(scope: Scope) {
-    check(enteredScope.complete(Unit)) { "Storage has already entered a scope." }
-  }
-
-  override fun onExitScope() {
-    coroutineScope.cancel()
-  }
-
   private fun checkActive() {
     job.ensureActive()
   }
@@ -111,7 +98,6 @@ private constructor(
     initializedPlatform?.let {
       return@withLock it
     }
-    enteredScope.await()
     selectPlatform().also {
       it.claimNamespace(encodedNamespace, job)
       initializedPlatform = it
@@ -151,18 +137,18 @@ private constructor(
   }
 
   @SingleIn(AppScope::class)
-  @ContributesBinding(AppScope::class, binding = binding<ScopedStorage.Factory>())
+  @ContributesBinding(AppScope::class, binding = binding<Storage.Factory>())
   class Factory(
     private val platform: StoragePlatform,
     private val controller: Lazy<RuntimeModeController>,
-  ) : ScopedStorage.Factory {
+  ) : Storage.Factory {
     private val inMemoryPlatform = InMemoryStoragePlatform()
 
     override fun create(
       namespace: String,
       coroutineScope: CoroutineScope,
       mustBePersistent: Boolean,
-    ): ScopedStorage =
+    ): Storage =
       DefaultStorage(namespace, coroutineScope) {
         if (mustBePersistent || controller.value.mode == RuntimeMode.Real) {
           platform

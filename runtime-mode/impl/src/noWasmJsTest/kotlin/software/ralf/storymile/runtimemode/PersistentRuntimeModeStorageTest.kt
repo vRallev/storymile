@@ -15,13 +15,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import software.ralf.app.platform.scope.RootScopeProvider
-import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.runTestWithScope
 import software.ralf.storymile.restart.ApplicationRestarter
 import software.ralf.storymile.storage.FileStorage
-import software.ralf.storymile.storage.ScopedStorage
+import software.ralf.storymile.storage.Storage
 
 class PersistentRuntimeModeStorageTest {
   @Test
@@ -32,10 +30,6 @@ class PersistentRuntimeModeStorageTest {
         PersistentRuntimeModeStorage(
           factory = TestStorageFactory(preferences),
           coroutineScope = scope.coroutineScope(),
-          rootScopeProvider =
-            object : RootScopeProvider {
-              override val rootScope: Scope = scope
-            },
         )
       val controller: RuntimeModeController =
         RuntimeModeControllerImpl(
@@ -60,29 +54,22 @@ class PersistentRuntimeModeStorageTest {
     }
 
   private class TestStorageFactory(private val preferences: DataStore<Preferences>) :
-    ScopedStorage.Factory {
+    Storage.Factory {
     override fun create(
       namespace: String,
       coroutineScope: CoroutineScope,
       mustBePersistent: Boolean,
-    ): ScopedStorage {
+    ): Storage {
       check(namespace == "runtime-mode")
       check(mustBePersistent) { "Runtime mode must persist in fake mode." }
-      return object : ScopedStorage {
-        private var enteredScope = false
-
+      return object : Storage {
         override val files: FileStorage
           get() = error("Not used")
 
         override val cache: FileStorage
           get() = error("Not used")
 
-        override fun onEnterScope(scope: Scope) {
-          enteredScope = true
-        }
-
         override suspend fun preferences(name: String): DataStore<Preferences> {
-          check(enteredScope) { "First access must register runtime-mode storage." }
           check(name == "runtime_mode")
           return preferences
         }

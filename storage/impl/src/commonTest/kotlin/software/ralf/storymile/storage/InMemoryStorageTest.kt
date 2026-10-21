@@ -17,6 +17,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
@@ -34,17 +35,17 @@ class InMemoryStorageTest {
   }
 
   @Test
-  fun `data survives scope exit within a factory and new factories start empty`() =
+  fun `data survives owner cancellation within a factory and new factories start empty`() =
     runTestWithScope { scope ->
-      val factory: ScopedStorage.Factory = InMemoryStorageFactory()
-      val original: ScopedStorage = factory.create("app", scope.coroutineScope())
-      scope.register(original)
+      val factory: Storage.Factory = InMemoryStorageFactory()
+      val owner = scope.coroutineScope()
+      val original: Storage = factory.create("app", owner)
       val key = stringPreferencesKey("theme")
       original.preferences("settings").edit { it[key] = "dark" }
       original.files.directory("books").write("chapter", byteArrayOf(1))
       original.cache.write("cover", byteArrayOf(2))
 
-      original.onExitScope()
+      owner.cancel()
       val reopened: Storage = scope.storage(factory)
       val fresh: Storage = scope.storage(InMemoryStorageFactory())
 
@@ -61,7 +62,7 @@ class InMemoryStorageTest {
   @Test
   fun `clearing nested files preserves siblings caches preferences and other namespaces`() =
     runTestWithScope { scope ->
-      val factory: ScopedStorage.Factory = InMemoryStorageFactory()
+      val factory: Storage.Factory = InMemoryStorageFactory()
       val app: Storage = scope.storage(factory)
       val user: Storage = scope.storage(factory, "user-alice")
       val key = stringPreferencesKey("theme")
@@ -192,11 +193,11 @@ class InMemoryStorageTest {
   }
 
   @Test
-  fun `scope exit cancels a preference edit and reopening keeps the last committed value`() =
+  fun `owner cancellation cancels a preference edit and reopening keeps the last committed value`() =
     runTestWithScope { scope ->
-      val factory: ScopedStorage.Factory = InMemoryStorageFactory()
-      val original: ScopedStorage = factory.create("app", scope.coroutineScope())
-      scope.register(original)
+      val factory: Storage.Factory = InMemoryStorageFactory()
+      val owner = scope.coroutineScope()
+      val original: Storage = factory.create("app", owner)
       val preferences = original.preferences("settings")
       val key = stringPreferencesKey("theme")
       preferences.edit { it[key] = "dark" }
@@ -217,13 +218,15 @@ class InMemoryStorageTest {
       }
       editStarted.await()
 
-      original.onExitScope()
+      owner.cancel()
       editing.await()
       val reopened: Storage = scope.storage(factory)
 
       assertThat(reopened.preferences("settings").data.first()[key]).isEqualTo("dark")
     }
 
-  private fun Scope.storage(factory: ScopedStorage.Factory, namespace: String = "app"): Storage =
-    factory.create(namespace, coroutineScope()).also { register(it) }
+  private fun Scope.storage(
+    factory: Storage.Factory,
+    namespace: String = "app",
+  ): Storage = factory.create(namespace, coroutineScope())
 }
