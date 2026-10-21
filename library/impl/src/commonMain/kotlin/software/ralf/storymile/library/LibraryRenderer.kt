@@ -1,13 +1,11 @@
 package software.ralf.storymile.library
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,16 +16,23 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Podcasts
 import androidx.compose.material3.Button
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Tab as MaterialTab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -74,44 +79,42 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
           title = stringResource(Res.string.library_title),
           windowWidth = LocalScreenSize.current.width,
         )
-        Column(Modifier.weight(1f).padding(horizontal = sidePadding)) {
-          Tabs(model)
-          if (horizontal) {
-            Row(
-              modifier = Modifier.fillMaxWidth().weight(1f).padding(vertical = 8.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.Center,
-            ) {
-              Illustration(
-                tab = model.selectedTab,
-                modifier =
-                  Modifier.padding(end = 24.dp).size(144.dp).testTag("library-illustration"),
-              )
-              EmptyMessage(
-                model = model,
-                compact = true,
-                large = false,
-                horizontal = true,
-                modifier = Modifier.weight(1f, fill = false),
-              )
+        val pagerState =
+          rememberPagerState(initialPage = model.selectedTab.ordinal) { Tab.entries.size }
+        val currentModel by rememberUpdatedState(model)
+        LaunchedEffect(model.selectedTab) {
+          pagerState.animateScrollToPage(model.selectedTab.ordinal)
+        }
+        LaunchedEffect(pagerState) {
+          snapshotFlow { pagerState.settledPage }
+            .collect { page ->
+              val tab = Tab.entries[page]
+              if (tab != currentModel.selectedTab) {
+                currentModel.onSelectTab(tab)
+              }
             }
-          } else {
-            Column(
-              modifier =
-                Modifier.fillMaxWidth().weight(1f).padding(vertical = if (short) 8.dp else 24.dp),
-              horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.Center,
-            ) {
-              Illustration(
-                tab = model.selectedTab,
-                modifier =
-                  Modifier.weight(1f, fill = false)
-                    .size(if (compact) 164.dp else if (large) 256.dp else 216.dp)
-                    .testTag("library-illustration"),
-              )
-              Spacer(Modifier.height(if (short) 8.dp else 24.dp))
-              EmptyMessage(model = model, compact = compact, large = large, horizontal = false)
-            }
+        }
+        Column(Modifier.weight(1f)) {
+          Tabs(
+            model = model,
+            pagerState = pagerState,
+            modifier = Modifier.padding(horizontal = sidePadding),
+          )
+          HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth().weight(1f).testTag("library-pager"),
+            key = { Tab.entries[it].name },
+          ) { page ->
+            val tab = Tab.entries[page]
+            EmptyPage(
+              tab = tab,
+              onDiscoverPodcasts = model.onDiscoverPodcasts,
+              compact = compact,
+              short = short,
+              horizontal = horizontal,
+              large = large,
+              modifier = Modifier.fillMaxSize().padding(horizontal = sidePadding),
+            )
           }
         }
       }
@@ -119,17 +122,73 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
   }
 
   @Composable
-  private fun Tabs(model: LibraryPresenterImpl.Model) {
-    FlowRow(
-      modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
+  private fun EmptyPage(
+    tab: Tab,
+    onDiscoverPodcasts: () -> Unit,
+    compact: Boolean,
+    short: Boolean,
+    horizontal: Boolean,
+    large: Boolean,
+    modifier: Modifier,
+  ) {
+    Box(modifier.testTag("library-page-${tab.name.lowercase()}")) {
+      if (horizontal) {
+        Row(
+          modifier = Modifier.fillMaxSize().padding(vertical = 8.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.Center,
+        ) {
+          Illustration(
+            tab = tab,
+            modifier = Modifier.padding(end = 24.dp).size(144.dp).testTag("library-illustration"),
+          )
+          EmptyMessage(
+            tab = tab,
+            onDiscoverPodcasts = onDiscoverPodcasts,
+            compact = true,
+            large = false,
+            horizontal = true,
+            modifier = Modifier.weight(1f, fill = false),
+          )
+        }
+      } else {
+        Column(
+          modifier = Modifier.fillMaxSize().padding(vertical = if (short) 8.dp else 24.dp),
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.Center,
+        ) {
+          Illustration(
+            tab = tab,
+            modifier =
+              Modifier.weight(1f, fill = false)
+                .size(if (compact) 164.dp else if (large) 256.dp else 216.dp)
+                .testTag("library-illustration"),
+          )
+          Spacer(Modifier.height(if (short) 8.dp else 24.dp))
+          EmptyMessage(
+            tab = tab,
+            onDiscoverPodcasts = onDiscoverPodcasts,
+            compact = compact,
+            large = large,
+            horizontal = false,
+          )
+        }
+      }
+    }
+  }
+
+  @Composable
+  private fun Tabs(model: LibraryPresenterImpl.Model, pagerState: PagerState, modifier: Modifier) {
+    PrimaryTabRow(
+      selectedTabIndex = pagerState.currentPage,
+      modifier = modifier,
+      containerColor = AppTheme.colorScheme.background,
     ) {
       Tab.entries.forEach { tab ->
-        val selected = model.selectedTab == tab
-        FilterChip(
-          selected = selected,
+        MaterialTab(
+          selected = pagerState.currentPage == tab.ordinal,
           onClick = { model.onSelectTab(tab) },
-          label = {
+          text = {
             Text(
               text =
                 stringResource(
@@ -142,21 +201,20 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
               style = AppTheme.typography.bodyLarge,
             )
           },
-          shape = CircleShape,
-          colors =
-            FilterChipDefaults.filterChipColors(
-              containerColor = AppTheme.colorScheme.background,
-              labelColor = AppTheme.colorScheme.primary,
-              selectedContainerColor = AppTheme.colorScheme.primary,
-              selectedLabelColor = AppTheme.colorScheme.onPrimary,
-            ),
-          border =
-            BorderStroke(
-              width = 1.dp,
-              color =
-                if (selected) AppTheme.colorScheme.primary else AppTheme.colorScheme.outlineVariant,
-            ),
-          modifier = Modifier.heightIn(min = 48.dp).testTag("library-tab-${tab.name.lowercase()}"),
+          icon = {
+            Icon(
+              imageVector =
+                when (tab) {
+                  Tab.QUEUE -> Icons.AutoMirrored.Filled.FormatListBulleted
+                  Tab.SHOWS -> Icons.Default.Podcasts
+                  Tab.SAVED -> Icons.Default.Bookmark
+                },
+              contentDescription = null,
+            )
+          },
+          selectedContentColor = AppTheme.colorScheme.primary,
+          unselectedContentColor = AppTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.testTag("library-tab-${tab.name.lowercase()}"),
         )
       }
     }
@@ -191,7 +249,8 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
 
   @Composable
   private fun EmptyMessage(
-    model: LibraryPresenterImpl.Model,
+    tab: Tab,
+    onDiscoverPodcasts: () -> Unit,
     compact: Boolean,
     large: Boolean,
     horizontal: Boolean,
@@ -205,7 +264,7 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
       horizontalAlignment = alignment,
     ) {
       Text(
-        text = stringResource(model.selectedTab.emptyTitle()),
+        text = stringResource(tab.emptyTitle()),
         style =
           when {
             compact -> AppTheme.typography.headlineSmall
@@ -217,7 +276,7 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
         color = AppTheme.colorScheme.onBackground,
       )
       Text(
-        text = stringResource(model.selectedTab.emptyDescription()),
+        text = stringResource(tab.emptyDescription()),
         modifier = Modifier.padding(top = 12.dp),
         style =
           when {
@@ -229,7 +288,7 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
         color = AppTheme.colorScheme.onSurfaceVariant,
       )
       Button(
-        onClick = model.onDiscoverPodcasts,
+        onClick = onDiscoverPodcasts,
         modifier =
           Modifier.padding(top = 24.dp)
             .widthIn(min = if (compact) 224.dp else 288.dp)

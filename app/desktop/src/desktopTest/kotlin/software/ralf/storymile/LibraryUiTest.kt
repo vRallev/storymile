@@ -11,6 +11,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import java.io.File
@@ -58,7 +60,7 @@ class LibraryUiTest {
   }
 
   @Test
-  fun `selected library tab survives resizing and discovery stays on the empty screen`() {
+  fun `swiped library tab survives resizing and discovery stays on the empty screen`() {
     val size = mutableStateOf(DesktopWindowSizes.phone)
     uiTestRule.runRobotTest(
       windowSize = DpSize(1440.dp, 1000.dp),
@@ -66,7 +68,9 @@ class LibraryUiTest {
       contentSize = size,
     ) {
       composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
-      runOnUiThread { onNodeWithTag("library-tab-saved").performClick() }
+      runOnUiThread { onNodeWithTag("library-pager").performTouchInput { swipeLeft() } }
+      onNodeWithTag("library-tab-shows").assertIsSelected()
+      runOnUiThread { onNodeWithTag("library-pager").performTouchInput { swipeLeft() } }
       onNodeWithTag("library-tab-saved").assertIsSelected()
 
       listOf(
