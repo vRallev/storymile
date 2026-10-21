@@ -44,16 +44,10 @@ import software.ralf.storymile.library.LibraryPresenterImpl.Model
 import software.ralf.storymile.library.LibraryPresenterImpl.Tab
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.StorymileTheme
-import software.ralf.storymile.theme.ThemeEnvironment
+import software.ralf.storymile.theme.testing.FakeThemeEnvironment
 
 class LibraryRendererTest {
-  private val themeEnvironment =
-    object : ThemeEnvironment {
-      @Composable
-      override fun Provide(darkTheme: Boolean, content: @Composable () -> Unit) {
-        content()
-      }
-    }
+  private val themeEnvironment = FakeThemeEnvironment()
 
   @Test
   fun `phone short wide and enlarged text layouts fit without scrolling`() {

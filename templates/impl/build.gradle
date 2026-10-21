@@ -13,4 +13,5 @@ dependencies {
   commonMainImplementation project(':theme:public')
 
   commonTestImplementation project(':runtime-mode:testing')
+  commonTestImplementation project(':theme:testing')
 }

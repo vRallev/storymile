@@ -27,6 +27,7 @@ import software.ralf.storymile.player.Player
 import software.ralf.storymile.playlist.PlaylistRepository
 import software.ralf.storymile.restart.ApplicationRestarter
 import software.ralf.storymile.restart.DefaultApplicationRestarter
+import software.ralf.storymile.restart.testing.FakeApplicationRestarter
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.runtimemode.TestRuntimeModeController
@@ -176,10 +177,10 @@ class RuntimeModeStorageTest {
 
   private suspend fun withApplication(
     platform: StoragePlatform,
-    block: suspend (Graph, TestApplicationRestarter) -> Unit,
+    block: suspend (Graph, FakeApplicationRestarter) -> Unit,
   ) {
     val application = KmpApplication()
-    val restarter = TestApplicationRestarter()
+    val restarter = FakeApplicationRestarter()
     val graph = createGraphFactory<Graph.Factory>().create(application, platform, restarter)
     application.create(graph)
     try {
@@ -245,14 +246,5 @@ class RuntimeModeStorageTest {
     val playlistRepository: PlaylistRepository
 
     val player: Player
-  }
-
-  private class TestApplicationRestarter : ApplicationRestarter {
-    var restartCount = 0
-      private set
-
-    override fun restart() {
-      restartCount++
-    }
   }
 }

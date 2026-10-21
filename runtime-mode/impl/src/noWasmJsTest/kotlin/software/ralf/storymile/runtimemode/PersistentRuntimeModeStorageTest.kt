@@ -19,7 +19,7 @@ import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.runTestWithScope
-import software.ralf.storymile.restart.ApplicationRestarter
+import software.ralf.storymile.restart.testing.FakeApplicationRestarter
 import software.ralf.storymile.storage.FileStorage
 import software.ralf.storymile.storage.ScopedStorage
 
@@ -41,8 +41,8 @@ class PersistentRuntimeModeStorageTest {
         RuntimeModeControllerImpl(
           storage = storage,
           applicationRestarter =
-            object : ApplicationRestarter {
-              override fun restart() = error("Reading the mode must not restart the app")
+            FakeApplicationRestarter {
+              error("Reading the mode must not restart the app")
             },
         )
 

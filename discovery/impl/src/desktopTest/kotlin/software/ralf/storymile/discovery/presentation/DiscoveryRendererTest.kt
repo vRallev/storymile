@@ -49,16 +49,10 @@ import software.ralf.app.platform.presenter.compose.text.PresenterTextFieldState
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.StorymileTheme
-import software.ralf.storymile.theme.ThemeEnvironment
+import software.ralf.storymile.theme.testing.FakeThemeEnvironment
 
 class DiscoveryRendererTest {
-  private val themeEnvironment =
-    object : ThemeEnvironment {
-      @Composable
-      override fun Provide(darkTheme: Boolean, content: @Composable () -> Unit) {
-        content()
-      }
-    }
+  private val themeEnvironment = FakeThemeEnvironment()
 
   @Test
   fun `search collapses topics and their spacing while clearing restores them`() {

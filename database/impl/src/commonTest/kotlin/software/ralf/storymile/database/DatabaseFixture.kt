@@ -1,7 +1,5 @@
 package software.ralf.storymile.database
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Dispatchers
@@ -14,8 +12,7 @@ import software.ralf.app.platform.scope.register
 import software.ralf.storymile.podcast.PodcastEnclosure
 import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.podcast.PodcastFeed
-import software.ralf.storymile.storage.FileStorage
-import software.ralf.storymile.storage.Storage
+import software.ralf.storymile.storage.testing.FakeStorage
 
 class DatabaseFixture(path: String? = null) {
   // Room connection timeouts must use real time while filesystem or browser-worker I/O is pending.
@@ -25,7 +22,7 @@ class DatabaseFixture(path: String? = null) {
 
   val database: PodcastDatabase =
     UserPodcastDatabase(
-        storage = DatabaseStorage(path),
+        storage = FakeStorage(databasePath = path),
         coroutineScope = owner.createChild(),
         platform = PlatformDatabase(),
       )
@@ -85,17 +82,5 @@ class DatabaseFixture(path: String? = null) {
             ),
           ),
       )
-  }
-
-  private class DatabaseStorage(private val path: String?) : Storage {
-    override val files: FileStorage
-      get() = error("Not used")
-
-    override val cache: FileStorage
-      get() = error("Not used")
-
-    override suspend fun databasePath(name: String): String? = path
-
-    override suspend fun preferences(name: String): DataStore<Preferences> = error("Not used")
   }
 }

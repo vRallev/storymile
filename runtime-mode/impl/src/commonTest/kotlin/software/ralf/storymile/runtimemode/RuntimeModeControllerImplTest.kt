@@ -12,6 +12,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import software.ralf.storymile.restart.ApplicationRestarter
+import software.ralf.storymile.restart.testing.FakeApplicationRestarter
 
 class RuntimeModeControllerImplTest {
   @Test
@@ -164,17 +165,6 @@ class RuntimeModeControllerImplTest {
     storage: RuntimeModeStorage,
     restarter: ApplicationRestarter,
   ): RuntimeModeController = RuntimeModeControllerImpl(storage, restarter)
-
-  private class FakeApplicationRestarter(private val onRestart: () -> Unit = {}) :
-    ApplicationRestarter {
-    var restartCount = 0
-      private set
-
-    override fun restart() {
-      onRestart()
-      restartCount++
-    }
-  }
 
   private class FakeStorage(private var selectedMode: String? = null) : RuntimeModeStorage {
     var readFailure: Exception? = null

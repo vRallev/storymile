@@ -13,6 +13,9 @@ dependencies {
   commonMainImplementation project(':user:public')
   commonMainImplementation libs.androidx.room.runtime
 
+  commonTestImplementation project(':storage:testing')
+
   noWasmJsMainImplementation libs.androidx.sqlite.bundled
+
   noWasmJsTestImplementation libs.okio
 }

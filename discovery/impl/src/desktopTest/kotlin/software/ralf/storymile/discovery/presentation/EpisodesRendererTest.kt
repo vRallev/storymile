@@ -32,16 +32,10 @@ import software.ralf.storymile.podcast.PodcastEnclosure
 import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.StorymileTheme
-import software.ralf.storymile.theme.ThemeEnvironment
+import software.ralf.storymile.theme.testing.FakeThemeEnvironment
 
 class EpisodesRendererTest {
-  private val themeEnvironment =
-    object : ThemeEnvironment {
-      @Composable
-      override fun Provide(darkTheme: Boolean, content: @Composable () -> Unit) {
-        content()
-      }
-    }
+  private val themeEnvironment = FakeThemeEnvironment()
 
   @Test
   fun `episode section renders loading empty and retryable partial failures`() =
