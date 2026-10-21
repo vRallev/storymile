@@ -1,7 +1,5 @@
 package software.ralf.storymile.playlist
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import app.cash.turbine.test
 import assertk.assertFailure
 import assertk.assertThat
@@ -18,13 +16,13 @@ import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.runTestWithScope
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
-import software.ralf.storymile.storage.FileStorage
 import software.ralf.storymile.storage.Storage
+import software.ralf.storymile.storage.testing.FakeStorage
 
 class PlaylistRepositoryImplTest {
   @Test
   fun `fake mode seeds three ordered episodes before queued edits`() = runTestWithScope { scope ->
-    val storage = FakeStorage()
+    val storage = storage()
     val mode = RuntimeMode.Fake
     val readBarrier = CompletableDeferred<Unit>()
     storage.readBarrier = readBarrier
@@ -57,7 +55,7 @@ class PlaylistRepositoryImplTest {
   @Test
   fun `deleting the default playlist does not reseed it in the same fake session`() =
     runTestWithScope { scope ->
-      val storage = FakeStorage()
+      val storage = storage()
       val mode = RuntimeMode.Fake
       val repository: PlaylistRepository = scope.repository(storage, mode)
       runCurrent()
@@ -72,7 +70,7 @@ class PlaylistRepositoryImplTest {
 
   @Test
   fun `failed seeding is retried before applying a later command`() = runTestWithScope { scope ->
-    val storage = FakeStorage().apply { writeFailure = IllegalStateException("Unavailable") }
+    val storage = storage().apply { writeFailure = IllegalStateException("Unavailable") }
     val repository: PlaylistRepository = scope.repository(storage, RuntimeMode.Fake)
     runCurrent()
     assertThat(repository.playlists.value).isEmpty()
@@ -86,7 +84,7 @@ class PlaylistRepositoryImplTest {
 
   @Test
   fun `real mode starts empty without writing a default playlist`() = runTestWithScope { scope ->
-    val storage = FakeStorage()
+    val storage = storage()
     val repository: PlaylistRepository = scope.repository(storage)
     runCurrent()
     assertThat(repository.playlists.value).isEmpty()
@@ -96,7 +94,7 @@ class PlaylistRepositoryImplTest {
   @Test
   fun `playlists retain their identities and episode order when reloaded`() =
     runTestWithScope { scope ->
-      val storage = FakeStorage()
+      val storage = storage()
       val repository: PlaylistRepository = scope.repository(storage)
       repository.create(PlaylistName("  Favorites  "))
       repository.create(PlaylistName("Favorites"))
@@ -124,7 +122,7 @@ class PlaylistRepositoryImplTest {
   @Test
   fun `membership commands preserve order and prevent repeats within each playlist`() =
     runTestWithScope { scope ->
-      val repository: PlaylistRepository = scope.repository(FakeStorage())
+      val repository: PlaylistRepository = scope.repository(storage())
       repository.create(PlaylistName("Favorites"))
       runCurrent()
       val id = repository.playlists.value.single().id
@@ -154,7 +152,7 @@ class PlaylistRepositoryImplTest {
   @Test
   fun `removing membership and deleting a playlist preserve the other playlist`() =
     runTestWithScope { scope ->
-      val storage = FakeStorage()
+      val storage = storage()
       val repository: PlaylistRepository = scope.repository(storage)
       repository.create(PlaylistName("First"))
       repository.create(PlaylistName("Second"))
@@ -180,7 +178,7 @@ class PlaylistRepositoryImplTest {
   @Test
   fun `commands wait for loading and apply to the saved playlists in submission order`() =
     runTestWithScope { scope ->
-      val storage = FakeStorage(SAVED_PLAYLISTS)
+      val storage = storage(SAVED_PLAYLISTS)
       val readBarrier = CompletableDeferred<Unit>()
       storage.readBarrier = readBarrier
       val repository: PlaylistRepository = scope.repository(storage)
@@ -210,7 +208,7 @@ class PlaylistRepositoryImplTest {
 
   @Test
   fun `a playlist becomes observable only after its write completes`() = runTestWithScope { scope ->
-    val storage = FakeStorage()
+    val storage = storage()
     val writeBarrier = CompletableDeferred<Unit>()
     storage.writeBarrier = writeBarrier
     val repository: PlaylistRepository = scope.repository(storage)
@@ -233,7 +231,7 @@ class PlaylistRepositoryImplTest {
   @Test
   fun `a failed write retains saved state and later commands can succeed`() =
     runTestWithScope { scope ->
-      val storage = FakeStorage(SAVED_PLAYLISTS)
+      val storage = storage(SAVED_PLAYLISTS)
       val repository: PlaylistRepository = scope.repository(storage)
       runCurrent()
       val saved = repository.playlists.value
@@ -244,7 +242,8 @@ class PlaylistRepositoryImplTest {
       runCurrent()
 
       assertThat(repository.playlists.value).isEqualTo(saved)
-      assertThat(storage.savedDocument).isEqualTo(SAVED_PLAYLISTS)
+      assertThat(storage.fileContent("playlists/playlists.json")?.decodeToString())
+        .isEqualTo(SAVED_PLAYLISTS)
       storage.writeFailure = null
       repository.addEpisode(PlaylistId("saved"), EpisodeId("two"))
       runCurrent()
@@ -265,7 +264,7 @@ class PlaylistRepositoryImplTest {
   @Test
   fun `a failed read is retried before a later command can update saved playlists`() =
     runTestWithScope { scope ->
-      val storage = FakeStorage(SAVED_PLAYLISTS)
+      val storage = storage(SAVED_PLAYLISTS)
       storage.readFailure = IllegalStateException("Storage unavailable")
       val repository: PlaylistRepository = scope.repository(storage)
       runCurrent()
@@ -273,7 +272,8 @@ class PlaylistRepositoryImplTest {
       runCurrent()
 
       assertThat(repository.playlists.value).isEmpty()
-      assertThat(storage.savedDocument).isEqualTo(SAVED_PLAYLISTS)
+      assertThat(storage.fileContent("playlists/playlists.json")?.decodeToString())
+        .isEqualTo(SAVED_PLAYLISTS)
       assertThat(storage.writeCount).isEqualTo(0)
       storage.readFailure = null
       repository.create(PlaylistName("Recovered"))
@@ -293,7 +293,7 @@ class PlaylistRepositoryImplTest {
           """{"version":2,"playlists":[]}""",
           SAVED_PLAYLISTS.replace("\"Saved\"", "\"  \""),
         )) {
-        val storage = FakeStorage(document)
+        val storage = storage(document)
         val repository: PlaylistRepository = scope.repository(storage)
         runCurrent()
         repository.create(PlaylistName("New"))
@@ -301,7 +301,8 @@ class PlaylistRepositoryImplTest {
         runCurrent()
 
         assertThat(repository.playlists.value).isEmpty()
-        assertThat(storage.savedDocument).isEqualTo(document)
+        assertThat(storage.fileContent("playlists/playlists.json")?.decodeToString())
+          .isEqualTo(document)
         assertThat(storage.writeCount).isEqualTo(0)
       }
     }
@@ -309,7 +310,7 @@ class PlaylistRepositoryImplTest {
   @Test
   fun `invalid moves preserve membership and do not prevent later commands`() =
     runTestWithScope { scope ->
-      val repository: PlaylistRepository = scope.repository(FakeStorage(SAVED_PLAYLISTS))
+      val repository: PlaylistRepository = scope.repository(storage(SAVED_PLAYLISTS))
       runCurrent()
       val id = PlaylistId("saved")
       repository.moveEpisode(id, EpisodeId("one"), EpisodeId("missing"))
@@ -327,7 +328,7 @@ class PlaylistRepositoryImplTest {
   @Test
   fun `commands for a missing playlist do not create it or prevent later commands`() =
     runTestWithScope { scope ->
-      val repository: PlaylistRepository = scope.repository(FakeStorage())
+      val repository: PlaylistRepository = scope.repository(storage())
       val missing = PlaylistId("missing")
       repository.rename(missing, PlaylistName("Renamed"))
       repository.addEpisode(missing, EpisodeId("one"))
@@ -343,7 +344,7 @@ class PlaylistRepositoryImplTest {
   @Test
   fun `scope exit cancels pending writes and queued commands and rejects later mutations`() =
     runTestWithScope { scope ->
-      val storage = FakeStorage(SAVED_PLAYLISTS)
+      val storage = storage(SAVED_PLAYLISTS)
       val repository: PlaylistRepository = scope.repository(storage)
       runCurrent()
       val saved = repository.playlists.value
@@ -360,7 +361,8 @@ class PlaylistRepositoryImplTest {
       runCurrent()
 
       assertThat(storage.writeCanceled.isCompleted).isTrue()
-      assertThat(storage.savedDocument).isEqualTo(SAVED_PLAYLISTS)
+      assertThat(storage.fileContent("playlists/playlists.json")?.decodeToString())
+        .isEqualTo(SAVED_PLAYLISTS)
       assertThat(repository.playlists.value).isEqualTo(saved)
       val id = PlaylistId("saved")
       val episode = EpisodeId("one")
@@ -381,76 +383,16 @@ class PlaylistRepositoryImplTest {
   ): PlaylistRepository =
     PlaylistRepositoryImpl(storage, FakeRuntimeModeController(mode)).also { register(it) }
 
+  private fun storage(savedDocument: String? = null): FakeStorage =
+    FakeStorage(
+      initialFiles =
+        savedDocument?.let {
+          mapOf("playlists/playlists.json" to it.encodeToByteArray())
+        } ?: emptyMap(),
+    )
+
   private companion object {
     const val SAVED_PLAYLISTS =
       """{"version":1,"playlists":[{"id":"saved","name":"Saved","episodeIds":["one"]}]}"""
-  }
-
-  private class FakeStorage(savedDocument: String? = null) : Storage {
-    private val content = mutableMapOf<String, ByteArray>()
-
-    var readBarrier: CompletableDeferred<Unit>? = null
-    var writeBarrier: CompletableDeferred<Unit>? = null
-    var readFailure: Exception? = null
-    var writeFailure: Exception? = null
-    var readCount = 0
-      private set
-
-    var writeCount = 0
-      private set
-
-    val writeStarted = CompletableDeferred<Unit>()
-    val writeCanceled = CompletableDeferred<Unit>()
-
-    val savedDocument: String?
-      get() = content["playlists/playlists.json"]?.decodeToString()
-
-    override val files: FileStorage = Files("")
-
-    override val cache: FileStorage
-      get() = error("Cache is not used")
-
-    init {
-      if (savedDocument != null) {
-        content["playlists/playlists.json"] = savedDocument.encodeToByteArray()
-      }
-    }
-
-    override suspend fun preferences(name: String): DataStore<Preferences> =
-      error("Preferences are not used")
-
-    override suspend fun databasePath(name: String): String? = error("Databases are not used")
-
-    private inner class Files(private val path: String) : FileStorage {
-      override fun directory(name: String): FileStorage = Files("$path$name/")
-
-      override suspend fun read(name: String): ByteArray? {
-        readCount++
-        readBarrier?.await()
-        readFailure?.let { throw it }
-        return content["$path$name"]?.copyOf()
-      }
-
-      override suspend fun write(name: String, content: ByteArray) {
-        writeStarted.complete(Unit)
-        try {
-          writeBarrier?.await()
-          writeFailure?.let { throw it }
-          this@FakeStorage.content["$path$name"] = content.copyOf()
-          writeCount++
-        } catch (exception: CancellationException) {
-          writeCanceled.complete(Unit)
-          throw exception
-        }
-      }
-
-      override suspend fun delete(name: String) {
-        content.remove("$path$name")
-      }
-
-      override suspend fun deleteAll() {
-        content.keys.removeAll { it.startsWith(path) }
-      }
-    }
   }
 }

@@ -14,10 +14,12 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.app.platform.presenter.compose.test
+import software.ralf.storymile.player.testing.FakePlayer
 import software.ralf.storymile.playlist.EpisodeId
 import software.ralf.storymile.playlist.Playlist
 import software.ralf.storymile.playlist.PlaylistId
 import software.ralf.storymile.playlist.PlaylistName
+import software.ralf.storymile.playlist.testing.FakePlaylistRepository
 
 class PlaybackPresenterImplTest {
   private val PlaybackPresenterImpl.Model.player: PlaybackPresenterImpl.PlayerModel
@@ -25,8 +27,8 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `playback is absent until a playlist contains episodes`() = runTest {
-    val repository = TestPlaylistRepository(emptyList())
-    val presenter: PlaybackPresenter = PlaybackPresenterImpl(repository, TestPlayer())
+    val repository = FakePlaylistRepository(emptyList())
+    val presenter: PlaybackPresenter = PlaybackPresenterImpl(repository, FakePlayer())
 
     presenter.test(this) {
       awaitItem().assertPlayback(visible = false)
@@ -47,8 +49,8 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `playback state survives unavailable content`() = runTest {
-    val repository = TestPlaylistRepository(listOf(playlist()))
-    val presenter = PlaybackPresenterImpl(repository, TestPlayer())
+    val repository = FakePlaylistRepository(listOf(playlist()))
+    val presenter = PlaybackPresenterImpl(repository, FakePlayer())
 
     presenter.testPlayer(this) {
       awaitItem().player.onSeek(123)
@@ -70,7 +72,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `collapsed and expanded controls share playback state`() = runTest {
-    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())), TestPlayer())
+    val presenter = PlaybackPresenterImpl(FakePlaylistRepository(listOf(playlist())), FakePlayer())
 
     presenter.testPlayer(this) {
       var model = awaitItem()
@@ -106,7 +108,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `seeking and skips stay within the current episode`() = runTest {
-    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())), TestPlayer())
+    val presenter = PlaybackPresenterImpl(FakePlaylistRepository(listOf(playlist())), FakePlayer())
 
     presenter.testPlayer(this) {
       var player = awaitItem().player
@@ -144,7 +146,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `chapter selection and seeking keep the active chapter in sync`() = runTest {
-    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())), TestPlayer())
+    val presenter = PlaybackPresenterImpl(FakePlaylistRepository(listOf(playlist())), FakePlayer())
 
     presenter.testPlayer(this) {
       var player = awaitItem().player
@@ -165,7 +167,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `queue selection loads the episode and preserves listening preferences`() = runTest {
-    val presenter = PlaybackPresenterImpl(TestPlaylistRepository(listOf(playlist())), TestPlayer())
+    val presenter = PlaybackPresenterImpl(FakePlaylistRepository(listOf(playlist())), FakePlayer())
 
     presenter.testPlayer(this) {
       var player = awaitItem().player

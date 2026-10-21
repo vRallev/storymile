@@ -19,6 +19,8 @@ dependencies {
   commonMainImplementation project(':util:public')
   commonMainImplementation libs.serialization.json
 
+  commonTestImplementation project(':episode-details:testing')
   commonTestImplementation project(':runtime-mode:testing')
+  commonTestImplementation project(':theme:testing')
   commonTestImplementation project(':util:testing')
 }

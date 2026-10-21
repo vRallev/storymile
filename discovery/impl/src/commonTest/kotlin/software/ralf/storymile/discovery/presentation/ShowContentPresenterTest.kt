@@ -14,6 +14,7 @@ import software.ralf.app.platform.presenter.backstack.nav3.withPresenterBackstac
 import software.ralf.app.platform.presenter.compose.test
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
+import software.ralf.storymile.episodedetails.testing.FakeEpisodeDetailsPresenterFactory
 
 class ShowContentPresenterTest {
   @Test
@@ -130,7 +131,7 @@ class ShowContentPresenterTest {
     ShowContentPresenter(
       catalog = catalog,
       feeds = TestPodcastFeeds(),
-      episodeDetailsFactory = TestEpisodeDetailsFactory(),
+      episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
       initialPodcast = initialPodcast,
       podcasts = listOf(podcast("one"), podcast("two")),
       source = ShowPresenter.Source.Browse,

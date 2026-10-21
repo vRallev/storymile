@@ -9,4 +9,6 @@ storymile {
 dependencies {
   commonMainImplementation project(':restart:public')
   commonMainImplementation project(':storage:public')
+
+  commonTestImplementation project(':restart:testing')
 }

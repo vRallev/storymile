@@ -1,7 +1,6 @@
 package software.ralf.storymile.episodedetails
 
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
@@ -30,14 +29,10 @@ import software.ralf.storymile.podcast.PodcastEnclosure
 import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.StorymileTheme
-import software.ralf.storymile.theme.ThemeEnvironment
+import software.ralf.storymile.theme.testing.FakeThemeEnvironment
 
 class EpisodeDetailsRendererTest {
-  private val environment =
-    object : ThemeEnvironment {
-      @Composable
-      override fun Provide(darkTheme: Boolean, content: @Composable () -> Unit) = content()
-    }
+  private val environment = FakeThemeEnvironment()
 
   @Test
   fun `full details scroll and back stays reachable across window sizes and large text`() {

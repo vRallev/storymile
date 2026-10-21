@@ -16,6 +16,7 @@ import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.app.platform.presenter.compose.test
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State as CatalogState
+import software.ralf.storymile.episodedetails.testing.FakeEpisodeDetailsPresenterFactory
 import software.ralf.storymile.podcast.PodcastEnclosure
 import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.podcast.PodcastFeed
@@ -33,7 +34,7 @@ class EpisodesPresenterTest {
           description = "<p title=\"1 > 0\">Caf&eacute; &amp; stories.<p>Next paragraph",
         )
     feeds.update("one", State.Success(feed.copy(episodes = listOf(episode))))
-    val factory = TestEpisodeDetailsFactory()
+    val factory = FakeEpisodeDetailsPresenterFactory()
     val presenter = EpisodesPresenter(TestPodcastCatalog(), feeds, factory)
     val backstack = FakePresenterBackstackScope()
     val initialBackstack = backstack.backstack.toList()
@@ -50,7 +51,7 @@ class EpisodesPresenterTest {
   fun `shows episodes in feed order and updates the snapshot`() = runTest {
     val feeds = TestPodcastFeeds()
     val presenter: ComposePresenter<List<DiscoveredPodcast>, EpisodesPresenter.Model> =
-      EpisodesPresenter(TestPodcastCatalog(), feeds, TestEpisodeDetailsFactory())
+      EpisodesPresenter(TestPodcastCatalog(), feeds, FakeEpisodeDetailsPresenterFactory())
     presenter.withPresenterBackstackScope(FakePresenterBackstackScope()).test(
       testScope = this,
       input = listOf(podcast("one")),
@@ -75,7 +76,7 @@ class EpisodesPresenterTest {
         EpisodesPresenter(
           catalog = TestPodcastCatalog(),
           repository = feeds,
-          episodeDetailsFactory = TestEpisodeDetailsFactory(),
+          episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
           episodesPerPodcast = 1,
         )
       presenter.withPresenterBackstackScope(FakePresenterBackstackScope()).test(
@@ -109,7 +110,7 @@ class EpisodesPresenterTest {
     feeds.update("one", State.Success(feed("one", "old")))
     val input = MutableStateFlow(listOf(podcast("one")))
     val presenter: ComposePresenter<List<DiscoveredPodcast>, EpisodesPresenter.Model> =
-      EpisodesPresenter(TestPodcastCatalog(), feeds, TestEpisodeDetailsFactory())
+      EpisodesPresenter(TestPodcastCatalog(), feeds, FakeEpisodeDetailsPresenterFactory())
     presenter.withPresenterBackstackScope(FakePresenterBackstackScope()).test(this, input) {
       assertThat(awaitItem().episodes.map { it.details.episode.title }).containsExactly("old")
       input.value = listOf(podcast("two"))
@@ -127,7 +128,7 @@ class EpisodesPresenterTest {
   fun `missing feeds and feeds without episodes produce an empty state`() = runTest {
     val feeds = TestPodcastFeeds()
     val presenter: ComposePresenter<List<DiscoveredPodcast>, EpisodesPresenter.Model> =
-      EpisodesPresenter(TestPodcastCatalog(), feeds, TestEpisodeDetailsFactory())
+      EpisodesPresenter(TestPodcastCatalog(), feeds, FakeEpisodeDetailsPresenterFactory())
     presenter.withPresenterBackstackScope(FakePresenterBackstackScope()).test(
       testScope = this,
       input = listOf(podcast(null), podcast(" ")),
@@ -158,7 +159,7 @@ class EpisodesPresenterTest {
       val feeds = TestPodcastFeeds()
       catalog.updateLookup("one", CatalogState.Loading)
       val presenter: ComposePresenter<List<DiscoveredPodcast>, EpisodesPresenter.Model> =
-        EpisodesPresenter(catalog, feeds, TestEpisodeDetailsFactory())
+        EpisodesPresenter(catalog, feeds, FakeEpisodeDetailsPresenterFactory())
       presenter.withPresenterBackstackScope(FakePresenterBackstackScope()).test(
         testScope = this,
         input = listOf(podcast("one").copy(feedUrl = null)),

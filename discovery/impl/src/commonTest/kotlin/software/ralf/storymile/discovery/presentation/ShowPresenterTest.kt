@@ -1,6 +1,5 @@
 package software.ralf.storymile.discovery.presentation
 
-import androidx.compose.runtime.Composable
 import assertk.assertThat
 import assertk.assertions.containsExactly
 import assertk.assertions.isEqualTo
@@ -17,7 +16,7 @@ import software.ralf.app.platform.presenter.compose.test
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State as CatalogState
 import software.ralf.storymile.episodedetails.EpisodeDetails
-import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
+import software.ralf.storymile.episodedetails.testing.FakeEpisodeDetailsPresenterFactory
 import software.ralf.storymile.podcast.PodcastEnclosure
 import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.podcast.PodcastFeed
@@ -100,7 +99,11 @@ class ShowPresenterTest {
     ShowPresenter(
       catalog = catalog,
       feeds = feeds,
-      episodeDetailsFactory = DetailsFactory(),
+      episodeDetailsFactory =
+        FakeEpisodeDetailsPresenterFactory { details ->
+          val backstack = LocalBackstackScope.requireNotNull()
+          EpisodeModel(details = details, onBack = { backstack.pop() })
+        },
       initialPodcast = podcast("one"),
       podcasts = listOf(podcast("one"), podcast("two")),
       source = ShowPresenter.Source.Browse,
@@ -143,17 +146,6 @@ class ShowPresenterTest {
           )
         },
     )
-
-  private class DetailsFactory : EpisodeDetailsPresenter.Factory {
-    override fun create(details: EpisodeDetails): EpisodeDetailsPresenter<*> =
-      object : EpisodeDetailsPresenter<EpisodeModel> {
-        @Composable
-        override fun present(input: Unit): EpisodeModel {
-          val backstack = LocalBackstackScope.requireNotNull()
-          return EpisodeModel(details = details, onBack = { backstack.pop() })
-        }
-      }
-  }
 
   private data class EpisodeModel(val details: EpisodeDetails, val onBack: () -> Unit) : BaseModel
 }

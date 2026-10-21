@@ -18,13 +18,14 @@ import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.compose.test
 import software.ralf.storymile.downloads.DownloadsPresenter
 import software.ralf.storymile.home.HomePresenter
+import software.ralf.storymile.home.testing.FakeHomePresenter
 import software.ralf.storymile.library.LibraryPresenter
 
 class TabsPresenterImplTest {
   @Test
   fun `tabs start at home and selection updates the destination`() = runTest {
     val presenter: TabsPresenter =
-      TabsPresenterImpl({ FakeHomePresenter() }, { FakeLibraryPresenter() }) {
+      TabsPresenterImpl({ FakeHomePresenter { HomeModel } }, { FakeLibraryPresenter() }) {
         FakeDownloadsPresenter()
       }
 
@@ -49,7 +50,7 @@ class TabsPresenterImplTest {
 
   @Test
   fun `only selected screens create and run presenters`() = runTest {
-    val home = FakeHomePresenter()
+    val home = FakeHomePresenter { HomeModel }
     val library = FakeLibraryPresenter()
     val downloads = FakeDownloadsPresenter()
     val created = mutableSetOf<TabsPresenter.Tab>()
@@ -103,7 +104,9 @@ class TabsPresenterImplTest {
   fun `library content keeps its filter while another tab is selected`() = runTest {
     val library = FakeLibraryPresenter()
     val presenter: TabsPresenter =
-      TabsPresenterImpl({ FakeHomePresenter() }, { library }) { FakeDownloadsPresenter() }
+      TabsPresenterImpl({ FakeHomePresenter { HomeModel } }, { library }) {
+        FakeDownloadsPresenter()
+      }
 
     presenter.test(this) {
       var model = awaitItem()
@@ -127,13 +130,13 @@ class TabsPresenterImplTest {
 
   @Test
   fun `reselecting home calls its reset without recreating home state`() = runTest {
-    val home = StatefulHomePresenter()
+    val home = HomeNavigation()
     var creationCount = 0
     val presenter: TabsPresenter =
       TabsPresenterImpl(
         homePresenter = {
           creationCount++
-          home
+          home.presenter
         },
         libraryPresenter = { FakeLibraryPresenter() },
         downloadsPresenter = { FakeDownloadsPresenter() },
@@ -142,14 +145,14 @@ class TabsPresenterImplTest {
     presenter.test(this) {
       var tabs = awaitItem()
       repeat(2) { index ->
-        (tabs.content as StatefulHomePresenter.Model).onNavigate()
+        (tabs.content as HomeNavigation.Model).onNavigate()
         tabs = awaitItem()
-        assertThat((tabs.content as StatefulHomePresenter.Model).destination).isEqualTo("Discovery")
+        assertThat((tabs.content as HomeNavigation.Model).destination).isEqualTo("Discovery")
 
         tabs.onSelectTab(TabsPresenter.Tab.HOME)
         tabs = awaitItem()
         assertThat(tabs.selectedTab).isEqualTo(TabsPresenter.Tab.HOME)
-        val homeModel = tabs.content as StatefulHomePresenter.Model
+        val homeModel = tabs.content as HomeNavigation.Model
         assertThat(homeModel.destination).isEqualTo("Welcome")
         assertThat(homeModel.navigationCount).isEqualTo(index + 1)
       }
@@ -167,11 +170,11 @@ class TabsPresenterImplTest {
   fun `returning home starts at welcome and preserves the library filter`() = runTest {
     val library = FakeLibraryPresenter()
     val presenter: TabsPresenter =
-      TabsPresenterImpl({ StatefulHomePresenter() }, { library }) { FakeDownloadsPresenter() }
+      TabsPresenterImpl({ HomeNavigation().presenter }, { library }) { FakeDownloadsPresenter() }
 
     presenter.test(this) {
       var tabs = awaitItem()
-      (tabs.content as StatefulHomePresenter.Model).onNavigate()
+      (tabs.content as HomeNavigation.Model).onNavigate()
       tabs = awaitItem()
       tabs.onSelectTab(TabsPresenter.Tab.LIBRARY)
       awaitItem()
@@ -180,7 +183,7 @@ class TabsPresenterImplTest {
 
       tabs.onSelectTab(TabsPresenter.Tab.HOME)
       tabs = awaitItem()
-      assertThat((tabs.content as StatefulHomePresenter.Model).destination).isEqualTo("Welcome")
+      assertThat((tabs.content as HomeNavigation.Model).destination).isEqualTo("Welcome")
 
       tabs.onSelectTab(TabsPresenter.Tab.LIBRARY)
       tabs = awaitItem()
@@ -208,20 +211,6 @@ class TabsPresenterImplTest {
     override val onHomeSelected: () -> Unit = {}
   }
 
-  private class FakeHomePresenter : HomePresenter<HomeModel> {
-    var active = false
-      private set
-
-    @Composable
-    override fun present(input: Unit): HomeModel {
-      DisposableEffect(Unit) {
-        active = true
-        onDispose { active = false }
-      }
-      return HomeModel
-    }
-  }
-
   private class FakeLibraryPresenter : LibraryPresenter<FakeLibraryPresenter.Model> {
     var selectFilter: (String) -> Unit = {}
     var active = false
@@ -241,15 +230,14 @@ class TabsPresenterImplTest {
     data class Model(val filter: String) : BaseModel
   }
 
-  private class StatefulHomePresenter : HomePresenter<StatefulHomePresenter.Model> {
+  private class HomeNavigation {
     var homeSelections = 0
       private set
 
-    @Composable
-    override fun present(input: Unit): Model {
+    val presenter = FakeHomePresenter {
       var destination by remember { mutableStateOf("Welcome") }
       var navigationCount by remember { mutableIntStateOf(0) }
-      return Model(
+      Model(
         destination = destination,
         navigationCount = navigationCount,
         onNavigate = {

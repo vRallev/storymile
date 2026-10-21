@@ -17,6 +17,7 @@ import software.ralf.storymile.playlist.EpisodeId
 import software.ralf.storymile.playlist.Playlist
 import software.ralf.storymile.playlist.PlaylistId
 import software.ralf.storymile.playlist.PlaylistName
+import software.ralf.storymile.playlist.testing.FakePlaylistRepository
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 
@@ -236,11 +237,12 @@ class PlayerImplTest {
       )
       .also { scope.register(it) }
 
-  private fun playlists(): TestPlaylistRepository =
-    TestPlaylistRepository(
-      listOf(
-        Playlist(PlaylistId("test"), PlaylistName("Test"), listOf(EpisodeId("test-episode-1"))),
-      ),
+  private fun playlists(): FakePlaylistRepository =
+    FakePlaylistRepository(
+      initial =
+        listOf(
+          Playlist(PlaylistId("test"), PlaylistName("Test"), listOf(EpisodeId("test-episode-1"))),
+        ),
     )
 
   private class FakeAudioPlayer : AudioPlayer() {

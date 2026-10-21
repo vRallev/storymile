@@ -12,4 +12,6 @@ dependencies {
   commonMainImplementation project(':templates:public')
   commonMainImplementation project(':theme:public')
   commonMainImplementation project(':user:public')
+
+  commonTestImplementation project(':theme:testing')
 }
