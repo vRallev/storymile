@@ -96,7 +96,7 @@ class RuntimeModeStorageTest {
     seedStorage(platform)
 
     withApplication(platform) { graph, restarter ->
-      assertThat(graph.runtimeModeController.mode()).isEqualTo(RuntimeMode.Fake)
+      assertThat(graph.runtimeModeController.mode).isEqualTo(RuntimeMode.Fake)
       graph.storage.assertData(null)
       graph.userStorage().assertData(null)
 
@@ -112,7 +112,7 @@ class RuntimeModeStorageTest {
     withRawStorage(platform, "user-guest") { it.assertData("saved guest") }
 
     withApplication(platform) { graph, restarter ->
-      assertThat(graph.runtimeModeController.mode()).isEqualTo(RuntimeMode.Fake)
+      assertThat(graph.runtimeModeController.mode).isEqualTo(RuntimeMode.Fake)
       graph.storage.assertData(null)
       graph.userStorage().assertData(null)
       assertThat(restarter.restartCount).isEqualTo(0)
@@ -127,14 +127,14 @@ class RuntimeModeStorageTest {
     withApplication(platform) { graph, restarter ->
       graph.runtimeModeController.switchMode(RuntimeMode.Real)
 
-      assertThat(graph.runtimeModeController.mode()).isEqualTo(RuntimeMode.Fake)
+      assertThat(graph.runtimeModeController.mode).isEqualTo(RuntimeMode.Fake)
       assertThat(restarter.restartCount).isEqualTo(1)
       graph.storage.writeData("outgoing fake app")
       graph.userStorage().writeData("outgoing fake guest")
     }
 
     withApplication(platform) { graph, restarter ->
-      assertThat(graph.runtimeModeController.mode()).isEqualTo(RuntimeMode.Real)
+      assertThat(graph.runtimeModeController.mode).isEqualTo(RuntimeMode.Real)
       graph.storage.assertData("saved app")
       graph.userStorage().assertData("saved guest")
       graph.storage.writeData("updated app")
@@ -143,7 +143,7 @@ class RuntimeModeStorageTest {
     }
 
     withApplication(platform) { graph, _ ->
-      assertThat(graph.runtimeModeController.mode()).isEqualTo(RuntimeMode.Real)
+      assertThat(graph.runtimeModeController.mode).isEqualTo(RuntimeMode.Real)
       graph.storage.assertData("updated app")
       graph.userStorage().assertData("updated guest")
     }

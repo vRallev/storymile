@@ -15,19 +15,19 @@ class PodcastDiscoveryServiceImpl(
   private val fake: Lazy<FakePodcastDiscoveryService>,
 ) : PodcastDiscoveryService {
   override suspend fun search(query: String): HttpResponse<List<DiscoveredPodcast>> =
-    when (runtimeModeController.mode()) {
+    when (runtimeModeController.mode) {
       RuntimeMode.Real -> real.value.search(query)
       RuntimeMode.Fake -> fake.value.search(query)
     }
 
   override suspend fun lookup(id: String): HttpResponse<List<DiscoveredPodcast>> =
-    when (runtimeModeController.mode()) {
+    when (runtimeModeController.mode) {
       RuntimeMode.Real -> real.value.lookup(id)
       RuntimeMode.Fake -> fake.value.lookup(id)
     }
 
   override suspend fun popular(): HttpResponse<List<DiscoveredPodcast>> =
-    when (runtimeModeController.mode()) {
+    when (runtimeModeController.mode) {
       RuntimeMode.Real -> real.value.popular()
       RuntimeMode.Fake -> fake.value.popular()
     }

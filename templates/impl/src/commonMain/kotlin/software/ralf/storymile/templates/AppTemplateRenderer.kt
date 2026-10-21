@@ -127,7 +127,7 @@ class AppTemplateRenderer(
         {
           coroutineScope.launch {
             val mode =
-              when (runtimeModeController.mode()) {
+              when (runtimeModeController.mode) {
                 RuntimeMode.Real -> RuntimeMode.Fake
                 RuntimeMode.Fake -> RuntimeMode.Real
               }

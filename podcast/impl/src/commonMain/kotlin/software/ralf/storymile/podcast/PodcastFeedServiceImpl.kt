@@ -15,7 +15,7 @@ class PodcastFeedServiceImpl(
   private val fake: Lazy<FakePodcastFeedService>,
 ) : PodcastFeedService {
   override suspend fun load(feedUrl: String): HttpResponse<PodcastFeed> =
-    when (runtimeModeController.mode()) {
+    when (runtimeModeController.mode) {
       RuntimeMode.Real -> real.value.load(feedUrl)
       RuntimeMode.Fake -> fake.value.load(feedUrl)
     }

@@ -164,7 +164,7 @@ private constructor(
       mustBePersistent: Boolean,
     ): ScopedStorage =
       DefaultStorage(namespace, coroutineScope) {
-        if (mustBePersistent || controller.value.mode() == RuntimeMode.Real) {
+        if (mustBePersistent || controller.value.mode == RuntimeMode.Real) {
           platform
         } else {
           inMemoryPlatform

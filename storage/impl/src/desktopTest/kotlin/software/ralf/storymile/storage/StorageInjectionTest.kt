@@ -136,7 +136,7 @@ class StorageInjectionTest {
     @Provides
     fun runtimeModeController(): RuntimeModeController =
       object : RuntimeModeController {
-        override suspend fun mode(): RuntimeMode = RuntimeMode.Real
+        override val mode: RuntimeMode = RuntimeMode.Real
 
         override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
       }

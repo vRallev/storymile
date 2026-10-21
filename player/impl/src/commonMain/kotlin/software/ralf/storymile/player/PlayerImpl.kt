@@ -56,7 +56,7 @@ internal constructor(
   override fun onEnterScope(scope: Scope) {
     scope.launch(mainDispatcher) {
       try {
-        if (runtimeModeController.mode() != RuntimeMode.Fake || closed) {
+        if (runtimeModeController.mode != RuntimeMode.Fake || closed) {
           return@launch
         }
         loadEpisode(autoPlay = false)

@@ -3,10 +3,8 @@ package software.ralf.storymile.player
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
-import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import kotlin.test.Test
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -24,23 +22,16 @@ import software.ralf.storymile.runtimemode.RuntimeModeController
 
 class PlayerImplTest {
   @Test
-  fun `waits for fake mode then prepares the first episode paused at normal speed`() =
-    runTestWithScope { scope ->
-      val audio = FakeAudioPlayer()
-      val mode = CompletableDeferred<RuntimeMode>()
-      val player: Player = player(scope, audio, mode)
-      runCurrent()
-      assertThat(audio.sources).isEqualTo(emptyList())
-      assertThat(player.state.value.title).isNull()
-
-      mode.complete(RuntimeMode.Fake)
-      runCurrent()
-      assertThat(player.state.value.title).isEqualTo("Test episode 1")
-      assertThat(player.state.value.positionMillis).isEqualTo(0L)
-      assertThat(player.state.value.isPlaying).isFalse()
-      assertThat(player.state.value.speed).isEqualTo(1f)
-      assertThat(audio.sources.single().endsWith("test-episode-1.mp3")).isTrue()
-    }
+  fun `fake mode prepares the first episode paused at normal speed`() = runTestWithScope { scope ->
+    val audio = FakeAudioPlayer()
+    val player: Player = player(scope, audio)
+    runCurrent()
+    assertThat(player.state.value.title).isEqualTo("Test episode 1")
+    assertThat(player.state.value.positionMillis).isEqualTo(0L)
+    assertThat(player.state.value.isPlaying).isFalse()
+    assertThat(player.state.value.speed).isEqualTo(1f)
+    assertThat(audio.sources.single().endsWith("test-episode-1.mp3")).isTrue()
+  }
 
   @Test
   fun `real mode does not create an audio transport`() = runTestWithScope { scope ->
@@ -234,12 +225,12 @@ class PlayerImplTest {
   private fun TestScope.player(
     scope: Scope,
     audio: AudioPlayer,
-    mode: CompletableDeferred<RuntimeMode> = CompletableDeferred(RuntimeMode.Fake),
+    mode: RuntimeMode = RuntimeMode.Fake,
   ): Player =
     PlayerImpl(
         lazy { audio },
         object : RuntimeModeController {
-          override suspend fun mode(): RuntimeMode = mode.await()
+          override val mode: RuntimeMode = mode
 
           override suspend fun switchMode(mode: RuntimeMode) = Unit
         },
@@ -258,7 +249,7 @@ class PlayerImplTest {
 
   private fun mode(value: RuntimeMode): RuntimeModeController =
     object : RuntimeModeController {
-      override suspend fun mode(): RuntimeMode = value
+      override val mode: RuntimeMode = value
 
       override suspend fun switchMode(mode: RuntimeMode) = Unit
     }

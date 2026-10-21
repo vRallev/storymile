@@ -146,7 +146,7 @@ class PlaylistRepositoryImpl(
   }
 
   private suspend fun defaultPlaylists(): List<Playlist> {
-    if (runtimeModeController.mode() != RuntimeMode.Fake) {
+    if (runtimeModeController.mode != RuntimeMode.Fake) {
       return emptyList()
     }
     val defaults =

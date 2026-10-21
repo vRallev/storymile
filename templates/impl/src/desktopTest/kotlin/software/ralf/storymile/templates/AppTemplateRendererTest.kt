@@ -552,7 +552,8 @@ class AppTemplateRendererTest {
           }
         },
         object : RuntimeModeController {
-          override suspend fun mode(): RuntimeMode = error("Not used")
+          override val mode: RuntimeMode
+            get() = error("Not used")
 
           override suspend fun switchMode(mode: RuntimeMode): Unit = error("Not used")
         },
