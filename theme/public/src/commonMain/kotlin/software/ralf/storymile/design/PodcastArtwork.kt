@@ -16,9 +16,10 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
+import coil3.request.crossfade
 import software.ralf.storymile.theme.AppTheme
 
-/** Displays podcast artwork, with a placeholder while the image is unavailable. */
+/** Displays podcast or episode artwork, fading it in over the placeholder when loaded. */
 @Composable
 fun PodcastArtwork(artworkUrl: String?, modifier: Modifier) {
   Box(
@@ -37,6 +38,7 @@ fun PodcastArtwork(artworkUrl: String?, modifier: Modifier) {
         model =
           ImageRequest.Builder(LocalPlatformContext.current)
             .data(artworkUrl)
+            .crossfade(durationMillis = 200)
             .memoryCacheKey(artworkUrl)
             .placeholderMemoryCacheKey(artworkUrl)
             .build(),
