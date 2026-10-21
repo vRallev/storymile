@@ -224,6 +224,8 @@ class InMemoryStorageTest {
       assertThat(reopened.preferences("settings").data.first()[key]).isEqualTo("dark")
     }
 
-  private fun Scope.storage(factory: ScopedStorage.Factory, namespace: String = "app"): Storage =
-    factory.create(namespace, coroutineScope()).also { register(it) }
+  private suspend fun Scope.storage(
+    factory: ScopedStorage.Factory,
+    namespace: String = "app",
+  ): Storage = factory.create(namespace, coroutineScope()).also { register(it) }
 }

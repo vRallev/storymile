@@ -14,7 +14,7 @@ import software.ralf.storymile.storage.Storage
 interface UserGraph {
   val user: User
 
-  @ForScope(UserScope::class) val storage: Storage
+  @ForScope(UserScope::class) val storage: suspend () -> Storage
 
   @ForScope(UserScope::class) @Multibinds(allowEmpty = true) val userScopedInstances: Set<Scoped>
 

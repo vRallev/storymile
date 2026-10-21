@@ -12,7 +12,6 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isSameInstanceAs
 import kotlin.test.Test
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +23,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.scope.Scope
-import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.runTestWithScope
 import software.ralf.storymile.restart.ApplicationRestarter
 import software.ralf.storymile.storage.FileStorage
@@ -62,8 +60,7 @@ class RuntimeModeControllerImplTest {
       val readBarrier = CompletableDeferred<Unit>()
       storage.preferences.readBarrier = readBarrier
       val restarter = FakeApplicationRestarter()
-      val controller: RuntimeModeController =
-        RuntimeModeControllerImpl(FakeStorageFactory(storage), backgroundScope, restarter)
+      val controller: RuntimeModeController = RuntimeModeControllerImpl({ storage }, restarter)
 
       val reads = List(2) { async { controller.mode() } }
       runCurrent()
@@ -79,8 +76,7 @@ class RuntimeModeControllerImplTest {
   fun `an unknown saved mode fails instead of guessing a mode`() = runTest {
     val storage = FakeStorage("unknown")
     val restarter = FakeApplicationRestarter()
-    val controller: RuntimeModeController =
-      RuntimeModeControllerImpl(FakeStorageFactory(storage), backgroundScope, restarter)
+    val controller: RuntimeModeController = RuntimeModeControllerImpl({ storage }, restarter)
 
     assertFailure { controller.mode() }.isInstanceOf<IllegalStateException>()
     assertFailure { controller.switchMode(RuntimeMode.Real) }.isInstanceOf<IllegalStateException>()
@@ -95,8 +91,7 @@ class RuntimeModeControllerImplTest {
     val failure = IllegalStateException("Storage unavailable")
     storage.preferences.readFailure = failure
     val restarter = FakeApplicationRestarter()
-    val controller: RuntimeModeController =
-      RuntimeModeControllerImpl(FakeStorageFactory(storage), backgroundScope, restarter)
+    val controller: RuntimeModeController = RuntimeModeControllerImpl({ storage }, restarter)
 
     assertFailure { controller.mode() }.isSameInstanceAs(failure)
 
@@ -231,7 +226,7 @@ class RuntimeModeControllerImplTest {
     storage: ScopedStorage,
     restarter: ApplicationRestarter,
   ): RuntimeModeController =
-    RuntimeModeControllerImpl(FakeStorageFactory(storage), coroutineScope(), restarter).also {
+    RuntimeModeControllerImpl({ storage }, restarter).also {
       register(it)
     }
 
@@ -243,18 +238,6 @@ class RuntimeModeControllerImplTest {
     override fun restart() {
       onRestart()
       restartCount++
-    }
-  }
-
-  private class FakeStorageFactory(private val storage: ScopedStorage) : ScopedStorage.Factory {
-    override fun create(
-      namespace: String,
-      coroutineScope: CoroutineScope,
-      mustBePersistent: Boolean,
-    ): ScopedStorage {
-      check(namespace == "runtime-mode")
-      check(mustBePersistent) { "The runtime mode must survive an app restart." }
-      return storage
     }
   }
 

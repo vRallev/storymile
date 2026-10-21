@@ -66,7 +66,7 @@ class IntegrationStorageTest {
     val application = KmpApplication()
     application.create(createGraphFactory<TestDesktopAppGraph.Factory>().create(application))
     try {
-      return block(application.rootScope.metroDependencyGraph<AppGraph>().storage)
+      return block(application.rootScope.metroDependencyGraph<AppGraph>().storage())
     } finally {
       application.destroy()
     }

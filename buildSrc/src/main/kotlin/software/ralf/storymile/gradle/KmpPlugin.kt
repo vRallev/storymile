@@ -134,10 +134,10 @@ internal class KmpPlugin : Plugin<Project> {
 
   private fun Project.configureMetro() {
     plugins.withId(Plugins.METRO) {
-      extensions
-        .getByType(MetroPluginExtension::class.java)
-        .unusedGraphInputsSeverity
-        .set(DiagnosticSeverity.NONE)
+      extensions.getByType(MetroPluginExtension::class.java).apply {
+        unusedGraphInputsSeverity.set(DiagnosticSeverity.NONE)
+        enableSuspendProviders.set(true)
+      }
     }
   }
 }

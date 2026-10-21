@@ -25,9 +25,9 @@ import software.ralf.storymile.runtimemode.RuntimeModeController
 /**
  * Scope-owned implementation used by [ScopedStorage.Factory].
  *
- * The graph can construct storage before its App Platform scope exists. The first operation waits
- * for [onEnterScope], then claims the namespace once. A claim rejects an active owner and waits for
- * a canceled owner's work to finish, including DataStore cleanup.
+ * Creation selects the backend and claims the namespace. A claim rejects an active owner and waits
+ * for a canceled owner's work to finish, including DataStore cleanup. File and preference
+ * operations wait for [onEnterScope].
  *
  * UTF-8 hex encoding preserves namespace and name identity on case-insensitive filesystems.
  * Directory handles encode single path segments and share the same owner. Durable files and cache
@@ -47,31 +47,17 @@ class DefaultStorage
 private constructor(
   namespace: String,
   private val coroutineScope: CoroutineScope,
-  private val selectPlatform: suspend () -> StoragePlatform,
+  private val platform: StoragePlatform,
 ) : ScopedStorage {
-  init {
-    require(namespace.matches(namePattern)) {
-      "Storage namespace must contain only letters, digits, underscores, and hyphens."
-    }
-  }
-
   private val encodedNamespace = namespace.encodeUtf8().hex()
   private val job = checkNotNull(coroutineScope.coroutineContext[Job])
   private val enteredScope = CompletableDeferred<Unit>()
-  private val initializationMutex = Mutex()
-  private var initializedPlatform: StoragePlatform? = null
   private val preferencesMutex = Mutex()
   private val filesMutex = Mutex()
   private val stores = mutableMapOf<String, DataStore<Preferences>>()
 
   override val files: FileStorage = DirectoryFileStorage(FileStorageArea.Files, "")
   override val cache: FileStorage = DirectoryFileStorage(FileStorageArea.Cache, "")
-
-  constructor(
-    namespace: String,
-    coroutineScope: CoroutineScope,
-    platform: StoragePlatform,
-  ) : this(namespace, coroutineScope, { platform })
 
   override suspend fun preferences(name: String): DataStore<Preferences> = operation { platform ->
     require(name.matches(namePattern)) {
@@ -107,35 +93,11 @@ private constructor(
     job.ensureActive()
   }
 
-  private suspend fun platform(): StoragePlatform = initializationMutex.withLock {
-    initializedPlatform?.let {
-      return@withLock it
+  private suspend fun <T> operation(block: suspend (StoragePlatform) -> T): T =
+    ownedOperation(coroutineScope) {
+      enteredScope.await()
+      block(platform)
     }
-    enteredScope.await()
-    selectPlatform().also {
-      it.claimNamespace(encodedNamespace, job)
-      initializedPlatform = it
-    }
-  }
-
-  private suspend fun <T> operation(block: suspend (StoragePlatform) -> T): T {
-    checkActive()
-    val callerContext = currentCoroutineContext()
-    callerContext.ensureActive()
-    val operation =
-      coroutineScope.async(callerContext.minusKey(Job)) {
-        try {
-          Result.success(block(platform()))
-        } catch (exception: Throwable) {
-          Result.failure(exception)
-        }
-      }
-    return try {
-      operation.await().getOrThrow()
-    } finally {
-      operation.cancel()
-    }
-  }
 
   private fun requireFileName(name: String) {
     require(name.isNotBlank() && name != "." && name != "..") {
@@ -146,8 +108,51 @@ private constructor(
     }
   }
 
-  private companion object {
-    val namePattern = Regex("[A-Za-z0-9_-]+")
+  companion object {
+    private val namePattern = Regex("[A-Za-z0-9_-]+")
+
+    /** Creates storage after claiming its namespace. */
+    suspend fun create(
+      namespace: String,
+      coroutineScope: CoroutineScope,
+      platform: StoragePlatform,
+    ): DefaultStorage = create(namespace, coroutineScope) { platform }
+
+    private suspend fun create(
+      namespace: String,
+      coroutineScope: CoroutineScope,
+      selectPlatform: suspend () -> StoragePlatform,
+    ): DefaultStorage {
+      require(namespace.matches(namePattern)) {
+        "Storage namespace must contain only letters, digits, underscores, and hyphens."
+      }
+      val platform = ownedOperation(coroutineScope) { selectPlatform() }
+      val storage = DefaultStorage(namespace, coroutineScope, platform)
+      platform.claimNamespace(storage.encodedNamespace, storage.job)
+      return storage
+    }
+
+    private suspend fun <T> ownedOperation(
+      coroutineScope: CoroutineScope,
+      block: suspend () -> T,
+    ): T {
+      coroutineScope.coroutineContext.ensureActive()
+      val callerContext = currentCoroutineContext()
+      callerContext.ensureActive()
+      val operation =
+        coroutineScope.async(callerContext.minusKey(Job)) {
+          try {
+            Result.success(block())
+          } catch (exception: Throwable) {
+            Result.failure(exception)
+          }
+        }
+      return try {
+        operation.await().getOrThrow()
+      } finally {
+        operation.cancel()
+      }
+    }
   }
 
   @SingleIn(AppScope::class)
@@ -158,12 +163,12 @@ private constructor(
   ) : ScopedStorage.Factory {
     private val inMemoryPlatform = InMemoryStoragePlatform()
 
-    override fun create(
+    override suspend fun create(
       namespace: String,
       coroutineScope: CoroutineScope,
       mustBePersistent: Boolean,
     ): ScopedStorage =
-      DefaultStorage(namespace, coroutineScope) {
+      DefaultStorage.create(namespace, coroutineScope) {
         if (mustBePersistent || controller.value.mode() == RuntimeMode.Real) {
           platform
         } else {

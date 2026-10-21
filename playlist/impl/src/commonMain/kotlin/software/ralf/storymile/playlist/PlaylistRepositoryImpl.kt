@@ -32,13 +32,12 @@ import software.ralf.storymile.user.UserScope
 @SingleIn(UserScope::class)
 @ContributesScoped(UserScope::class)
 class PlaylistRepositoryImpl(
-  @ForScope(UserScope::class) storage: Storage,
+  @ForScope(UserScope::class) private val storage: suspend () -> Storage,
   private val runtimeModeController: RuntimeModeController,
 ) : PlaylistRepository, Scoped {
   override val playlists: StateFlow<List<Playlist>>
     field = MutableStateFlow(emptyList())
 
-  private val files = storage.files.directory("playlists")
   private val document = PlaylistDocument()
   private val commands = Channel<(List<Playlist>) -> List<Playlist>>(Channel.UNLIMITED)
   private var loaded = false
@@ -53,7 +52,7 @@ class PlaylistRepositoryImpl(
             val current = playlists.value
             val updated = command(current)
             if (updated != current) {
-              files.write(fileName, document.encode(updated))
+              files().write(fileName, document.encode(updated))
               currentCoroutineContext().ensureActive()
               playlists.value = updated
             }
@@ -136,9 +135,11 @@ class PlaylistRepositoryImpl(
     }
   }
 
+  private suspend fun files() = storage().files.directory("playlists")
+
   private suspend fun load() {
     if (!loaded) {
-      val saved = files.read(fileName)?.let { document.decode(it) } ?: defaultPlaylists()
+      val saved = files().read(fileName)?.let { document.decode(it) } ?: defaultPlaylists()
       currentCoroutineContext().ensureActive()
       playlists.value = saved
       loaded = true
@@ -157,7 +158,7 @@ class PlaylistRepositoryImpl(
           (1..3).map { EpisodeId("test-episode-$it") },
         ),
       )
-    files.write(fileName, document.encode(defaults))
+    files().write(fileName, document.encode(defaults))
     return defaults
   }
 

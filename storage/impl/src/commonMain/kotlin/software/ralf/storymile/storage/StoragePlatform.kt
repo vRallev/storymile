@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -19,7 +20,12 @@ abstract class StoragePlatform {
       "Storage namespace is already owned by another active scope."
     }
     // DataStore actors and browser writes must finish cleanup before this namespace is reused.
-    previous?.join()
+    if (previous != null) {
+      select {
+        previous.onJoin {}
+        owner.onJoin { owner.ensureActive() }
+      }
+    }
     owner.ensureActive()
     namespaceOwners.entries.removeAll { it.value.isCompleted }
     namespaceOwners[namespace] = owner

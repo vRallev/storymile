@@ -31,6 +31,7 @@ import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.buildTestScope
 import software.ralf.app.platform.scope.coroutine.CoroutineScopeScoped
 import software.ralf.app.platform.scope.coroutine.addCoroutineScopeScoped
+import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.runTestWithScope
 
 class StorageTest {
@@ -46,10 +47,9 @@ class StorageTest {
   fun `different active scopes cannot share a persistent namespace`() = runTestWithScope { scope ->
     val platform = InMemoryPlatform()
     val otherScope = Scope.buildTestScope(this, name = scope.name)
-    scope.storage("app", platform).files.read("file")
+    scope.storage("app", platform)
 
-    val other: Storage = otherScope.storage("app", platform)
-    assertFailure { other.files.read("file") }.isInstanceOf<IllegalStateException>()
+    assertFailure { otherScope.storage("app", platform) }.isInstanceOf<IllegalStateException>()
   }
 
   @Test
@@ -157,14 +157,70 @@ class StorageTest {
       platform.writeStarted.await()
 
       previousScope.destroy()
-      val reopened: Storage = scope.child(this).storage("user-alice", platform)
-      val reading = async { reopened.files.read("file") }
+      val owner = scope.child(this)
+      val reopening = async { owner.storage("user-alice", platform) }
       runCurrent()
 
-      assertThat(reading.isCompleted).isFalse()
+      assertThat(reopening.isCompleted).isFalse()
       cleanup.complete(Unit)
       writing.await()
-      assertThat(reading.await()).isNull()
+      assertThat(reopening.await().files.read("file")).isNull()
+    }
+
+  @Test
+  fun `canceling a namespace claim leaves the owner usable for retry`() =
+    runTestWithScope { scope ->
+      val cleanup = CompletableDeferred<Unit>()
+      val platform = InMemoryPlatform(blockWrites = true, cleanup = cleanup)
+      val previousScope = scope.child(this)
+      val previous: Storage = previousScope.storage("app", platform)
+      val writing = async {
+        assertFailure { previous.files.write("file", byteArrayOf(1)) }
+          .isInstanceOf<CancellationException>()
+      }
+      platform.writeStarted.await()
+      previousScope.destroy()
+      val owner = scope.coroutineScope()
+      val creating = async { DefaultStorage.create("app", owner, platform) }
+      runCurrent()
+      assertThat(creating.isCompleted).isFalse()
+
+      creating.cancel()
+      creating.join()
+      cleanup.complete(Unit)
+      writing.await()
+      val reopened: Storage =
+        DefaultStorage.create("app", owner, platform).also { scope.register(it) }
+
+      assertThat(reopened.files.read("file")).isNull()
+    }
+
+  @Test
+  fun `canceling the owner stops a namespace claim waiting for cleanup`() =
+    runTestWithScope { scope ->
+      val cleanup = CompletableDeferred<Unit>()
+      val platform = InMemoryPlatform(blockWrites = true, cleanup = cleanup)
+      val previousScope = scope.child(this)
+      val previous: Storage = previousScope.storage("app", platform)
+      val writing = async {
+        assertFailure { previous.files.write("file", byteArrayOf(1)) }
+          .isInstanceOf<CancellationException>()
+      }
+      platform.writeStarted.await()
+      previousScope.destroy()
+      val nextScope = scope.child(this)
+      val owner = nextScope.coroutineScope()
+      val creating = async {
+        assertFailure { DefaultStorage.create("app", owner, platform) }
+          .isInstanceOf<CancellationException>()
+      }
+      runCurrent()
+      assertThat(creating.isCompleted).isFalse()
+
+      nextScope.destroy()
+      creating.await()
+      cleanup.complete(Unit)
+      writing.await()
     }
 
   @Test

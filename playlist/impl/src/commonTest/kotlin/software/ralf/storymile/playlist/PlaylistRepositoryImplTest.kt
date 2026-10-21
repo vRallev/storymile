@@ -378,7 +378,7 @@ class PlaylistRepositoryImplTest {
     storage: Storage,
     mode: CompletableDeferred<RuntimeMode> = CompletableDeferred(RuntimeMode.Real),
   ): PlaylistRepository =
-    PlaylistRepositoryImpl(storage, TestRuntimeModeController(mode)).also { register(it) }
+    PlaylistRepositoryImpl({ storage }, TestRuntimeModeController(mode)).also { register(it) }
 
   private companion object {
     const val SAVED_PLAYLISTS =

@@ -25,7 +25,7 @@ class DatabaseFixture(path: String? = null) {
 
   val database: PodcastDatabase =
     UserPodcastDatabase(
-        storage = DatabaseStorage(path),
+        storage = { DatabaseStorage(path) },
         coroutineScope = owner.createChild(),
         platform = PlatformDatabase(),
       )

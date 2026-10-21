@@ -97,13 +97,13 @@ class RuntimeModeStorageTest {
 
     withApplication(platform) { graph, restarter ->
       assertThat(graph.runtimeModeController.mode()).isEqualTo(RuntimeMode.Fake)
-      graph.storage.assertData(null)
+      graph.storage().assertData(null)
       graph.userStorage().assertData(null)
 
-      graph.storage.writeData("fake app")
+      graph.storage().writeData("fake app")
       graph.userStorage().writeData("fake guest")
 
-      graph.storage.assertData("fake app")
+      graph.storage().assertData("fake app")
       graph.userStorage().assertData("fake guest")
       assertThat(restarter.restartCount).isEqualTo(0)
     }
@@ -113,7 +113,7 @@ class RuntimeModeStorageTest {
 
     withApplication(platform) { graph, restarter ->
       assertThat(graph.runtimeModeController.mode()).isEqualTo(RuntimeMode.Fake)
-      graph.storage.assertData(null)
+      graph.storage().assertData(null)
       graph.userStorage().assertData(null)
       assertThat(restarter.restartCount).isEqualTo(0)
     }
@@ -129,22 +129,22 @@ class RuntimeModeStorageTest {
 
       assertThat(graph.runtimeModeController.mode()).isEqualTo(RuntimeMode.Fake)
       assertThat(restarter.restartCount).isEqualTo(1)
-      graph.storage.writeData("outgoing fake app")
+      graph.storage().writeData("outgoing fake app")
       graph.userStorage().writeData("outgoing fake guest")
     }
 
     withApplication(platform) { graph, restarter ->
       assertThat(graph.runtimeModeController.mode()).isEqualTo(RuntimeMode.Real)
-      graph.storage.assertData("saved app")
+      graph.storage().assertData("saved app")
       graph.userStorage().assertData("saved guest")
-      graph.storage.writeData("updated app")
+      graph.storage().writeData("updated app")
       graph.userStorage().writeData("updated guest")
       assertThat(restarter.restartCount).isEqualTo(0)
     }
 
     withApplication(platform) { graph, _ ->
       assertThat(graph.runtimeModeController.mode()).isEqualTo(RuntimeMode.Real)
-      graph.storage.assertData("updated app")
+      graph.storage().assertData("updated app")
       graph.userStorage().assertData("updated guest")
     }
   }
@@ -165,7 +165,7 @@ class RuntimeModeStorageTest {
     block: suspend (Storage) -> Unit,
   ) {
     val scope = Scope.buildTestScope(this)
-    val storage: ScopedStorage = DefaultStorage(namespace, scope.coroutineScope(), platform)
+    val storage: ScopedStorage = DefaultStorage.create(namespace, scope.coroutineScope(), platform)
     scope.register(storage)
     try {
       block(storage)
@@ -189,8 +189,8 @@ class RuntimeModeStorageTest {
     }
   }
 
-  private fun Graph.userStorage(): Storage =
-    userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().storage
+  private suspend fun Graph.userStorage(): Storage =
+    userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().storage()
 
   private fun Graph.playlistRepository(): PlaylistRepository =
     userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().playlistRepository
@@ -240,7 +240,7 @@ class RuntimeModeStorageTest {
 
   @ContributesTo(UserScope::class)
   interface UserStorageBindings {
-    @ForScope(UserScope::class) val storage: Storage
+    @ForScope(UserScope::class) val storage: suspend () -> Storage
 
     val playlistRepository: PlaylistRepository
 

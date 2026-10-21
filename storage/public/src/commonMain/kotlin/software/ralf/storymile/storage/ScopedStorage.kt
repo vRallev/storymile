@@ -11,8 +11,9 @@ interface ScopedStorage : Storage, Scoped {
   /** Creates storage for a scope's binding container without an implementation dependency. */
   interface Factory {
     /**
-     * Creates a new, unregistered instance. Bind the same instance as qualified [Storage] and in
-     * the owning scope's lifecycle set before use.
+     * Selects the backend, claims the namespace, and returns an unregistered instance. Register it
+     * in the owning scope before file or preference operations. Bind the same instance as qualified
+     * [Storage]. Cancellation or failure leaves creation retryable.
      *
      * [namespace] is a stable identity containing only letters, digits, underscores, and hyphens.
      * Use `app` for app data and a unique `user-<id>` for each user. An active namespace cannot be
@@ -23,7 +24,7 @@ interface ScopedStorage : Storage, Scoped {
      * When [mustBePersistent] is true, use persistent storage without checking the runtime mode.
      * Otherwise, fake mode uses in-memory storage.
      */
-    fun create(
+    suspend fun create(
       namespace: String,
       coroutineScope: CoroutineScope,
       mustBePersistent: Boolean = false,

@@ -9,9 +9,9 @@ import kotlinx.coroutines.CoroutineScope
 class InMemoryStorageFactory : ScopedStorage.Factory {
   private val platform = InMemoryStoragePlatform()
 
-  override fun create(
+  override suspend fun create(
     namespace: String,
     coroutineScope: CoroutineScope,
     mustBePersistent: Boolean,
-  ): ScopedStorage = DefaultStorage(namespace, coroutineScope, platform)
+  ): ScopedStorage = DefaultStorage.create(namespace, coroutineScope, platform)
 }

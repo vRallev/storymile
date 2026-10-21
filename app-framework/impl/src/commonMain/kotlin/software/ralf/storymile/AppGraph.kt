@@ -19,7 +19,7 @@ interface AppGraph {
   val platform: Platform
 
   /** Preferences, files, and caches owned by the app scope. */
-  @ForScope(AppScope::class) val storage: Storage
+  @ForScope(AppScope::class) val storage: suspend () -> Storage
 
   /** All [Scoped] instances that share the application lifecycle. */
   @ForScope(AppScope::class) @Multibinds(allowEmpty = true) val appScopedInstances: Set<Scoped>

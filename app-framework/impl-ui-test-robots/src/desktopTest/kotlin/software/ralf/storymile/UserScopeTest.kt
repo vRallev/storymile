@@ -72,7 +72,7 @@ class UserScopeTest {
       assertFailure { second.userScope }.isInstanceOf<IllegalStateException>()
       assertThat(firstManager.userScope.value).isSameInstanceAs(firstScope)
       assertThat(firstScope.isDestroyed()).isFalse()
-      val storage: Storage = firstScope.metroDependencyGraph<UserBindings>().storage
+      val storage: Storage = firstScope.metroDependencyGraph<UserBindings>().storage()
       storage.files.write("chapter", byteArrayOf(1))
       assertThat(storage.files.read("chapter")).isNotNull().isEqualTo(byteArrayOf(1))
     }
@@ -81,9 +81,9 @@ class UserScopeTest {
   @Test
   fun `guest data is separate from application data`() = runTest {
     withApplication { graph ->
-      val appStorage: Storage = graph.storage
+      val appStorage: Storage = graph.storage()
       val userStorage: Storage =
-        graph.userManager.userScope.value.metroDependencyGraph<UserBindings>().storage
+        graph.userManager.userScope.value.metroDependencyGraph<UserBindings>().storage()
       val key = stringPreferencesKey("value")
 
       appStorage.files.write("chapter", byteArrayOf(1))
@@ -105,7 +105,7 @@ class UserScopeTest {
     try {
       val manager: UserManager = rootScope.metroDependencyGraph<Graph>().userManager
       val userScope = manager.userScope.value
-      val storage: Storage = userScope.metroDependencyGraph<UserBindings>().storage
+      val storage: Storage = userScope.metroDependencyGraph<UserBindings>().storage()
       val preferences = storage.preferences("settings")
       storage.files.write("chapter", byteArrayOf(1))
       val work = userScope.launch { awaitCancellation() }
@@ -133,7 +133,7 @@ class UserScopeTest {
       withApplication(factory) { graph ->
         val manager: UserManager = graph.userManager
         val userGraph = manager.userScope.value.metroDependencyGraph<UserBindings>()
-        val storage: Storage = userGraph.storage
+        val storage: Storage = userGraph.storage()
         storage.files.write("chapter", byteArrayOf(1))
         storage.preferences("settings").edit { it[key] = "guest" }
         userGraph.user.id
@@ -142,7 +142,7 @@ class UserScopeTest {
     withApplication(factory) { graph ->
       val manager: UserManager = graph.userManager
       val userGraph = manager.userScope.value.metroDependencyGraph<UserBindings>()
-      val storage: Storage = userGraph.storage
+      val storage: Storage = userGraph.storage()
 
       assertThat(userGraph.user.id).isEqualTo(userId)
       assertThat(storage.files.read("chapter")).isNotNull().isEqualTo(byteArrayOf(1))
@@ -192,6 +192,6 @@ class UserScopeTest {
   interface UserBindings {
     val user: User
 
-    @ForScope(UserScope::class) val storage: Storage
+    @ForScope(UserScope::class) val storage: suspend () -> Storage
   }
 }

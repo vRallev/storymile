@@ -93,12 +93,14 @@ Use assertk for value and exception assertions.
 ### Storage
 
 Use `:storage:public` for preferences, files, and caches. App assembly selects `:storage:impl`.
-Inject `@ForScope(AppScope::class) storage: Storage` for app data.
-Inject `@ForScope(UserScope::class) storage: Storage` for user data, including guest data.
+Inject `@ForScope(AppScope::class) storage: suspend () -> Storage` for app data.
+Inject `@ForScope(UserScope::class) storage: suspend () -> Storage` for user data, including guest data.
 `UserManager` starts a guest user and owns its child scope. Guest data uses `user-guest`.
 For future scopes, inject `ScopedStorage.Factory` in the owning module's binding container.
-Create one `ScopedStorage` with a dedicated scope coroutine owner and stable `user-<id>` namespace.
-Bind that instance to the scope-qualified `Storage` and `Scoped` set.
+Create one `ScopedStorage` in a Metro suspend provider.
+Use a dedicated scope coroutine owner and stable `user-<id>` namespace.
+Bind it to scope-qualified `Storage`.
+In a synchronous `Scoped` entry, launch a scope coroutine to resolve and register storage.
 Do not reuse the app handle for user data. Scope exit cancels storage work and preserves saved data.
 Delete files explicitly. Keep preference keys in the owning feature.
 Use `Storage.cache` for data the system can remove.

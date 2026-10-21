@@ -38,16 +38,15 @@ class StorageInjectionTest {
       val graph =
         createGraphFactory<Graph.Factory>()
           .create(InMemoryStoragePlatform(), scope.coroutineScope())
-      val storage: Storage = graph.consumer.storage
+      val storage: Storage = graph.consumer.storage()
       val directory: FileStorage = storage.files.directory("books")
       val cache: FileStorage = storage.cache.directory("covers")
       val writing = async { directory.write("chapter", byteArrayOf(1)) }
       runCurrent()
 
       assertThat(writing.isCompleted).isFalse()
-      assertThat(graph.storage).isSameInstanceAs(storage)
-      assertThat(graph.consumer.storage).isSameInstanceAs(storage)
-      assertThat(graph.scopedInstances.single()).isSameInstanceAs(storage)
+      assertThat(graph.storage()).isSameInstanceAs(storage)
+      assertThat(graph.consumer.storage()).isSameInstanceAs(storage)
 
       scope.register(graph.scopedInstances)
 
@@ -83,39 +82,34 @@ class StorageInjectionTest {
     scope.register(graph.scopedInstances)
     userScope.register(user)
 
-    graph.storage.files.write("file", byteArrayOf(1))
+    graph.storage().files.write("file", byteArrayOf(1))
     user.files.write("file", byteArrayOf(2))
-    assertThat(graph.storage.files.read("file")).isNotNull().isEqualTo(byteArrayOf(1))
+    assertThat(graph.storage().files.read("file")).isNotNull().isEqualTo(byteArrayOf(1))
     assertThat(user.files.read("file")).isNotNull().isEqualTo(byteArrayOf(2))
 
     userScope.destroy()
 
     assertFailure { user.files.read("file") }.isInstanceOf<CancellationException>()
-    assertThat(graph.storage.files.read("file")).isNotNull().isEqualTo(byteArrayOf(1))
+    assertThat(graph.storage().files.read("file")).isNotNull().isEqualTo(byteArrayOf(1))
   }
 
   @Test
   fun `failed initialization leaves sibling injected storage usable`() = runTestWithScope { scope ->
     val platform = InMemoryStoragePlatform()
     val original: Storage =
-      DefaultStorage("app", scope.coroutineScope(), platform).also {
+      DefaultStorage.create("app", scope.coroutineScope(), platform).also {
         scope.register(it)
       }
     original.files.write("chapter", byteArrayOf(1))
     val otherScope = Scope.buildTestScope(this)
-    val duplicate: Storage =
-      DefaultStorage("app", otherScope.coroutineScope(), platform).also {
-        otherScope.register(it)
-      }
-
     assertFailure {
-      duplicate.files.read("chapter")
+      DefaultStorage.create("app", otherScope.coroutineScope(), platform)
     }
       .isInstanceOf<IllegalStateException>()
       .isNotInstanceOf<CancellationException>()
 
     val sibling: Storage =
-      DefaultStorage("user-alice", otherScope.coroutineScope(), platform).also {
+      DefaultStorage.create("user-alice", otherScope.coroutineScope(), platform).also {
         otherScope.register(it)
       }
     sibling.files.write("chapter", byteArrayOf(2))
@@ -129,7 +123,7 @@ class StorageInjectionTest {
 
     val storageFactory: ScopedStorage.Factory
 
-    @ForScope(AppScope::class) val storage: Storage
+    @ForScope(AppScope::class) val storage: suspend () -> Storage
 
     @ForScope(AppScope::class) val scopedInstances: Set<Scoped>
 
@@ -150,5 +144,5 @@ class StorageInjectionTest {
     }
   }
 
-  @Inject class Consumer(@ForScope(AppScope::class) val storage: Storage)
+  @Inject class Consumer(@ForScope(AppScope::class) val storage: suspend () -> Storage)
 }

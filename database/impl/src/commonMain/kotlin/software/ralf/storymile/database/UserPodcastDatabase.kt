@@ -26,7 +26,7 @@ import software.ralf.storymile.user.UserScope
 @SingleIn(UserScope::class)
 @ContributesScoped(UserScope::class)
 class UserPodcastDatabase(
-  @ForScope(UserScope::class) private val storage: Storage,
+  @ForScope(UserScope::class) private val storage: suspend () -> Storage,
   @ForScope(UserScope::class) private val coroutineScope: CoroutineScope,
   private val platform: DatabasePlatform,
 ) : PodcastDatabase, Scoped {
@@ -43,7 +43,7 @@ class UserPodcastDatabase(
       try {
         opened =
           platform.open(
-            path = storage.databasePath("podcasts"),
+            path = storage().databasePath("podcasts"),
             coroutineContext = coroutineScope.coroutineContext,
           )
         database.complete(opened)

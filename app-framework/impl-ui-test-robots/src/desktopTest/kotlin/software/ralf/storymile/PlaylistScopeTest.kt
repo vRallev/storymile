@@ -127,7 +127,7 @@ class PlaylistScopeTest {
               playlists.any { it.id == playlist.id && it.episodeIds == listOf(episodeId) }
             }
 
-          graph.storage.files.deleteAll()
+          graph.storage().files.deleteAll()
           repository to playlists
         }
 

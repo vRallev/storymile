@@ -9,7 +9,9 @@ import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.Qualifier
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineScope
+import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.Scoped
+import software.ralf.app.platform.scope.coroutine.launch
 import software.ralf.storymile.storage.ScopedStorage
 import software.ralf.storymile.storage.Storage
 
@@ -20,23 +22,27 @@ interface UserStorageBindings {
   @ForScope(UserScope::class)
   fun storage(@ForStorageLifecycle instance: ScopedStorage): Storage
 
-  @Binds
-  @IntoSet
-  @ForScope(UserScope::class)
-  fun scoped(@ForStorageLifecycle instance: ScopedStorage): Scoped
-
   companion object {
+    @Provides
+    @IntoSet
+    @ForScope(UserScope::class)
+    fun scoped(@ForStorageLifecycle instance: suspend () -> ScopedStorage): Scoped =
+      object : Scoped {
+        override fun onEnterScope(scope: Scope) {
+          scope.launch { scope.register(instance()) }
+        }
+      }
+
     @Provides
     @SingleIn(UserScope::class)
     @ForStorageLifecycle
-    fun userStorage(
+    suspend fun userStorage(
       user: User,
       factory: ScopedStorage.Factory,
       @ForScope(UserScope::class) coroutineScope: CoroutineScope,
     ): ScopedStorage = factory.create("user-${user.id}", coroutineScope)
   }
 
-  // Both aliases use this private key to share one instance without exposing an unqualified
-  // ScopedStorage binding to consumers.
+  // Storage injection and lifecycle registration share the same scoped suspend binding.
   @Qualifier @Retention(AnnotationRetention.BINARY) private annotation class ForStorageLifecycle
 }
