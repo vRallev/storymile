@@ -40,7 +40,6 @@ import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.storymile.design.TitleBar
-import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.impl.generated.resources.Res
 import software.ralf.storymile.discovery.impl.generated.resources.episodes
 import software.ralf.storymile.discovery.impl.generated.resources.follow
@@ -84,30 +83,7 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
           ) {
             item {
               Column(contentModifier) {
-                Box(Modifier.fillMaxWidth()) {
-                  PodcastDetails(
-                    podcast = model.podcast,
-                    source = model.source,
-                    modifier = Modifier.padding(end = 48.dp),
-                  )
-                  IconToggleButton(
-                    checked = model.descriptionExpanded,
-                    onCheckedChange = { model.onToggleDescription() },
-                    modifier = Modifier.align(Alignment.TopEnd).testTag("show-info"),
-                  ) {
-                    Icon(
-                      imageVector = Icons.Outlined.Info,
-                      contentDescription =
-                        stringResource(
-                          if (model.descriptionExpanded) {
-                            Res.string.hide_description
-                          } else {
-                            Res.string.show_description
-                          },
-                        ),
-                    )
-                  }
-                }
+                PodcastDetails(model = model, modifier = Modifier.fillMaxWidth())
                 AnimatedVisibility(visible = model.descriptionExpanded) {
                   Description(model)
                 }
@@ -138,10 +114,11 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
 
   @Composable
   private fun PodcastDetails(
-    podcast: DiscoveredPodcast,
-    source: ShowPresenter.Source,
+    model: ShowContentPresenter.Model,
     modifier: Modifier,
   ) {
+    val podcast = model.podcast
+    val source = model.source
     CompositionLocalProvider(
       LocalAnimatedVisibilityScope provides
         (LocalShowParentVisibilityScope.current ?: LocalAnimatedVisibilityScope.current),
@@ -153,7 +130,7 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
             horizontalArrangement = Arrangement.spacedBy(24.dp),
             verticalAlignment = Alignment.CenterVertically,
           ) {
-            Box(Modifier.weight(0.8f)) {
+            Box(Modifier.weight(if (LocalShowPane.current) 0.6f else 0.8f)) {
               PodcastArtwork(
                 podcast,
                 Modifier.podcastSharedElement(podcast, source, PodcastSharedElement.Artwork)
@@ -163,7 +140,10 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
                   .aspectRatio(1f),
               )
             }
-            Metadata(podcast, source, Modifier.weight(1.2f))
+            Metadata(
+              model = model,
+              modifier = Modifier.weight(if (LocalShowPane.current) 1.4f else 1.2f),
+            )
           }
         } else {
           Column(
@@ -179,7 +159,7 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
                 .fillMaxWidth()
                 .aspectRatio(1f),
             )
-            Metadata(podcast, source, Modifier.fillMaxWidth())
+            Metadata(model = model, modifier = Modifier.fillMaxWidth())
           }
         }
       }
@@ -198,23 +178,48 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
 
   @Composable
   private fun Metadata(
-    podcast: DiscoveredPodcast,
-    source: ShowPresenter.Source,
+    model: ShowContentPresenter.Model,
     modifier: Modifier,
   ) {
+    val podcast = model.podcast
+    val source = model.source
     Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
       Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
-          text = podcast.title,
-          modifier =
-            Modifier.podcastSharedElement(podcast, source, PodcastSharedElement.Title)
-              .testTag("show-title")
-              .semantics {
-                heading()
-              },
-          style = AppTheme.typography.headlineSmall,
-          fontWeight = FontWeight.Bold,
-        )
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Text(
+            text = podcast.title,
+            modifier =
+              Modifier.weight(weight = 1f, fill = false)
+                .podcastSharedElement(podcast, source, PodcastSharedElement.Title)
+                .testTag("show-title")
+                .semantics {
+                  heading()
+                },
+            style = AppTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+          )
+          IconToggleButton(
+            checked = model.descriptionExpanded,
+            onCheckedChange = { model.onToggleDescription() },
+            modifier = Modifier.testTag("show-info"),
+          ) {
+            Icon(
+              imageVector = Icons.Outlined.Info,
+              contentDescription =
+                stringResource(
+                  if (model.descriptionExpanded) {
+                    Res.string.hide_description
+                  } else {
+                    Res.string.show_description
+                  },
+                ),
+            )
+          }
+        }
         podcast.author?.let { author ->
           Text(
             text = author,
