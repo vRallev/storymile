@@ -7,5 +7,5 @@ import software.ralf.storymile.discovery.DiscoveredPodcast
 
 @Composable
 internal fun PodcastArtwork(podcast: DiscoveredPodcast, modifier: Modifier) {
-  PodcastArtwork(podcast.artworkUrl, modifier)
+  PodcastArtwork(artworkUrl = podcast.artworkUrl, modifier = modifier, artworkId = podcast.id)
 }
