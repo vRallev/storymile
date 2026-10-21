@@ -45,7 +45,7 @@ class DesktopApp(private val graph: (RootScopeProvider) -> AppGraph) : RootScope
     val controller = scope.metroDependencyGraph<Graph>().runtimeModeController
     scope.launch {
       val mode =
-        when (controller.mode()) {
+        when (controller.mode) {
           RuntimeMode.Real -> RuntimeMode.Fake
           RuntimeMode.Fake -> RuntimeMode.Real
         }

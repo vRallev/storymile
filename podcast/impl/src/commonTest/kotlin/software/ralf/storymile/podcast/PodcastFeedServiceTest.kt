@@ -4,14 +4,10 @@ import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isSameInstanceAs
 import kotlin.test.Test
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.runtimemode.RuntimeMode
@@ -261,11 +257,10 @@ class PodcastFeedServiceTest {
   }
 
   @Test
-  fun `load waits for saved fake mode without constructing the real service`() = runTest {
-    val savedMode = CompletableDeferred<RuntimeMode>()
+  fun `fake feeds never construct the real service`() = runTest {
     val controller: RuntimeModeController =
       object : RuntimeModeController {
-        override suspend fun mode(): RuntimeMode = savedMode.await()
+        override val mode: RuntimeMode = RuntimeMode.Fake
 
         override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
       }
@@ -277,13 +272,7 @@ class PodcastFeedServiceTest {
         fake,
       )
 
-    val result = async { service.load("https://example.invalid/podcasts/science.xml") }
-    runCurrent()
-    assertThat(result.isCompleted).isFalse()
-    assertThat(fake.isInitialized()).isFalse()
-    savedMode.complete(RuntimeMode.Fake)
-
-    assertThat(result.await())
+    assertThat(service.load("https://example.invalid/podcasts/science.xml"))
       .isInstanceOf<HttpResponse.Success<PodcastFeed>>()
       .transform { it.data.title }
       .isEqualTo("Small Science")

@@ -25,14 +25,16 @@ class PlaylistRepositoryImplTest {
   @Test
   fun `fake mode seeds three ordered episodes before queued edits`() = runTestWithScope { scope ->
     val storage = FakeStorage()
-    val mode = CompletableDeferred<RuntimeMode>()
+    val mode = RuntimeMode.Fake
+    val readBarrier = CompletableDeferred<Unit>()
+    storage.readBarrier = readBarrier
     val repository: PlaylistRepository = scope.repository(storage, mode)
     repository.create(PlaylistName("My playlist"))
     runCurrent()
     assertThat(repository.playlists.value).isEmpty()
     assertThat(storage.writeCount).isEqualTo(0)
 
-    mode.complete(RuntimeMode.Fake)
+    readBarrier.complete(Unit)
     runCurrent()
     val playlists = repository.playlists.value
     assertThat(playlists.map { it.name.value })
@@ -56,7 +58,7 @@ class PlaylistRepositoryImplTest {
   fun `deleting the default playlist does not reseed it in the same fake session`() =
     runTestWithScope { scope ->
       val storage = FakeStorage()
-      val mode = CompletableDeferred(RuntimeMode.Fake)
+      val mode = RuntimeMode.Fake
       val repository: PlaylistRepository = scope.repository(storage, mode)
       runCurrent()
       repository.delete(repository.playlists.value.single().id)
@@ -71,8 +73,7 @@ class PlaylistRepositoryImplTest {
   @Test
   fun `failed seeding is retried before applying a later command`() = runTestWithScope { scope ->
     val storage = FakeStorage().apply { writeFailure = IllegalStateException("Unavailable") }
-    val repository: PlaylistRepository =
-      scope.repository(storage, CompletableDeferred(RuntimeMode.Fake))
+    val repository: PlaylistRepository = scope.repository(storage, RuntimeMode.Fake)
     runCurrent()
     assertThat(repository.playlists.value).isEmpty()
 
@@ -376,7 +377,7 @@ class PlaylistRepositoryImplTest {
 
   private fun Scope.repository(
     storage: Storage,
-    mode: CompletableDeferred<RuntimeMode> = CompletableDeferred(RuntimeMode.Real),
+    mode: RuntimeMode = RuntimeMode.Real,
   ): PlaylistRepository =
     PlaylistRepositoryImpl(storage, TestRuntimeModeController(mode)).also { register(it) }
 
@@ -386,9 +387,9 @@ class PlaylistRepositoryImplTest {
   }
 
   private class TestRuntimeModeController(
-    private val selectedMode: CompletableDeferred<RuntimeMode>,
+    private val selectedMode: RuntimeMode,
   ) : RuntimeModeController {
-    override suspend fun mode(): RuntimeMode = selectedMode.await()
+    override val mode: RuntimeMode = selectedMode
 
     override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
   }

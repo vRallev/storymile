@@ -6,19 +6,14 @@ import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.hasMessage
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import kotlin.test.Test
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runCurrent
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.runTestWithScope
@@ -48,14 +43,14 @@ class RuntimeModeStorageTest {
   }
 
   @Test
-  fun `storage waits for Fake mode before reading or changing data`() = runTestWithScope { scope ->
+  fun `fake storage isolates all data from real storage`() = runTestWithScope { scope ->
     val realPlatform = InMemoryStoragePlatform()
     val real: Storage = scope.storage(realPlatform)
     val key = stringPreferencesKey("theme")
     real.preferences("settings").edit { it[key] = "real" }
     real.files.directory("books").write("chapter", byteArrayOf(1))
     real.cache.write("cover", byteArrayOf(2))
-    val mode = CompletableDeferred<RuntimeMode>()
+    val mode = RuntimeMode.Fake
     val factory: ScopedStorage.Factory =
       DefaultStorage.Factory(realPlatform, lazy { FakeRuntimeModeController(mode) })
     val storage: Storage = scope.storage(factory)
@@ -77,10 +72,6 @@ class RuntimeModeStorageTest {
         },
         async { assertThat(storage.databasePath("podcasts")).isNull() },
       )
-    runCurrent()
-
-    operations.forEach { assertThat(it.isCompleted).isFalse() }
-    mode.complete(RuntimeMode.Fake)
     operations.awaitAll()
 
     assertThat(storage.preferences("settings").data.first()[key]).isEqualTo("fake")
@@ -103,8 +94,7 @@ class RuntimeModeStorageTest {
       real.files.write("chapter", byteArrayOf(1))
       real.cache.write("cover", byteArrayOf(2))
       val failure = IllegalStateException("Mode unavailable")
-      val mode = CompletableDeferred<RuntimeMode>().also { it.completeExceptionally(failure) }
-      val controller = FakeRuntimeModeController(mode)
+      val controller = FakeRuntimeModeController(RuntimeMode.Fake).apply { modeFailure = failure }
       val factory: ScopedStorage.Factory = DefaultStorage.Factory(realPlatform, lazy { controller })
       val storage: Storage = scope.storage(factory)
 
@@ -124,7 +114,7 @@ class RuntimeModeStorageTest {
         .isInstanceOf<IllegalStateException>()
         .hasMessage("Mode unavailable")
 
-      controller.selectedMode = CompletableDeferred(RuntimeMode.Fake)
+      controller.modeFailure = null
       storage.preferences("settings").edit { it[key] = "fake" }
       storage.files.write("chapter", byteArrayOf(3))
       storage.cache.write("cover", byteArrayOf(4))
@@ -137,64 +127,21 @@ class RuntimeModeStorageTest {
       assertThat(real.cache.read("cover")).isNotNull().isEqualTo(byteArrayOf(2))
     }
 
-  @Test
-  fun `canceling initial access allows the next operation to load the mode`() =
-    runTestWithScope { scope ->
-      val mode = CompletableDeferred<RuntimeMode>()
-      val factory: ScopedStorage.Factory =
-        DefaultStorage.Factory(InMemoryStoragePlatform(), lazy { FakeRuntimeModeController(mode) })
-      val storage: Storage = scope.storage(factory)
-      val reading = async { storage.files.read("chapter") }
-      runCurrent()
-      assertThat(reading.isCompleted).isFalse()
-
-      reading.cancelAndJoin()
-      mode.complete(RuntimeMode.Fake)
-
-      storage.files.write("chapter", byteArrayOf(1))
-      assertThat(storage.files.read("chapter")).isNotNull().isEqualTo(byteArrayOf(1))
-    }
-
-  @Test
-  fun `scope exit cancels storage operations waiting for the saved mode`() =
-    runTestWithScope { scope ->
-      val mode = CompletableDeferred<RuntimeMode>()
-      val factory: ScopedStorage.Factory =
-        DefaultStorage.Factory(
-          InMemoryStoragePlatform(),
-          lazy { FakeRuntimeModeController(mode) },
-        )
-      val storage: Storage = scope.storage(factory)
-      val operations =
-        listOf(
-          async {
-            assertFailure { storage.preferences("settings") }.isInstanceOf<CancellationException>()
-          },
-          async {
-            assertFailure { storage.files.directory("books").write("chapter", byteArrayOf(1)) }
-              .isInstanceOf<CancellationException>()
-          },
-          async {
-            assertFailure { storage.cache.read("cover") }.isInstanceOf<CancellationException>()
-          },
-        )
-      runCurrent()
-      operations.forEach { assertThat(it.isCompleted).isFalse() }
-
-      scope.destroy()
-
-      operations.awaitAll()
-    }
-
   private fun Scope.storage(platform: StoragePlatform): Storage =
     DefaultStorage("app", coroutineScope(), platform).also { register(it) }
 
   private fun Scope.storage(factory: ScopedStorage.Factory): Storage =
     factory.create("app", coroutineScope()).also { register(it) }
 
-  private class FakeRuntimeModeController(var selectedMode: CompletableDeferred<RuntimeMode>) :
+  private class FakeRuntimeModeController(private val selectedMode: RuntimeMode) :
     RuntimeModeController {
-    override suspend fun mode(): RuntimeMode = selectedMode.await()
+    var modeFailure: Exception? = null
+
+    override val mode: RuntimeMode
+      get() {
+        modeFailure?.let { throw it }
+        return selectedMode
+      }
 
     override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
   }

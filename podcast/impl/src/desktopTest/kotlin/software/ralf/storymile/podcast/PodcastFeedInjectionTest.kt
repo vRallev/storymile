@@ -58,11 +58,11 @@ class PodcastFeedInjectionTest {
     assertThat(client.requestedUrls).isEmpty()
   }
 
-  private fun TestScope.graph(mode: RuntimeMode, client: HttpClient): Graph =
+  private fun TestScope.graph(runtimeMode: RuntimeMode, client: HttpClient): Graph =
     createGraphFactory<Graph.Factory>()
       .create(
         object : RuntimeModeController {
-          override suspend fun mode(): RuntimeMode = mode
+          override val mode: RuntimeMode = runtimeMode
 
           override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
         },

@@ -2,14 +2,10 @@ package software.ralf.storymile.discovery
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNull
 import assertk.assertions.isSameInstanceAs
 import kotlin.test.Test
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.runtimemode.RuntimeMode
@@ -163,56 +159,38 @@ class PodcastDiscoveryServiceTest {
   }
 
   @Test
-  fun `search waits for the saved mode and fake mode never constructs the real service`() =
-    runTest {
-      val savedMode = CompletableDeferred<RuntimeMode>()
-      val controller: RuntimeModeController =
-        object : RuntimeModeController {
-          override suspend fun mode(): RuntimeMode = savedMode.await()
+  fun `fake search never constructs the real service`() = runTest {
+    val controller: RuntimeModeController =
+      object : RuntimeModeController {
+        override val mode: RuntimeMode = RuntimeMode.Fake
 
-          override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
-        }
-      val fake = lazy { FakePodcastDiscoveryService() }
-      val service: PodcastDiscoveryService =
-        PodcastDiscoveryServiceImpl(controller, lazy { error("Real service constructed") }, fake)
+        override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
+      }
+    val fake = lazy { FakePodcastDiscoveryService() }
+    val service: PodcastDiscoveryService =
+      PodcastDiscoveryServiceImpl(controller, lazy { error("Real service constructed") }, fake)
 
-      val result = async { service.search("science") }
-      runCurrent()
-
-      assertThat(result.isCompleted).isFalse()
-      assertThat(fake.isInitialized()).isFalse()
-      savedMode.complete(RuntimeMode.Fake)
-
-      assertThat(result.await())
-        .isInstanceOf<HttpResponse.Success<List<DiscoveredPodcast>>>()
-        .transform { it.data.single().title }
-        .isEqualTo("Small Science")
-    }
+    assertThat(service.search("science"))
+      .isInstanceOf<HttpResponse.Success<List<DiscoveredPodcast>>>()
+      .transform { it.data.single().title }
+      .isEqualTo("Small Science")
+  }
 
   @Test
-  fun `popular waits for the saved mode and fake mode never constructs the real service`() =
-    runTest {
-      val savedMode = CompletableDeferred<RuntimeMode>()
-      val controller: RuntimeModeController =
-        object : RuntimeModeController {
-          override suspend fun mode(): RuntimeMode = savedMode.await()
+  fun `fake popular never constructs the real service`() = runTest {
+    val controller: RuntimeModeController =
+      object : RuntimeModeController {
+        override val mode: RuntimeMode = RuntimeMode.Fake
 
-          override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
-        }
-      val fake = lazy { FakePodcastDiscoveryService() }
-      val service: PodcastDiscoveryService =
-        PodcastDiscoveryServiceImpl(controller, lazy { error("Real service constructed") }, fake)
+        override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
+      }
+    val fake = lazy { FakePodcastDiscoveryService() }
+    val service: PodcastDiscoveryService =
+      PodcastDiscoveryServiceImpl(controller, lazy { error("Real service constructed") }, fake)
 
-      val result = async { service.popular() }
-      runCurrent()
-
-      assertThat(result.isCompleted).isFalse()
-      assertThat(fake.isInitialized()).isFalse()
-      savedMode.complete(RuntimeMode.Fake)
-
-      assertThat(result.await())
-        .isInstanceOf<HttpResponse.Success<List<DiscoveredPodcast>>>()
-        .transform { it.data.map { podcast -> podcast.title } }
-        .isEqualTo(listOf("Small Science", "History on Foot", "Design Notes"))
-    }
+    assertThat(service.popular())
+      .isInstanceOf<HttpResponse.Success<List<DiscoveredPodcast>>>()
+      .transform { it.data.map { podcast -> podcast.title } }
+      .isEqualTo(listOf("Small Science", "History on Foot", "Design Notes"))
+  }
 }
