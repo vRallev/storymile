@@ -193,7 +193,7 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
           Text(
             text = podcast.title,
             modifier =
-              Modifier.weight(1f)
+              Modifier.weight(weight = 1f, fill = false)
                 .podcastSharedElement(podcast, source, PodcastSharedElement.Title)
                 .testTag("show-title")
                 .semantics {
