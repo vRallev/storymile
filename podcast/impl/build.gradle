@@ -11,4 +11,6 @@ dependencies {
   commonMainImplementation project(':runtime-mode:public')
   commonMainImplementation libs.ktor.client.core
   commonMainImplementation libs.xmlutil.core
+
+  commonTestImplementation project(':runtime-mode:testing')
 }

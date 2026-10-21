@@ -22,6 +22,7 @@ import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.podcast.PodcastFeedRepository
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
+import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 import software.ralf.storymile.util.Device
 import software.ralf.storymile.util.testing.FakeDevice
 
@@ -103,12 +104,7 @@ class PodcastDiscoveryInjectionTest {
   private fun TestScope.graph(runtimeMode: RuntimeMode, client: HttpClient): Graph =
     createGraphFactory<Graph.Factory>()
       .create(
-        controller =
-          object : RuntimeModeController {
-            override val mode: RuntimeMode = runtimeMode
-
-            override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
-          },
+        controller = FakeRuntimeModeController(runtimeMode),
         client = client,
         device = FakeDevice("DE"),
         coroutineScope = backgroundScope,

@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
+import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 
 class PodcastFeedServiceTest {
   @Test
@@ -258,12 +259,7 @@ class PodcastFeedServiceTest {
 
   @Test
   fun `fake feeds never construct the real service`() = runTest {
-    val controller: RuntimeModeController =
-      object : RuntimeModeController {
-        override val mode: RuntimeMode = RuntimeMode.Fake
-
-        override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
-      }
+    val controller: RuntimeModeController = FakeRuntimeModeController(RuntimeMode.Fake)
     val fake = lazy { FakePodcastFeedService() }
     val service: PodcastFeedService =
       PodcastFeedServiceImpl(

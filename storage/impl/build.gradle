@@ -11,4 +11,6 @@ dependencies {
   commonMainImplementation project(':util:public')
   commonMainImplementation libs.androidx.datastore.core.okio
   commonMainImplementation libs.okio
+
+  commonTestImplementation project(':runtime-mode:testing')
 }

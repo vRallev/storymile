@@ -30,6 +30,7 @@ import software.ralf.app.platform.scope.register
 import software.ralf.app.platform.scope.runTestWithScope
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
+import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 
 class StorageInjectionTest {
   @Test
@@ -134,12 +135,7 @@ class StorageInjectionTest {
     @ForScope(AppScope::class) val scopedInstances: Set<Scoped>
 
     @Provides
-    fun runtimeModeController(): RuntimeModeController =
-      object : RuntimeModeController {
-        override val mode: RuntimeMode = RuntimeMode.Real
-
-        override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
-      }
+    fun runtimeModeController(): RuntimeModeController = FakeRuntimeModeController(RuntimeMode.Real)
 
     @DependencyGraph.Factory
     fun interface Factory {
