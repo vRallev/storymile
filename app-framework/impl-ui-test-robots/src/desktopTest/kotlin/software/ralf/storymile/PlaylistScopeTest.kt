@@ -27,7 +27,7 @@ import software.ralf.storymile.playlist.PlaylistName
 import software.ralf.storymile.playlist.PlaylistRepository
 import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.InMemoryStorageFactory
-import software.ralf.storymile.storage.ScopedStorage
+import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.templates.AppTemplate
 import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.user.UserScope
@@ -111,7 +111,7 @@ class PlaylistScopeTest {
   @Test
   fun `guest playlists survive application recreation independently of application files`() =
     runTest {
-      val factory: ScopedStorage.Factory = InMemoryStorageFactory()
+      val factory: Storage.Factory = InMemoryStorageFactory()
       val episodeId = EpisodeId("episode")
       val (previousRepository, savedPlaylists) =
         withApplication(factory) { graph ->
@@ -142,7 +142,7 @@ class PlaylistScopeTest {
     userManager.userScope.value.metroDependencyGraph<UserBindings>().playlistRepository
 
   private suspend fun <T> withApplication(
-    storageFactory: ScopedStorage.Factory = InMemoryStorageFactory(),
+    storageFactory: Storage.Factory = InMemoryStorageFactory(),
     block: suspend (Graph) -> T,
   ): T {
     val application = KmpApplication()
@@ -167,7 +167,7 @@ class PlaylistScopeTest {
     fun interface Factory {
       fun create(
         @Provides rootScopeProvider: RootScopeProvider,
-        @Provides storageFactory: ScopedStorage.Factory,
+        @Provides storageFactory: Storage.Factory,
       ): Graph
     }
   }

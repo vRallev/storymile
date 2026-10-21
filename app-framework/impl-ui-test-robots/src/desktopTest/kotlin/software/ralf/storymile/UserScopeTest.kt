@@ -27,7 +27,6 @@ import software.ralf.app.platform.scope.coroutine.launch
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.InMemoryStorageFactory
-import software.ralf.storymile.storage.ScopedStorage
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.user.User
 import software.ralf.storymile.user.UserManager
@@ -127,7 +126,7 @@ class UserScopeTest {
 
   @Test
   fun `guest data remains available after application recreation`() = runTest {
-    val factory: ScopedStorage.Factory = InMemoryStorageFactory()
+    val factory: Storage.Factory = InMemoryStorageFactory()
     val key = stringPreferencesKey("value")
     val userId =
       withApplication(factory) { graph ->
@@ -151,7 +150,7 @@ class UserScopeTest {
   }
 
   private fun createApplication(
-    storageFactory: ScopedStorage.Factory = InMemoryStorageFactory(),
+    storageFactory: Storage.Factory = InMemoryStorageFactory(),
   ): KmpApplication {
     val application = KmpApplication()
     application.create(
@@ -161,7 +160,7 @@ class UserScopeTest {
   }
 
   private suspend fun <T> withApplication(
-    storageFactory: ScopedStorage.Factory = InMemoryStorageFactory(),
+    storageFactory: Storage.Factory = InMemoryStorageFactory(),
     block: suspend (Graph) -> T,
   ): T {
     val application = createApplication(storageFactory)
@@ -183,7 +182,7 @@ class UserScopeTest {
     fun interface Factory {
       fun create(
         @Provides rootScopeProvider: RootScopeProvider,
-        @Provides storageFactory: ScopedStorage.Factory,
+        @Provides storageFactory: Storage.Factory,
       ): Graph
     }
   }

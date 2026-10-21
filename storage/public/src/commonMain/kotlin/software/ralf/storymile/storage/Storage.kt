@@ -2,6 +2,7 @@ package software.ralf.storymile.storage
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Scope-owned preferences, durable files, and caches. Inject with `@ForScope(AppScope::class)` for
@@ -40,4 +41,27 @@ interface Storage {
    * browser returns a virtual filename for its SQLite filesystem. The caller owns the database.
    */
   suspend fun databasePath(name: String): String?
+
+  /** Creates storage for an owning coroutine scope. */
+  interface Factory {
+    /**
+     * Creates storage ready for use. The first operation selects the backend and claims the
+     * namespace.
+     *
+     * [namespace] contains only letters, digits, underscores, and hyphens. Use `app` for app data
+     * and a stable `user-<id>` for each user. An active namespace cannot be shared. Reopening waits
+     * for the previous owner's storage work and cleanup to finish.
+     *
+     * [coroutineScope] must be a dedicated child of the owning scope. The caller cancels it to stop
+     * storage access while preserving saved data.
+     *
+     * When [mustBePersistent] is true, use persistent storage without checking the runtime mode.
+     * Otherwise, fake mode uses in-memory storage.
+     */
+    fun create(
+      namespace: String,
+      coroutineScope: CoroutineScope,
+      mustBePersistent: Boolean = false,
+    ): Storage
+  }
 }
