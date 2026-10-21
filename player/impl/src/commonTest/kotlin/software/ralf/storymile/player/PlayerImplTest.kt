@@ -18,7 +18,7 @@ import software.ralf.storymile.playlist.Playlist
 import software.ralf.storymile.playlist.PlaylistId
 import software.ralf.storymile.playlist.PlaylistName
 import software.ralf.storymile.runtimemode.RuntimeMode
-import software.ralf.storymile.runtimemode.RuntimeModeController
+import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 
 class PlayerImplTest {
   @Test
@@ -39,7 +39,7 @@ class PlayerImplTest {
     val player: Player =
       PlayerImpl(
           transport,
-          mode(RuntimeMode.Real),
+          FakeRuntimeModeController(RuntimeMode.Real),
           playlists(),
           StandardTestDispatcher(testScheduler),
           { it },
@@ -180,7 +180,7 @@ class PlayerImplTest {
       val player: Player =
         PlayerImpl(
             lazy { audio },
-            mode(RuntimeMode.Fake),
+            FakeRuntimeModeController(RuntimeMode.Fake),
             playlists,
             StandardTestDispatcher(testScheduler),
             { it },
@@ -229,11 +229,7 @@ class PlayerImplTest {
   ): Player =
     PlayerImpl(
         lazy { audio },
-        object : RuntimeModeController {
-          override val mode: RuntimeMode = mode
-
-          override suspend fun switchMode(mode: RuntimeMode) = Unit
-        },
+        FakeRuntimeModeController(mode),
         playlists(),
         StandardTestDispatcher(testScheduler),
         { it },
@@ -246,13 +242,6 @@ class PlayerImplTest {
         Playlist(PlaylistId("test"), PlaylistName("Test"), listOf(EpisodeId("test-episode-1"))),
       ),
     )
-
-  private fun mode(value: RuntimeMode): RuntimeModeController =
-    object : RuntimeModeController {
-      override val mode: RuntimeMode = value
-
-      override suspend fun switchMode(mode: RuntimeMode) = Unit
-    }
 
   private class FakeAudioPlayer : AudioPlayer() {
     override val state: StateFlow<State>

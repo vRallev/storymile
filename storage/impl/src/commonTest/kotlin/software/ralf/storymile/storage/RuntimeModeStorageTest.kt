@@ -18,7 +18,7 @@ import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.runTestWithScope
 import software.ralf.storymile.runtimemode.RuntimeMode
-import software.ralf.storymile.runtimemode.RuntimeModeController
+import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 
 class RuntimeModeStorageTest {
   @Test
@@ -132,17 +132,4 @@ class RuntimeModeStorageTest {
 
   private fun Scope.storage(factory: ScopedStorage.Factory): Storage =
     factory.create("app", coroutineScope()).also { register(it) }
-
-  private class FakeRuntimeModeController(private val selectedMode: RuntimeMode) :
-    RuntimeModeController {
-    var modeFailure: Exception? = null
-
-    override val mode: RuntimeMode
-      get() {
-        modeFailure?.let { throw it }
-        return selectedMode
-      }
-
-    override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
-  }
 }

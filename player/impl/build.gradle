@@ -14,5 +14,7 @@ dependencies {
   commonMainImplementation project(':runtime-mode:public')
   commonMainImplementation project(':user:public')
 
+  commonTestImplementation project(':runtime-mode:testing')
+
   desktopMainImplementation libs.jlayer
 }

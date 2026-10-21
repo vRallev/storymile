@@ -18,6 +18,7 @@ import software.ralf.storymile.http.HttpClient
 import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
+import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 
 class PodcastFeedInjectionTest {
   @Test
@@ -61,11 +62,7 @@ class PodcastFeedInjectionTest {
   private fun TestScope.graph(runtimeMode: RuntimeMode, client: HttpClient): Graph =
     createGraphFactory<Graph.Factory>()
       .create(
-        object : RuntimeModeController {
-          override val mode: RuntimeMode = runtimeMode
-
-          override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
-        },
+        FakeRuntimeModeController(runtimeMode),
         client,
         backgroundScope,
       )

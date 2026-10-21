@@ -17,7 +17,7 @@ import kotlinx.coroutines.test.runCurrent
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.runTestWithScope
 import software.ralf.storymile.runtimemode.RuntimeMode
-import software.ralf.storymile.runtimemode.RuntimeModeController
+import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 import software.ralf.storymile.storage.FileStorage
 import software.ralf.storymile.storage.Storage
 
@@ -379,19 +379,11 @@ class PlaylistRepositoryImplTest {
     storage: Storage,
     mode: RuntimeMode = RuntimeMode.Real,
   ): PlaylistRepository =
-    PlaylistRepositoryImpl(storage, TestRuntimeModeController(mode)).also { register(it) }
+    PlaylistRepositoryImpl(storage, FakeRuntimeModeController(mode)).also { register(it) }
 
   private companion object {
     const val SAVED_PLAYLISTS =
       """{"version":1,"playlists":[{"id":"saved","name":"Saved","episodeIds":["one"]}]}"""
-  }
-
-  private class TestRuntimeModeController(
-    private val selectedMode: RuntimeMode,
-  ) : RuntimeModeController {
-    override val mode: RuntimeMode = selectedMode
-
-    override suspend fun switchMode(mode: RuntimeMode) = error("Not used")
   }
 
   private class FakeStorage(savedDocument: String? = null) : Storage {

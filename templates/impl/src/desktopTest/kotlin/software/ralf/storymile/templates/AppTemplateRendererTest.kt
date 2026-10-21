@@ -79,8 +79,7 @@ import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.app.platform.renderer.LocalRendererFactory
 import software.ralf.app.platform.renderer.Renderer
 import software.ralf.app.platform.renderer.RendererFactory
-import software.ralf.storymile.runtimemode.RuntimeMode
-import software.ralf.storymile.runtimemode.RuntimeModeController
+import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 import software.ralf.storymile.screen.DefaultScreenSizeProvider
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.screen.ScreenSizeProvider
@@ -551,12 +550,7 @@ class AppTemplateRendererTest {
             content()
           }
         },
-        object : RuntimeModeController {
-          override val mode: RuntimeMode
-            get() = error("Not used")
-
-          override suspend fun switchMode(mode: RuntimeMode): Unit = error("Not used")
-        },
+        FakeRuntimeModeController(),
       )
     private val slotRenderer = SlotRenderer(forwardModifiers)
 
