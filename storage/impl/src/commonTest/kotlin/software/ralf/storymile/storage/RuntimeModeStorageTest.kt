@@ -83,7 +83,7 @@ class RuntimeModeStorageTest {
   }
 
   @Test
-  fun `a mode read failure allows retry without falling back to real storage`() =
+  fun `a mode read failure allows factory retry without falling back to real storage`() =
     runTestWithScope { scope ->
       val realPlatform = InMemoryStoragePlatform()
       val real: Storage = scope.storage(realPlatform)
@@ -94,25 +94,13 @@ class RuntimeModeStorageTest {
       val failure = IllegalStateException("Mode unavailable")
       val controller = FakeRuntimeModeController(RuntimeMode.Fake).apply { modeFailure = failure }
       val factory: Storage.Factory = DefaultStorage.Factory(realPlatform, lazy { controller })
-      val storage: Storage = scope.storage(factory)
 
-      assertFailure { storage.preferences("settings").edit { it[key] = "fake" } }
-        .isInstanceOf<IllegalStateException>()
-        .hasMessage("Mode unavailable")
-      assertFailure { storage.files.read("chapter") }
-        .isInstanceOf<IllegalStateException>()
-        .hasMessage("Mode unavailable")
-      assertFailure { storage.files.write("chapter", byteArrayOf(3)) }
-        .isInstanceOf<IllegalStateException>()
-        .hasMessage("Mode unavailable")
-      assertFailure { storage.files.delete("chapter") }
-        .isInstanceOf<IllegalStateException>()
-        .hasMessage("Mode unavailable")
-      assertFailure { storage.cache.deleteAll() }
+      assertFailure { scope.storage(factory) }
         .isInstanceOf<IllegalStateException>()
         .hasMessage("Mode unavailable")
 
       controller.modeFailure = null
+      val storage: Storage = scope.storage(factory)
       storage.preferences("settings").edit { it[key] = "fake" }
       storage.files.write("chapter", byteArrayOf(3))
       storage.cache.write("cover", byteArrayOf(4))

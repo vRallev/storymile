@@ -45,8 +45,7 @@ interface Storage {
   /** Creates storage for an owning coroutine scope. */
   interface Factory {
     /**
-     * Creates storage ready for use. The first operation selects the backend and claims the
-     * namespace.
+     * Creates storage ready for use. The first operation claims the namespace.
      *
      * [namespace] contains only letters, digits, underscores, and hyphens. Use `app` for app data
      * and a stable `user-<id>` for each user. An active namespace cannot be shared. Reopening waits
@@ -56,7 +55,8 @@ interface Storage {
      * storage access while preserving saved data.
      *
      * When [mustBePersistent] is true, use persistent storage without checking the runtime mode.
-     * Otherwise, fake mode uses in-memory storage.
+     * Otherwise, fake mode uses in-memory storage. Runtime mode read failures propagate from this
+     * call.
      */
     fun create(
       namespace: String,

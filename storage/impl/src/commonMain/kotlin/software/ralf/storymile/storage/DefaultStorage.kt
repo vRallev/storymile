@@ -22,8 +22,8 @@ import software.ralf.storymile.runtimemode.RuntimeModeController
 /**
  * Scope-owned implementation used by [Storage.Factory].
  *
- * The first operation selects the backend and claims the namespace once. A claim rejects an active
- * owner and waits for a canceled owner's work to finish, including DataStore cleanup.
+ * The first operation claims the namespace once. A claim rejects an active owner and waits for a
+ * canceled owner's work to finish, including DataStore cleanup.
  *
  * UTF-8 hex encoding preserves namespace and name identity on case-insensitive filesystems.
  * Directory handles encode single path segments and share the same owner. Durable files and cache
@@ -39,11 +39,10 @@ import software.ralf.storymile.runtimemode.RuntimeModeController
  * scope's regular [Job]. The caller cancels the scope to stop actors and operations while
  * preserving saved data.
  */
-class DefaultStorage
-private constructor(
+class DefaultStorage(
   namespace: String,
   private val coroutineScope: CoroutineScope,
-  private val selectPlatform: suspend () -> StoragePlatform,
+  private val platform: StoragePlatform,
 ) : Storage {
   init {
     require(namespace.matches(namePattern)) {
@@ -53,8 +52,8 @@ private constructor(
 
   private val encodedNamespace = namespace.encodeUtf8().hex()
   private val job = checkNotNull(coroutineScope.coroutineContext[Job])
-  private val initializationMutex = Mutex()
-  private var initializedPlatform: StoragePlatform? = null
+  private val namespaceMutex = Mutex()
+  private var namespaceClaimed = false
   private val preferencesMutex = Mutex()
   private val filesMutex = Mutex()
   private val stores = mutableMapOf<String, DataStore<Preferences>>()
@@ -62,13 +61,7 @@ private constructor(
   override val files: FileStorage = DirectoryFileStorage(FileStorageArea.Files, "")
   override val cache: FileStorage = DirectoryFileStorage(FileStorageArea.Cache, "")
 
-  constructor(
-    namespace: String,
-    coroutineScope: CoroutineScope,
-    platform: StoragePlatform,
-  ) : this(namespace, coroutineScope, { platform })
-
-  override suspend fun preferences(name: String): DataStore<Preferences> = operation { platform ->
+  override suspend fun preferences(name: String): DataStore<Preferences> = operation {
     require(name.matches(namePattern)) {
       "Preferences name must contain only letters, digits, underscores, and hyphens."
     }
@@ -81,7 +74,7 @@ private constructor(
     }
   }
 
-  override suspend fun databasePath(name: String): String? = operation { platform ->
+  override suspend fun databasePath(name: String): String? = operation {
     require(name.matches(namePattern)) {
       "Database name must contain only letters, digits, underscores, and hyphens."
     }
@@ -94,24 +87,22 @@ private constructor(
     job.ensureActive()
   }
 
-  private suspend fun platform(): StoragePlatform = initializationMutex.withLock {
-    initializedPlatform?.let {
-      return@withLock it
-    }
-    selectPlatform().also {
-      it.claimNamespace(encodedNamespace, job)
-      initializedPlatform = it
+  private suspend fun claimNamespace() = namespaceMutex.withLock {
+    if (!namespaceClaimed) {
+      platform.claimNamespace(encodedNamespace, job)
+      namespaceClaimed = true
     }
   }
 
-  private suspend fun <T> operation(block: suspend (StoragePlatform) -> T): T {
+  private suspend fun <T> operation(block: suspend () -> T): T {
     checkActive()
     val callerContext = currentCoroutineContext()
     callerContext.ensureActive()
     val operation =
       coroutineScope.async(callerContext.minusKey(Job)) {
         try {
-          Result.success(block(platform()))
+          claimNamespace()
+          Result.success(block())
         } catch (exception: Throwable) {
           Result.failure(exception)
         }
@@ -149,13 +140,16 @@ private constructor(
       coroutineScope: CoroutineScope,
       mustBePersistent: Boolean,
     ): Storage =
-      DefaultStorage(namespace, coroutineScope) {
-        if (mustBePersistent || controller.value.mode == RuntimeMode.Real) {
-          platform
-        } else {
-          inMemoryPlatform
-        }
-      }
+      DefaultStorage(
+        namespace = namespace,
+        coroutineScope = coroutineScope,
+        platform =
+          if (mustBePersistent || controller.value.mode == RuntimeMode.Real) {
+            platform
+          } else {
+            inMemoryPlatform
+          },
+      )
   }
 
   private inner class DirectoryFileStorage(
@@ -167,19 +161,19 @@ private constructor(
       return DirectoryFileStorage(area, resolve(name))
     }
 
-    override suspend fun read(name: String): ByteArray? = operation { platform ->
+    override suspend fun read(name: String): ByteArray? = operation {
       filesMutex.withLock { platform.readFile(encodedNamespace, area, resolve(name)) }
     }
 
-    override suspend fun write(name: String, content: ByteArray) = operation { platform ->
+    override suspend fun write(name: String, content: ByteArray) = operation {
       filesMutex.withLock { platform.writeFile(encodedNamespace, area, resolve(name), content) }
     }
 
-    override suspend fun delete(name: String) = operation { platform ->
+    override suspend fun delete(name: String) = operation {
       filesMutex.withLock { platform.deleteFile(encodedNamespace, area, resolve(name)) }
     }
 
-    override suspend fun deleteAll() = operation { platform ->
+    override suspend fun deleteAll() = operation {
       filesMutex.withLock { platform.deleteAllFiles(encodedNamespace, area, path) }
     }
 
