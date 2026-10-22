@@ -69,7 +69,7 @@ internal object PlaybackControls {
   fun Details(player: PlayerModel, large: Boolean) {
     val screen = LocalScreenSize.current
     val phone = screen.category == ScreenSize.Category.PHONE
-    val stacked = screen.orientation == ScreenSize.Orientation.PORTRAIT
+    val stacked = screen.width < 600.dp || screen.width <= screen.height
     // Keep both labels beside the growing artwork until they can pass below it.
     val horizontalArc = if (stacked) screen.width * 0.1f else 0.dp
     val verticalArc = if (!stacked) 0.dp else if (phone) 64.dp else 96.dp

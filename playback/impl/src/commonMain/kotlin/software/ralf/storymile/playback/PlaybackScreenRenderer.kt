@@ -61,13 +61,13 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
     Column(modifier.fillMaxSize()) {
       PlayerHeader(
         tablet = tablet,
-        showProfile = tablet,
-        landscape = screenSize.orientation == ScreenSize.Orientation.LANDSCAPE,
+        showProfile = screenSize.category != ScreenSize.Category.PHONE,
+        landscape = screenSize.width > screenSize.height,
         onMore = { panel = PlaybackOptions.Panel.INFO },
       )
       Spacer(Modifier.height(if (screenSize.height < 600.dp) 8.dp else 24.dp))
       BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
-        val landscape = screenSize.orientation == ScreenSize.Orientation.LANDSCAPE
+        val landscape = maxWidth >= 600.dp && screenSize.width > screenSize.height
         val largeControls = screenSize.category == ScreenSize.Category.TABLET_LARGE
         if (landscape) {
           val artworkSize =

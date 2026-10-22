@@ -2,7 +2,6 @@ package software.ralf.storymile.discovery.presentation
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -118,7 +116,7 @@ internal fun EpisodeRow(
   edgeToEdge: Boolean = false,
 ) {
   val details = item.details
-  BoxWithConstraints(
+  Row(
     modifier =
       Modifier.fillMaxWidth()
         .clip(if (edgeToEdge) RectangleShape else RoundedCornerShape(16.dp))
@@ -128,90 +126,63 @@ internal fun EpisodeRow(
           horizontal = if (edgeToEdge) 16.dp else 8.dp,
           vertical = if (edgeToEdge) 4.dp else 8.dp,
         ),
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+    verticalAlignment = Alignment.CenterVertically,
   ) {
-    val stacked = maxWidth / LocalDensity.current.fontScale < 240.dp
-    val artwork: @Composable () -> Unit = {
-      PodcastArtwork(
-        artworkUrl = details.artworkUrl,
+    PodcastArtwork(
+      artworkUrl = details.artworkUrl,
+      modifier =
+        Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Artwork)
+          .testTag("episode-artwork-$index")
+          .size(56.dp),
+    )
+    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+      Text(
+        text = details.episode.title,
         modifier =
-          Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Artwork)
-            .testTag("episode-artwork-$index")
-            .size(56.dp),
+          Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Title)
+            .testTag("episode-title-$index"),
+        style = AppTheme.typography.titleSmall.copy(textMotion = TextMotion.Animated),
       )
-    }
-    val labels: @Composable (Modifier) -> Unit = { modifier ->
-      Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+      Text(
+        text = details.podcastTitle,
+        modifier =
+          Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Subtitle)
+            .testTag("episode-subtitle-$index"),
+        style = AppTheme.typography.bodySmall.copy(textMotion = TextMotion.Animated),
+        color = AppTheme.colorScheme.onSurfaceVariant,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+      )
+      details.duration?.let { duration ->
         Text(
-          text = details.episode.title,
+          text = duration,
           modifier =
-            Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Title)
-              .testTag("episode-title-$index"),
-          style = AppTheme.typography.titleSmall.copy(textMotion = TextMotion.Animated),
-        )
-        Text(
-          text = details.podcastTitle,
-          modifier =
-            Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Subtitle)
-              .testTag("episode-subtitle-$index"),
+            Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Duration)
+              .testTag("episode-duration-$index"),
           style = AppTheme.typography.bodySmall.copy(textMotion = TextMotion.Animated),
+          color = AppTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+      if (details.description.isNotBlank()) {
+        Text(
+          text = details.description,
+          modifier =
+            Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Description)
+              .testTag("episode-description-$index"),
+          style = AppTheme.typography.bodyMedium.copy(textMotion = TextMotion.Animated),
           color = AppTheme.colorScheme.onSurfaceVariant,
           maxLines = 2,
           overflow = TextOverflow.Ellipsis,
         )
-        details.duration?.let { duration ->
-          Text(
-            text = duration,
-            modifier =
-              Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Duration)
-                .testTag("episode-duration-$index"),
-            style = AppTheme.typography.bodySmall.copy(textMotion = TextMotion.Animated),
-            color = AppTheme.colorScheme.onSurfaceVariant,
-          )
-        }
-        if (details.description.isNotBlank()) {
-          Text(
-            text = details.description,
-            modifier =
-              Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Description)
-                .testTag("episode-description-$index"),
-            style = AppTheme.typography.bodyMedium.copy(textMotion = TextMotion.Animated),
-            color = AppTheme.colorScheme.onSurfaceVariant,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-          )
-        }
       }
     }
-    val play: @Composable () -> Unit = {
-      FilledIconButton(
-        onClick = {},
-        enabled = false,
-        modifier = Modifier.testTag("episode-play-$index"),
-      ) {
-        Icon(Icons.Filled.PlayArrow, stringResource(Res.string.play_episode, details.episode.title))
-      }
-    }
-    if (stacked) {
-      Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          artwork()
-          play()
-        }
-        labels(Modifier.fillMaxWidth())
-      }
-    } else {
-      Row(
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        artwork()
-        labels(Modifier.weight(1f))
-        play()
-      }
+    FilledIconButton(
+      onClick = {},
+      enabled = false,
+      modifier = Modifier.testTag("episode-play-$index"),
+    ) {
+      Icon(Icons.Filled.PlayArrow, stringResource(Res.string.play_episode, details.episode.title))
     }
   }
 }

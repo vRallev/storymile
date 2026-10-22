@@ -57,7 +57,7 @@ class HomeContentRenderer : ComposeRenderer<HomeContentPresenter.Model>() {
       BoxWithConstraints(Modifier.fillMaxSize().testTag("home-screen")) {
         val screenSize = LocalScreenSize.current
         val phone = screenSize.category == ScreenSize.Category.PHONE
-        val wide = screenSize.orientation == ScreenSize.Orientation.LANDSCAPE
+        val wide = maxWidth >= 760.dp && screenSize.orientation == ScreenSize.Orientation.LANDSCAPE
         val compact = maxHeight < 700.dp || LocalDensity.current.fontScale > 1.3f
         val promptSpacing =
           when {

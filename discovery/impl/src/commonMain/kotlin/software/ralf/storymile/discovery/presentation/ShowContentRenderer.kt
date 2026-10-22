@@ -57,13 +57,14 @@ import software.ralf.storymile.theme.AppTheme
 class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
   @Composable
   override fun Compose(model: ShowContentPresenter.Model, modifier: Modifier) {
-    BoxWithConstraints(
+    Box(
       modifier
         .fillMaxSize()
         .then(if (LocalShowPane.current) Modifier else Modifier.discoveryScreenTransition())
         .testTag(if (LocalShowPane.current) "show-content" else "show-screen"),
     ) {
-      val edgeToEdgeEpisodes = LocalScreenSize.current.category == ScreenSize.Category.PHONE
+      val edgeToEdgeEpisodes =
+        !LocalShowPane.current && LocalScreenSize.current.category == ScreenSize.Category.PHONE
       val contentModifier = Modifier.padding(horizontal = if (edgeToEdgeEpisodes) 16.dp else 0.dp)
       val detailState = key(model.podcast.id) { rememberLazyListState() }
       Column(Modifier.fillMaxSize()) {
@@ -149,8 +150,7 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
         (LocalShowParentVisibilityScope.current ?: LocalAnimatedVisibilityScope.current),
     ) {
       BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val horizontalWidth = if (LocalShowPane.current) 240.dp else 440.dp
-        if (maxWidth / LocalDensity.current.fontScale >= horizontalWidth) {
+        if (LocalShowPane.current || maxWidth / LocalDensity.current.fontScale >= 440.dp) {
           Row(
             modifier = modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(24.dp),
@@ -170,7 +170,7 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
           }
         } else {
           Column(
-            modifier = (if (LocalShowPane.current) Modifier else modifier).fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
           ) {
@@ -178,7 +178,6 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
               podcast,
               Modifier.podcastSharedElement(podcast, source, PodcastSharedElement.Artwork)
                 .testTag("show-artwork")
-                .padding(end = if (LocalShowPane.current) 48.dp else 0.dp)
                 .widthIn(max = 320.dp)
                 .fillMaxWidth()
                 .aspectRatio(1f),

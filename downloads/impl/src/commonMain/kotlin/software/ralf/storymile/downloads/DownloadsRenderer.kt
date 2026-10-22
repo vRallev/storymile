@@ -53,7 +53,6 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
     val window = LocalScreenSize.current
     BoxWithConstraints(modifier.fillMaxSize().testTag("downloads-screen")) {
       val short = maxHeight / LocalDensity.current.fontScale < 600.dp
-      val tight = maxHeight / LocalDensity.current.fontScale < 300.dp
       val phone = window.category == ScreenSize.Category.PHONE
       val compact = phone || short
       val horizontal = short && maxWidth >= 560.dp
@@ -63,7 +62,7 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
         Column(
           Modifier.weight(1f)
             .padding(horizontal = sidePadding)
-            .padding(bottom = if (tight) 0.dp else if (short) 12.dp else 24.dp),
+            .padding(bottom = if (short) 12.dp else 24.dp),
         ) {
           Text(
             text = stringResource(Res.string.downloads_summary),
@@ -71,7 +70,7 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
               if (compact) AppTheme.typography.bodyLarge else AppTheme.typography.headlineSmall,
             color = AppTheme.colorScheme.secondary,
           )
-          Spacer(Modifier.height(if (tight) 0.dp else if (short) 12.dp else 32.dp))
+          Spacer(Modifier.height(if (short) 12.dp else 32.dp))
           Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
             if (horizontal) {
               Row(
@@ -80,12 +79,7 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
                 horizontalArrangement = Arrangement.spacedBy(32.dp),
               ) {
                 DownloadIllustration(compact = true)
-                EmptyMessage(
-                  compact = true,
-                  tight = true,
-                  noSpacing = tight,
-                  modifier = Modifier.weight(1f),
-                )
+                EmptyMessage(compact = true, tight = true, modifier = Modifier.weight(1f))
               }
             } else {
               Column(
@@ -95,11 +89,11 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
               ) {
                 DownloadIllustration(compact, Modifier.weight(1f, fill = false))
                 Spacer(Modifier.height(if (short) 12.dp else 24.dp))
-                EmptyMessage(compact = compact, tight = short)
+                EmptyMessage(compact, tight = short)
               }
             }
           }
-          Spacer(Modifier.height(if (tight) 0.dp else if (short) 12.dp else 48.dp))
+          Spacer(Modifier.height(if (short) 12.dp else 48.dp))
         }
       }
     }
@@ -129,13 +123,7 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
   }
 
   @Composable
-  private fun EmptyMessage(
-    compact: Boolean,
-    tight: Boolean,
-    noSpacing: Boolean = false,
-    modifier: Modifier = Modifier,
-  ) {
-    val spacingScale = if (noSpacing) 0f else 1f
+  private fun EmptyMessage(compact: Boolean, tight: Boolean, modifier: Modifier = Modifier) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
       Text(
         text = stringResource(Res.string.listen_anywhere),
@@ -146,7 +134,7 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
         textAlign = TextAlign.Center,
         modifier = Modifier.semantics { heading() },
       )
-      Spacer(Modifier.height((if (tight) 8.dp else 12.dp) * spacingScale))
+      Spacer(Modifier.height(if (tight) 8.dp else 12.dp))
       Text(
         text = stringResource(Res.string.downloads_description),
         style = if (compact) AppTheme.typography.bodyLarge else AppTheme.typography.headlineSmall,
@@ -154,7 +142,7 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
         textAlign = TextAlign.Center,
         modifier = Modifier.widthIn(max = if (compact && !tight) 300.dp else 600.dp),
       )
-      Spacer(Modifier.height((if (tight) 8.dp else 24.dp) * spacingScale))
+      Spacer(Modifier.height(if (tight) 8.dp else 24.dp))
       Button(
         onClick = {},
         modifier =
@@ -170,7 +158,7 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
           textAlign = TextAlign.Center,
         )
       }
-      Spacer(Modifier.height((if (tight) 8.dp else 20.dp) * spacingScale))
+      Spacer(Modifier.height(if (tight) 8.dp else 20.dp))
       Text(
         text = stringResource(Res.string.downloads_hint),
         style = if (compact) AppTheme.typography.bodyMedium else AppTheme.typography.bodyLarge,

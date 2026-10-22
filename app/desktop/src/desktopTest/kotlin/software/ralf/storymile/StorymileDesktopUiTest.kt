@@ -224,11 +224,12 @@ class StorymileDesktopUiTest {
   }
 
   @Test
-  fun `tablet sidebar expands with available window width`() {
+  fun `sidebar expansion follows width instead of height`() {
     listOf(
         DpSize(1440.dp, 900.dp) to 360.dp,
         DpSize(1199.dp, 900.dp) to 112.dp,
         DpSize(1200.dp, 900.dp) to 360.dp,
+        DpSize(1200.dp, 500.dp) to 360.dp,
         DpSize(900.dp, 1440.dp) to 112.dp,
       )
       .forEach { (size, tabWidth) ->

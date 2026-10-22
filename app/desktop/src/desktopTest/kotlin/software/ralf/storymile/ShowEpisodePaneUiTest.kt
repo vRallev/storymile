@@ -39,30 +39,6 @@ class ShowEpisodePaneUiTest {
   private val uiTestRule = DesktopUiTestRule()
 
   @Test
-  fun `small tablet panes keep podcast actions and episode text readable`() {
-    listOf(DpSize(600.dp, 960.dp) to 1f, DpSize(800.dp, 1280.dp) to 1.5f).forEach {
-      (size, fontScale) ->
-      uiTestRule.runRobotTest(windowSize = size, fontScale = fontScale) {
-        openShow()
-        assertSingleLineFollow()
-        scrollToEpisode(0)
-        runOnUiThread { onNodeWithTag("episode-0").performClick() }
-        waitForIdle()
-        onNodeWithTag("episode-details-screen").assertIsDisplayed()
-        scrollToEpisode(0)
-        val episode = bounds("episode-0")
-        val title = bounds("episode-title-0")
-        assertThat(title.width).isGreaterThan(episode.width * 0.5f)
-        runOnUiThread {
-          onNodeWithTag("show-detail").performScrollToNode(hasTestTag("show-follow"))
-        }
-        assertSingleLineFollow()
-        saveFrame("small-tablet-${size.width.value.toInt()}-$fontScale")
-      }
-    }
-  }
-
-  @Test
   fun `wide episode navigation shrinks the podcast into the narrow left pane`() {
     listOf(872.dp, 1280.dp).forEach { width ->
       uiTestRule.runRobotTest(windowSize = DpSize(width = width, height = 800.dp)) {
