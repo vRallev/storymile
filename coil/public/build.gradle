@@ -1,0 +1,12 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  enableComposeUi true
+}
+
+dependencies {
+  commonMainImplementation project(':theme:public')
+  commonMainImplementation libs.coil.compose
+}

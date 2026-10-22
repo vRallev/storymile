@@ -9,14 +9,4 @@ storymile {
 
 dependencies {
   commonMainImplementation libs.compose.multiplatform.ui
-
-  // Kotlin/Native links libraries from the compile classpath.
-  iosMainImplementation libs.coil.network.ktor3
-  iosMainImplementation libs.ktor.client.darwin
-
-  commonJvmMainRuntimeOnly libs.ktor.client.okhttp
-
-  commonMainRuntimeOnly libs.coil.network.ktor3
-  // Keep Coil's Ktor client on the app version.
-  commonMainRuntimeOnly libs.ktor.client.core
 }

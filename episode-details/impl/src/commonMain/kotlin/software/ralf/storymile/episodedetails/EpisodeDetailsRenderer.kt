@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
-import software.ralf.storymile.design.PodcastArtwork
+import software.ralf.storymile.coil.PodcastArtwork
 import software.ralf.storymile.design.TitleBar
 import software.ralf.storymile.episode.details.impl.generated.resources.Res
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_author

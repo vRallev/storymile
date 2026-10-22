@@ -21,6 +21,7 @@ dependencies {
   androidMainImplementation libs.compose.ui.test.junit4.android
 
   commonMainImplementation project(':app-framework:impl')
+  commonMainImplementation project(':coil:impl')
   commonMainImplementation project(':discovery:impl')
   commonMainImplementation project(':discovery:impl-robots')
   commonMainImplementation project(':downloads:impl')
@@ -51,6 +52,7 @@ dependencies {
   commonTestImplementation project(':restart:public')
   commonTestImplementation project(':restart:testing')
   commonTestImplementation project(':runtime-mode:impl')
+  commonTestImplementation libs.coil.compose
 
   desktopTestImplementation project(':database:impl')
   desktopTestImplementation libs.okio
