@@ -1,13 +1,20 @@
 package software.ralf.storymile.discovery.presentation
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
@@ -21,10 +28,15 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import assertk.assertThat
+import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
+import assertk.assertions.isLessThan
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
@@ -35,6 +47,46 @@ import software.ralf.storymile.theme.testing.FakeThemeEnvironment
 
 class ShowContentRendererTest {
   private val themeEnvironment = FakeThemeEnvironment()
+
+  @Test
+  fun `podcast title wrapping moves the header and episodes smoothly in both directions`() =
+    runDesktopComposeUiTest(width = 600, height = 800) {
+      val targetWidth = mutableStateOf(520.dp)
+      val model =
+        model().let { it.copy(podcast = it.podcast.copy(title = "The Joe Rogan Experience")) }
+      setContent {
+        ThemedContent {
+          val paneWidth by
+            animateDpAsState(targetValue = targetWidth.value, animationSpec = tween(450))
+          Box(Modifier.fillMaxSize()) {
+            CompositionLocalProvider(LocalShowPane provides true) {
+              ShowContentRenderer().renderCompose(model, Modifier.width(paneWidth))
+            }
+          }
+        }
+      }
+      assertThat(titleLineCount()).isEqualTo(2)
+      mainClock.autoAdvance = false
+      try {
+        listOf(320.dp to 3, 520.dp to 2).forEach { (width, lines) ->
+          var previousFollow = onNodeWithTag("show-follow").getUnclippedBoundsInRoot().top.value
+          var previousEpisodes = onNodeWithText("Episodes").getUnclippedBoundsInRoot().top.value
+          runOnUiThread { targetWidth.value = width }
+          repeat(60) {
+            mainClock.advanceTimeByFrame()
+            val follow = onNodeWithTag("show-follow").getUnclippedBoundsInRoot().top.value
+            val episodes = onNodeWithText("Episodes").getUnclippedBoundsInRoot().top.value
+            assertThat(kotlin.math.abs(follow - previousFollow)).isLessThan(8f)
+            assertThat(kotlin.math.abs(episodes - previousEpisodes)).isLessThan(8f)
+            previousFollow = follow
+            previousEpisodes = episodes
+          }
+          assertThat(titleLineCount()).isEqualTo(lines)
+        }
+      } finally {
+        mainClock.autoAdvance = true
+      }
+    }
 
   @Test
   fun `info expands below the artwork and follow button and collapses across window sizes`() {
@@ -109,6 +161,14 @@ class ShowContentRendererTest {
         Surface(color = AppTheme.colorScheme.background, content = content)
       }
     }
+  }
+
+  private fun ComposeUiTest.titleLineCount(): Int {
+    val layouts = mutableListOf<TextLayoutResult>()
+    onNodeWithTag("show-title").performSemanticsAction(SemanticsActions.GetTextLayoutResult) {
+      it(layouts)
+    }
+    return layouts.single().lineCount
   }
 
   private fun model(): ShowContentPresenter.Model {
