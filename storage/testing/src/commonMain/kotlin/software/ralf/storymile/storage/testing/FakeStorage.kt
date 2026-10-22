@@ -36,10 +36,10 @@ class FakeStorage(
   /** Reads a relative path without applying read failures, barriers, or counters. */
   fun fileContent(path: String): ByteArray? = content[path]?.copyOf()
 
-  override suspend fun preferences(name: String): DataStore<Preferences> =
+  override fun preferences(name: String): DataStore<Preferences> =
     error("Preferences are not configured")
 
-  override suspend fun databasePath(name: String): String? = databasePath
+  override fun databasePath(name: String): String? = databasePath
 
   private inner class Files(private val relativePath: String) : FileStorage {
     override val path: Path? = null

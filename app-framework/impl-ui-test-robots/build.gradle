@@ -51,4 +51,7 @@ dependencies {
   commonTestImplementation project(':restart:public')
   commonTestImplementation project(':restart:testing')
   commonTestImplementation project(':runtime-mode:impl')
+
+  desktopTestImplementation project(':database:impl')
+  desktopTestImplementation libs.okio
 }

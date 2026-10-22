@@ -69,12 +69,12 @@ class PersistentRuntimeModeStorageTest {
         override val cache: FileStorage
           get() = error("Not used")
 
-        override suspend fun preferences(name: String): DataStore<Preferences> {
+        override fun preferences(name: String): DataStore<Preferences> {
           check(name == "runtime_mode")
           return preferences
         }
 
-        override suspend fun databasePath(name: String): String? = error("Not used")
+        override fun databasePath(name: String): String? = error("Not used")
       }
     }
   }
