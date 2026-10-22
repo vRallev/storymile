@@ -9,4 +9,5 @@ storymile {
 dependencies {
   commonMainApi libs.androidx.datastore.core
   commonMainApi libs.androidx.datastore.preferences.core
+  commonMainApi libs.okio
 }

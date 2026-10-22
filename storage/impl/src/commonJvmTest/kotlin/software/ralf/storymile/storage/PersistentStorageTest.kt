@@ -4,12 +4,14 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import assertk.assertFailure
 import assertk.assertThat
+import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
+import assertk.assertions.isSameInstanceAs
 import assertk.assertions.isTrue
 import java.nio.file.Files
 import kotlin.test.Test
@@ -30,9 +32,111 @@ import okio.Path.Companion.toPath
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.coroutine.CoroutineScopeScoped
 import software.ralf.app.platform.scope.coroutine.addCoroutineScopeScoped
+import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.runTestWithScope
+import software.ralf.storymile.runtimemode.RuntimeMode
+import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 
 class PersistentStorageTest {
+  @Test
+  fun `directory paths create isolated roots and nested directories`() =
+    storageTest { scope, platform, _ ->
+      val app: Storage = scope.storage("app", platform)
+      val other: Storage = scope.child(this).storage("App", platform)
+      val files = requireNotNull(app.files.path)
+      val cache = requireNotNull(app.cache.path)
+      val nested = requireNotNull(app.files.directory("audio").directory("clips").path)
+      val paths =
+        setOf(
+          files,
+          cache,
+          nested,
+          app.files.directory("Audio").directory("clips").path,
+          app.cache.directory("audio").directory("clips").path,
+          other.files.path,
+          other.cache.path,
+        )
+
+      assertThat(paths.size).isEqualTo(7)
+      paths.forEach { path ->
+        assertThat(requireNotNull(path).isAbsolute).isTrue()
+        assertThat(FileSystem.SYSTEM.metadata(path).isDirectory).isTrue()
+      }
+      assertThat(nested.parent?.parent).isEqualTo(files)
+      assertThat(app.files.directory("audio").directory("clips").path).isEqualTo(nested)
+    }
+
+  @Test
+  fun `directory paths initialize lazily and stay cached after clearing`() =
+    storageTest { scope, platform, root ->
+      val storage: Storage = scope.storage("app", platform)
+      val directory: FileStorage = storage.cache.directory("coil")
+
+      assertThat(FileSystem.SYSTEM.list(root)).isEmpty()
+      val path = requireNotNull(directory.path)
+      assertThat(FileSystem.SYSTEM.metadata(path).isDirectory).isTrue()
+      assertThat(directory.path).isSameInstanceAs(path)
+
+      storage.cache.deleteAll()
+
+      assertThat(FileSystem.SYSTEM.exists(path)).isFalse()
+      assertThat(directory.path).isSameInstanceAs(path)
+      assertThat(FileSystem.SYSTEM.exists(path)).isFalse()
+    }
+
+  @Test
+  fun `directory paths stay available after scope exit`() = storageTest { scope, platform, _ ->
+    val storage: Storage = scope.storage("app", platform)
+    val directory: FileStorage = storage.files.directory("library")
+    val path = requireNotNull(directory.path)
+    val uncached: FileStorage = storage.cache.directory("library")
+
+    scope.destroy()
+
+    assertThat(directory.path).isSameInstanceAs(path)
+    assertThat(uncached.path).isNotNull()
+  }
+
+  @Test
+  fun `fake mode returns no directory paths on first access`() =
+    storageTest { scope, platform, root ->
+      val factory: Storage.Factory =
+        DefaultStorage.Factory(platform, lazy { FakeRuntimeModeController(RuntimeMode.Fake) })
+      val storage: Storage = factory.create("app", scope.coroutineScope())
+
+      assertThat(storage.files.path).isNull()
+      assertThat(storage.cache.directory("coil").path).isNull()
+      assertThat(FileSystem.SYSTEM.list(root)).isEmpty()
+    }
+
+  @Test
+  fun `library files persist within their namespace and clear with their storage area`() =
+    storageTest { scope, platform, _ ->
+      val originalScope = scope.child(this)
+      val original: Storage = originalScope.storage("app", platform)
+      val cache = requireNotNull(original.cache.directory("coil").path)
+      val durable = requireNotNull(original.files.directory("coil").path)
+      FileSystem.SYSTEM.write(cache / "journal") { writeUtf8("cached") }
+      FileSystem.SYSTEM.write(durable / "journal") { writeUtf8("durable") }
+      originalScope.destroy()
+
+      val reopened: Storage = scope.child(this).storage("app", platform)
+      val sameCache = requireNotNull(reopened.cache.directory("coil").path)
+      assertThat(sameCache).isEqualTo(cache)
+      assertThat(FileSystem.SYSTEM.read(sameCache / "journal") { readUtf8() }).isEqualTo("cached")
+      val other: Storage = scope.child(this).storage("user-guest", platform)
+      val otherCache = requireNotNull(other.cache.directory("coil").path)
+      FileSystem.SYSTEM.write(otherCache / "journal") { writeUtf8("other") }
+
+      reopened.cache.deleteAll()
+
+      assertThat(FileSystem.SYSTEM.exists(cache)).isFalse()
+      assertThat(FileSystem.SYSTEM.read(durable / "journal") { readUtf8() }).isEqualTo("durable")
+      assertThat(FileSystem.SYSTEM.read(otherCache / "journal") { readUtf8() }).isEqualTo("other")
+      assertThat(reopened.cache.directory("coil").path).isEqualTo(cache)
+      assertThat(FileSystem.SYSTEM.metadata(cache).isDirectory).isTrue()
+    }
+
   @Test
   fun `database paths survive reopening and isolate user and database names`() =
     storageTest { scope, platform, _ ->
@@ -388,6 +492,7 @@ class PersistentStorageTest {
       )
       val linked: FileStorage = app.files.directory("linked").directory("nested")
 
+      assertFailure { linked.path }.isInstanceOf<IllegalStateException>()
       assertFailure { linked.read("track") }.isInstanceOf<IllegalStateException>()
       assertFailure { linked.write("track", byteArrayOf(9)) }.isInstanceOf<IllegalStateException>()
       assertFailure { linked.delete("track") }.isInstanceOf<IllegalStateException>()

@@ -30,6 +30,21 @@ abstract class OkioStoragePlatform(
   /** Returns an absolute cache directory reserved for Storymile. */
   protected abstract fun cacheDirectory(): Path
 
+  internal final override fun directoryPath(
+    namespace: String,
+    area: FileStorageArea,
+    path: String,
+  ): Path =
+    requireNotNull(
+      storageDirectory(
+        namespace = namespace,
+        area = area.directoryName,
+        segments = if (path.isEmpty()) emptyList() else path.split('/'),
+        create = true,
+        root = rootFor(area),
+      ),
+    )
+
   internal final override suspend fun databasePath(namespace: String, name: String): String =
     withContext(ioDispatcher) {
       requireNotNull(
