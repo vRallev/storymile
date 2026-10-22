@@ -5,7 +5,8 @@ import software.ralf.storymile.podcast.PodcastFeed
 
 /**
  * One user's saved podcasts. Real mode persists data; fake mode keeps it in memory. Access ends
- * when the user scope exits. Persistent data survives scope recreation.
+ * when the user scope exits. Persistent data survives scope recreation. Reopening a persistent
+ * database waits for its previous owner to close it. Active scopes cannot share its path.
  */
 interface PodcastDatabase {
   /** Saved show metadata and episodes, ordered by feed URL. Emits an empty list when empty. */

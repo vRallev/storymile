@@ -45,13 +45,11 @@ abstract class OkioStoragePlatform(
       ),
     )
 
-  internal final override suspend fun databasePath(namespace: String, name: String): String =
-    withContext(ioDispatcher) {
-      requireNotNull(
-          storageFile(namespace = namespace, area = "databases", name = "$name.db", create = true),
-        )
-        .toString()
-    }
+  internal final override fun databasePath(namespace: String, name: String): String =
+    requireNotNull(
+        storageFile(namespace = namespace, area = "databases", name = "$name.db", create = true),
+      )
+      .toString()
 
   internal final override fun createPreferences(
     namespace: String,

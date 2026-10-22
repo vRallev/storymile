@@ -15,7 +15,7 @@ class InMemoryStoragePlatform : StoragePlatform() {
   private val filesMutex = Mutex()
   private val files = mutableMapOf<FileKey, ByteArray>()
 
-  override suspend fun databasePath(namespace: String, name: String): String? = null
+  override fun databasePath(namespace: String, name: String): String? = null
 
   override fun createPreferences(
     namespace: String,

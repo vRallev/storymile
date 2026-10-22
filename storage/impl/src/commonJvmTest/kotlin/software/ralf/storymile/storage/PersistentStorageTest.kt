@@ -4,6 +4,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import assertk.assertFailure
 import assertk.assertThat
+import assertk.assertions.hasMessage
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
@@ -17,7 +18,10 @@ import java.nio.file.Files
 import kotlin.test.Test
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.job
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -135,6 +139,45 @@ class PersistentStorageTest {
       assertThat(FileSystem.SYSTEM.read(otherCache / "journal") { readUtf8() }).isEqualTo("other")
       assertThat(reopened.cache.directory("coil").path).isEqualTo(cache)
       assertThat(FileSystem.SYSTEM.metadata(cache).isDirectory).isTrue()
+    }
+
+  @Test
+  fun `concurrent namespace claims allow only one active owner`() = runTestWithScope { scope ->
+    val factory: Storage.Factory = InMemoryStorageFactory()
+    val owners = List(32) { scope.child(this).coroutineScope() }
+    val storages =
+      owners
+        .map { owner ->
+          async(Dispatchers.Default) {
+            try {
+              factory.create("app", owner)
+            } catch (exception: IllegalStateException) {
+              assertThat(exception)
+                .hasMessage("Storage namespace is already owned by another active scope.")
+              null
+            }
+          }
+        }
+        .awaitAll()
+        .filterNotNull()
+
+    assertThat(storages.size).isEqualTo(1)
+    val storage: Storage = storages.single()
+    storage.files.write("file", byteArrayOf(1))
+    assertThat(storage.files.read("file")).isNotNull().isEqualTo(byteArrayOf(1))
+  }
+
+  @Test
+  fun `concurrent preference lookups share one usable datastore`() =
+    storageTest { scope, platform, _ ->
+      val storage: Storage = scope.storage("app", platform)
+      val preferences =
+        List(32) { async(Dispatchers.Default) { storage.preferences("settings") } }.awaitAll()
+      preferences.forEach { assertThat(it).isSameInstanceAs(preferences.first()) }
+
+      val key = stringPreferencesKey("theme")
+      preferences.first().edit { it[key] = "dark" }
+      assertThat(preferences.last().data.first()[key]).isEqualTo("dark")
     }
 
   @Test

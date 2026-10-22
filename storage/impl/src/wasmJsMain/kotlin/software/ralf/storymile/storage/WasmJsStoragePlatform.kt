@@ -29,7 +29,7 @@ import kotlinx.coroutines.withContext
 class WasmJsStoragePlatform : StoragePlatform() {
   private val files = createBrowserFileStorage()
 
-  internal override suspend fun databasePath(namespace: String, name: String): String =
+  internal override fun databasePath(namespace: String, name: String): String =
     "/storymile-$namespace-$name.db"
 
   internal override fun createPreferences(

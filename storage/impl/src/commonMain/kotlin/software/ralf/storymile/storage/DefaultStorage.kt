@@ -12,7 +12,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.updateAndGet
+import kotlinx.coroutines.job
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.ByteString.Companion.encodeUtf8
@@ -23,8 +26,8 @@ import software.ralf.storymile.runtimemode.RuntimeModeController
 /**
  * Scope-owned implementation used by [Storage.Factory].
  *
- * The first operation claims the namespace once. A claim rejects an active owner and waits for a
- * canceled owner's work to finish, including DataStore cleanup.
+ * Construction claims the namespace. File and preference operations wait for canceled owners to
+ * finish, including DataStore cleanup.
  *
  * UTF-8 hex encoding preserves namespace and name identity on case-insensitive filesystems.
  * Directory handles encode single path segments and share the same owner. Durable files and cache
@@ -52,57 +55,42 @@ class DefaultStorage(
   }
 
   private val encodedNamespace = namespace.encodeUtf8().hex()
-  private val job = checkNotNull(coroutineScope.coroutineContext[Job])
-  private val namespaceMutex = Mutex()
-  private var namespaceClaimed = false
-  private val preferencesMutex = Mutex()
+  private val previousOwners =
+    platform.claimNamespace(encodedNamespace, coroutineScope.coroutineContext.job)
   private val filesMutex = Mutex()
-  private val stores = mutableMapOf<String, DataStore<Preferences>>()
+  private val stores = MutableStateFlow<Map<String, DataStore<Preferences>>>(emptyMap())
 
   override val files: FileStorage = DirectoryFileStorage(FileStorageArea.Files, "")
   override val cache: FileStorage = DirectoryFileStorage(FileStorageArea.Cache, "")
 
-  override suspend fun preferences(name: String): DataStore<Preferences> = operation {
+  override fun preferences(name: String): DataStore<Preferences> {
+    coroutineScope.ensureActive()
     require(name.matches(namePattern)) {
       "Preferences name must contain only letters, digits, underscores, and hyphens."
     }
-    preferencesMutex.withLock {
-      stores.getOrPut(name) {
-        GuardedDataStore(
-          platform.createPreferences(encodedNamespace, name.encodeUtf8().hex(), coroutineScope),
-        )
+    return stores
+      .updateAndGet { stores ->
+        if (name in stores) stores else stores + (name to GuardedDataStore(name))
       }
-    }
+      .getValue(name)
   }
 
-  override suspend fun databasePath(name: String): String? = operation {
+  override fun databasePath(name: String): String? {
+    coroutineScope.ensureActive()
     require(name.matches(namePattern)) {
       "Database name must contain only letters, digits, underscores, and hyphens."
     }
-    filesMutex.withLock {
-      platform.databasePath(namespace = encodedNamespace, name = name.encodeUtf8().hex())
-    }
-  }
-
-  private fun checkActive() {
-    job.ensureActive()
-  }
-
-  private suspend fun claimNamespace() = namespaceMutex.withLock {
-    if (!namespaceClaimed) {
-      platform.claimNamespace(encodedNamespace, job)
-      namespaceClaimed = true
-    }
+    return platform.databasePath(namespace = encodedNamespace, name = name.encodeUtf8().hex())
   }
 
   private suspend fun <T> operation(block: suspend () -> T): T {
-    checkActive()
     val callerContext = currentCoroutineContext()
+    // The operation belongs to storage, so an already canceled caller must be checked separately.
     callerContext.ensureActive()
     val operation =
       coroutineScope.async(callerContext.minusKey(Job)) {
         try {
-          claimNamespace()
+          previousOwners.forEach { it.join() }
           Result.success(block())
         } catch (exception: Throwable) {
           Result.failure(exception)
@@ -162,7 +150,7 @@ class DefaultStorage(
     }
 
     override fun directory(name: String): FileStorage {
-      checkActive()
+      coroutineScope.ensureActive()
       return DirectoryFileStorage(area, resolve(name))
     }
 
@@ -189,8 +177,11 @@ class DefaultStorage(
     }
   }
 
-  private inner class GuardedDataStore(private val delegate: DataStore<Preferences>) :
-    DataStore<Preferences> {
+  private inner class GuardedDataStore(name: String) : DataStore<Preferences> {
+    private val delegate by lazy {
+      platform.createPreferences(encodedNamespace, name.encodeUtf8().hex(), coroutineScope)
+    }
+
     override val data: Flow<Preferences> = channelFlow {
       operation { delegate.data.collect { send(it) } }
     }

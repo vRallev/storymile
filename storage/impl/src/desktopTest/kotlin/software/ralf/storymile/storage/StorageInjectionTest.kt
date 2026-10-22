@@ -86,10 +86,8 @@ class StorageInjectionTest {
     val original: Storage = DefaultStorage("app", scope.coroutineScope(), platform)
     original.files.write("chapter", byteArrayOf(1))
     val otherScope = Scope.buildTestScope(this)
-    val duplicate: Storage = DefaultStorage("app", otherScope.coroutineScope(), platform)
-
     assertFailure {
-      duplicate.files.read("chapter")
+      DefaultStorage("app", otherScope.coroutineScope(), platform)
     }
       .isInstanceOf<IllegalStateException>()
       .isNotInstanceOf<CancellationException>()

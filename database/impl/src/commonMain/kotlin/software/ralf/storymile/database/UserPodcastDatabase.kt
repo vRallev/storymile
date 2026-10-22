@@ -12,8 +12,11 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.updateAndGet
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import software.ralf.app.platform.inject.metro.ContributesScoped
@@ -41,9 +44,11 @@ class UserPodcastDatabase(
     coroutineScope.launch {
       var opened: RoomPodcastDatabase? = null
       try {
+        val path = storage.databasePath("podcasts")
+        awaitPreviousOwner(path)
         opened =
           platform.open(
-            path = storage.databasePath("podcasts"),
+            path = path,
             coroutineContext = coroutineScope.coroutineContext,
           )
         database.complete(opened)
@@ -60,6 +65,27 @@ class UserPodcastDatabase(
   }
 
   override suspend fun insert(podcast: PodcastFeed) = operation { it.insert(podcast) }
+
+  private suspend fun awaitPreviousOwner(path: String?) {
+    if (path == null) {
+      return
+    }
+    val owner = currentCoroutineContext().job
+    val previous =
+      owners
+        .updateAndGet { paths ->
+          owner.ensureActive()
+          val previous = paths[path].orEmpty().filterNot { it.isCompleted }
+          check(previous.none { it.isActive }) {
+            "Database path is already owned by another active scope."
+          }
+          paths.filterValues { owners -> owners.any { !it.isCompleted } } +
+            (path to (previous + owner))
+        }
+        .getValue(path)
+        .dropLast(1)
+    previous.forEach { it.join() }
+  }
 
   private suspend fun <T> operation(block: suspend (PodcastDao) -> T): T {
     coroutineScope.coroutineContext.ensureActive()
@@ -78,5 +104,9 @@ class UserPodcastDatabase(
     } finally {
       operation.cancel()
     }
+  }
+
+  private companion object {
+    val owners = MutableStateFlow<Map<String, List<Job>>>(emptyMap())
   }
 }

@@ -5,25 +5,28 @@ import androidx.datastore.preferences.core.Preferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.updateAndGet
 import okio.Path
 
 /** Platform storage selected by the application graph. */
 abstract class StoragePlatform {
-  private val namespacesMutex = Mutex()
-  private val namespaceOwners = mutableMapOf<String, Job>()
+  private val namespaceOwners = MutableStateFlow<Map<String, List<Job>>>(emptyMap())
 
-  internal suspend fun claimNamespace(namespace: String, owner: Job) = namespacesMutex.withLock {
-    val previous = namespaceOwners[namespace]
-    check(previous == null || !previous.isActive) {
-      "Storage namespace is already owned by another active scope."
-    }
-    // DataStore actors and browser writes must finish cleanup before this namespace is reused.
-    previous?.join()
-    owner.ensureActive()
-    namespaceOwners.entries.removeAll { it.value.isCompleted }
-    namespaceOwners[namespace] = owner
+  internal fun claimNamespace(namespace: String, owner: Job): List<Job> {
+    return namespaceOwners
+      .updateAndGet { namespaces ->
+        owner.ensureActive()
+        val previous = namespaces[namespace].orEmpty().filterNot { it.isCompleted }
+        check(previous.none { it.isActive }) {
+          "Storage namespace is already owned by another active scope."
+        }
+        // Keep canceled owners until cleanup finishes, even if a replacement is canceled too.
+        namespaces.filterValues { owners -> owners.any { !it.isCompleted } } +
+          (namespace to (previous + owner))
+      }
+      .getValue(namespace)
+      .dropLast(1)
   }
 
   internal abstract fun createPreferences(
@@ -32,7 +35,7 @@ abstract class StoragePlatform {
     coroutineScope: CoroutineScope,
   ): DataStore<Preferences>
 
-  internal abstract suspend fun databasePath(namespace: String, name: String): String?
+  internal abstract fun databasePath(namespace: String, name: String): String?
 
   internal open fun directoryPath(
     namespace: String,

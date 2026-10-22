@@ -31,25 +31,27 @@ interface Storage {
 
   /**
    * Returns a named preferences store. Names contain only letters, digits, underscores, and
-   * hyphens. Preference keys belong to the caller. Repeated calls return the same store.
+   * hyphens. Preference keys belong to the caller. Repeated calls return the same store. Reads and
+   * updates wait for the previous namespace owner's cleanup.
    */
-  suspend fun preferences(name: String): DataStore<Preferences>
+  fun preferences(name: String): DataStore<Preferences>
 
   /**
    * Returns a stable database path in this scope, or null for in-memory storage. Names contain only
    * letters, digits, underscores, and hyphens. Native platforms create the parent directory; the
-   * browser returns a virtual filename for its SQLite filesystem. The caller owns the database.
+   * browser returns a virtual filename for its SQLite filesystem. This call can perform blocking
+   * filesystem work. The caller owns the database and must close it before scope exit.
    */
-  suspend fun databasePath(name: String): String?
+  fun databasePath(name: String): String?
 
   /** Creates storage for an owning coroutine scope. */
   interface Factory {
     /**
-     * Creates storage ready for use. The first operation claims the namespace.
+     * Creates storage and claims its namespace.
      *
      * [namespace] contains only letters, digits, underscores, and hyphens. Use `app` for app data
-     * and a stable `user-<id>` for each user. An active namespace cannot be shared. Reopening waits
-     * for the previous owner's storage work and cleanup to finish.
+     * and a stable `user-<id>` for each user. An active namespace cannot be shared. File operations
+     * and preference reads and updates wait for the previous owner's cleanup to finish.
      *
      * [coroutineScope] must be a dedicated child of the owning scope. The caller cancels it to stop
      * storage access while preserving saved data.

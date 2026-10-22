@@ -9,14 +9,19 @@ import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNull
 import assertk.assertions.isSameInstanceAs
+import kotlin.coroutines.CoroutineContext
 import kotlin.test.Test
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -48,8 +53,7 @@ class StorageTest {
     val otherScope = Scope.buildTestScope(this, name = scope.name)
     scope.storage("app", platform).files.read("file")
 
-    val other: Storage = otherScope.storage("app", platform)
-    assertFailure { other.files.read("file") }.isInstanceOf<IllegalStateException>()
+    assertFailure { otherScope.storage("app", platform) }.isInstanceOf<IllegalStateException>()
   }
 
   @Test
@@ -127,6 +131,26 @@ class StorageTest {
     }
 
   @Test
+  fun `an already canceled caller cannot write through an immediate dispatcher`() =
+    runTestWithScope { scope ->
+      val storage: Storage = scope.storage("app", InMemoryPlatform())
+      val dispatcher =
+        object : CoroutineDispatcher() {
+          override fun dispatch(context: CoroutineContext, block: Runnable) = block.run()
+        }
+
+      assertFailure {
+        withContext(dispatcher) {
+          currentCoroutineContext().cancel()
+          storage.files.write("file", byteArrayOf(1))
+        }
+      }
+        .isInstanceOf<CancellationException>()
+
+      assertThat(storage.files.read("file")).isNull()
+    }
+
+  @Test
   fun `clearing a directory waits for writes through another handle`() = runTestWithScope { scope ->
     val platform = InMemoryPlatform(blockWrites = true)
     val storage: Storage = scope.storage("app", platform)
@@ -157,6 +181,45 @@ class StorageTest {
       platform.writeStarted.await()
 
       previousScope.destroy()
+      val reopened: Storage = scope.child(this).storage("user-alice", platform)
+      val preferences = reopened.preferences("settings")
+      val reading = async { reopened.files.read("file") }
+      val readingPreferences = async { preferences.data.first() }
+      runCurrent()
+
+      assertThat(reading.isCompleted).isFalse()
+      assertThat(readingPreferences.isCompleted).isFalse()
+      val other: Storage = scope.child(this).storage("user-bob", platform)
+      assertThat(other.files.read("file")).isNull()
+      cleanup.complete(Unit)
+      writing.await()
+      assertThat(reading.await()).isNull()
+      readingPreferences.await()
+    }
+
+  @Test
+  fun `canceling a replacement preserves the original namespace cleanup barrier`() =
+    runTestWithScope { scope ->
+      val cleanup = CompletableDeferred<Unit>()
+      val platform = InMemoryPlatform(blockWrites = true, cleanup = cleanup)
+      val originalScope = scope.child(this)
+      val original: Storage = originalScope.storage("user-alice", platform)
+      val writing = async {
+        assertFailure { original.files.write("file", byteArrayOf(1)) }
+          .isInstanceOf<CancellationException>()
+      }
+      platform.writeStarted.await()
+      originalScope.destroy()
+
+      val replacementScope = scope.child(this)
+      val replacement: Storage = replacementScope.storage("user-alice", platform)
+      val canceledRead = async {
+        assertFailure { replacement.files.read("file") }.isInstanceOf<CancellationException>()
+      }
+      runCurrent()
+      replacementScope.destroy()
+      canceledRead.await()
+
       val reopened: Storage = scope.child(this).storage("user-alice", platform)
       val reading = async { reopened.files.read("file") }
       runCurrent()
@@ -207,7 +270,7 @@ class StorageTest {
     val finishWrite = CompletableDeferred<Unit>()
     private val files = mutableMapOf<Triple<String, FileStorageArea, String>, ByteArray>()
 
-    override suspend fun databasePath(namespace: String, name: String): String? = null
+    override fun databasePath(namespace: String, name: String): String? = null
 
     override fun createPreferences(
       namespace: String,
