@@ -134,7 +134,8 @@ internal fun EpisodeRow(
       modifier =
         Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Artwork)
           .testTag("episode-artwork-$index")
-          .size(56.dp),
+          .size(56.dp)
+          .align(Alignment.Top),
     )
     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
       Text(
