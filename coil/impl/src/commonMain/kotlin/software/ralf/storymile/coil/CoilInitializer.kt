@@ -1,4 +1,4 @@
-package software.ralf.storymile.theme
+package software.ralf.storymile.coil
 
 import coil3.ImageLoader
 import coil3.SingletonImageLoader

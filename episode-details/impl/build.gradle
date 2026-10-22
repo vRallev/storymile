@@ -8,6 +8,7 @@ storymile {
 }
 
 dependencies {
+  commonMainImplementation project(':coil:public')
   commonMainImplementation project(':templates:public')
   commonMainImplementation project(':theme:public')
   commonMainImplementation project(':user:public')

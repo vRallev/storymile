@@ -30,7 +30,7 @@ import androidx.compose.ui.text.style.TextMotion
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import software.ralf.storymile.design.PodcastArtwork
+import software.ralf.storymile.coil.PodcastArtwork
 import software.ralf.storymile.discovery.impl.generated.resources.Res
 import software.ralf.storymile.discovery.impl.generated.resources.episodes_error
 import software.ralf.storymile.discovery.impl.generated.resources.loading_episodes

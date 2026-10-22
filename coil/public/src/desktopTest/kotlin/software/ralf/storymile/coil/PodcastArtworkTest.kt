@@ -1,4 +1,4 @@
-package software.ralf.storymile.design
+package software.ralf.storymile.coil
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme

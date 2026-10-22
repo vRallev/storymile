@@ -21,6 +21,7 @@ dependencies {
   androidMainImplementation libs.compose.ui.test.junit4.android
 
   commonMainImplementation project(':app-framework:impl')
+  commonMainImplementation project(':coil:impl')
   commonMainImplementation project(':discovery:impl')
   commonMainImplementation project(':discovery:impl-robots')
   commonMainImplementation project(':downloads:impl')
