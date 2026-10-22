@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.ByteString.Companion.encodeUtf8
+import okio.Path
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
 
@@ -154,8 +155,12 @@ class DefaultStorage(
 
   private inner class DirectoryFileStorage(
     private val area: FileStorageArea,
-    private val path: String,
+    private val relativePath: String,
   ) : FileStorage {
+    override val path: Path? by lazy {
+      platform.directoryPath(namespace = encodedNamespace, area = area, path = relativePath)
+    }
+
     override fun directory(name: String): FileStorage {
       checkActive()
       return DirectoryFileStorage(area, resolve(name))
@@ -174,13 +179,13 @@ class DefaultStorage(
     }
 
     override suspend fun deleteAll() = operation {
-      filesMutex.withLock { platform.deleteAllFiles(encodedNamespace, area, path) }
+      filesMutex.withLock { platform.deleteAllFiles(encodedNamespace, area, relativePath) }
     }
 
     private fun resolve(name: String): String {
       requireFileName(name)
       val encodedName = name.encodeUtf8().hex()
-      return if (path.isEmpty()) encodedName else "$path/$encodedName"
+      return if (relativePath.isEmpty()) encodedName else "$relativePath/$encodedName"
     }
   }
 

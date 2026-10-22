@@ -7,6 +7,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import okio.Path
 
 /** Platform storage selected by the application graph. */
 abstract class StoragePlatform {
@@ -32,6 +33,12 @@ abstract class StoragePlatform {
   ): DataStore<Preferences>
 
   internal abstract suspend fun databasePath(namespace: String, name: String): String?
+
+  internal open fun directoryPath(
+    namespace: String,
+    area: FileStorageArea,
+    path: String,
+  ): Path? = null
 
   internal abstract suspend fun readFile(
     namespace: String,

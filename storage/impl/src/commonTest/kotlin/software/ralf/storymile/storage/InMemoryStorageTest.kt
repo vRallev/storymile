@@ -27,10 +27,12 @@ import software.ralf.app.platform.scope.runTestWithScope
 
 class InMemoryStorageTest {
   @Test
-  fun `in-memory storage does not return a database file`() = runTestWithScope { scope ->
+  fun `in-memory storage does not return native paths`() = runTestWithScope { scope ->
     val storage: Storage =
       scope.storage(factory = InMemoryStorageFactory(), namespace = "user-guest")
 
+    assertThat(storage.files.path).isNull()
+    assertThat(storage.cache.directory("coil").path).isNull()
     assertThat(storage.databasePath("podcasts")).isNull()
   }
 

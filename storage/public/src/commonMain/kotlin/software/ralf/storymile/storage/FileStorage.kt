@@ -1,13 +1,27 @@
 package software.ralf.storymile.storage
 
+import okio.Path
+
 /**
  * Stores whole files within the owning scope. Names are single file names with no path separators.
- * Calls after scope exit fail with cancellation.
+ * File operations after scope exit fail with cancellation.
  */
 interface FileStorage {
   /**
+   * Avoid this API when Wasm support is required. Use [read] and [write] instead.
+   *
+   * This directory's absolute path, or null for in-memory and browser storage. Creates the
+   * directory on first access and caches the path. The path remains available after scope exit. Use
+   * a dedicated child directory for library-owned files. Close the library before clearing that
+   * directory or leaving the scope. Direct filesystem access bypasses namespace ownership, scope
+   * cancellation, and file-name encoding.
+   */
+  val path: Path?
+
+  /**
    * Returns storage for a child directory. [name] is one path segment. Directories are created on
-   * the first write. The returned handle shares this storage's scope lifetime.
+   * the first write or first access to [path]. The returned handle shares this storage's scope
+   * lifetime.
    */
   fun directory(name: String): FileStorage
 

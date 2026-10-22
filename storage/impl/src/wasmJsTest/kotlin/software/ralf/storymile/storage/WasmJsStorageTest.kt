@@ -15,6 +15,14 @@ import software.ralf.app.platform.scope.runTestWithScope
 
 class WasmJsStorageTest {
   @Test
+  fun `browser storage does not return native directory paths`() = runTestWithScope { scope ->
+    val storage: Storage = scope.storage("test-paths", WasmJsStoragePlatform())
+
+    assertThat(storage.files.path).isNull()
+    assertThat(storage.cache.directory("coil").path).isNull()
+  }
+
+  @Test
   fun `database filenames are stable and isolate user and database names`() =
     runTestWithScope { scope ->
       val platform = WasmJsStoragePlatform()

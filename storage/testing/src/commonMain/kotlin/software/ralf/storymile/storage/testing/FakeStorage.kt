@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import okio.Path
 import software.ralf.storymile.storage.FileStorage
 import software.ralf.storymile.storage.Storage
 
@@ -40,14 +41,16 @@ class FakeStorage(
 
   override suspend fun databasePath(name: String): String? = databasePath
 
-  private inner class Files(private val path: String) : FileStorage {
-    override fun directory(name: String): FileStorage = Files("$path$name/")
+  private inner class Files(private val relativePath: String) : FileStorage {
+    override val path: Path? = null
+
+    override fun directory(name: String): FileStorage = Files("$relativePath$name/")
 
     override suspend fun read(name: String): ByteArray? {
       readCount++
       readBarrier?.await()
       readFailure?.let { throw it }
-      return content["$path$name"]?.copyOf()
+      return content["$relativePath$name"]?.copyOf()
     }
 
     override suspend fun write(name: String, content: ByteArray) {
@@ -55,7 +58,7 @@ class FakeStorage(
       try {
         writeBarrier?.await()
         writeFailure?.let { throw it }
-        this@FakeStorage.content["$path$name"] = content.copyOf()
+        this@FakeStorage.content["$relativePath$name"] = content.copyOf()
         writeCount++
       } catch (exception: CancellationException) {
         writeCanceled.complete(Unit)
@@ -64,11 +67,11 @@ class FakeStorage(
     }
 
     override suspend fun delete(name: String) {
-      content.remove("$path$name")
+      content.remove("$relativePath$name")
     }
 
     override suspend fun deleteAll() {
-      content.keys.removeAll { it.startsWith(path) }
+      content.keys.removeAll { it.startsWith(relativePath) }
     }
   }
 }
