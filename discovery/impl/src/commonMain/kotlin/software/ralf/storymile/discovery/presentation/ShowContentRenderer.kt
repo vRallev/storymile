@@ -1,6 +1,7 @@
 package software.ralf.storymile.discovery.presentation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -194,6 +195,7 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
             text = podcast.title,
             modifier =
               Modifier.weight(weight = 1f, fill = false)
+                .then(if (LocalShowPane.current) Modifier.animateContentSize() else Modifier)
                 .podcastSharedElement(podcast, source, PodcastSharedElement.Title)
                 .testTag("show-title")
                 .semantics {
