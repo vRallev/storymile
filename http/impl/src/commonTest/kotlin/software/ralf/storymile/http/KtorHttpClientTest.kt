@@ -6,6 +6,7 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isSameInstanceAs
+import assertk.assertions.isTrue
 import io.ktor.client.HttpClient as KtorClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.mock.MockEngine
@@ -21,8 +22,10 @@ import kotlin.test.Test
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.job
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.io.IOException
@@ -30,6 +33,61 @@ import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.runTestWithScope
 
 class KtorHttpClientTest {
+  @Test
+  fun `requests initialize the client on first use and reuse it`() = runTestWithScope { scope ->
+    val factory =
+      TestClientFactory(
+        dispatcher = StandardTestDispatcher(testScheduler),
+        handler = { respond("podcast") },
+      )
+    val client: HttpClient = KtorHttpClient(factory).also { scope.register(it) }
+
+    assertThat(factory.createCount).isEqualTo(0)
+
+    repeat(2) {
+      assertThat(client.get("https://example.test/search") { it })
+        .isEqualTo(HttpResponse.Success("podcast", statusCode = 200))
+      assertThat(factory.createCount).isEqualTo(1)
+    }
+  }
+
+  @Test
+  fun `scope exit leaves an unused client uninitialized`() = runTestWithScope { scope ->
+    val factory =
+      TestClientFactory(
+        dispatcher = StandardTestDispatcher(testScheduler),
+        handler = { error("A closed client must not send requests.") },
+      )
+    val client: HttpClient = KtorHttpClient(factory).also { scope.register(it) }
+
+    scope.destroy()
+
+    assertThat(factory.createCount).isEqualTo(0)
+    assertFailure { client.get("https://example.test/search") { it } }
+      .isInstanceOf<IllegalStateException>()
+    assertThat(factory.createCount).isEqualTo(0)
+  }
+
+  @Test
+  fun `scope exit during initialization closes the new client`() = runTestWithScope { scope ->
+    var clientJob: Job? = null
+    val factory =
+      TestClientFactory(
+        dispatcher = StandardTestDispatcher(testScheduler),
+        handler = { error("A closed client must not send requests.") },
+        onCreate = { created ->
+          clientJob = created.coroutineContext.job
+          scope.destroy()
+        },
+      )
+    val client: HttpClient = KtorHttpClient(factory).also { scope.register(it) }
+
+    assertFailure { client.get("https://example.test/search") { it } }
+      .isInstanceOf<CancellationException>()
+    assertThat(factory.createCount).isEqualTo(1)
+    assertThat(checkNotNull(clientJob).isCancelled).isTrue()
+  }
+
   @Test
   fun `successful responses preserve status and decode even an empty body`() =
     runTestWithScope { scope ->
@@ -226,14 +284,21 @@ class KtorHttpClientTest {
   private class TestClientFactory(
     private val dispatcher: CoroutineDispatcher,
     private val handler: MockRequestHandler,
+    private val onCreate: (KtorClient) -> Unit = {},
   ) : KtorClientFactory() {
-    override fun create(configure: HttpClientConfig<*>.() -> Unit): KtorClient =
-      KtorClient(MockEngine) {
-        configure(this)
-        engine {
-          dispatcher = this@TestClientFactory.dispatcher
-          addHandler(handler)
+    var createCount = 0
+      private set
+
+    override fun create(configure: HttpClientConfig<*>.() -> Unit): KtorClient {
+      createCount++
+      return KtorClient(MockEngine) {
+          configure(this)
+          engine {
+            dispatcher = this@TestClientFactory.dispatcher
+            addHandler(handler)
+          }
         }
-      }
+        .also { onCreate(it) }
+    }
   }
 }
