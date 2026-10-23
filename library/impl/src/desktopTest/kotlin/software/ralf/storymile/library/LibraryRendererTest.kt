@@ -52,7 +52,7 @@ class LibraryRendererTest {
 
   @Test
   fun `phone short wide and enlarged text layouts fit without scrolling`() {
-    listOf(Triple(320, 568, 1f), Triple(900, 360, 1f), Triple(480, 700, 1.5f)).forEach {
+    listOf(Triple(320, 568, 1f), Triple(900, 280, 1f), Triple(480, 700, 1.5f)).forEach {
       (width, height, fontScale) ->
       runDesktopComposeUiTest(width = width, height = height) {
         val renderer = LibraryRenderer()
@@ -66,9 +66,9 @@ class LibraryRendererTest {
           assertReadableLabels()
         }
         val illustration =
-          pageNode(tab = Tab.SAVED, tag = "library-illustration").getUnclippedBoundsInRoot()
+          pageNode(tab = Tab.HISTORY, tag = "library-illustration").getUnclippedBoundsInRoot()
         val message =
-          pageNode(tab = Tab.SAVED, tag = "library-empty-message").getUnclippedBoundsInRoot()
+          pageNode(tab = Tab.HISTORY, tag = "library-empty-message").getUnclippedBoundsInRoot()
         if (width >= 600 && height < 480) {
           assertThat(illustration.right).isLessThanOrEqualTo(message.left)
         } else {
@@ -119,7 +119,10 @@ class LibraryRendererTest {
       }
 
       assertSelectedTab(tab = Tab.QUEUE, title = "Your queue is empty")
-      onNodeWithTag("library-tab-saved").performClick()
+      onNodeWithTag("library-tab-history").performClick()
+      assertSelectedTab(tab = Tab.HISTORY, title = "No listening history yet")
+      onNodeWithText("Episodes you finish will appear here.").assertIsDisplayed()
+      onNodeWithTag("library-pager").performTouchInput { swipeRight() }
       assertSelectedTab(tab = Tab.SAVED, title = "No saved episodes")
       onNodeWithTag("library-pager").performTouchInput { swipeRight() }
       assertSelectedTab(tab = Tab.SHOWS, title = "No followed shows")
@@ -130,10 +133,13 @@ class LibraryRendererTest {
       onNodeWithTag("library-pager").performTouchInput { swipeLeft() }
       assertSelectedTab(tab = Tab.SAVED, title = "No saved episodes")
 
+      onNodeWithTag("library-pager").performTouchInput { swipeLeft() }
+      assertSelectedTab(tab = Tab.HISTORY, title = "No listening history yet")
+
       runOnIdle { visible = false }
       onNodeWithTag("library-empty").assertDoesNotExist()
       runOnIdle { visible = true }
-      assertSelectedTab(tab = Tab.SAVED, title = "No saved episodes")
+      assertSelectedTab(tab = Tab.HISTORY, title = "No listening history yet")
       onNodeWithTag("library-tab-queue").performClick()
       assertSelectedTab(tab = Tab.QUEUE, title = "Your queue is empty")
     }
@@ -158,7 +164,15 @@ class LibraryRendererTest {
       )
       .assertCountEquals(0)
     val root = onNodeWithTag("library-empty").getUnclippedBoundsInRoot()
-    listOf("tab-queue", "tab-shows", "tab-saved", "illustration", "empty-message", "discover")
+    listOf(
+        "tab-queue",
+        "tab-shows",
+        "tab-saved",
+        "tab-history",
+        "illustration",
+        "empty-message",
+        "discover",
+      )
       .forEach { tag ->
         val node =
           if (tag.startsWith("tab-")) {
@@ -185,6 +199,9 @@ class LibraryRendererTest {
       labels[index].performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
       layouts.forEach { layout ->
         val text = layout.layoutInput.text.text
+        if (text in listOf("Queue", "Shows", "Saved", "History")) {
+          assertThat(layout.lineCount, text).isEqualTo(1)
+        }
         // Compose can reuse a wider aligned paragraph. Compare the line widths.
         for (line in 0 until layout.lineCount) {
           assertThat(layout.isLineEllipsized(line), text).isFalse()
