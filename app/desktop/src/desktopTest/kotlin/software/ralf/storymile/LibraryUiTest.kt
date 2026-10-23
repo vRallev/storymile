@@ -19,6 +19,8 @@ import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
+import software.ralf.storymile.discovery.DiscoveryRobot
+import software.ralf.storymile.discovery.ShowRobot
 import software.ralf.storymile.tabs.TabsPresenter
 
 class LibraryUiTest {
@@ -60,7 +62,7 @@ class LibraryUiTest {
   }
 
   @Test
-  fun `swiped library tab survives resizing and discovery stays on the empty screen`() {
+  fun `swiped library tab survives resizing`() {
     val size = mutableStateOf(DesktopWindowSizes.phone)
     uiTestRule.runRobotTest(
       windowSize = DpSize(1440.dp, 1000.dp),
@@ -87,12 +89,43 @@ class LibraryUiTest {
           onNodeWithTag("library-tab-shows").assertIsNotSelected()
           onNodeWithTag("library-tab-queue").assertIsNotSelected()
           onNodeWithTag("library-discover").assertIsDisplayed()
-          runOnUiThread { onNodeWithTag("library-discover").performClick() }
-          onNodeWithTag("library-empty").assertIsDisplayed()
-          onNodeWithTag("tab-library").assertIsSelected()
           saveScreenshot("resized-${next.width.value.toInt()}-${next.height.value.toInt()}")
         }
     }
+  }
+
+  @Test
+  fun `every empty library tab opens discovery and back returns to the selected tab`() {
+    listOf(DesktopWindowSizes.phone, DesktopWindowSizes.tablet, DesktopWindowSizes.desktop)
+      .forEach { size ->
+        uiTestRule.runRobotTest(windowSize = size, darkTheme = false) {
+          composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
+          listOf("queue", "shows", "saved").forEach { tab ->
+            runOnUiThread { onNodeWithTag("library-tab-$tab").performClick() }
+            onNodeWithTag("library-tab-$tab").assertIsSelected()
+            runOnUiThread { onNodeWithTag("library-discover").performClick() }
+
+            composeRobot<DiscoveryRobot> {
+              seePodcast("quiet-current")
+              openPodcast("quiet-current")
+            }
+            onNodeWithTag("tab-library").assertIsSelected()
+            composeRobot<ShowRobot> {
+              seeShow()
+              back()
+            }
+            composeRobot<DiscoveryRobot> { backFromCatalog() }
+            onNodeWithTag("library-empty").assertIsDisplayed()
+            onNodeWithTag("library-tab-$tab").assertIsSelected()
+            onNodeWithTag("tab-library").assertIsSelected()
+          }
+          composeRobot<AppShellRobot> {
+            selectTab(TabsPresenter.Tab.HOME)
+            selectTab(TabsPresenter.Tab.LIBRARY)
+          }
+          onNodeWithTag("library-tab-saved").assertIsSelected()
+        }
+      }
   }
 
   private fun ComposeUiTest.saveScreenshot(name: String) {
