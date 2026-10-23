@@ -12,7 +12,6 @@ import kotlinx.coroutines.withTimeout
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
-import software.ralf.storymile.util.rootScopeProvider
 
 /**
  * Android UI-test rule that launches the real activity with the integration-test Metro graph.
@@ -47,9 +46,13 @@ class AndroidUiTestRule : TestRule {
 
   /** Clears the library and runs [block] after the activity reaches an idle Compose state. */
   fun runRobotTest(block: ComposeTestRule.() -> Unit) {
-    val rootScope =
-      InstrumentationRegistry.getInstrumentation().targetContext.rootScopeProvider().rootScope
-    runBlocking { withTimeout(10_000) { TestPlaylists.clear(rootScope) } }
+    val startup = startup()
+    runBlocking {
+      withTimeout(10_000) {
+        startup.awaitReady()
+        TestPlaylists.clear(startup.rootScope)
+      }
+    }
     composeTestRule.waitForIdle()
     composeTestRule.block()
   }
@@ -61,10 +64,13 @@ class AndroidUiTestRule : TestRule {
   }
 
   private fun destroyRootScope() {
-    val rootScopeProvider =
-      InstrumentationRegistry.getInstrumentation().targetContext.rootScopeProvider()
-    rootScopeProvider.rootScope.destroy()
+    startup().destroy()
   }
+
+  private fun startup(): ApplicationStartup =
+    (InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
+        as ApplicationStartup.Provider)
+      .startup
 
   private fun setSystemAnimations(enabled: Boolean) {
     val value = if (enabled) "1.0" else "0.0"

@@ -1,27 +1,13 @@
 package software.ralf.storymile
 
 import android.app.Application
-import com.jakewharton.processphoenix.ProcessPhoenix
 import dev.zacsweers.metro.createGraphFactory
-import software.ralf.app.platform.scope.RootScopeProvider
-import software.ralf.app.platform.scope.Scope
 import software.ralf.storymile.app.android.BuildConfig
 import software.ralf.storymile.util.BuildInfoImpl
 
-/** Android application that creates the shared root scope. */
-open class AndroidApplication : Application(), RootScopeProvider {
-  private val storymileApplication = KmpApplication()
-
-  override val rootScope: Scope
-    get() = storymileApplication.rootScope
-
-  override fun onCreate() {
-    super.onCreate()
-    if (ProcessPhoenix.isPhoenixProcess(this)) {
-      return
-    }
-    storymileApplication.create(metroGraph(storymileApplication))
-  }
+/** Retains startup across activities without constructing the app scope in onCreate. */
+open class AndroidApplication : Application(), ApplicationStartup.Provider {
+  override val startup by lazy { ApplicationStartup { metroGraph(it) } }
 
   /** Creates the production graph. Tests can override this to install a test graph. */
   protected open fun metroGraph(storymileApplication: KmpApplication): AppGraph {

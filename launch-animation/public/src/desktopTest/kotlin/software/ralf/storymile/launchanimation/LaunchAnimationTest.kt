@@ -48,7 +48,7 @@ class LaunchAnimationTest {
         var pixels = emptyList<Color>()
         runDesktopComposeUiTest(width = 400, height = 800) {
           mainClock.autoAdvance = false
-          val animation: LaunchAnimation = DefaultLaunchAnimation()
+          val animation: LaunchAnimation = LaunchAnimation()
           setContent {
             Theme { animation.Content { Box(Modifier.fillMaxSize().background(destination)) } }
           }
@@ -68,7 +68,7 @@ class LaunchAnimationTest {
       listOf(400 to 800, 1000 to 400).forEach { (width, height) ->
         runDesktopComposeUiTest(width = width, height = height) {
           mainClock.autoAdvance = false
-          val animation: LaunchAnimation = DefaultLaunchAnimation()
+          val animation: LaunchAnimation = LaunchAnimation()
           setContent { Theme(dark) { animation.Content { Destination() } } }
           onNodeWithTag("launch-animation").assertIsDisplayed()
           onNodeWithTag("destination").assertDoesNotExist()
@@ -102,7 +102,7 @@ class LaunchAnimationTest {
   fun `theme changes keep the animation progressing and content stays composed`() =
     runDesktopComposeUiTest {
       mainClock.autoAdvance = false
-      val animation: LaunchAnimation = DefaultLaunchAnimation()
+      val animation: LaunchAnimation = LaunchAnimation()
       var dark by mutableStateOf(false)
       var creations = 0
       var disposals = 0
@@ -132,21 +132,33 @@ class LaunchAnimationTest {
     }
 
   @Test
-  fun `host recreation cannot replay an interrupted launch but a new app scope can`() =
+  fun `host recreation resumes a pending reveal and never replays a completed launch`() =
     runDesktopComposeUiTest {
       mainClock.autoAdvance = false
-      var animation: LaunchAnimation by mutableStateOf(DefaultLaunchAnimation())
+      var animation by mutableStateOf(LaunchAnimation())
       var host by mutableIntStateOf(0)
-      setContent { key(host) { Theme { animation.Content { Destination() } } } }
-      mainClock.advanceTimeBy(100)
+      var ready by mutableStateOf(false)
+      setContent {
+        key(host) { Theme { animation.Content(contentReady = ready) { Destination() } } }
+      }
+      mainClock.advanceTimeBy(3000)
       onNodeWithTag("launch-animation").assertIsDisplayed()
+      assertCovered()
+
+      runOnIdle { host++ }
+      mainClock.advanceTimeBy(3000)
+      onNodeWithTag("launch-animation").assertIsDisplayed()
+      assertCovered()
+      runOnIdle { ready = true }
+      mainClock.advanceTimeBy(1300)
+      onNodeWithTag("launch-animation").assertDoesNotExist()
+      onNodeWithTag("destination").assertIsDisplayed()
 
       runOnIdle { host++ }
       mainClock.advanceTimeByFrame()
       onNodeWithTag("launch-animation").assertDoesNotExist()
-      onNodeWithTag("destination").assertIsDisplayed()
 
-      runOnIdle { animation = DefaultLaunchAnimation() }
+      runOnIdle { animation = LaunchAnimation() }
       mainClock.advanceTimeByFrame()
       onNodeWithTag("launch-animation").assertIsDisplayed()
       assertCovered()
@@ -155,7 +167,7 @@ class LaunchAnimationTest {
   @Test
   fun `touches cannot activate content until the reveal ends`() = runDesktopComposeUiTest {
     mainClock.autoAdvance = false
-    val animation: LaunchAnimation = DefaultLaunchAnimation()
+    val animation: LaunchAnimation = LaunchAnimation()
     var clicks = 0
     setContent { Theme { animation.Content { Destination { clicks++ } } } }
     onNodeWithTag("launch-animation").performTouchInput { click() }
@@ -166,7 +178,7 @@ class LaunchAnimationTest {
   }
 
   @Test
-  fun `disabled system animations reveal content without waiting for the duration`() =
+  fun `disabled animations still wait for ready content but skip the motion duration`() =
     runDesktopComposeUiTest(
       effectContext =
         object : MotionDurationScale {
@@ -174,9 +186,14 @@ class LaunchAnimationTest {
         },
     ) {
       mainClock.autoAdvance = false
-      val animation: LaunchAnimation = DefaultLaunchAnimation()
-      setContent { Theme { animation.Content { Destination() } } }
-      mainClock.advanceTimeBy(64)
+      val animation: LaunchAnimation = LaunchAnimation()
+      var ready by mutableStateOf(false)
+      setContent { Theme { animation.Content(contentReady = ready) { Destination() } } }
+      mainClock.advanceTimeBy(3000)
+      onNodeWithTag("launch-animation").assertIsDisplayed()
+      assertCovered()
+      runOnIdle { ready = true }
+      mainClock.advanceTimeBy(128)
       onNodeWithTag("launch-animation").assertDoesNotExist()
       onNodeWithTag("destination").assertIsDisplayed()
     }

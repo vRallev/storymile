@@ -9,7 +9,6 @@ plugins {
 }
 
 dependencies {
-  commonMainImplementation project(':launch-animation:public')
   commonMainImplementation project(':runtime-mode:public')
   commonMainImplementation project(':theme:public')
 

@@ -1,23 +1,12 @@
 import StorymileApp
 import SwiftUI
 
-class AppDelegate: NSObject, UIApplicationDelegate, RootScopeProvider {
+class AppDelegate: NSObject, UIApplicationDelegate {
 
-    private let storymileApplication: KmpApplication = KmpApplication()
-
-    var rootScope: Scope {
-        get {
-            storymileApplication.rootScope
-        }
-    }
+    private(set) var startup: ApplicationStartup!
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        storymileApplication.create(
-            appGraph: IosAppGraphKt.createIosAppGraph(
-                application: application,
-                rootScopeProvider: storymileApplication
-            )
-        )
+        startup = IosAppGraphKt.createIosApplicationStartup(application: application)
         return true
     }
 }
@@ -29,7 +18,7 @@ struct iOSApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ComposeContentView(rootScopeProvider: appDelegate)
+            ComposeContentView(startup: appDelegate.startup)
         }
     }
 }

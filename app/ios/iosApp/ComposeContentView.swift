@@ -3,28 +3,28 @@ import SwiftUI
 import StorymileApp
 
 struct ComposeView: UIViewControllerRepresentable {
-    private var rootScopeProvider: RootScopeProvider
+    private var startup: ApplicationStartup
 
-    init(rootScopeProvider: RootScopeProvider) {
-        self.rootScopeProvider = rootScopeProvider
+    init(startup: ApplicationStartup) {
+        self.startup = startup
     }
 
     func makeUIViewController(context: Context) -> UIViewController {
-        MainViewControllerKt.mainViewController(rootScopeProvider: rootScopeProvider)
+        MainViewControllerKt.mainViewController(startup: startup)
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 
 struct ComposeContentView: View {
-    var rootScopeProvider: RootScopeProvider
+    var startup: ApplicationStartup
 
-    init(rootScopeProvider: RootScopeProvider) {
-        self.rootScopeProvider = rootScopeProvider
+    init(startup: ApplicationStartup) {
+        self.startup = startup
     }
 
     var body: some View {
-        ComposeView(rootScopeProvider: rootScopeProvider)
+        ComposeView(startup: startup)
             .ignoresSafeArea(.all)
     }
 }
