@@ -110,6 +110,9 @@ places the template slots for the available window. It adapts navigation placeme
 presentation while keeping the shared presenter tree. Use the linked source files for model details
 and layout rules.
 
+The [launch animation](../launch-animation/impl/src/commonMain/kotlin/software/ralf/storymile/launchanimation/DefaultLaunchAnimation.kt)
+reveals these slots through the themed boat once per app scope. Host recreation and resume do not replay it.
+
 [TabsRenderer](../tabs/impl/src/commonMain/kotlin/software/ralf/storymile/tabs/TabsRenderer.kt)
 shows Home, Library, and Downloads with Material icons in every navigation layout.
 Side navigation also shows the Storymile logo and title.

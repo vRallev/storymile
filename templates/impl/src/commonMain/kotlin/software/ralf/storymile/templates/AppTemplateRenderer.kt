@@ -91,6 +91,7 @@ import software.ralf.app.platform.presenter.compose.backgesture.ForwardBackPress
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.app.platform.renderer.Render
 import software.ralf.storymile.design.LocalOnLogoLongPress
+import software.ralf.storymile.launchanimation.LaunchAnimation
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.screen.DefaultScreenSizeProvider
@@ -114,6 +115,7 @@ class AppTemplateRenderer(
   private val screenSizeProvider: DefaultScreenSizeProvider,
   private val themeEnvironment: ThemeEnvironment,
   private val runtimeModeController: RuntimeModeController,
+  private val launchAnimation: LaunchAnimation,
 ) : ComposeRenderer<AppTemplate>() {
   @Composable
   override fun Compose(model: AppTemplate, modifier: Modifier) {
@@ -141,12 +143,14 @@ class AppTemplateRenderer(
           color = AppTheme.colorScheme.background,
           contentColor = AppTheme.colorScheme.onBackground,
         ) {
-          SharedTransitionLayout {
-            CompositionLocalProvider(LocalSharedTransitionScope provides this) {
-              when (model) {
-                is AppTemplate.AdaptiveTemplate -> AdaptiveTemplateContent(model)
+          launchAnimation.Content {
+            SharedTransitionLayout {
+              CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+                when (model) {
+                  is AppTemplate.AdaptiveTemplate -> AdaptiveTemplateContent(model)
+                }
+                backGestureDispatcherPresenter.ForwardBackPressEventsToPresenters()
               }
-              backGestureDispatcherPresenter.ForwardBackPressEventsToPresenters()
             }
           }
         }
