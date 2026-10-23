@@ -1,8 +1,8 @@
 package software.ralf.storymile
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -109,7 +109,10 @@ fun main(args: Array<String>) {
 
 private fun loadAppIcon(): BufferedImage {
   val osName = System.getProperty("os.name")
-  val isMac = osName.startsWith("Mac", ignoreCase = true) || osName.equals("Darwin", ignoreCase = true)
+  val isMac =
+    osName.startsWith("Mac", ignoreCase = true) || osName.equals("Darwin", ignoreCase = true)
   val iconResource = if (isMac) "icon-macos.png" else "icon.png"
-  return ImageIO.read(checkNotNull(Thread.currentThread().contextClassLoader.getResource(iconResource)))
+  return ImageIO.read(
+    checkNotNull(Thread.currentThread().contextClassLoader.getResource(iconResource)),
+  )
 }

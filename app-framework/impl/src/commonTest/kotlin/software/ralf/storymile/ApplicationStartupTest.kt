@@ -11,8 +11,8 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.Scoped
@@ -23,11 +23,12 @@ class ApplicationStartupTest {
     val dispatcher = StandardTestDispatcher(testScheduler)
     val release = CompletableDeferred<Unit>()
     var creations = 0
-    val startup = ApplicationStartup(dispatcher) {
-      creations++
-      release.await()
-      StartupTestGraph(dispatcher)
-    }
+    val startup =
+      ApplicationStartup(dispatcher) {
+        creations++
+        release.await()
+        StartupTestGraph(dispatcher)
+      }
     try {
       runCurrent()
       assertThat(creations).isEqualTo(0)
@@ -56,19 +57,21 @@ class ApplicationStartupTest {
     val release = CompletableDeferred<Unit>()
     var entered = false
     var exited = false
-    val service = object : Scoped {
-      override fun onEnterScope(scope: Scope) {
-        entered = true
-      }
+    val service =
+      object : Scoped {
+        override fun onEnterScope(scope: Scope) {
+          entered = true
+        }
 
-      override fun onExitScope() {
-        exited = true
+        override fun onExitScope() {
+          exited = true
+        }
       }
-    }
-    val startup = ApplicationStartup(dispatcher) {
-      withContext(NonCancellable) { release.await() }
-      StartupTestGraph(dispatcher = dispatcher, appScopedInstances = setOf(service))
-    }
+    val startup =
+      ApplicationStartup(dispatcher) {
+        withContext(NonCancellable) { release.await() }
+        StartupTestGraph(dispatcher = dispatcher, appScopedInstances = setOf(service))
+      }
     val host = async { startup.awaitReady() }
     runCurrent()
     startup.destroy()
@@ -85,22 +88,25 @@ class ApplicationStartupTest {
   fun `a registration failure releases partially initialized services`() = runTest {
     val dispatcher = StandardTestDispatcher(testScheduler)
     var exited = false
-    val service = object : Scoped {
-      override fun onExitScope() {
-        exited = true
+    val service =
+      object : Scoped {
+        override fun onExitScope() {
+          exited = true
+        }
       }
-    }
-    val brokenService = object : Scoped {
-      override fun onEnterScope(scope: Scope) {
-        error("Startup failed")
+    val brokenService =
+      object : Scoped {
+        override fun onEnterScope(scope: Scope) {
+          error("Startup failed")
+        }
       }
-    }
-    val startup = ApplicationStartup(dispatcher) {
-      StartupTestGraph(
-        dispatcher = dispatcher,
-        appScopedInstances = linkedSetOf(service, brokenService),
-      )
-    }
+    val startup =
+      ApplicationStartup(dispatcher) {
+        StartupTestGraph(
+          dispatcher = dispatcher,
+          appScopedInstances = linkedSetOf(service, brokenService),
+        )
+      }
     try {
       assertFailure { startup.awaitReady() }.isInstanceOf<IllegalStateException>()
       assertThat(exited).isTrue()

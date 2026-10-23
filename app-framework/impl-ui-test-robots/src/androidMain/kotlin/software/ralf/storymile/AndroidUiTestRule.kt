@@ -68,8 +68,8 @@ class AndroidUiTestRule : TestRule {
   }
 
   private fun startup(): ApplicationStartup =
-    (InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as
-        ApplicationStartup.Provider)
+    (InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
+        as ApplicationStartup.Provider)
       .startup
 
   private fun setSystemAnimations(enabled: Boolean) {

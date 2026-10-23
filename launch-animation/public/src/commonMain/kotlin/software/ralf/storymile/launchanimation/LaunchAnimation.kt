@@ -46,8 +46,9 @@ class LaunchAnimation {
    * revealing [content]. Install inside Storymile's theme. Content stays composed, measured, and
    * drawn behind the cover, with input and accessibility blocked until the reveal ends.
    *
-   * [onFirstFrame] runs after the first cover frame, so callers can start app initialization without
-   * delaying that frame. System animation settings affect motion, but never bypass readiness.
+   * [onFirstFrame] runs after the first cover frame, so callers can start app initialization
+   * without delaying that frame. System animation settings affect motion, but never bypass
+   * readiness.
    */
   @Composable
   fun Content(
@@ -87,12 +88,14 @@ class LaunchAnimation {
     }
 
     Box(
-      modifier.onPreviewKeyEvent { running }.drawWithContent {
-        drawContent()
-        if (!firstFrameDrawn) {
-          firstFrameDrawn = true
-        }
-      },
+      modifier
+        .onPreviewKeyEvent { running }
+        .drawWithContent {
+          drawContent()
+          if (!firstFrameDrawn) {
+            firstFrameDrawn = true
+          }
+        },
     ) {
       Box(
         modifier =

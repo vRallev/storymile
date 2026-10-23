@@ -10,11 +10,11 @@ import software.ralf.app.platform.renderer.ComposeRendererFactory
 import software.ralf.app.platform.renderer.renderCompose
 import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.Scope
-import software.ralf.storymile.theme.SkikoThemeEnvironment
 import software.ralf.app.platform.scope.coroutine.launch
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
+import software.ralf.storymile.theme.SkikoThemeEnvironment
 
 /** Owns the Desktop root scope and renders its shared template stream. */
 class DesktopApp(graph: (RootScopeProvider) -> AppGraph) : RootScopeProvider {

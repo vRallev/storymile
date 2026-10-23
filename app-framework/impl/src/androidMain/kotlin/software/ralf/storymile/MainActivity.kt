@@ -37,7 +37,9 @@ class MainActivity : ComponentActivity() {
       Box(Modifier.fillMaxSize().semantics { testTagsAsResourceId = true }) {
         startup.Content(themeEnvironment = remember { AndroidThemeEnvironment() }) {
           val rendererFactory = remember {
-            ComposeAndroidRendererFactory.createForComposeUi(rootScopeProvider = rootScopeProvider())
+            ComposeAndroidRendererFactory.createForComposeUi(
+              rootScopeProvider = rootScopeProvider(),
+            )
           }
           val template by viewModel.templates.collectAsState()
           rendererFactory.renderCompose(template)

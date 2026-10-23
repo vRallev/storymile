@@ -63,9 +63,10 @@ class ApplicationStartup(
     content: @Composable () -> Unit,
   ) {
     var firstFrame by remember(this) { mutableStateOf(false) }
-    var ready by remember(this) {
-      mutableStateOf(initialization.isCompleted && !initialization.isCancelled)
-    }
+    var ready by
+      remember(this) {
+        mutableStateOf(initialization.isCompleted && !initialization.isCancelled)
+      }
     LaunchedEffect(this, firstFrame) {
       if (firstFrame) {
         awaitReady()
