@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- Match StorymileColorSchemes.paperTide before Compose draws. -->
+  <color name="launch_background">#F7F3EB</color>
+  <bool name="launch_light_system_bars">true</bool>
+
+  <style name="Theme.Storymile.Base" parent="@android:style/Theme.Material.Light.NoActionBar">
+    <item name="android:windowBackground">@color/launch_background</item>
+    <item name="android:statusBarColor">@color/launch_background</item>
+    <item name="android:windowLightStatusBar">@bool/launch_light_system_bars</item>
+  </style>
+
+  <style name="Theme.Storymile" parent="Theme.Storymile.Base" />
+</resources>
