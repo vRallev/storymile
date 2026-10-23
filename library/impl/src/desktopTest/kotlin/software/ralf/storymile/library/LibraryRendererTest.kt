@@ -40,6 +40,7 @@ import assertk.assertions.isGreaterThanOrEqualTo
 import assertk.assertions.isLessThan
 import assertk.assertions.isLessThanOrEqualTo
 import kotlin.test.Test
+import software.ralf.storymile.discovery.DiscoveryPresenter
 import software.ralf.storymile.library.LibraryPresenterImpl.Model
 import software.ralf.storymile.library.LibraryPresenterImpl.Tab
 import software.ralf.storymile.theme.AppTheme
@@ -101,14 +102,17 @@ class LibraryRendererTest {
   fun `tab clicks and swipes stay synchronized and retain selection when returning`() =
     runDesktopComposeUiTest(width = 480, height = 840) {
       val renderer = LibraryRenderer()
-      val presenter = LibraryPresenterImpl()
+      val presenter = LibraryPresenterImpl(UnusedDiscoveryFactory)
       var visible by mutableStateOf(true)
       setContent {
         val stateHolder = rememberSaveableStateHolder()
         ThemedContent {
           if (visible) {
             stateHolder.SaveableStateProvider("library") {
-              renderer.renderCompose(presenter.present(Unit), Modifier.fillMaxSize())
+              renderer.renderCompose(
+                model = presenter.present(Unit).backstack.single() as Model,
+                modifier = Modifier.fillMaxSize(),
+              )
             }
           }
         }
@@ -204,5 +208,10 @@ class LibraryRendererTest {
         Box(Modifier.fillMaxSize().background(AppTheme.colorScheme.background)) { content() }
       }
     }
+  }
+
+  private object UnusedDiscoveryFactory : DiscoveryPresenter.Factory {
+    override fun create(focusSearch: Boolean): DiscoveryPresenter<*> =
+      error("Discovery is not opened")
   }
 }

@@ -20,7 +20,8 @@ flowchart TD
   EpisodesPresenter["EpisodesPresenter\nfeed episodes"]
   DownloadsPresenter["DownloadsPresenterImpl\nempty downloads"]
   TabsPresenter["TabsPresenterImpl\ntabs"]
-  LibraryPresenter["LibraryPresenterImpl\nempty library"]
+  LibraryPresenter["LibraryPresenterImpl\nbackstack"]
+  LibraryContent["Library content\nempty library"]
   PlaybackPresenter["PlaybackPresenterImpl\ncollapsed and expanded playback"]
 
   TemplateProvider -->|launches| AppTemplatePresenter
@@ -37,6 +38,10 @@ flowchart TD
   ShowPresenter -->|pushed entry| EpisodeDetailsPresenter
   ShowContentPresenter --> EpisodesPresenter
   TabsPresenter -->|Library| LibraryPresenter
+  LibraryPresenter -->|root| LibraryContent
+  LibraryPresenter -->|pushed entries| DiscoveryPresenterImpl
+  LibraryPresenter -->|pushed entry| ShowPresenter
+  LibraryPresenter -->|pushed entry| EpisodeDetailsPresenter
   TabsPresenter -->|Downloads| DownloadsPresenter
   UserPresenter --> PlaybackPresenter
 ```
@@ -87,7 +92,8 @@ renders the `DefaultBackstackModel`.
 Returning from another tab starts a new Home stack.
 The tabs presenter creates and composes only the selected screen. It retains the
 [library](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryPresenterImpl.kt)
-filter across tab changes.
+filter across tab changes. Library owns a backstack. Each empty tab opens Discovery.
+Back returns to the selected Library tab.
 [DownloadsPresenterImpl](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsPresenterImpl.kt)
 provides the empty Downloads screen, rendered by
 [DownloadsRenderer](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsRenderer.kt).
