@@ -366,11 +366,12 @@ run_ios_tests() {
   fi
 }
 
-USAGE="Usage: ./run.sh [--hot | --emulator | --device | --web-test | --ios-test | --desktop-test]"
+USAGE="Usage: ./run.sh [--desktop | --hot | --emulator | --device | --web-test | --ios-test | --desktop-test]"
 if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then
   echo "$USAGE"
   echo "Choose Android, Desktop (hot reload), iOS, Wasm, or platform tests."
   echo "Then choose a device, emulator, or window size."
+  echo "Use --desktop to start Desktop without hot reload or the menu."
   echo "Use --hot to start Desktop hot reload without the menu."
   echo "Use --emulator to launch Android Debug on the first available emulator without the menu."
   echo "Use --device to launch Android Debug on the first available physical device without the menu."
@@ -386,6 +387,7 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 if [[ $# == 1 ]]; then
   case "$1" in
+    --desktop) ./gradlew --quiet :app:desktop:run; exit 0 ;;
     --hot) ./gradlew --quiet :app:desktop:hotRunDesktop --auto; exit 0 ;;
     --emulator) run_android emulator true; exit 0 ;;
     --device) run_android device true; exit 0 ;;
