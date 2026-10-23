@@ -22,6 +22,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Podcasts
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -48,6 +49,10 @@ import software.ralf.storymile.design.TabHeader
 import software.ralf.storymile.library.LibraryPresenterImpl.Tab
 import software.ralf.storymile.library.impl.generated.resources.Res
 import software.ralf.storymile.library.impl.generated.resources.library_discover
+import software.ralf.storymile.library.impl.generated.resources.library_history
+import software.ralf.storymile.library.impl.generated.resources.library_history_empty_description
+import software.ralf.storymile.library.impl.generated.resources.library_history_empty_title
+import software.ralf.storymile.library.impl.generated.resources.library_history_illustration
 import software.ralf.storymile.library.impl.generated.resources.library_illustration
 import software.ralf.storymile.library.impl.generated.resources.library_queue
 import software.ralf.storymile.library.impl.generated.resources.library_queue_empty_description
@@ -142,7 +147,10 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
         ) {
           Illustration(
             tab = tab,
-            modifier = Modifier.padding(end = 24.dp).size(144.dp).testTag("library-illustration"),
+            modifier =
+              Modifier.padding(end = 24.dp)
+                .size(if (tab == Tab.HISTORY) 80.dp else 144.dp)
+                .testTag("library-illustration"),
           )
           EmptyMessage(
             tab = tab,
@@ -163,7 +171,14 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
             tab = tab,
             modifier =
               Modifier.weight(1f, fill = false)
-                .size(if (compact) 164.dp else if (large) 256.dp else 216.dp)
+                .size(
+                  when {
+                    tab == Tab.HISTORY -> if (compact) 80.dp else if (large) 112.dp else 96.dp
+                    compact -> 164.dp
+                    large -> 256.dp
+                    else -> 216.dp
+                  },
+                )
                 .testTag("library-illustration"),
           )
           Spacer(Modifier.height(if (short) 8.dp else 24.dp))
@@ -190,34 +205,38 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
         MaterialTab(
           selected = pagerState.currentPage == tab.ordinal,
           onClick = { model.onSelectTab(tab) },
-          text = {
-            Text(
-              text =
-                stringResource(
-                  when (tab) {
-                    Tab.QUEUE -> Res.string.library_queue
-                    Tab.SHOWS -> Res.string.library_shows
-                    Tab.SAVED -> Res.string.library_saved
-                  },
-                ),
-              style = AppTheme.typography.bodyLarge,
-            )
-          },
-          icon = {
-            Icon(
-              imageVector =
-                when (tab) {
-                  Tab.QUEUE -> Icons.AutoMirrored.Filled.FormatListBulleted
-                  Tab.SHOWS -> Icons.Default.Podcasts
-                  Tab.SAVED -> Icons.Default.Bookmark
-                },
-              contentDescription = null,
-            )
-          },
           selectedContentColor = AppTheme.colorScheme.primary,
           unselectedContentColor = AppTheme.colorScheme.onSurfaceVariant,
-          modifier = Modifier.testTag("library-tab-${tab.name.lowercase()}"),
-        )
+          modifier =
+            Modifier.testTag("library-tab-${tab.name.lowercase()}")
+              .heightIn(min = 72.dp)
+              .padding(horizontal = 4.dp, vertical = 8.dp),
+        ) {
+          Icon(
+            imageVector =
+              when (tab) {
+                Tab.QUEUE -> Icons.AutoMirrored.Filled.FormatListBulleted
+                Tab.SHOWS -> Icons.Default.Podcasts
+                Tab.SAVED -> Icons.Default.Bookmark
+                Tab.HISTORY -> Icons.Default.History
+              },
+            contentDescription = null,
+          )
+          Spacer(Modifier.height(8.dp))
+          Text(
+            text =
+              stringResource(
+                when (tab) {
+                  Tab.QUEUE -> Res.string.library_queue
+                  Tab.SHOWS -> Res.string.library_shows
+                  Tab.SAVED -> Res.string.library_saved
+                  Tab.HISTORY -> Res.string.library_history
+                },
+              ),
+            style = AppTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+          )
+        }
       }
     }
   }
@@ -232,6 +251,7 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
               Tab.QUEUE -> Res.drawable.library_queue_illustration
               Tab.SHOWS -> Res.drawable.library_shows_illustration
               Tab.SAVED -> Res.drawable.library_illustration
+              Tab.HISTORY -> Res.drawable.library_history_illustration
             },
           ),
         contentDescription = null,
@@ -270,7 +290,7 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
       )
       Text(
         text = stringResource(tab.emptyDescription()),
-        modifier = Modifier.padding(top = 12.dp),
+        modifier = Modifier.padding(top = if (horizontal) 8.dp else 12.dp),
         style =
           when {
             compact -> AppTheme.typography.bodyMedium
@@ -283,7 +303,7 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
       Button(
         onClick = onDiscoverPodcasts,
         modifier =
-          Modifier.padding(top = 24.dp)
+          Modifier.padding(top = if (horizontal) 12.dp else 24.dp)
             .widthIn(min = if (compact) 224.dp else 288.dp)
             .heightIn(min = if (compact) 48.dp else 56.dp)
             .testTag("library-discover"),
@@ -303,6 +323,7 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
       Tab.QUEUE -> Res.string.library_queue_empty_title
       Tab.SHOWS -> Res.string.library_shows_empty_title
       Tab.SAVED -> Res.string.library_saved_empty_title
+      Tab.HISTORY -> Res.string.library_history_empty_title
     }
 
   private fun Tab.emptyDescription(): StringResource =
@@ -310,5 +331,6 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
       Tab.QUEUE -> Res.string.library_queue_empty_description
       Tab.SHOWS -> Res.string.library_shows_empty_description
       Tab.SAVED -> Res.string.library_saved_empty_description
+      Tab.HISTORY -> Res.string.library_history_empty_description
     }
 }

@@ -48,6 +48,7 @@ class LibraryPresenterImpl(private val discoveryPresenterFactory: DiscoveryPrese
     QUEUE,
     SHOWS,
     SAVED,
+    HISTORY,
   }
 
   /**

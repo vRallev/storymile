@@ -45,10 +45,12 @@ class LibraryUiTest {
             onNodeWithTag("library-tab-queue").assertIsSelected()
             onNodeWithTag("library-tab-shows").assertIsNotSelected()
             onNodeWithTag("library-tab-saved").assertIsNotSelected()
+            onNodeWithTag("library-tab-history").assertIsNotSelected()
             listOf(
                 "queue" to "Your queue is empty",
                 "shows" to "No followed shows",
                 "saved" to "No saved episodes",
+                "history" to "No listening history yet",
               )
               .forEach { (tab, title) ->
                 runOnUiThread { onNodeWithTag("library-tab-$tab").performClick() }
@@ -74,6 +76,8 @@ class LibraryUiTest {
       onNodeWithTag("library-tab-shows").assertIsSelected()
       runOnUiThread { onNodeWithTag("library-pager").performTouchInput { swipeLeft() } }
       onNodeWithTag("library-tab-saved").assertIsSelected()
+      runOnUiThread { onNodeWithTag("library-pager").performTouchInput { swipeLeft() } }
+      onNodeWithTag("library-tab-history").assertIsSelected()
 
       listOf(
           DesktopWindowSizes.tablet,
@@ -85,7 +89,8 @@ class LibraryUiTest {
         .forEach { next ->
           runOnIdle { size.value = next }
           onNodeWithTag("tab-library").assertIsSelected()
-          onNodeWithTag("library-tab-saved").assertIsSelected()
+          onNodeWithTag("library-tab-history").assertIsSelected()
+          onNodeWithTag("library-tab-saved").assertIsNotSelected()
           onNodeWithTag("library-tab-shows").assertIsNotSelected()
           onNodeWithTag("library-tab-queue").assertIsNotSelected()
           onNodeWithTag("library-discover").assertIsDisplayed()
@@ -100,7 +105,7 @@ class LibraryUiTest {
       .forEach { size ->
         uiTestRule.runRobotTest(windowSize = size, darkTheme = false) {
           composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
-          listOf("queue", "shows", "saved").forEach { tab ->
+          listOf("queue", "shows", "saved", "history").forEach { tab ->
             runOnUiThread { onNodeWithTag("library-tab-$tab").performClick() }
             onNodeWithTag("library-tab-$tab").assertIsSelected()
             runOnUiThread { onNodeWithTag("library-discover").performClick() }
@@ -123,7 +128,7 @@ class LibraryUiTest {
             selectTab(TabsPresenter.Tab.HOME)
             selectTab(TabsPresenter.Tab.LIBRARY)
           }
-          onNodeWithTag("library-tab-saved").assertIsSelected()
+          onNodeWithTag("library-tab-history").assertIsSelected()
         }
       }
   }

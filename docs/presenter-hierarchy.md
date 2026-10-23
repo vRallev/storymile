@@ -129,7 +129,7 @@ renders the podcast and its episodes. Narrow layouts show one destination at a t
 Resizing preserves the selected episode and presenter stack.
 
 [LibraryRenderer](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryRenderer.kt)
-shows Queue, Shows, and Saved placeholders at phone, tablet, and desktop widths.
+shows Queue, Shows, Saved, and History placeholders at phone, tablet, and desktop widths.
 
 [PlaybackScreenRenderer](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackScreenRenderer.kt)
 shows artwork, episode details, playback controls, and chapters. Its collapse button calls the template's

@@ -3,11 +3,14 @@
   <string name="library_queue">Queue</string>
   <string name="library_shows">Shows</string>
   <string name="library_saved">Saved</string>
+  <string name="library_history">History</string>
   <string name="library_queue_empty_title">Your queue is empty</string>
   <string name="library_queue_empty_description">Add episodes to choose what plays next.</string>
   <string name="library_shows_empty_title">No followed shows</string>
   <string name="library_shows_empty_description">Follow podcasts to see them here.</string>
   <string name="library_saved_empty_title">No saved episodes</string>
   <string name="library_saved_empty_description">Save episodes to find them here.</string>
+  <string name="library_history_empty_title">No listening history yet</string>
+  <string name="library_history_empty_description">Episodes you finish will appear here.</string>
   <string name="library_discover">Discover podcasts</string>
 </resources>

@@ -38,10 +38,10 @@ class LibraryPresenterImplTest {
 
     presenter.test(this, visible) {
       assertThat(awaitItem().library).isNotNull().given {
-        it.onSelectTab(Tab.SAVED)
+        it.onSelectTab(Tab.HISTORY)
       }
       assertThat(awaitItem().library).isNotNull().given {
-        assertThat(it.selectedTab).isEqualTo(Tab.SAVED)
+        assertThat(it.selectedTab).isEqualTo(Tab.HISTORY)
       }
 
       visible.value = false
@@ -49,13 +49,13 @@ class LibraryPresenterImplTest {
 
       visible.value = true
       assertThat(awaitItem().library).isNotNull().given {
-        assertThat(it.selectedTab).isEqualTo(Tab.SAVED)
+        assertThat(it.selectedTab).isEqualTo(Tab.HISTORY)
       }
     }
   }
 
   @Test
-  fun `tabs select queue shows or saved without leaving the library`() = runTest {
+  fun `tabs select queue shows saved or history without leaving the library`() = runTest {
     val presenter = createPresenter()
 
     presenter.test(this) {
@@ -69,6 +69,10 @@ class LibraryPresenterImplTest {
       model.onSelectTab(Tab.SAVED)
       model = awaitItem().content()
       assertThat(model.selectedTab).isEqualTo(Tab.SAVED)
+
+      model.onSelectTab(Tab.HISTORY)
+      model = awaitItem().content()
+      assertThat(model.selectedTab).isEqualTo(Tab.HISTORY)
 
       model.onSelectTab(Tab.QUEUE)
       model = awaitItem().content()
