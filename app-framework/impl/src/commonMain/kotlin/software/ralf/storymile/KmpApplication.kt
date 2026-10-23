@@ -26,9 +26,9 @@ class KmpApplication : RootScopeProvider {
     rootScope.register(appGraph.appScopedInstances)
   }
 
-  /** Destroys the root scope and releases its scoped objects. */
+  /** Releases the scope, including partial startup. Safe before creation and after destruction. */
   fun destroy() {
-    rootScope.destroy()
+    rootScopeOrNull?.destroy()
     rootScopeOrNull = null
   }
 }

@@ -10,33 +10,35 @@ import software.ralf.app.platform.renderer.ComposeRendererFactory
 import software.ralf.app.platform.renderer.renderCompose
 import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.Scope
+import software.ralf.storymile.theme.SkikoThemeEnvironment
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 
 /** Owns the Wasm root scope and renders its shared template stream. */
-class WasmJsApp(private val graph: (RootScopeProvider) -> AppGraph) : RootScopeProvider {
-  private val application = KmpApplication().apply { create(graph(this)) }
-  private val templateProvider =
-    application.rootScope
-      .metroDependencyGraph<Graph>()
-      .templateProviderFactory
-      .createTemplateProvider()
+class WasmJsApp(graph: (RootScopeProvider) -> AppGraph) : RootScopeProvider {
+  private val startup = ApplicationStartup { graph(it) }
+  private val templateProvider = lazy {
+    rootScope.metroDependencyGraph<Graph>().templateProviderFactory.createTemplateProvider()
+  }
 
   override val rootScope: Scope
-    get() = application.rootScope
+    get() = startup.rootScope
 
   /** Renders the latest template. */
   @Composable
   fun renderTemplates() {
-    val template by templateProvider.templates.collectAsState()
-    val rendererFactory = remember { ComposeRendererFactory(application) }
-
-    rendererFactory.renderCompose(template)
+    startup.Content(themeEnvironment = remember { SkikoThemeEnvironment() }) {
+      val template by templateProvider.value.templates.collectAsState()
+      val rendererFactory = remember { ComposeRendererFactory(this) }
+      rendererFactory.renderCompose(template)
+    }
   }
 
   /** Releases presenter and application resources. */
   fun destroy() {
-    templateProvider.cancel()
-    application.destroy()
+    if (templateProvider.isInitialized()) {
+      templateProvider.value.cancel()
+    }
+    startup.destroy()
   }
 
   /** Graph access needed by the Wasm runtime. */

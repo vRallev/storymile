@@ -77,7 +77,12 @@ class DesktopUiTestRule(private val withEpisodes: Boolean = false) {
     RobotInternals.setRootScopeProvider(desktopApp)
 
     try {
-      runBlocking { withTimeout(10_000) { TestPlaylists.clear(desktopApp.rootScope) } }
+      runBlocking {
+        withTimeout(10_000) {
+          desktopApp.awaitReady()
+          TestPlaylists.clear(desktopApp.rootScope)
+        }
+      }
       runDesktopComposeUiTest(
         width = windowSize.width.value.roundToInt(),
         height = windowSize.height.value.roundToInt(),

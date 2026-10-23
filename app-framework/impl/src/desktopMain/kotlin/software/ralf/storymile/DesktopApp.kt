@@ -10,34 +10,42 @@ import software.ralf.app.platform.renderer.ComposeRendererFactory
 import software.ralf.app.platform.renderer.renderCompose
 import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.Scope
+import software.ralf.storymile.theme.SkikoThemeEnvironment
 import software.ralf.app.platform.scope.coroutine.launch
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
 
 /** Owns the Desktop root scope and renders its shared template stream. */
-class DesktopApp(private val graph: (RootScopeProvider) -> AppGraph) : RootScopeProvider {
-  private val application = KmpApplication().apply { create(graph(this)) }
-  private val templateProvider =
-    application.rootScope
-      .metroDependencyGraph<Graph>()
-      .templateProviderFactory
-      .createTemplateProvider()
+class DesktopApp(graph: (RootScopeProvider) -> AppGraph) : RootScopeProvider {
+  private val startup = ApplicationStartup { graph(it) }
+  private val templateProvider = lazy {
+    rootScope.metroDependencyGraph<Graph>().templateProviderFactory.createTemplateProvider()
+  }
 
   override val rootScope: Scope
-    get() = application.rootScope
+    get() = startup.rootScope
+
+  /** Initializes the app without a rendered host, for headless callers and test setup. */
+  suspend fun awaitReady() {
+    startup.awaitReady()
+  }
 
   /** Renders the latest template. */
   @Composable
   fun renderTemplates() {
-    val template by templateProvider.templates.collectAsState()
-    val rendererFactory = remember { ComposeRendererFactory(application) }
-
-    DesktopBackGesture { rendererFactory.renderCompose(template) }
+    startup.Content(themeEnvironment = remember { SkikoThemeEnvironment() }) {
+      val template by templateProvider.value.templates.collectAsState()
+      val rendererFactory = remember { ComposeRendererFactory(this) }
+      DesktopBackGesture { rendererFactory.renderCompose(template) }
+    }
   }
 
   /** Saves the opposite runtime mode and restarts the application. */
   fun toggleRuntimeMode() {
+    if (!templateProvider.isInitialized()) {
+      return
+    }
     val scope = rootScope
     if (scope.isDestroyed()) {
       return
@@ -55,8 +63,10 @@ class DesktopApp(private val graph: (RootScopeProvider) -> AppGraph) : RootScope
 
   /** Releases presenter and application resources. */
   fun destroy() {
-    templateProvider.cancel()
-    application.destroy()
+    if (templateProvider.isInitialized()) {
+      templateProvider.value.cancel()
+    }
+    startup.destroy()
   }
 
   /** Graph access needed by the Desktop runtime. */

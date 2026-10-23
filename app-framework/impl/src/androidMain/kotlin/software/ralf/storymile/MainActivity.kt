@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import software.ralf.app.platform.renderer.ComposeAndroidRendererFactory
 import software.ralf.app.platform.renderer.renderCompose
+import software.ralf.storymile.theme.AndroidThemeEnvironment
 import software.ralf.storymile.util.rootScopeProvider
 
 /** Android entry point that renders the shared template stream. */
@@ -29,14 +31,17 @@ class MainActivity : ComponentActivity() {
     }
     enableEdgeToEdge()
 
-    val rendererFactory =
-      ComposeAndroidRendererFactory.createForComposeUi(rootScopeProvider = rootScopeProvider())
-
+    val startup = (application as ApplicationStartup.Provider).startup
     setContent {
-      val template by viewModel.templates.collectAsState()
       // The Android interop renderer does not forward the root modifier.
       Box(Modifier.fillMaxSize().semantics { testTagsAsResourceId = true }) {
-        rendererFactory.renderCompose(template)
+        startup.Content(themeEnvironment = remember { AndroidThemeEnvironment() }) {
+          val rendererFactory = remember {
+            ComposeAndroidRendererFactory.createForComposeUi(rootScopeProvider = rootScopeProvider())
+          }
+          val template by viewModel.templates.collectAsState()
+          rendererFactory.renderCompose(template)
+        }
       }
     }
   }

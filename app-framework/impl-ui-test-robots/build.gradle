@@ -27,7 +27,6 @@ dependencies {
   commonMainImplementation project(':downloads:impl')
   commonMainImplementation project(':episode-details:impl')
   commonMainImplementation project(':home:impl')
-  commonMainImplementation project(':launch-animation:impl')
   commonMainImplementation project(':library:impl')
   commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':player:impl')

@@ -59,7 +59,7 @@ internal class BoatLaunchDrawing(
         (1f - 0.09f * preparation) *
         exp(ln(size.maxDimension * 9f / (boatSize * 0.91f)) * zoom)
     val logoAlpha = 1f - progress.segment(start = 0.34f, end = 0.46f)
-    val titleAlpha = 1f - progress.segment(start = 0.16f, end = 0.31f)
+    val titleAlpha = 1f - progress.segment(start = 0.34f, end = 0.46f)
 
     aperture.reset()
     aperture.addPath(outline)
@@ -75,7 +75,7 @@ internal class BoatLaunchDrawing(
       clipPath(path = aperture, clipOp = ClipOp.Difference) { backdrop() }
     }
     if (logoAlpha > 0f) {
-      val settle = (progress / 0.36f).coerceIn(0f, 1f)
+      val settle = (progress / 0.32f).coerceIn(0f, 1f)
       val decay = (1f - settle).pow(2)
       val angle = -3.2f * cos(PI.toFloat() * 2.1f * settle) * decay
       val drift = 4.dp.toPx() * sin(PI.toFloat() * 2f * settle) * decay
