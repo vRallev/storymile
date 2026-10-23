@@ -31,6 +31,28 @@ class DiscoveryUiTest {
   private val uiTestRule = DesktopUiTestRule()
 
   @Test
+  fun `following and unfollowing survive reopening the show`() {
+    uiTestRule.runPhoneRobotTest(darkTheme = false) {
+      composeRobot<DiscoveryRobot> {
+        discover()
+        openPodcast("quiet-current")
+      }
+      composeRobot<ShowRobot> {
+        follow()
+        back()
+      }
+      composeRobot<DiscoveryRobot> { openPodcast("quiet-current") }
+      composeRobot<ShowRobot> {
+        seeFollowing(true)
+        unfollow()
+        back()
+      }
+      composeRobot<DiscoveryRobot> { openPodcast("quiet-current") }
+      composeRobot<ShowRobot> { seeFollowing(false) }
+    }
+  }
+
+  @Test
   fun `browse topics search show preview and back retain context while home resets it`() {
     uiTestRule.runPhoneRobotTest(darkTheme = false) {
       composeRobot<DiscoveryRobot> {

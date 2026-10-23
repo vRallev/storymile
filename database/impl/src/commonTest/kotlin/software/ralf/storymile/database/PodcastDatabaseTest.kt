@@ -16,6 +16,27 @@ import kotlinx.coroutines.test.runTest
 
 class PodcastDatabaseTest {
   @Test
+  fun `deleting a show removes its episodes without changing other shows`() = runTest {
+    DatabaseFixture().use { database ->
+      val podcast = DatabaseFixture.podcast()
+      val other = podcast.copy(feedUrl = "https://feeds.test/other.xml")
+      database.insert(podcast)
+      database.insert(other)
+      database.podcasts.test {
+        assertThat(awaitItem()).isEqualTo(listOf(other, podcast))
+        database.delete(podcast.feedUrl)
+        assertThat(awaitItem()).isEqualTo(listOf(other))
+        database.delete(podcast.feedUrl)
+        assertThat(database.podcasts.first()).isEqualTo(listOf(other))
+
+        val followedAgain = podcast.copy(episodes = podcast.episodes.take(1))
+        database.insert(followedAgain)
+        assertThat(awaitItem()).isEqualTo(listOf(other, followedAgain))
+      }
+    }
+  }
+
+  @Test
   fun `flows preserve metadata and order while replacing one podcast atomically`() = runTest {
     DatabaseFixture().use { database ->
       val podcast = DatabaseFixture.podcast()
@@ -81,6 +102,8 @@ class PodcastDatabaseTest {
       collection.await()
 
       assertFailure { database.insert(DatabaseFixture.podcast()) }
+        .isInstanceOf<CancellationException>()
+      assertFailure { database.delete(DatabaseFixture.podcast().feedUrl) }
         .isInstanceOf<CancellationException>()
       assertFailure { database.podcasts.first() }.isInstanceOf<CancellationException>()
     }

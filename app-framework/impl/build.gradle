@@ -18,6 +18,7 @@ dependencies {
   androidMainImplementation libs.androidx.activity.compose
 
   commonMainImplementation project(':coil:impl')
+  commonMainImplementation project(':database:impl')
   commonMainImplementation project(':discovery:impl')
   commonMainImplementation project(':downloads:impl')
   commonMainImplementation project(':episode-details:impl')

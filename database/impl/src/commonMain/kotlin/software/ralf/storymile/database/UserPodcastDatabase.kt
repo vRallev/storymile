@@ -66,6 +66,8 @@ class UserPodcastDatabase(
 
   override suspend fun insert(podcast: PodcastFeed) = operation { it.insert(podcast) }
 
+  override suspend fun delete(feedUrl: String) = operation { it.delete(feedUrl) }
+
   private suspend fun awaitPreviousOwner(path: String?) {
     if (path == null) {
       return

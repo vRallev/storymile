@@ -28,7 +28,8 @@ class ShowContentPresenterTest {
 
       val podcast = podcast("one").copy(description = "Stories & science.")
       catalog.updateLookup(id = podcast.id, state = State.Success(listOf(podcast)))
-      val loaded = awaitItem()
+      runCurrent()
+      val loaded = expectMostRecentItem()
       assertThat(loaded.podcast).isEqualTo(podcast)
       assertThat(loaded.descriptionExpanded).isFalse()
       assertThat(catalog.lookedUp).containsExactly("one")
@@ -132,6 +133,7 @@ class ShowContentPresenterTest {
       catalog = catalog,
       feeds = TestPodcastFeeds(),
       episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
+      database = TestPodcastDatabase(),
       initialPodcast = initialPodcast,
       podcasts = listOf(podcast("one"), podcast("two")),
       source = ShowPresenter.Source.Browse,
