@@ -12,7 +12,7 @@ window.STORYMILE_DESIGN = {
         916
       ],
       "width": 841,
-      "height": 1871,
+      "height": 1870,
       "preview": "previews/android-phone-home-light.webp",
       "thumbnail": "previews/android-phone-home-light-small.webp"
     },
@@ -28,7 +28,7 @@ window.STORYMILE_DESIGN = {
         916
       ],
       "width": 841,
-      "height": 1871,
+      "height": 1870,
       "preview": "previews/android-phone-home-dark.webp",
       "thumbnail": "previews/android-phone-home-dark-small.webp"
     },
@@ -267,8 +267,8 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1586,
-      "height": 992,
+      "width": 1584,
+      "height": 993,
       "preview": "previews/android-tablet-landscape-discovery-light.webp",
       "thumbnail": "previews/android-tablet-landscape-discovery-light-small.webp"
     },
@@ -283,8 +283,8 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1586,
-      "height": 992,
+      "width": 1584,
+      "height": 993,
       "preview": "previews/android-tablet-landscape-discovery-dark.webp",
       "thumbnail": "previews/android-tablet-landscape-discovery-dark-small.webp"
     },
@@ -316,7 +316,7 @@ window.STORYMILE_DESIGN = {
         701
       ],
       "width": 1373,
-      "height": 1145,
+      "height": 1146,
       "preview": "previews/android-foldable-discovery-dark.webp",
       "thumbnail": "previews/android-foldable-discovery-dark-small.webp"
     },
@@ -443,8 +443,8 @@ window.STORYMILE_DESIGN = {
         412,
         916
       ],
-      "width": 841,
-      "height": 1870,
+      "width": 840,
+      "height": 1871,
       "preview": "previews/android-phone-episode-dark.webp",
       "thumbnail": "previews/android-phone-episode-dark-small.webp"
     },
@@ -668,7 +668,7 @@ window.STORYMILE_DESIGN = {
         916
       ],
       "width": 841,
-      "height": 1870,
+      "height": 1871,
       "preview": "previews/android-phone-download-detail-dark.webp",
       "thumbnail": "previews/android-phone-download-detail-dark-small.webp"
     },
@@ -827,7 +827,7 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1586,
+      "width": 1585,
       "height": 992,
       "preview": "previews/android-tablet-landscape-home-light.webp",
       "thumbnail": "previews/android-tablet-landscape-home-light-small.webp"
@@ -843,7 +843,7 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1586,
+      "width": 1585,
       "height": 992,
       "preview": "previews/android-tablet-landscape-home-dark.webp",
       "thumbnail": "previews/android-tablet-landscape-home-dark-small.webp"
@@ -859,7 +859,7 @@ window.STORYMILE_DESIGN = {
         841,
         701
       ],
-      "width": 1373,
+      "width": 1374,
       "height": 1145,
       "preview": "previews/android-foldable-home-light.webp",
       "thumbnail": "previews/android-foldable-home-light-small.webp"
@@ -1100,7 +1100,7 @@ window.STORYMILE_DESIGN = {
         1280
       ],
       "width": 992,
-      "height": 1585,
+      "height": 1586,
       "preview": "previews/android-tablet-portrait-downloads-dark.webp",
       "thumbnail": "previews/android-tablet-portrait-downloads-dark-small.webp"
     },
@@ -1147,7 +1147,7 @@ window.STORYMILE_DESIGN = {
         841,
         701
       ],
-      "width": 1373,
+      "width": 1374,
       "height": 1145,
       "preview": "previews/android-foldable-downloads-light.webp",
       "thumbnail": "previews/android-foldable-downloads-light-small.webp"
@@ -1803,8 +1803,8 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1584,
-      "height": 993,
+      "width": 1586,
+      "height": 992,
       "preview": "previews/android-tablet-landscape-search-dark.webp",
       "thumbnail": "previews/android-tablet-landscape-search-dark-small.webp"
     },
@@ -1916,7 +1916,7 @@ window.STORYMILE_DESIGN = {
         1280
       ],
       "width": 992,
-      "height": 1586,
+      "height": 1585,
       "preview": "previews/android-tablet-portrait-episode-light.webp",
       "thumbnail": "previews/android-tablet-portrait-episode-light-small.webp"
     },
@@ -1963,8 +1963,8 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1586,
-      "height": 992,
+      "width": 1584,
+      "height": 993,
       "preview": "previews/android-tablet-landscape-episode-dark.webp",
       "thumbnail": "previews/android-tablet-landscape-episode-dark-small.webp"
     },
@@ -3067,8 +3067,8 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1585,
-      "height": 992,
+      "width": 1584,
+      "height": 993,
       "preview": "previews/android-tablet-landscape-download-detail-light.webp",
       "thumbnail": "previews/android-tablet-landscape-download-detail-light-small.webp"
     },
@@ -3083,8 +3083,8 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1585,
-      "height": 992,
+      "width": 1584,
+      "height": 993,
       "preview": "previews/android-tablet-landscape-download-detail-dark.webp",
       "thumbnail": "previews/android-tablet-landscape-download-detail-dark-small.webp"
     },
@@ -3099,7 +3099,7 @@ window.STORYMILE_DESIGN = {
         841,
         701
       ],
-      "width": 1373,
+      "width": 1374,
       "height": 1145,
       "preview": "previews/android-foldable-download-detail-light.webp",
       "thumbnail": "previews/android-foldable-download-detail-light-small.webp"
@@ -3628,7 +3628,7 @@ window.STORYMILE_DESIGN = {
         412
       ],
       "width": 1871,
-      "height": 840,
+      "height": 841,
       "preview": "previews/android-phone-landscape-library-empty-light.webp",
       "thumbnail": "previews/android-phone-landscape-library-empty-light-small.webp"
     },
@@ -3691,7 +3691,7 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1586,
+      "width": 1585,
       "height": 992,
       "preview": "previews/android-tablet-landscape-library-empty-light.webp",
       "thumbnail": "previews/android-tablet-landscape-library-empty-light-small.webp"
@@ -4107,7 +4107,7 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1586,
+      "width": 1585,
       "height": 992,
       "preview": "previews/android-tablet-landscape-discover-light.webp",
       "thumbnail": "previews/android-tablet-landscape-discover-light-small.webp"
@@ -4155,7 +4155,7 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1586,
+      "width": 1585,
       "height": 992,
       "preview": "previews/android-tablet-landscape-topic-nature-dark.webp",
       "thumbnail": "previews/android-tablet-landscape-topic-nature-dark-small.webp"
@@ -4171,7 +4171,7 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1586,
+      "width": 1585,
       "height": 992,
       "preview": "previews/android-tablet-landscape-show-preview-light.webp",
       "thumbnail": "previews/android-tablet-landscape-show-preview-light-small.webp"
@@ -4187,7 +4187,7 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1585,
+      "width": 1586,
       "height": 992,
       "preview": "previews/android-tablet-landscape-show-preview-dark.webp",
       "thumbnail": "previews/android-tablet-landscape-show-preview-dark-small.webp"
@@ -4203,7 +4203,7 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1586,
+      "width": 1585,
       "height": 992,
       "preview": "previews/android-tablet-landscape-show-followed-light.webp",
       "thumbnail": "previews/android-tablet-landscape-show-followed-light-small.webp"
@@ -4219,7 +4219,7 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1585,
+      "width": 1586,
       "height": 992,
       "preview": "previews/android-tablet-landscape-show-followed-dark.webp",
       "thumbnail": "previews/android-tablet-landscape-show-followed-dark-small.webp"
@@ -4523,7 +4523,7 @@ window.STORYMILE_DESIGN = {
         800
       ],
       "title": "Shows · Empty",
-      "width": 1586,
+      "width": 1585,
       "height": 992,
       "preview": "previews/android-tablet-landscape-library-shows-empty-light.webp",
       "thumbnail": "previews/android-tablet-landscape-library-shows-empty-light-small.webp"
@@ -4555,7 +4555,7 @@ window.STORYMILE_DESIGN = {
         701
       ],
       "title": "Shows · Empty",
-      "width": 1373,
+      "width": 1372,
       "height": 1146,
       "preview": "previews/android-foldable-library-shows-empty-light.webp",
       "thumbnail": "previews/android-foldable-library-shows-empty-light-small.webp"
@@ -4620,7 +4620,7 @@ window.STORYMILE_DESIGN = {
       ],
       "title": "Queue",
       "width": 841,
-      "height": 1871,
+      "height": 1870,
       "preview": "previews/android-phone-library-queue-light.webp",
       "thumbnail": "previews/android-phone-library-queue-light-small.webp"
     },
@@ -4652,7 +4652,7 @@ window.STORYMILE_DESIGN = {
       ],
       "title": "Queue · Empty",
       "width": 841,
-      "height": 1871,
+      "height": 1870,
       "preview": "previews/android-phone-library-queue-empty-light.webp",
       "thumbnail": "previews/android-phone-library-queue-empty-light-small.webp"
     },
@@ -4668,7 +4668,7 @@ window.STORYMILE_DESIGN = {
       ],
       "title": "Queue · Empty",
       "width": 841,
-      "height": 1871,
+      "height": 1870,
       "preview": "previews/android-phone-library-queue-empty-dark.webp",
       "thumbnail": "previews/android-phone-library-queue-empty-dark-small.webp"
     },
@@ -4747,8 +4747,8 @@ window.STORYMILE_DESIGN = {
         1280
       ],
       "title": "Queue",
-      "width": 992,
-      "height": 1585,
+      "width": 993,
+      "height": 1584,
       "preview": "previews/android-tablet-portrait-library-queue-light.webp",
       "thumbnail": "previews/android-tablet-portrait-library-queue-light-small.webp"
     },
@@ -4827,7 +4827,7 @@ window.STORYMILE_DESIGN = {
         800
       ],
       "title": "Queue",
-      "width": 1585,
+      "width": 1586,
       "height": 992,
       "preview": "previews/android-tablet-landscape-library-queue-dark.webp",
       "thumbnail": "previews/android-tablet-landscape-library-queue-dark-small.webp"
@@ -4991,6 +4991,518 @@ window.STORYMILE_DESIGN = {
       "height": 941,
       "preview": "previews/desktop-library-queue-empty-dark.webp",
       "thumbnail": "previews/desktop-library-queue-empty-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-library-history-dark",
+      "title": "History",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-library-history-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-library-history-dark.webp",
+      "thumbnail": "previews/android-foldable-library-history-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-library-history-empty-dark",
+      "title": "History · Empty",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-foldable-library-history-empty-dark.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-library-history-empty-dark.webp",
+      "thumbnail": "previews/android-foldable-library-history-empty-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-library-history-empty-light",
+      "title": "History · Empty",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-library-history-empty-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-library-history-empty-light.webp",
+      "thumbnail": "previews/android-foldable-library-history-empty-light-small.webp"
+    },
+    {
+      "id": "android-foldable-library-history-light",
+      "title": "History",
+      "device": "foldable",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-foldable-library-history-light.png",
+      "viewport": [
+        841,
+        701
+      ],
+      "width": 1373,
+      "height": 1145,
+      "preview": "previews/android-foldable-library-history-light.webp",
+      "thumbnail": "previews/android-foldable-library-history-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-library-history-dark",
+      "title": "History",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-library-history-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-library-history-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-library-history-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-library-history-empty-dark",
+      "title": "History · Empty",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-landscape-library-history-empty-dark.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-library-history-empty-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-library-history-empty-dark-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-library-history-empty-light",
+      "title": "History · Empty",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-library-history-empty-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-library-history-empty-light.webp",
+      "thumbnail": "previews/android-phone-landscape-library-history-empty-light-small.webp"
+    },
+    {
+      "id": "android-phone-landscape-library-history-light",
+      "title": "History",
+      "device": "phone-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-landscape-library-history-light.png",
+      "viewport": [
+        916,
+        412
+      ],
+      "width": 1870,
+      "height": 841,
+      "preview": "previews/android-phone-landscape-library-history-light.webp",
+      "thumbnail": "previews/android-phone-landscape-library-history-light-small.webp"
+    },
+    {
+      "id": "android-phone-library-history-dark",
+      "title": "History",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-library-history-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-library-history-dark.webp",
+      "thumbnail": "previews/android-phone-library-history-dark-small.webp"
+    },
+    {
+      "id": "android-phone-library-history-empty-dark",
+      "title": "History · Empty",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-phone-library-history-empty-dark.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-library-history-empty-dark.webp",
+      "thumbnail": "previews/android-phone-library-history-empty-dark-small.webp"
+    },
+    {
+      "id": "android-phone-library-history-empty-light",
+      "title": "History · Empty",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-library-history-empty-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-library-history-empty-light.webp",
+      "thumbnail": "previews/android-phone-library-history-empty-light-small.webp"
+    },
+    {
+      "id": "android-phone-library-history-light",
+      "title": "History",
+      "device": "phone-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-phone-library-history-light.png",
+      "viewport": [
+        412,
+        916
+      ],
+      "width": 841,
+      "height": 1870,
+      "preview": "previews/android-phone-library-history-light.webp",
+      "thumbnail": "previews/android-phone-library-history-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-library-history-dark",
+      "title": "History",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-library-history-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1585,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-library-history-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-library-history-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-library-history-empty-dark",
+      "title": "History · Empty",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-library-history-empty-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-library-history-empty-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-library-history-empty-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-library-history-empty-light",
+      "title": "History · Empty",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-library-history-empty-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-library-history-empty-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-library-history-empty-light-small.webp"
+    },
+    {
+      "id": "android-tablet-landscape-library-history-light",
+      "title": "History",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-landscape-library-history-light.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1586,
+      "height": 992,
+      "preview": "previews/android-tablet-landscape-library-history-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-library-history-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-library-history-dark",
+      "title": "History",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-library-history-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-library-history-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-library-history-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-library-history-empty-dark",
+      "title": "History · Empty",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-portrait-library-history-empty-dark.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-library-history-empty-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-library-history-empty-dark-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-library-history-empty-light",
+      "title": "History · Empty",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-library-history-empty-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-library-history-empty-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-library-history-empty-light-small.webp"
+    },
+    {
+      "id": "android-tablet-portrait-library-history-light",
+      "title": "History",
+      "device": "tablet-portrait",
+      "platform": "android",
+      "theme": "light",
+      "file": "screens/android-tablet-portrait-library-history-light.png",
+      "viewport": [
+        800,
+        1280
+      ],
+      "width": 992,
+      "height": 1586,
+      "preview": "previews/android-tablet-portrait-library-history-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-library-history-light-small.webp"
+    },
+    {
+      "id": "desktop-library-history-dark",
+      "title": "History",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-library-history-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-library-history-dark.webp",
+      "thumbnail": "previews/desktop-library-history-dark-small.webp"
+    },
+    {
+      "id": "desktop-library-history-empty-dark",
+      "title": "History · Empty",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "dark",
+      "file": "screens/desktop-library-history-empty-dark.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-library-history-empty-dark.webp",
+      "thumbnail": "previews/desktop-library-history-empty-dark-small.webp"
+    },
+    {
+      "id": "desktop-library-history-empty-light",
+      "title": "History · Empty",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-library-history-empty-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-library-history-empty-light.webp",
+      "thumbnail": "previews/desktop-library-history-empty-light-small.webp"
+    },
+    {
+      "id": "desktop-library-history-light",
+      "title": "History",
+      "device": "desktop",
+      "platform": "desktop",
+      "theme": "light",
+      "file": "screens/desktop-library-history-light.png",
+      "viewport": [
+        1600,
+        900
+      ],
+      "width": 1672,
+      "height": 941,
+      "preview": "previews/desktop-library-history-light.webp",
+      "thumbnail": "previews/desktop-library-history-light-small.webp"
+    },
+    {
+      "id": "ios-phone-library-history-dark",
+      "title": "History",
+      "device": "phone-portrait",
+      "platform": "ios",
+      "theme": "dark",
+      "file": "screens/ios-phone-library-history-dark.png",
+      "viewport": [
+        393,
+        852
+      ],
+      "width": 853,
+      "height": 1844,
+      "preview": "previews/ios-phone-library-history-dark.webp",
+      "thumbnail": "previews/ios-phone-library-history-dark-small.webp"
+    },
+    {
+      "id": "ios-phone-library-history-empty-dark",
+      "title": "History · Empty",
+      "device": "phone-portrait",
+      "platform": "ios",
+      "theme": "dark",
+      "file": "screens/ios-phone-library-history-empty-dark.png",
+      "viewport": [
+        393,
+        852
+      ],
+      "width": 853,
+      "height": 1844,
+      "preview": "previews/ios-phone-library-history-empty-dark.webp",
+      "thumbnail": "previews/ios-phone-library-history-empty-dark-small.webp"
+    },
+    {
+      "id": "ios-phone-library-history-empty-light",
+      "title": "History · Empty",
+      "device": "phone-portrait",
+      "platform": "ios",
+      "theme": "light",
+      "file": "screens/ios-phone-library-history-empty-light.png",
+      "viewport": [
+        393,
+        852
+      ],
+      "width": 853,
+      "height": 1844,
+      "preview": "previews/ios-phone-library-history-empty-light.webp",
+      "thumbnail": "previews/ios-phone-library-history-empty-light-small.webp"
+    },
+    {
+      "id": "ios-phone-library-history-light",
+      "title": "History",
+      "device": "phone-portrait",
+      "platform": "ios",
+      "theme": "light",
+      "file": "screens/ios-phone-library-history-light.png",
+      "viewport": [
+        393,
+        852
+      ],
+      "width": 853,
+      "height": 1844,
+      "preview": "previews/ios-phone-library-history-light.webp",
+      "thumbnail": "previews/ios-phone-library-history-light-small.webp"
+    },
+    {
+      "id": "ios-tablet-landscape-library-history-dark",
+      "title": "History",
+      "device": "tablet-landscape",
+      "platform": "ios",
+      "theme": "dark",
+      "file": "screens/ios-tablet-landscape-library-history-dark.png",
+      "viewport": [
+        1366,
+        1024
+      ],
+      "width": 1448,
+      "height": 1086,
+      "preview": "previews/ios-tablet-landscape-library-history-dark.webp",
+      "thumbnail": "previews/ios-tablet-landscape-library-history-dark-small.webp"
+    },
+    {
+      "id": "ios-tablet-landscape-library-history-empty-dark",
+      "title": "History · Empty",
+      "device": "tablet-landscape",
+      "platform": "ios",
+      "theme": "dark",
+      "file": "screens/ios-tablet-landscape-library-history-empty-dark.png",
+      "viewport": [
+        1366,
+        1024
+      ],
+      "width": 1448,
+      "height": 1086,
+      "preview": "previews/ios-tablet-landscape-library-history-empty-dark.webp",
+      "thumbnail": "previews/ios-tablet-landscape-library-history-empty-dark-small.webp"
+    },
+    {
+      "id": "ios-tablet-landscape-library-history-empty-light",
+      "title": "History · Empty",
+      "device": "tablet-landscape",
+      "platform": "ios",
+      "theme": "light",
+      "file": "screens/ios-tablet-landscape-library-history-empty-light.png",
+      "viewport": [
+        1366,
+        1024
+      ],
+      "width": 1448,
+      "height": 1086,
+      "preview": "previews/ios-tablet-landscape-library-history-empty-light.webp",
+      "thumbnail": "previews/ios-tablet-landscape-library-history-empty-light-small.webp"
+    },
+    {
+      "id": "ios-tablet-landscape-library-history-light",
+      "title": "History",
+      "device": "tablet-landscape",
+      "platform": "ios",
+      "theme": "light",
+      "file": "screens/ios-tablet-landscape-library-history-light.png",
+      "viewport": [
+        1366,
+        1024
+      ],
+      "width": 1448,
+      "height": 1086,
+      "preview": "previews/ios-tablet-landscape-library-history-light.webp",
+      "thumbnail": "previews/ios-tablet-landscape-library-history-light-small.webp"
     }
   ],
   "themePairs": [
@@ -5294,6 +5806,90 @@ window.STORYMILE_DESIGN = {
       "device": "desktop",
       "light": "desktop-library-empty-light",
       "dark": "desktop-library-empty-dark"
+    },
+    {
+      "id": "android-phone-library-history",
+      "title": "Library · History",
+      "device": "phone-portrait",
+      "light": "android-phone-library-history-light",
+      "dark": "android-phone-library-history-dark"
+    },
+    {
+      "id": "android-phone-landscape-library-history",
+      "title": "Library · History",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-library-history-light",
+      "dark": "android-phone-landscape-library-history-dark"
+    },
+    {
+      "id": "android-tablet-portrait-library-history",
+      "title": "Library · History",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-library-history-light",
+      "dark": "android-tablet-portrait-library-history-dark"
+    },
+    {
+      "id": "android-tablet-landscape-library-history",
+      "title": "Library · History",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-library-history-light",
+      "dark": "android-tablet-landscape-library-history-dark"
+    },
+    {
+      "id": "android-foldable-library-history",
+      "title": "Library · History",
+      "device": "foldable",
+      "light": "android-foldable-library-history-light",
+      "dark": "android-foldable-library-history-dark"
+    },
+    {
+      "id": "desktop-library-history",
+      "title": "Library · History",
+      "device": "desktop",
+      "light": "desktop-library-history-light",
+      "dark": "desktop-library-history-dark"
+    },
+    {
+      "id": "android-phone-library-history-empty",
+      "title": "Library · History · Empty",
+      "device": "phone-portrait",
+      "light": "android-phone-library-history-empty-light",
+      "dark": "android-phone-library-history-empty-dark"
+    },
+    {
+      "id": "android-phone-landscape-library-history-empty",
+      "title": "Library · History · Empty",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-library-history-empty-light",
+      "dark": "android-phone-landscape-library-history-empty-dark"
+    },
+    {
+      "id": "android-tablet-portrait-library-history-empty",
+      "title": "Library · History · Empty",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-library-history-empty-light",
+      "dark": "android-tablet-portrait-library-history-empty-dark"
+    },
+    {
+      "id": "android-tablet-landscape-library-history-empty",
+      "title": "Library · History · Empty",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-library-history-empty-light",
+      "dark": "android-tablet-landscape-library-history-empty-dark"
+    },
+    {
+      "id": "android-foldable-library-history-empty",
+      "title": "Library · History · Empty",
+      "device": "foldable",
+      "light": "android-foldable-library-history-empty-light",
+      "dark": "android-foldable-library-history-empty-dark"
+    },
+    {
+      "id": "desktop-library-history-empty",
+      "title": "Library · History · Empty",
+      "device": "desktop",
+      "light": "desktop-library-history-empty-light",
+      "dark": "desktop-library-history-empty-dark"
     },
     {
       "id": "android-phone-downloads",
@@ -6111,6 +6707,34 @@ window.STORYMILE_DESIGN = {
           "url": "https://developer.apple.com/design/human-interface-guidelines/toggles"
         }
       ]
+    },
+    {
+      "id": "history",
+      "title": "Library · History",
+      "android": "android-phone-library-history-light",
+      "ios": "ios-phone-library-history-light",
+      "note": "History keeps finished episodes. Both platforms offer Add to queue for listening again."
+    },
+    {
+      "id": "history-empty",
+      "title": "Library · History · Empty",
+      "android": "android-phone-library-history-empty-light",
+      "ios": "ios-phone-library-history-empty-light",
+      "note": "History keeps finished episodes. Both platforms offer Add to queue for listening again."
+    },
+    {
+      "id": "tablet-history",
+      "title": "Library · History",
+      "android": "android-tablet-landscape-library-history-light",
+      "ios": "ios-tablet-landscape-library-history-light",
+      "note": "History keeps finished episodes. Both platforms offer Add to queue for listening again."
+    },
+    {
+      "id": "tablet-history-empty",
+      "title": "Library · History · Empty",
+      "android": "android-tablet-landscape-library-history-empty-light",
+      "ios": "ios-tablet-landscape-library-history-empty-light",
+      "note": "History keeps finished episodes. Both platforms offer Add to queue for listening again."
     }
   ],
   "flows": [
@@ -6163,10 +6787,12 @@ window.STORYMILE_DESIGN = {
         "android-phone-library-queue-light",
         "android-phone-library-shows-light",
         "android-phone-library-light",
+        "android-phone-library-history-light",
         "android-phone-episode-light",
         "android-tablet-landscape-library-queue-light",
         "android-tablet-landscape-library-shows-light",
         "android-tablet-landscape-library-light",
+        "android-tablet-landscape-library-history-light",
         "android-tablet-landscape-episode-light"
       ]
     },
@@ -6279,6 +6905,34 @@ window.STORYMILE_DESIGN = {
       "device": "tablet-landscape",
       "light": "ios-tablet-landscape-settings-light",
       "dark": "ios-tablet-landscape-settings-dark"
+    },
+    {
+      "id": "ios-phone-library-history-empty",
+      "title": "Library · History · Empty",
+      "device": "phone-portrait",
+      "light": "ios-phone-library-history-empty-light",
+      "dark": "ios-phone-library-history-empty-dark"
+    },
+    {
+      "id": "ios-phone-library-history",
+      "title": "Library · History",
+      "device": "phone-portrait",
+      "light": "ios-phone-library-history-light",
+      "dark": "ios-phone-library-history-dark"
+    },
+    {
+      "id": "ios-tablet-landscape-library-history-empty",
+      "title": "Library · History · Empty",
+      "device": "tablet-landscape",
+      "light": "ios-tablet-landscape-library-history-empty-light",
+      "dark": "ios-tablet-landscape-library-history-empty-dark"
+    },
+    {
+      "id": "ios-tablet-landscape-library-history",
+      "title": "Library · History",
+      "device": "tablet-landscape",
+      "light": "ios-tablet-landscape-library-history-light",
+      "dark": "ios-tablet-landscape-library-history-dark"
     }
   ],
   "flowThemePairs": [
