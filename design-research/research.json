@@ -250,12 +250,13 @@
     }
   ],
   "notes": [
-    "Android is the default. Five screens compare Android and iOS on phone portrait and tablet landscape in both themes.",
+    "Android is the default. Android and iOS comparisons cover phone portrait and tablet landscape in both themes.",
     "Viewports are layout targets. PNG dimensions come from the generated images; the gallery preserves their native proportions.",
     "The supplied blue paper boat remains the brand mark. Profile opens from the avatar; primary destinations are Home, Library, and Downloads.",
     "Phone detail screens become neighboring panes in larger windows. Playback and selection persist when the window changes.",
-    "Library tabs are Queue, Shows, and Saved. The player shortcut opens the same queue. Queuing does not save or download an episode.",
+    "Library tabs are Queue, Shows, Saved, and History. The player shortcut opens the same queue. Finished episodes remain in History after they leave the queue.",
     "Queue and Chapters are separate choices from the player; they do not form an automatic sequence.",
+    "Add to queue is the primary episode action and appends without interrupting playback. Play now starts immediately. Queuing does not save or download an episode.",
     "Saving keeps a Library bookmark. Downloading stores audio locally. Removing a download keeps the bookmark.",
     "Generated screens are design references. Exact typography, platform components, and accessibility need implementation validation."
   ],
