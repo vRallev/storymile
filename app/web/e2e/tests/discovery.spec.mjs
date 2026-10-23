@@ -82,8 +82,8 @@ test('loads real-mode charts after retry and searches topics in the browser', as
   await chart.click({ force: true });
   await expect(page.locator('[id="show-title"]')).toContainText('Chart Podcast');
   const back = page.locator('[id="show-back"]');
-  // Forced canvas clicks need stable coordinates after navigation.
-  await (await back.elementHandle()).waitForElementState('stable');
+  // Semantics bounds can lag the canvas until the outgoing screen finishes its transition.
+  await expect(page.locator('[id="discovery-screen"]')).not.toBeAttached();
   await back.click({ force: true });
   await expect(page.locator('[id="show-screen"]')).not.toBeAttached();
   await expect(chart).toBeVisible();
