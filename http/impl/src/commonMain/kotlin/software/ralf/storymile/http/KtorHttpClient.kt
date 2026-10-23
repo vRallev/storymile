@@ -10,6 +10,7 @@ import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -19,21 +20,28 @@ import software.ralf.app.platform.scope.Scoped
 @SingleIn(AppScope::class)
 @ContributesScoped(AppScope::class)
 class KtorHttpClient(private val factory: KtorClientFactory) : HttpClient, Scoped {
-  private val client = factory.create {
-    expectSuccess = false
-    followRedirects = false
-    install(HttpTimeout) {
-      requestTimeoutMillis = 30_000
-      connectTimeoutMillis = 10_000
-      socketTimeoutMillis = 15_000
-    }
+  private val lifetime = Job()
+  private val client by lazy {
+    factory
+      .create {
+        expectSuccess = false
+        followRedirects = false
+        install(HttpTimeout) {
+          requestTimeoutMillis = 30_000
+          connectTimeoutMillis = 10_000
+          socketTimeoutMillis = 15_000
+        }
+      }
+      .also { client ->
+        lifetime.invokeOnCompletion {
+          client.coroutineContext.cancel()
+          client.close()
+        }
+      }
   }
-  private var closed = false
 
   override fun onExitScope() {
-    closed = true
-    client.coroutineContext.cancel()
-    client.close()
+    lifetime.cancel()
   }
 
   override suspend fun <T : Any> get(
@@ -41,7 +49,7 @@ class KtorHttpClient(private val factory: KtorClientFactory) : HttpClient, Scope
     parameters: Map<String, String>,
     decode: (String) -> T,
   ): HttpResponse<T> {
-    check(!closed) { "The network client is closed." }
+    check(lifetime.isActive) { "The network client is closed." }
     val response =
       try {
         request(url, parameters)
