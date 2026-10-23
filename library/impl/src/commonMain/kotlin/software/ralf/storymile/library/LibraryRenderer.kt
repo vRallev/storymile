@@ -52,12 +52,14 @@ import software.ralf.storymile.library.impl.generated.resources.library_illustra
 import software.ralf.storymile.library.impl.generated.resources.library_queue
 import software.ralf.storymile.library.impl.generated.resources.library_queue_empty_description
 import software.ralf.storymile.library.impl.generated.resources.library_queue_empty_title
+import software.ralf.storymile.library.impl.generated.resources.library_queue_illustration
 import software.ralf.storymile.library.impl.generated.resources.library_saved
 import software.ralf.storymile.library.impl.generated.resources.library_saved_empty_description
 import software.ralf.storymile.library.impl.generated.resources.library_saved_empty_title
 import software.ralf.storymile.library.impl.generated.resources.library_shows
 import software.ralf.storymile.library.impl.generated.resources.library_shows_empty_description
 import software.ralf.storymile.library.impl.generated.resources.library_shows_empty_title
+import software.ralf.storymile.library.impl.generated.resources.library_shows_illustration
 import software.ralf.storymile.library.impl.generated.resources.library_title
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.theme.AppTheme
@@ -223,27 +225,18 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
   @Composable
   private fun Illustration(tab: Tab, modifier: Modifier) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-      when (tab) {
-        Tab.QUEUE,
-        Tab.SHOWS ->
-          Icon(
-            imageVector =
-              if (tab == Tab.QUEUE) {
-                Icons.AutoMirrored.Filled.FormatListBulleted
-              } else {
-                Icons.Default.Podcasts
-              },
-            contentDescription = null,
-            tint = AppTheme.colorScheme.secondary,
-            modifier = Modifier.fillMaxSize(0.65f),
-          )
-        Tab.SAVED ->
-          Image(
-            painter = painterResource(Res.drawable.library_illustration),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-          )
-      }
+      Image(
+        painter =
+          painterResource(
+            when (tab) {
+              Tab.QUEUE -> Res.drawable.library_queue_illustration
+              Tab.SHOWS -> Res.drawable.library_shows_illustration
+              Tab.SAVED -> Res.drawable.library_illustration
+            },
+          ),
+        contentDescription = null,
+        modifier = Modifier.fillMaxSize(),
+      )
     }
   }
 
