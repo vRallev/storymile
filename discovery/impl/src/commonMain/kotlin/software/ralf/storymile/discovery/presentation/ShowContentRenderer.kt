@@ -1,6 +1,8 @@
 package software.ralf.storymile.discovery.presentation
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,14 +22,17 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +49,8 @@ import software.ralf.storymile.design.TitleBar
 import software.ralf.storymile.discovery.impl.generated.resources.Res
 import software.ralf.storymile.discovery.impl.generated.resources.episodes
 import software.ralf.storymile.discovery.impl.generated.resources.follow
+import software.ralf.storymile.discovery.impl.generated.resources.follow_error
+import software.ralf.storymile.discovery.impl.generated.resources.following
 import software.ralf.storymile.discovery.impl.generated.resources.hide_description
 import software.ralf.storymile.discovery.impl.generated.resources.no_description
 import software.ralf.storymile.discovery.impl.generated.resources.show_description
@@ -233,15 +240,48 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
           )
         }
       }
+      val buttonColor by
+        animateColorAsState(
+          targetValue =
+            if (model.followed) {
+              AppTheme.colorScheme.primaryContainer
+            } else {
+              AppTheme.colorScheme.primary
+            },
+        )
+      val contentColor by
+        animateColorAsState(
+          targetValue =
+            if (model.followed) {
+              AppTheme.colorScheme.onPrimaryContainer
+            } else {
+              AppTheme.colorScheme.onPrimary
+            },
+        )
       Button(
-        onClick = {},
-        modifier = Modifier.widthIn(min = 180.dp).testTag("show-follow"),
+        onClick = model.onToggleFollow,
+        enabled = model.followEnabled,
+        modifier = Modifier.widthIn(min = 180.dp).animateContentSize().testTag("show-follow"),
+        colors =
+          ButtonDefaults.buttonColors(containerColor = buttonColor, contentColor = contentColor),
         contentPadding =
           PaddingValues(horizontal = if (LocalShowPane.current) 12.dp else 24.dp, vertical = 12.dp),
       ) {
-        Icon(Icons.Filled.Add, null)
-        Spacer(Modifier.width(8.dp))
-        Text(stringResource(Res.string.follow))
+        AnimatedContent(targetState = model.followed, label = "Follow state") { followed ->
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(if (followed) Icons.Filled.Check else Icons.Filled.Add, null)
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(if (followed) Res.string.following else Res.string.follow))
+          }
+        }
+      }
+      if (model.followFailed) {
+        Text(
+          text = stringResource(Res.string.follow_error),
+          modifier = Modifier.testTag("show-follow-error"),
+          color = AppTheme.colorScheme.error,
+          style = AppTheme.typography.bodyMedium,
+        )
       }
     }
   }

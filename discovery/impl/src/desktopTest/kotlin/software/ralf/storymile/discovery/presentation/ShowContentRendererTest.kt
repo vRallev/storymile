@@ -12,12 +12,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasTestTag
@@ -37,6 +41,7 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
 import assertk.assertions.isLessThan
+import assertk.assertions.isNotEqualTo
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
@@ -47,6 +52,56 @@ import software.ralf.storymile.theme.testing.FakeThemeEnvironment
 
 class ShowContentRendererTest {
   private val themeEnvironment = FakeThemeEnvironment()
+
+  @Test
+  fun `follow button animates both directions and shows retryable failures`() {
+    listOf(false, true).forEach { darkTheme ->
+      runDesktopComposeUiTest(width = 600, height = 900) {
+        val state = mutableStateOf(model())
+        state.value =
+          state.value.copy(
+            onToggleFollow = { state.value = state.value.copy(followed = !state.value.followed) },
+          )
+        setContent {
+          StorymileTheme(environment = themeEnvironment, darkTheme = darkTheme) {
+            Surface(color = AppTheme.colorScheme.background) {
+              ShowContentRenderer().renderCompose(state.value, Modifier.fillMaxSize())
+            }
+          }
+        }
+        listOf(true, false).forEach { followed ->
+          val original = followButtonColor()
+          mainClock.autoAdvance = false
+          onNodeWithTag("show-follow").assertIsEnabled().performClick()
+          mainClock.advanceTimeByFrame()
+          mainClock.advanceTimeBy(80)
+          val intermediate = followButtonColor()
+          mainClock.advanceTimeBy(1000)
+          val settled = followButtonColor()
+          assertThat(intermediate).isNotEqualTo(original)
+          assertThat(intermediate).isNotEqualTo(settled)
+          mainClock.autoAdvance = true
+          onNodeWithTag("show-follow").assertTextContains(if (followed) "Following" else "Follow")
+          if (followed) {
+            val file =
+              File(
+                "build/reports/screenshots/show-following-${if (darkTheme) "dark" else "light"}.png",
+              )
+            file.parentFile.mkdirs()
+            ImageIO.write(onRoot().captureToImage().toAwtImage(), "png", file)
+          }
+        }
+        runOnIdle { state.value = state.value.copy(followEnabled = false) }
+        onNodeWithTag("show-follow").assertIsNotEnabled()
+        runOnIdle { state.value = state.value.copy(followEnabled = true, followFailed = true) }
+        onNodeWithTag("show-follow").assertIsEnabled()
+        onNodeWithTag("show-follow-error").assertIsDisplayed()
+      }
+    }
+  }
+
+  private fun ComposeUiTest.followButtonColor() =
+    onNodeWithTag("show-follow").captureToImage().toPixelMap().let { it[12, it.height / 2] }
 
   @Test
   fun `podcast title wrapping moves the header and episodes smoothly in both directions`() =
@@ -194,6 +249,10 @@ class ShowContentRendererTest {
           onRetry = {},
         ),
       descriptionExpanded = false,
+      followed = false,
+      followEnabled = true,
+      followFailed = false,
+      onToggleFollow = {},
       onToggleDescription = {},
       onPodcastSelected = {},
       onBack = {},

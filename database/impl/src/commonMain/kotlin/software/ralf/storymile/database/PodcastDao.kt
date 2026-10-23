@@ -14,6 +14,8 @@ interface PodcastDao {
   @Query("SELECT * FROM shows ORDER BY feedUrl")
   fun observe(): Flow<List<StoredPodcast>>
 
+  @Query("DELETE FROM shows WHERE feedUrl = :feedUrl") suspend fun delete(feedUrl: String)
+
   @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertShow(show: ShowEntity)
 
   @Insert suspend fun insertEpisodes(episodes: List<EpisodeEntity>)

@@ -15,6 +15,7 @@ import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
 import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.app.platform.presenter.compose.text.PresenterTextFieldState
+import software.ralf.storymile.database.PodcastDatabase
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.DiscoveryPresenter
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository
@@ -27,6 +28,7 @@ class DiscoveryPresenterImpl(
   private val repository: PodcastDiscoveryRepository,
   private val feeds: PodcastFeedRepository,
   private val episodeDetailsFactory: EpisodeDetailsPresenter.Factory,
+  private val database: PodcastDatabase,
   private val topic: DiscoveryTopic? = null,
   private val focusSearch: Boolean = false,
 ) : DiscoveryPresenter<DiscoveryPresenterImpl.Model> {
@@ -72,7 +74,15 @@ class DiscoveryPresenterImpl(
         }
       },
       onTopicSelected = {
-        backstack.push(DiscoveryPresenterImpl(repository, feeds, episodeDetailsFactory, topic = it))
+        backstack.push(
+          DiscoveryPresenterImpl(
+            repository = repository,
+            feeds = feeds,
+            episodeDetailsFactory = episodeDetailsFactory,
+            database = database,
+            topic = it,
+          ),
+        )
       },
       onPodcastSelected = { podcast ->
         backstack.push(
@@ -80,6 +90,7 @@ class DiscoveryPresenterImpl(
             catalog = repository,
             feeds = feeds,
             episodeDetailsFactory = episodeDetailsFactory,
+            database = database,
             initialPodcast = podcast,
             podcasts = (state as? CatalogState.Ready)?.podcasts.orEmpty(),
             source =

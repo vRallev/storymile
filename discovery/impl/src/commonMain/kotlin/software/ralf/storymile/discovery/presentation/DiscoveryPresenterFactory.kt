@@ -2,6 +2,7 @@ package software.ralf.storymile.discovery.presentation
 
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import software.ralf.storymile.database.PodcastDatabase
 import software.ralf.storymile.discovery.DiscoveryPresenter
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
@@ -14,12 +15,14 @@ class DiscoveryPresenterFactory(
   private val repository: PodcastDiscoveryRepository,
   private val feeds: PodcastFeedRepository,
   private val episodeDetailsFactory: EpisodeDetailsPresenter.Factory,
+  private val database: PodcastDatabase,
 ) : DiscoveryPresenter.Factory {
   override fun create(focusSearch: Boolean): DiscoveryPresenter<*> =
     DiscoveryPresenterImpl(
       repository = repository,
       feeds = feeds,
       episodeDetailsFactory = episodeDetailsFactory,
+      database = database,
       focusSearch = focusSearch,
     )
 }
