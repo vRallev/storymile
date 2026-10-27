@@ -65,6 +65,7 @@ class FollowShowPersistenceTest {
           val saved = user.database.podcasts.first().single()
           assertThat(saved.title).isEqualTo("The Quiet Current")
           assertThat(saved.episodes.size).isEqualTo(3)
+          cancelAndIgnoreRemainingEvents()
         }
       }
       withApplication(storageFactory) { graph, user ->
@@ -72,12 +73,14 @@ class FollowShowPersistenceTest {
           awaitModel { it.followed && it.followEnabled }.onToggleFollow()
           awaitModel { !it.followed && it.followEnabled }
           assertThat(user.database.podcasts.first()).isEmpty()
+          cancelAndIgnoreRemainingEvents()
         }
       }
       withApplication(storageFactory) { graph, user ->
         graph.showPresenter(user).test(this) {
           assertThat(awaitModel { it.followEnabled }.followed).isFalse()
           assertThat(user.database.podcasts.first()).isEmpty()
+          cancelAndIgnoreRemainingEvents()
         }
       }
     } finally {
