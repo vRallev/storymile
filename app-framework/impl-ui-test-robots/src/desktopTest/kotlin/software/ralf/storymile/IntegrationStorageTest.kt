@@ -63,9 +63,11 @@ class IntegrationStorageTest {
   }
 
   private suspend fun <T> withStorage(block: suspend (Storage) -> T): T {
-    val application = KmpApplication()
-    application.create(createGraphFactory<TestDesktopAppGraph.Factory>().create(application))
+    val application = KmpApplication {
+      createGraphFactory<TestDesktopAppGraph.Factory>().create(it)
+    }
     try {
+      application.awaitReady()
       return block(application.rootScope.metroDependencyGraph<AppGraph>().storage)
     } finally {
       application.destroy()

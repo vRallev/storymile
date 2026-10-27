@@ -8,15 +8,15 @@ import androidx.compose.ui.window.ComposeUIViewController
 import platform.UIKit.UIViewController
 import software.ralf.app.platform.renderer.ComposeRendererFactory
 import software.ralf.app.platform.renderer.renderCompose
-import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
+import software.ralf.storymile.theme.SkikoThemeEnvironment
 
 /** Called from Swift to create the Compose Multiplatform view controller. */
 @Suppress("unused")
-fun mainViewController(rootScopeProvider: RootScopeProvider): UIViewController =
-  ComposeUIViewController {
+fun mainViewController(kmpApplication: KmpApplication): UIViewController = ComposeUIViewController {
+  kmpApplication.Content(themeEnvironment = remember { SkikoThemeEnvironment() }) {
     val templateProvider = remember {
-      rootScopeProvider.rootScope
+      kmpApplication.rootScope
         .metroDependencyGraph<IosMainViewControllerGraph>()
         .templateProviderFactory
         .createTemplateProvider()
@@ -24,8 +24,9 @@ fun mainViewController(rootScopeProvider: RootScopeProvider): UIViewController =
 
     DisposableEffect(templateProvider) { onDispose { templateProvider.cancel() } }
 
-    val rendererFactory = remember { ComposeRendererFactory(rootScopeProvider) }
+    val rendererFactory = remember { ComposeRendererFactory(kmpApplication) }
     val template by templateProvider.templates.collectAsState()
 
     rendererFactory.renderCompose(template)
   }
+}

@@ -1,6 +1,7 @@
 package software.ralf.storymile
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,11 +20,14 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import dev.zacsweers.metro.createGraphFactory
 import java.awt.Taskbar
+import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
-import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import software.ralf.storymile.restart.DesktopProcessRestarter
 import software.ralf.storymile.theme.LocalThemeController
 import software.ralf.storymile.util.Platform
+import software.ralf.storymile.util.PlatformBindings
 
 /**
  * Launches the Desktop application. Command/Ctrl+S cycles phone, tablet, and desktop sizes;
@@ -43,10 +47,19 @@ fun main(args: Array<String>) {
     }
 
   val desktopApp = DesktopApp { createGraphFactory<DesktopAppGraph.Factory>().create(it) }
-  val platform = desktopApp.rootScope.metroDependencyGraph<AppGraph>().platform
-  val windowIcon = configureAppIcon(platform)
 
   application {
+    var windowIcon by remember { mutableStateOf<BitmapPainter?>(null) }
+    LaunchedEffect(Unit) {
+      val image = withContext(Dispatchers.IO) { loadAppIcon() }
+      if (Taskbar.isTaskbarSupported()) {
+        val taskbar = Taskbar.getTaskbar()
+        if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE)) {
+          taskbar.iconImage = image
+        }
+      }
+      windowIcon = BitmapPainter(image.toComposeImageBitmap())
+    }
     var windowSize by remember { mutableStateOf(initialSize) }
     val windowState = rememberWindowState(width = initialSize.width, height = initialSize.height)
     val themeController = LocalThemeController.current
@@ -96,15 +109,10 @@ fun main(args: Array<String>) {
   }
 }
 
-private fun configureAppIcon(platform: Platform): BitmapPainter {
+private fun loadAppIcon(): BufferedImage {
+  val platform = PlatformBindings.providePlatform()
   val iconResource = if (platform == Platform.Desktop.Mac) "icon-macos.png" else "icon.png"
-  val iconImage =
-    ImageIO.read(checkNotNull(Thread.currentThread().contextClassLoader.getResource(iconResource)))
-  if (Taskbar.isTaskbarSupported()) {
-    val taskbar = Taskbar.getTaskbar()
-    if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE)) {
-      taskbar.iconImage = iconImage
-    }
-  }
-  return BitmapPainter(iconImage.toComposeImageBitmap())
+  return ImageIO.read(
+    checkNotNull(Thread.currentThread().contextClassLoader.getResource(iconResource)),
+  )
 }

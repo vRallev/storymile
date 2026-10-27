@@ -542,10 +542,10 @@ class AppTemplateRendererTest {
     val backGestureDispatcher = BackGestureDispatcherPresenter.createNewInstance()
     private val templateRenderer =
       AppTemplateRenderer(
-        backGestureDispatcher,
-        mutableScreenSizeProvider,
-        FakeThemeEnvironment(),
-        FakeRuntimeModeController(),
+        backGestureDispatcherPresenter = backGestureDispatcher,
+        screenSizeProvider = mutableScreenSizeProvider,
+        themeEnvironment = FakeThemeEnvironment(),
+        runtimeModeController = FakeRuntimeModeController(),
       )
     private val slotRenderer = SlotRenderer(forwardModifiers)
 

@@ -177,12 +177,13 @@ class RuntimeModeStorageTest {
     platform: StoragePlatform,
     block: suspend (Graph, FakeApplicationRestarter) -> Unit,
   ) {
-    val application = KmpApplication()
     val restarter = FakeApplicationRestarter()
-    val graph = createGraphFactory<Graph.Factory>().create(application, platform, restarter)
-    application.create(graph)
+    val application = KmpApplication {
+      createGraphFactory<Graph.Factory>().create(it, platform, restarter)
+    }
     try {
-      block(graph, restarter)
+      application.awaitReady()
+      block(application.rootScope.metroDependencyGraph<Graph>(), restarter)
     } finally {
       application.destroy()
     }

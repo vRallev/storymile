@@ -38,9 +38,11 @@ class DesktopHeadlessTestRule {
     block: suspend ReceiveTurbine<AppTemplate>.() -> Unit,
   ) {
     runTest {
-      val application = KmpApplication()
-      application.create(createGraphFactory<TestDesktopAppGraph.Factory>().create(application))
+      val application = KmpApplication {
+        createGraphFactory<TestDesktopAppGraph.Factory>().create(it)
+      }
       try {
+        application.awaitReady()
         TestPlaylists.clear(application.rootScope)
         val graph = application.rootScope.metroDependencyGraph<Graph>()
         graph.screenSizeProvider.update(ScreenSize.from(windowSize.width, windowSize.height))

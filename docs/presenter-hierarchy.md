@@ -110,6 +110,12 @@ places the template slots for the available window. It adapts navigation placeme
 presentation while keeping the shared presenter tree. Use the linked source files for model details
 and layout rules.
 
+[KmpApplication](../app-framework/impl/src/commonMain/kotlin/software/ralf/storymile/KmpApplication.kt)
+shows the [boat](../launch-animation/public/src/commonMain/kotlin/software/ralf/storymile/launchanimation/LaunchAnimation.kt)
+before it creates the app scope in the background. The host composes the template behind the boat.
+The reveal waits for the first content layout and draw. Host recreation resumes an interrupted reveal;
+resume does not replay a completed reveal.
+
 [TabsRenderer](../tabs/impl/src/commonMain/kotlin/software/ralf/storymile/tabs/TabsRenderer.kt)
 shows Home, Library, and Downloads with Material icons in every navigation layout.
 Side navigation also shows the Storymile logo and title.

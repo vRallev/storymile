@@ -145,11 +145,12 @@ class PlaylistScopeTest {
     storageFactory: Storage.Factory = InMemoryStorageFactory(),
     block: suspend (Graph) -> T,
   ): T {
-    val application = KmpApplication()
-    val graph = createGraphFactory<Graph.Factory>().create(application, storageFactory)
-    application.create(graph)
+    val application = KmpApplication {
+      createGraphFactory<Graph.Factory>().create(it, storageFactory)
+    }
     try {
-      return block(graph)
+      application.awaitReady()
+      return block(application.rootScope.metroDependencyGraph<Graph>())
     } finally {
       application.destroy()
     }
