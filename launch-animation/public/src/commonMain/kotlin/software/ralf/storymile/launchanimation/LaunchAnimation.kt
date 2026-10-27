@@ -48,8 +48,8 @@ import software.ralf.storymile.theme.AppTheme
  */
 @Composable
 fun LaunchAnimation(
-  progress: Animatable<Float, AnimationVector1D> = remember { Animatable(0f) },
   modifier: Modifier = Modifier,
+  progress: Animatable<Float, AnimationVector1D> = remember { Animatable(0f) },
   contentReady: Boolean = true,
   onFirstFrame: () -> Unit = {},
   content: @Composable () -> Unit,
