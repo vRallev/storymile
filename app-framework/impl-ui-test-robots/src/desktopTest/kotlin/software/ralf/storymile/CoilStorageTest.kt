@@ -8,15 +8,18 @@ import coil3.SingletonImageLoader
 import coil3.annotation.DelicateCoilApi
 import dev.zacsweers.metro.createGraphFactory
 import kotlin.test.Test
+import kotlinx.coroutines.test.runTest
 
 @OptIn(DelicateCoilApi::class)
 class CoilStorageTest {
   @Test
-  fun `application startup configures a memory-only singleton with in-memory storage`() {
+  fun `application startup configures a memory-only singleton with in-memory storage`() = runTest {
     SingletonImageLoader.reset()
-    val application = KmpApplication()
-    application.create(createGraphFactory<TestDesktopAppGraph.Factory>().create(application))
+    val application = KmpApplication {
+      createGraphFactory<TestDesktopAppGraph.Factory>().create(it)
+    }
     try {
+      application.awaitReady()
       val loader = SingletonImageLoader.get(PlatformContext.INSTANCE)
       try {
         assertThat(loader.diskCache).isNull()

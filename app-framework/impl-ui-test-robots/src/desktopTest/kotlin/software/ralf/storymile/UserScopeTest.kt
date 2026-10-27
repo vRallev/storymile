@@ -35,14 +35,14 @@ import software.ralf.storymile.user.UserScope
 class UserScopeTest {
   @Test
   fun `application starts with a guest bound to its user scope`() = runTest {
-    val application = KmpApplication()
-    val graph = createGraphFactory<Graph.Factory>().create(application, InMemoryStorageFactory())
-    val manager: UserManager = graph.userManager
-
-    assertFailure { manager.userScope }.isInstanceOf<IllegalStateException>()
-
-    application.create(graph)
+    val application = KmpApplication {
+      val graph = createGraphFactory<Graph.Factory>().create(it, InMemoryStorageFactory())
+      assertFailure { graph.userManager.userScope }.isInstanceOf<IllegalStateException>()
+      graph
+    }
     try {
+      application.awaitReady()
+      val manager: UserManager = application.rootScope.metroDependencyGraph<Graph>().userManager
       val userScope = manager.userScope.first()
       val user: User = userScope.metroDependencyGraph<UserBindings>().user
       assertThat(user.isGuest).isTrue()
@@ -149,13 +149,13 @@ class UserScopeTest {
     }
   }
 
-  private fun createApplication(
+  private suspend fun createApplication(
     storageFactory: Storage.Factory = InMemoryStorageFactory(),
   ): KmpApplication {
-    val application = KmpApplication()
-    application.create(
-      createGraphFactory<Graph.Factory>().create(application, storageFactory),
-    )
+    val application = KmpApplication {
+      createGraphFactory<Graph.Factory>().create(it, storageFactory)
+    }
+    application.awaitReady()
     return application
   }
 

@@ -21,8 +21,10 @@ interface IosAppGraph {
   }
 }
 
-/** Called from Swift to create the production iOS graph. */
+/** Called from Swift to retain the application before creating the production iOS graph. */
 @Suppress("unused")
-fun createIosAppGraph(application: UIApplication, rootScopeProvider: RootScopeProvider): AppGraph {
-  return createGraphFactory<IosAppGraph.Factory>().create(application, rootScopeProvider)
+fun createIosApplication(application: UIApplication): KmpApplication {
+  return KmpApplication {
+    createGraphFactory<IosAppGraph.Factory>().create(application, it)
+  }
 }
