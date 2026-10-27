@@ -48,7 +48,7 @@ class ShowEpisodePaneUiTest {
         val catalog = requireNotNull(initial.catalog)
         val episode = bounds("episode-0")
         assertCompactPodcast(initial)
-        assertSingleLineFollow()
+        assertSingleLineFollowing()
         saveFrame("${width.value.toInt()}-catalog")
 
         mainClock.autoAdvance = false
@@ -61,7 +61,7 @@ class ShowEpisodePaneUiTest {
           val details = bounds("episode-details-screen")
           saveFrame("${width.value.toInt()}-details")
           assertCompactPodcast(selected)
-          assertSingleLineFollow()
+          assertSingleLineFollowing()
           assertBoundsNear(actual = selected.podcast.left, expected = catalog.left)
           assertBoundsNear(actual = selected.podcast.width, expected = catalog.width)
           assertThat(selected.podcast.right).isLessThanOrEqualTo(details.left)
@@ -338,9 +338,9 @@ class ShowEpisodePaneUiTest {
     }
   }
 
-  private fun ComposeUiTest.assertSingleLineFollow() {
+  private fun ComposeUiTest.assertSingleLineFollowing() {
     val layouts = mutableListOf<TextLayoutResult>()
-    onNodeWithText("Follow", useUnmergedTree = true).performSemanticsAction(
+    onNodeWithText("Following", useUnmergedTree = true).performSemanticsAction(
       SemanticsActions.GetTextLayoutResult,
     ) {
       it(layouts)

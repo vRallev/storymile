@@ -29,6 +29,10 @@ class DatabasePersistenceTest {
         }
         DatabaseFixture(path).use { reopened ->
           assertThat(reopened.podcasts.first()).isEqualTo(listOf(podcast))
+          reopened.delete(podcast.feedUrl)
+        }
+        DatabaseFixture(path).use { reopened ->
+          assertThat(reopened.podcasts.first()).isEmpty()
         }
       } finally {
         FileSystem.SYSTEM.deleteRecursively(directory)
