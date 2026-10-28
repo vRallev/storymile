@@ -31,14 +31,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.coil.PodcastArtwork
+import software.ralf.storymile.episodedetails.EpisodeSharedElement
+import software.ralf.storymile.episodedetails.episodeSharedElement
 import software.ralf.storymile.shows.generated.resources.Res
 import software.ralf.storymile.shows.generated.resources.episodes_error
 import software.ralf.storymile.shows.generated.resources.loading_episodes
 import software.ralf.storymile.shows.generated.resources.no_episodes
 import software.ralf.storymile.shows.generated.resources.play_episode
 import software.ralf.storymile.shows.generated.resources.retry
-import software.ralf.storymile.episodedetails.EpisodeSharedElement
-import software.ralf.storymile.episodedetails.episodeSharedElement
 import software.ralf.storymile.theme.AppTheme
 
 /** Displays a short episode list with loading and retry states. */

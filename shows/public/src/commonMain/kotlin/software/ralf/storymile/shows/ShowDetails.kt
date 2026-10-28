@@ -33,14 +33,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import software.ralf.storymile.shows.PodcastSharedElement.Companion.podcastSharedElement
 import software.ralf.storymile.shows.generated.resources.Res
 import software.ralf.storymile.shows.generated.resources.episodes
-import software.ralf.storymile.shows.generated.resources.follow
 import software.ralf.storymile.shows.generated.resources.follow_error
 import software.ralf.storymile.shows.generated.resources.hide_description
 import software.ralf.storymile.shows.generated.resources.no_description
 import software.ralf.storymile.shows.generated.resources.show_description
-import software.ralf.storymile.shows.PodcastSharedElement.Companion.podcastSharedElement
 import software.ralf.storymile.theme.AppTheme
 
 /** Displays show metadata, follow controls, and episodes inside its caller's navigation. */
@@ -52,22 +51,28 @@ fun ShowDetails(
   transitionSource: String? = null,
   stackedArtwork: Boolean = false,
 ) {
-  ShowDetailsLayout(pane = pane, transitionSource = transitionSource, stackedArtwork = stackedArtwork).Content(model, modifier)
+  ShowDetailsLayout(
+      pane = pane,
+      transitionSource = transitionSource,
+      stackedArtwork = stackedArtwork,
+    )
+    .Content(model, modifier)
 }
 
-private class ShowDetailsLayout(private val pane: Boolean, private val transitionSource: String?, private val stackedArtwork: Boolean) {
+private class ShowDetailsLayout(
+  private val pane: Boolean,
+  private val transitionSource: String?,
+  private val stackedArtwork: Boolean,
+) {
   @Composable
   fun Content(model: ShowDetailsModel, modifier: Modifier) {
-    BoxWithConstraints(
-      modifier.fillMaxSize(),
-    ) {
+    BoxWithConstraints(modifier.fillMaxSize()) {
       val edgeToEdgeEpisodes = !pane && maxWidth < 600.dp
       val contentModifier = Modifier.padding(horizontal = if (edgeToEdgeEpisodes) 16.dp else 0.dp)
       val detailState = key(model.podcast.id) { rememberLazyListState() }
       Column(Modifier.fillMaxSize()) {
         Row(
-          Modifier.weight(1f)
-            .padding(horizontal = if (pane || edgeToEdgeEpisodes) 0.dp else 32.dp),
+          Modifier.weight(1f).padding(horizontal = if (pane || edgeToEdgeEpisodes) 0.dp else 32.dp),
         ) {
           LazyColumn(
             modifier = Modifier.weight(1.35f).testTag("show-detail"),

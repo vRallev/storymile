@@ -1,7 +1,7 @@
 package software.ralf.storymile.library
 
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -75,34 +75,38 @@ class LibraryShowsPresenter(
       loading = saved == null,
       failed = saved?.isFailure == true,
       detailOpen = detailOpen && selected != null,
-      details = selected?.let { feed ->
-        ShowDetailsModel(
-          podcast = feed.asPodcast(),
-          episodes = ShowEpisodes(
-            episodes = feed.episodes.map { episode ->
-              val details = EpisodeDetails(
-                feedUrl = feed.feedUrl,
-                podcastTitle = feed.title,
-                artworkUrl = episode.artworkUrl ?: feed.artworkUrl,
-                episode = episode,
-              )
-              ShowEpisodes.Episode(
-                details = details,
-                onClick = { backstack.push(episodeDetailsFactory.create(details)) },
-              )
-            },
-            loading = false,
-            failed = false,
-            onRetry = {},
-          ),
-          descriptionExpanded = descriptionExpanded,
-          followed = true,
-          followEnabled = feed.feedUrl !in updating,
-          followFailed = failed == feed.feedUrl,
-          onToggleFollow = { unfollow(feed.feedUrl) },
-          onToggleDescription = { descriptionExpanded = !descriptionExpanded },
-        )
-      },
+      details =
+        selected?.let { feed ->
+          ShowDetailsModel(
+            podcast = feed.asPodcast(),
+            episodes =
+              ShowEpisodes(
+                episodes =
+                  feed.episodes.map { episode ->
+                    val details =
+                      EpisodeDetails(
+                        feedUrl = feed.feedUrl,
+                        podcastTitle = feed.title,
+                        artworkUrl = episode.artworkUrl ?: feed.artworkUrl,
+                        episode = episode,
+                      )
+                    ShowEpisodes.Episode(
+                      details = details,
+                      onClick = { backstack.push(episodeDetailsFactory.create(details)) },
+                    )
+                  },
+                loading = false,
+                failed = false,
+                onRetry = {},
+              ),
+            descriptionExpanded = descriptionExpanded,
+            followed = true,
+            followEnabled = feed.feedUrl !in updating,
+            followFailed = failed == feed.feedUrl,
+            onToggleFollow = { unfollow(feed.feedUrl) },
+            onToggleDescription = { descriptionExpanded = !descriptionExpanded },
+          )
+        },
       updating = updating,
       unfollowFailed = failed,
       onUnfollow = unfollow,
@@ -116,29 +120,32 @@ class LibraryShowsPresenter(
   }
 
   @Composable
-  private fun savedShows(retry: Int): Result<List<PodcastFeed>>? = key(retry) {
-    val state by produceState<Result<List<PodcastFeed>>?>(null) {
-      try {
-        database.podcasts.collect { value = Result.success(it) }
-      } catch (exception: Exception) {
-        if (exception is CancellationException) {
-          throw exception
+  private fun savedShows(retry: Int): Result<List<PodcastFeed>>? =
+    key(retry) {
+      val state by
+        produceState<Result<List<PodcastFeed>>?>(null) {
+          try {
+            database.podcasts.collect { value = Result.success(it) }
+          } catch (exception: Exception) {
+            if (exception is CancellationException) {
+              throw exception
+            }
+            value = Result.failure(exception)
+          }
         }
-        value = Result.failure(exception)
-      }
+      state
     }
-    state
-  }
 
-  private fun PodcastFeed.asPodcast() = DiscoveredPodcast(
-    id = feedUrl,
-    title = title,
-    author = author,
-    feedUrl = feedUrl,
-    artworkUrl = artworkUrl,
-    catalogUrl = link,
-    description = HtmlDescription.plainText(description),
-  )
+  private fun PodcastFeed.asPodcast() =
+    DiscoveredPodcast(
+      id = feedUrl,
+      title = title,
+      author = author,
+      feedUrl = feedUrl,
+      artworkUrl = artworkUrl,
+      catalogUrl = link,
+      description = HtmlDescription.plainText(description),
+    )
 
   data class Model(
     val shows: List<DiscoveredPodcast>,

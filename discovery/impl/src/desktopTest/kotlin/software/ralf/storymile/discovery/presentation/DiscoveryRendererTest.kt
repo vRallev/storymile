@@ -1,6 +1,5 @@
 package software.ralf.storymile.discovery.presentation
 
-import software.ralf.storymile.shows.ShowEpisodes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,6 +47,7 @@ import kotlin.math.roundToInt
 import kotlin.test.Test
 import software.ralf.app.platform.presenter.compose.text.PresenterTextFieldState
 import software.ralf.storymile.discovery.DiscoveredPodcast
+import software.ralf.storymile.shows.ShowEpisodes
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.StorymileTheme
 import software.ralf.storymile.theme.testing.FakeThemeEnvironment

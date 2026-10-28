@@ -55,17 +55,19 @@ class LibraryShowsUiTest {
         }
         onNodeWithTag("show-title", useUnmergedTree = true).assertTextEquals("The Quiet Current")
         listOf(
-          "tablet" to DesktopWindowSizes.tablet,
-          "desktop" to DesktopWindowSizes.desktop,
-          "short-wide" to DpSize(1100.dp, 420.dp),
-          "tall-narrow" to DpSize(360.dp, 1000.dp),
-          "phone-return" to DesktopWindowSizes.phone,
-        ).forEach { (name, nextSize) ->
-          runOnIdle { size.value = nextSize }
-          onNodeWithTag("library-tab-shows").assertIsSelected()
-          onNodeWithTag("show-title", useUnmergedTree = true).assertTextEquals("The Quiet Current")
-          saveScreenshot("$name-${if (darkTheme) "dark" else "light"}")
-        }
+            "tablet" to DesktopWindowSizes.tablet,
+            "desktop" to DesktopWindowSizes.desktop,
+            "short-wide" to DpSize(1100.dp, 420.dp),
+            "tall-narrow" to DpSize(360.dp, 1000.dp),
+            "phone-return" to DesktopWindowSizes.phone,
+          )
+          .forEach { (name, nextSize) ->
+            runOnIdle { size.value = nextSize }
+            onNodeWithTag("library-tab-shows").assertIsSelected()
+            onNodeWithTag("show-title", useUnmergedTree = true)
+              .assertTextEquals("The Quiet Current")
+            saveScreenshot("$name-${if (darkTheme) "dark" else "light"}")
+          }
         runOnUiThread {
           onNodeWithTag("show-detail").performScrollToNode(hasTestTag("episode-0"))
           onNodeWithTag("episode-0").performClick()

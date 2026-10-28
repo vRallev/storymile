@@ -1,7 +1,6 @@
 package software.ralf.storymile.library
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
@@ -67,55 +67,12 @@ internal fun LibraryShows(model: LibraryShowsPresenter.Model, active: Boolean, m
     } else {
       Row(Modifier.fillMaxSize()) {
         if (wide || !model.detailOpen) {
-          LazyColumn(
-            modifier = Modifier.weight(1f).testTag("library-shows-list"),
-            state = listState,
-            contentPadding = PaddingValues(vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-          ) {
-            item {
-              Text(
-                text = stringResource(Res.string.library_followed_shows),
-                modifier = Modifier.padding(bottom = 8.dp).semantics { heading() },
-                style = AppTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-              )
-            }
-            items(model.shows, key = { it.id }) { podcast ->
-              Column {
-                PodcastRow(
-                  podcast = podcast,
-                  onClick = { model.onSelectShow(podcast) },
-                  selected = wide && details?.podcast?.id == podcast.id,
-                  subtitle = if (wide) {
-                    stringResource(Res.string.library_shows_episode_count, model.episodeCounts[podcast.id] ?: 0)
-                  } else {
-                    stringResource(Res.string.library_following)
-                  },
-                  trailingContent = if (wide) {
-                    {
-                      FollowButton(
-                        followed = true,
-                        enabled = podcast.id !in model.updating,
-                        onClick = { model.onUnfollow(podcast.id) },
-                        compact = true,
-                      )
-                    }
-                  } else {
-                    null
-                  },
-                )
-                if (model.unfollowFailed == podcast.id) {
-                  Text(
-                    text = stringResource(Res.string.library_shows_unfollow_error),
-                    modifier = Modifier.padding(8.dp).testTag("library-unfollow-error"),
-                    color = AppTheme.colorScheme.error,
-                  )
-                }
-                HorizontalDivider(color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-              }
-            }
-          }
+          FollowedShowList(
+            model = model,
+            wide = wide,
+            listState = listState,
+            modifier = Modifier.weight(1f),
+          )
         }
         if (details != null && (wide || model.detailOpen)) {
           if (wide) {
@@ -137,9 +94,77 @@ internal fun LibraryShows(model: LibraryShowsPresenter.Model, active: Boolean, m
                 backButtonModifier = Modifier.testTag("library-show-back"),
               )
             }
-            ShowDetails(model = details, modifier = Modifier.fillMaxWidth().weight(1f), pane = wide, stackedArtwork = wide && maxHeight >= 500.dp)
+            ShowDetails(
+              model = details,
+              modifier = Modifier.fillMaxWidth().weight(1f),
+              pane = wide,
+              stackedArtwork = wide && maxHeight >= 500.dp,
+            )
           }
         }
+      }
+    }
+  }
+}
+
+@Composable
+private fun FollowedShowList(
+  model: LibraryShowsPresenter.Model,
+  wide: Boolean,
+  listState: LazyListState,
+  modifier: Modifier,
+) {
+  LazyColumn(
+    modifier = modifier.testTag("library-shows-list"),
+    state = listState,
+    contentPadding = PaddingValues(vertical = 24.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp),
+  ) {
+    item {
+      Text(
+        text = stringResource(Res.string.library_followed_shows),
+        modifier = Modifier.padding(bottom = 8.dp).semantics { heading() },
+        style = AppTheme.typography.titleLarge,
+        fontWeight = FontWeight.SemiBold,
+      )
+    }
+    items(model.shows, key = { it.id }) { podcast ->
+      Column {
+        PodcastRow(
+          podcast = podcast,
+          onClick = { model.onSelectShow(podcast) },
+          selected = wide && model.details?.podcast?.id == podcast.id,
+          subtitle =
+            if (wide) {
+              stringResource(
+                Res.string.library_shows_episode_count,
+                model.episodeCounts[podcast.id] ?: 0,
+              )
+            } else {
+              stringResource(Res.string.library_following)
+            },
+          trailingContent =
+            if (wide) {
+              {
+                FollowButton(
+                  followed = true,
+                  enabled = podcast.id !in model.updating,
+                  onClick = { model.onUnfollow(podcast.id) },
+                  compact = true,
+                )
+              }
+            } else {
+              null
+            },
+        )
+        if (model.unfollowFailed == podcast.id) {
+          Text(
+            text = stringResource(Res.string.library_shows_unfollow_error),
+            modifier = Modifier.padding(8.dp).testTag("library-unfollow-error"),
+            color = AppTheme.colorScheme.error,
+          )
+        }
+        HorizontalDivider(color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
       }
     }
   }

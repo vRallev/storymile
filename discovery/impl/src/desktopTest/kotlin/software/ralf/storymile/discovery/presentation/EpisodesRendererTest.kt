@@ -1,7 +1,5 @@
 package software.ralf.storymile.discovery.presentation
 
-import software.ralf.storymile.shows.ShowEpisodes
-import software.ralf.storymile.shows.Episodes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
@@ -32,6 +30,8 @@ import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.episodedetails.EpisodeDetails
 import software.ralf.storymile.podcast.PodcastEnclosure
 import software.ralf.storymile.podcast.PodcastEpisode
+import software.ralf.storymile.shows.Episodes
+import software.ralf.storymile.shows.ShowEpisodes
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.StorymileTheme
 import software.ralf.storymile.theme.testing.FakeThemeEnvironment

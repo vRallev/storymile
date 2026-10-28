@@ -1,6 +1,5 @@
 package software.ralf.storymile.discovery.presentation
 
-import software.ralf.storymile.shows.PodcastRow
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
@@ -35,6 +34,7 @@ import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.discovery.impl.generated.resources.Res
 import software.ralf.storymile.discovery.impl.generated.resources.podcasts_to_explore
+import software.ralf.storymile.shows.PodcastRow
 import software.ralf.storymile.theme.AppTheme
 
 internal data class ShowScene(

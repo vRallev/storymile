@@ -20,7 +20,8 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
   override fun Compose(model: ShowContentPresenter.Model, modifier: Modifier) {
     val pane = LocalShowPane.current
     Column(
-      modifier.fillMaxSize()
+      modifier
+        .fillMaxSize()
         .then(if (pane) Modifier else Modifier.discoveryScreenTransition())
         .testTag(if (pane) "show-content" else "show-screen"),
     ) {
@@ -36,16 +37,17 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
           (LocalShowParentVisibilityScope.current ?: LocalAnimatedVisibilityScope.current),
       ) {
         ShowDetails(
-          model = ShowDetailsModel(
-            podcast = model.podcast,
-            episodes = model.episodes,
-            descriptionExpanded = model.descriptionExpanded,
-            followed = model.followed,
-            followEnabled = model.followEnabled,
-            followFailed = model.followFailed,
-            onToggleFollow = model.onToggleFollow,
-            onToggleDescription = model.onToggleDescription,
-          ),
+          model =
+            ShowDetailsModel(
+              podcast = model.podcast,
+              episodes = model.episodes,
+              descriptionExpanded = model.descriptionExpanded,
+              followed = model.followed,
+              followEnabled = model.followEnabled,
+              followFailed = model.followFailed,
+              onToggleFollow = model.onToggleFollow,
+              onToggleDescription = model.onToggleDescription,
+            ),
           modifier = Modifier.weight(1f),
           pane = pane,
           transitionSource = model.source.transitionKey,

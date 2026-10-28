@@ -1,12 +1,10 @@
 package software.ralf.storymile.discovery.presentation
 
-import software.ralf.storymile.shows.ShowEpisodes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
-import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
 import software.ralf.app.platform.presenter.backstack.nav3.backstack
 import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
@@ -18,6 +16,7 @@ import software.ralf.storymile.episodedetails.EpisodeDetails
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.podcast.PodcastFeedRepository
 import software.ralf.storymile.podcast.PodcastFeedRepository.State
+import software.ralf.storymile.shows.ShowEpisodes
 
 class EpisodesPresenter(
   private val catalog: PodcastDiscoveryRepository,
@@ -97,5 +96,4 @@ class EpisodesPresenter(
   }
 
   private data class Source(val url: String?, val id: String?, val lookup: CatalogState?)
-
 }

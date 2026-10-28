@@ -24,8 +24,7 @@ import software.ralf.storymile.user.UserScope
 class LibraryPresenterImpl(
   private val discoveryPresenterFactory: DiscoveryPresenter.Factory,
   private val showsPresenter: LibraryShowsPresenter,
-) :
-  LibraryPresenter<DefaultBackstackModel> {
+) : LibraryPresenter<DefaultBackstackModel> {
   @Composable
   override fun present(input: Unit): DefaultBackstackModel {
     var selectedTab by

@@ -1,6 +1,5 @@
 package software.ralf.storymile.discovery.presentation
 
-import software.ralf.storymile.shows.ShowEpisodes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,6 +23,7 @@ import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.podcast.PodcastFeedRepository
+import software.ralf.storymile.shows.ShowEpisodes
 
 class DiscoveryPresenterImpl(
   private val repository: PodcastDiscoveryRepository,

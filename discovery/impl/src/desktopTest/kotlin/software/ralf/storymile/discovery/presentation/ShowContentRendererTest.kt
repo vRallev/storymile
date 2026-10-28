@@ -1,7 +1,5 @@
 package software.ralf.storymile.discovery.presentation
 
-import software.ralf.storymile.shows.ShowEpisodes
-import software.ralf.storymile.shows.Episodes
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -64,6 +62,7 @@ import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import software.ralf.storymile.discovery.DiscoveredPodcast
+import software.ralf.storymile.shows.ShowEpisodes
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.StorymileTheme
 import software.ralf.storymile.theme.testing.FakeThemeEnvironment

@@ -1,6 +1,5 @@
 package software.ralf.storymile.discovery.presentation
 
-import software.ralf.storymile.shows.ShowEpisodes
 import assertk.assertThat
 import assertk.assertions.containsExactly
 import assertk.assertions.isEmpty
@@ -22,6 +21,7 @@ import software.ralf.storymile.podcast.PodcastEnclosure
 import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.podcast.PodcastFeed
 import software.ralf.storymile.podcast.PodcastFeedRepository.State
+import software.ralf.storymile.shows.ShowEpisodes
 
 class EpisodesPresenterTest {
   @Test
@@ -31,9 +31,7 @@ class EpisodesPresenterTest {
     val episode =
       feed.episodes
         .single()
-        .copy(
-          description = "<p title=\"1 > 0\">Caf&eacute; &amp; stories.<p>Next paragraph",
-        )
+        .copy(description = "<p title=\"1 > 0\">Caf&eacute; &amp; stories.<p>Next paragraph")
     feeds.update("one", State.Success(feed.copy(episodes = listOf(episode))))
     val factory = FakeEpisodeDetailsPresenterFactory()
     val presenter = EpisodesPresenter(TestPodcastCatalog(), feeds, factory)

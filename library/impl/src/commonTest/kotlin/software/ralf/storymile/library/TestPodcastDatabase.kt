@@ -10,10 +10,11 @@ import software.ralf.storymile.database.PodcastDatabase
 import software.ralf.storymile.episodedetails.testing.FakeEpisodeDetailsPresenterFactory
 import software.ralf.storymile.podcast.PodcastFeed
 
-internal fun testShowsPresenter() = LibraryShowsPresenter(
-  database = TestPodcastDatabase(),
-  episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-)
+internal fun testShowsPresenter() =
+  LibraryShowsPresenter(
+    database = TestPodcastDatabase(),
+    episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
+  )
 
 internal class TestPodcastDatabase : PodcastDatabase {
   val saved: StateFlow<List<PodcastFeed>>
@@ -29,8 +30,8 @@ internal class TestPodcastDatabase : PodcastDatabase {
   }
 
   override suspend fun insert(podcast: PodcastFeed) {
-    saved.value = (saved.value.filterNot { it.feedUrl == podcast.feedUrl } + podcast)
-      .sortedBy { it.feedUrl }
+    saved.value =
+      (saved.value.filterNot { it.feedUrl == podcast.feedUrl } + podcast).sortedBy { it.feedUrl }
   }
 
   override suspend fun delete(feedUrl: String) {

@@ -114,22 +114,26 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
           ) { page ->
             val tab = Tab.entries[page]
             val shows = model.shows
-            if (tab == Tab.SHOWS && shows != null && (shows.loading || shows.failed || shows.shows.isNotEmpty())) {
+            if (
+              tab == Tab.SHOWS &&
+                shows != null &&
+                (shows.loading || shows.failed || shows.shows.isNotEmpty())
+            ) {
               LibraryShows(
                 model = shows,
                 active = model.selectedTab == Tab.SHOWS,
                 modifier = Modifier.fillMaxSize().padding(horizontal = sidePadding),
               )
             } else {
-            EmptyPage(
-              tab = tab,
-              onDiscoverPodcasts = model.onDiscoverPodcasts,
-              compact = compact,
-              short = short,
-              horizontal = horizontal,
-              large = large,
-              modifier = Modifier.fillMaxSize().padding(horizontal = sidePadding),
-            )
+              EmptyPage(
+                tab = tab,
+                onDiscoverPodcasts = model.onDiscoverPodcasts,
+                compact = compact,
+                short = short,
+                horizontal = horizontal,
+                large = large,
+                modifier = Modifier.fillMaxSize().padding(horizontal = sidePadding),
+              )
             }
           }
         }

@@ -79,11 +79,11 @@ fun PodcastRow(
       if (trailingContent != null) {
         trailingContent()
       } else {
-      Icon(
-        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-        contentDescription = null,
-        tint = AppTheme.colorScheme.primary,
-      )
+        Icon(
+          imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.primary,
+        )
       }
     }
   }
