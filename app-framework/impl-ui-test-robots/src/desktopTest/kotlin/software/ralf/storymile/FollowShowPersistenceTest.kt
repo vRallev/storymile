@@ -120,9 +120,11 @@ class FollowShowPersistenceTest {
     storageFactory: Storage.Factory,
     block: suspend (Graph, UserBindings) -> Unit,
   ) {
-    val application = KmpApplication()
-    val graph = createGraphFactory<Graph.Factory>().create(application, storageFactory)
-    application.create(graph)
+    val application = KmpApplication {
+      createGraphFactory<Graph.Factory>().create(it, storageFactory)
+    }
+    application.awaitReady()
+    val graph = application.rootScope.metroDependencyGraph<Graph>()
     val user = graph.userManager.userScope.value.metroDependencyGraph<UserBindings>()
     try {
       block(graph, user)
