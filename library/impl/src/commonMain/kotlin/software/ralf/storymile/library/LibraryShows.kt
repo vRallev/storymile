@@ -47,6 +47,7 @@ import software.ralf.storymile.theme.AppTheme
 internal fun LibraryShows(model: LibraryShowsPresenter.Model, active: Boolean, modifier: Modifier) {
   BoxWithConstraints(modifier.testTag("library-page-shows")) {
     val wide = maxWidth / LocalDensity.current.fontScale >= 840.dp
+    val stackedArtwork = wide && maxHeight >= 500.dp
     val listState = rememberLazyListState()
     val details = model.details
     if (model.loading || model.failed) {
@@ -98,7 +99,7 @@ internal fun LibraryShows(model: LibraryShowsPresenter.Model, active: Boolean, m
               model = details,
               modifier = Modifier.fillMaxWidth().weight(1f),
               pane = wide,
-              stackedArtwork = wide && maxHeight >= 500.dp,
+              stackedArtwork = stackedArtwork,
             )
           }
         }
