@@ -34,6 +34,7 @@ import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.discovery.impl.generated.resources.Res
 import software.ralf.storymile.discovery.impl.generated.resources.podcasts_to_explore
+import software.ralf.storymile.shows.PodcastRow
 import software.ralf.storymile.theme.AppTheme
 
 internal data class ShowScene(

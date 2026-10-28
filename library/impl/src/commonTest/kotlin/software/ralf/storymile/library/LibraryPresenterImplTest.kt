@@ -6,18 +6,79 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
+import assertk.assertions.isTrue
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.app.platform.presenter.compose.saveable.rememberReturningSaveableStateHolder
 import software.ralf.app.platform.presenter.compose.test
 import software.ralf.storymile.discovery.DiscoveryPresenter
+import software.ralf.storymile.episodedetails.testing.FakeEpisodeDetailsPresenterFactory
 import software.ralf.storymile.library.LibraryPresenterImpl.Tab
+import software.ralf.storymile.podcast.PodcastFeed
 import software.ralf.storymile.presenternavigation.DefaultBackstackModel
 
 class LibraryPresenterImplTest {
+  @Test
+  fun `selected show survives leaving Library and recreating its backstack`() = runTest {
+    val database = TestPodcastDatabase()
+    listOf("one", "two").forEach { id ->
+      database.insert(
+        PodcastFeed(
+          feedUrl = id,
+          title = id,
+          description = null,
+          author = null,
+          artworkUrl = null,
+          link = null,
+          episodes = emptyList(),
+        ),
+      )
+    }
+    val visible = MutableStateFlow(true)
+    val presenter =
+      ComposePresenter<Boolean, LibraryVisibilityModel> { showLibrary ->
+        val stateHolder = rememberReturningSaveableStateHolder()
+        stateHolder.SaveableStateProvider(if (showLibrary) "library" else "hidden") {
+          LibraryVisibilityModel(
+            if (showLibrary) {
+              val library = remember {
+                LibraryPresenterImpl(
+                  discoveryPresenterFactory = FakeDiscoveryFactory(),
+                  showsPresenter =
+                    LibraryShowsPresenter(
+                      database = database,
+                      episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
+                    ),
+                )
+              }
+              library.present(Unit).content()
+            } else {
+              null
+            },
+          )
+        }
+      }
+    presenter.test(this, visible) {
+      runCurrent()
+      val shows = requireNotNull(expectMostRecentItem().library?.shows)
+      shows.onSelectShow(shows.shows.last())
+      runCurrent()
+      assertThat(expectMostRecentItem().library?.shows?.details?.podcast?.id).isEqualTo("two")
+      visible.value = false
+      assertThat(awaitItem().library).isNull()
+      visible.value = true
+      runCurrent()
+      val restored = requireNotNull(expectMostRecentItem().library?.shows)
+      assertThat(restored.details?.podcast?.id).isEqualTo("two")
+      assertThat(restored.detailOpen).isTrue()
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
   @Test
   fun `tab survives leaving composition and creating a new presenter`() = runTest {
     val visible = MutableStateFlow(true)
@@ -107,7 +168,11 @@ class LibraryPresenterImplTest {
     }
   }
 
-  private fun createPresenter(): LibraryPresenterImpl = LibraryPresenterImpl(FakeDiscoveryFactory())
+  private fun createPresenter(): LibraryPresenterImpl =
+    LibraryPresenterImpl(
+      discoveryPresenterFactory = FakeDiscoveryFactory(),
+      showsPresenter = testShowsPresenter(),
+    )
 
   private fun DefaultBackstackModel.content(): LibraryPresenterImpl.Model =
     backstack.single() as LibraryPresenterImpl.Model

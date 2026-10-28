@@ -23,6 +23,7 @@ import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.podcast.PodcastFeedRepository
+import software.ralf.storymile.shows.ShowEpisodes
 
 class DiscoveryPresenterImpl(
   private val repository: PodcastDiscoveryRepository,
@@ -145,7 +146,7 @@ class DiscoveryPresenterImpl(
     val topic: DiscoveryTopic?,
     val query: PresenterTextFieldState,
     val state: CatalogState,
-    val episodes: EpisodesPresenter.Model,
+    val episodes: ShowEpisodes,
     val focusSearch: Boolean,
     val selectedFilter: DiscoveryTopic.Filter?,
     val onFilterSelected: (DiscoveryTopic.Filter) -> Unit,

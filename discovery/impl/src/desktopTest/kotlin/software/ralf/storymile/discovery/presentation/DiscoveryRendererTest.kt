@@ -47,6 +47,7 @@ import kotlin.math.roundToInt
 import kotlin.test.Test
 import software.ralf.app.platform.presenter.compose.text.PresenterTextFieldState
 import software.ralf.storymile.discovery.DiscoveredPodcast
+import software.ralf.storymile.shows.ShowEpisodes
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.StorymileTheme
 import software.ralf.storymile.theme.testing.FakeThemeEnvironment
@@ -61,7 +62,7 @@ class DiscoveryRendererTest {
         val renderer = DiscoveryRenderer()
         val model =
           DiscoveryPresenterImpl.Model(
-            episodes = EpisodesPresenter.Model(emptyList(), false, false, {}),
+            episodes = ShowEpisodes(emptyList(), false, false, {}),
             topic = null,
             query = PresenterTextFieldState(),
             state = CatalogState.Loading,
@@ -296,7 +297,7 @@ class DiscoveryRendererTest {
 
   private fun model(query: PresenterTextFieldState, state: CatalogState) =
     DiscoveryPresenterImpl.Model(
-      episodes = EpisodesPresenter.Model(emptyList(), false, false, {}),
+      episodes = ShowEpisodes(emptyList(), false, false, {}),
       topic = null,
       query = query,
       state = state,
@@ -408,7 +409,7 @@ class DiscoveryRendererTest {
 
   private fun model() =
     DiscoveryPresenterImpl.Model(
-      episodes = EpisodesPresenter.Model(emptyList(), false, false, {}),
+      episodes = ShowEpisodes(emptyList(), false, false, {}),
       topic = null,
       query = PresenterTextFieldState("Podcast"),
       state =

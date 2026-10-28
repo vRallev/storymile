@@ -1,4 +1,4 @@
-package software.ralf.storymile.discovery.presentation
+package software.ralf.storymile.shows
 
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
@@ -12,16 +12,22 @@ import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.templates.LocalAnimatedVisibilityScope
 import software.ralf.storymile.templates.LocalSharedTransitionScope
 
-internal enum class PodcastSharedElement {
+/** Elements matched between a catalog row and its show header. */
+enum class PodcastSharedElement {
+  /** The show cover. */
   Artwork,
+  /** The show title. */
   Title,
+  /** The publisher name. */
   Author;
 
+  /** Shared transition helpers. */
   companion object {
+    /** Matches only elements from the same source; null disables matching. */
     @Composable
     fun Modifier.podcastSharedElement(
       podcast: DiscoveredPodcast,
-      source: ShowPresenter.Source?,
+      source: String?,
       element: PodcastSharedElement,
     ): Modifier {
       // Sidebar rows and episode artwork must not compete with the show header for a match.
@@ -58,7 +64,7 @@ internal enum class PodcastSharedElement {
 
   private data class Key(
     val podcastId: String,
-    val source: ShowPresenter.Source,
+    val source: String,
     val element: PodcastSharedElement,
   )
 }

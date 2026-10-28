@@ -62,6 +62,7 @@ import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import software.ralf.storymile.discovery.DiscoveredPodcast
+import software.ralf.storymile.shows.ShowEpisodes
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.StorymileTheme
 import software.ralf.storymile.theme.testing.FakeThemeEnvironment
@@ -323,7 +324,7 @@ class ShowContentRendererTest {
       podcasts = listOf(podcast),
       source = ShowPresenter.Source.Browse,
       episodes =
-        EpisodesPresenter.Model(
+        ShowEpisodes(
           episodes = emptyList(),
           loading = false,
           failed = false,
