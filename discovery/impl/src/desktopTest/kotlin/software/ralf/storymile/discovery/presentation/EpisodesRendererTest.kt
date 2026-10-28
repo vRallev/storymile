@@ -1,5 +1,7 @@
 package software.ralf.storymile.discovery.presentation
 
+import software.ralf.storymile.shows.ShowEpisodes
+import software.ralf.storymile.shows.Episodes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
@@ -41,7 +43,7 @@ class EpisodesRendererTest {
   fun `episode section renders loading empty and retryable partial failures`() =
     runDesktopComposeUiTest(width = 412, height = 916) {
       var retries = 0
-      val state = mutableStateOf(EpisodesPresenter.Model(emptyList(), true, false, { retries++ }))
+      val state = mutableStateOf(ShowEpisodes(emptyList(), true, false, { retries++ }))
       setContent {
         ThemedContent {
           Column { Episodes("Episodes to try", state.value, Modifier) }
@@ -77,7 +79,7 @@ class EpisodesRendererTest {
               podcast = podcast,
               podcasts = listOf(podcast),
               source = ShowPresenter.Source.Browse,
-              episodes = EpisodesPresenter.Model(List(100) { episode(it) }, false, false, {}),
+              episodes = ShowEpisodes(List(100) { episode(it) }, false, false, {}),
               descriptionExpanded = false,
               followed = false,
               followEnabled = true,
@@ -116,7 +118,7 @@ class EpisodesRendererTest {
   }
 
   private fun episode(index: Int) =
-    EpisodesPresenter.Episode(
+    ShowEpisodes.Episode(
       details =
         EpisodeDetails(
           feedUrl = "feed",

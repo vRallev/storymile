@@ -1,5 +1,9 @@
 package software.ralf.storymile.discovery.presentation
 
+import software.ralf.storymile.shows.PodcastArtwork
+import software.ralf.storymile.shows.PodcastSharedElement
+import software.ralf.storymile.shows.PodcastRow
+import software.ralf.storymile.shows.Episodes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.EnterExitState
@@ -91,7 +95,7 @@ import software.ralf.storymile.discovery.impl.generated.resources.topic_nature_s
 import software.ralf.storymile.discovery.impl.generated.resources.topic_science_subtitle
 import software.ralf.storymile.discovery.impl.generated.resources.topic_technology_subtitle
 import software.ralf.storymile.discovery.impl.generated.resources.try_another_search
-import software.ralf.storymile.discovery.presentation.PodcastSharedElement.Companion.podcastSharedElement
+import software.ralf.storymile.shows.PodcastSharedElement.Companion.podcastSharedElement
 import software.ralf.storymile.templates.LocalAnimatedVisibilityScope
 import software.ralf.storymile.templates.SharedNavigationElement
 import software.ralf.storymile.templates.sharedNavigationBounds
@@ -493,7 +497,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
           PodcastRow(
             podcast,
             onClick = { model.onPodcastSelected(podcast) },
-            transitionSource = source,
+            transitionSource = source.transitionKey,
           )
         }
       }
@@ -517,7 +521,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
           podcast,
           Modifier.podcastSharedElement(
               podcast,
-              ShowPresenter.Source.Browse,
+              ShowPresenter.Source.Browse.transitionKey,
               PodcastSharedElement.Artwork,
             )
             .testTag("discovery-artwork-${podcast.id}")
@@ -529,7 +533,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
           modifier =
             Modifier.podcastSharedElement(
                 podcast,
-                ShowPresenter.Source.Browse,
+                ShowPresenter.Source.Browse.transitionKey,
                 PodcastSharedElement.Title,
               )
               .testTag("discovery-title-${podcast.id}"),
@@ -544,7 +548,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
             modifier =
               Modifier.podcastSharedElement(
                   podcast,
-                  ShowPresenter.Source.Browse,
+                  ShowPresenter.Source.Browse.transitionKey,
                   PodcastSharedElement.Author,
                 )
                 .testTag("discovery-author-${podcast.id}"),

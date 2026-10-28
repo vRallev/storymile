@@ -1,5 +1,6 @@
 package software.ralf.storymile.discovery.presentation
 
+import software.ralf.storymile.shows.ShowEpisodes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -145,7 +146,7 @@ class DiscoveryPresenterImpl(
     val topic: DiscoveryTopic?,
     val query: PresenterTextFieldState,
     val state: CatalogState,
-    val episodes: EpisodesPresenter.Model,
+    val episodes: ShowEpisodes,
     val focusSearch: Boolean,
     val selectedFilter: DiscoveryTopic.Filter?,
     val onFilterSelected: (DiscoveryTopic.Filter) -> Unit,

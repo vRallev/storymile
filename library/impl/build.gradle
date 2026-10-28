@@ -8,6 +8,12 @@ storymile {
 }
 
 dependencies {
+  commonMainImplementation project(':database:public')
+  commonMainImplementation project(':episode-details:public')
+  commonMainImplementation project(':podcast:public')
+  commonMainImplementation project(':util:public')
+  commonMainImplementation libs.navigation.event.compose
+  commonMainImplementation project(':shows:public')
   commonMainImplementation project(':discovery:public')
   commonMainImplementation project(':presenter-navigation:public')
   commonMainImplementation project(':templates:public')
@@ -15,4 +21,5 @@ dependencies {
   commonMainImplementation project(':user:public')
 
   commonTestImplementation project(':theme:testing')
+  commonTestImplementation project(':episode-details:testing')
 }

@@ -9,6 +9,7 @@ storymile {
 }
 
 dependencies {
+  commonMainImplementation project(':shows:public')
   commonMainImplementation project(':coil:public')
   commonMainImplementation project(':database:public')
   commonMainImplementation project(':episode-details:public')

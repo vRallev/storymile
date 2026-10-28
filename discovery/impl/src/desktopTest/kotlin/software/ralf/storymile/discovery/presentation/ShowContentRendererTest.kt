@@ -1,5 +1,7 @@
 package software.ralf.storymile.discovery.presentation
 
+import software.ralf.storymile.shows.ShowEpisodes
+import software.ralf.storymile.shows.Episodes
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -323,7 +325,7 @@ class ShowContentRendererTest {
       podcasts = listOf(podcast),
       source = ShowPresenter.Source.Browse,
       episodes =
-        EpisodesPresenter.Model(
+        ShowEpisodes(
           episodes = emptyList(),
           loading = false,
           failed = false,

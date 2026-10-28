@@ -1,4 +1,10 @@
 <resources>
+  <string name="library_followed_shows">Followed shows</string>
+  <string name="library_following">Following</string>
+  <string name="library_shows_episode_count">%1$d episodes</string>
+  <string name="library_shows_error">Could not load followed shows.</string>
+  <string name="library_shows_unfollow_error">Could not unfollow this show. Try again.</string>
+  <string name="library_retry">Try again</string>
   <string name="library_title">Library</string>
   <string name="library_queue">Queue</string>
   <string name="library_shows">Shows</string>

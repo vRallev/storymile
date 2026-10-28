@@ -1,5 +1,6 @@
 package software.ralf.storymile.discovery.presentation
 
+import software.ralf.storymile.shows.ShowEpisodes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -129,7 +130,7 @@ class ShowContentPresenter(
     val podcast: DiscoveredPodcast,
     val podcasts: List<DiscoveredPodcast>,
     val source: ShowPresenter.Source,
-    val episodes: EpisodesPresenter.Model,
+    val episodes: ShowEpisodes,
     val descriptionExpanded: Boolean,
     val followed: Boolean,
     val followEnabled: Boolean,

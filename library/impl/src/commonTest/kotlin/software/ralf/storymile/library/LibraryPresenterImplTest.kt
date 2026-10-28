@@ -107,7 +107,7 @@ class LibraryPresenterImplTest {
     }
   }
 
-  private fun createPresenter(): LibraryPresenterImpl = LibraryPresenterImpl(FakeDiscoveryFactory())
+  private fun createPresenter(): LibraryPresenterImpl = LibraryPresenterImpl(discoveryPresenterFactory = FakeDiscoveryFactory(), showsPresenter = testShowsPresenter())
 
   private fun DefaultBackstackModel.content(): LibraryPresenterImpl.Model =
     backstack.single() as LibraryPresenterImpl.Model

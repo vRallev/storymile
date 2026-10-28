@@ -1,4 +1,4 @@
-package software.ralf.storymile.discovery.presentation
+package software.ralf.storymile.shows
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState

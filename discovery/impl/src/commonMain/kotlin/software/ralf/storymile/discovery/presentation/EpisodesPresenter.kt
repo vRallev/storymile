@@ -1,5 +1,6 @@
 package software.ralf.storymile.discovery.presentation
 
+import software.ralf.storymile.shows.ShowEpisodes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,9 +25,9 @@ class EpisodesPresenter(
   private val episodeDetailsFactory: EpisodeDetailsPresenter.Factory,
   private val episodesPerPodcast: Int = Int.MAX_VALUE,
   private val replaceOpenEpisode: Boolean = false,
-) : ComposePresenter<List<DiscoveredPodcast>, EpisodesPresenter.Model> {
+) : ComposePresenter<List<DiscoveredPodcast>, ShowEpisodes> {
   @Composable
-  override fun present(input: List<DiscoveredPodcast>): Model {
+  override fun present(input: List<DiscoveredPodcast>): ShowEpisodes {
     val backstack = LocalBackstackScope.requireNotNull()
     val sources =
       input
@@ -53,7 +54,7 @@ class EpisodesPresenter(
         url to state
       }
     }
-    return Model(
+    return ShowEpisodes(
       episodes =
         states.flatMap { (url, state) ->
           if (state is State.Success) {
@@ -65,7 +66,7 @@ class EpisodesPresenter(
                   artworkUrl = episode.artworkUrl ?: state.feed.artworkUrl,
                   episode = episode,
                 )
-              Episode(
+              ShowEpisodes.Episode(
                 details = details,
                 onClick = {
                   val presenter = episodeDetailsFactory.create(details)
@@ -97,14 +98,4 @@ class EpisodesPresenter(
 
   private data class Source(val url: String?, val id: String?, val lookup: CatalogState?)
 
-  data class Episode(val details: EpisodeDetails, val onClick: () -> Unit) {
-    val key: String = details.key
-  }
-
-  data class Model(
-    val episodes: List<Episode>,
-    val loading: Boolean,
-    val failed: Boolean,
-    val onRetry: () -> Unit,
-  ) : BaseModel
 }

@@ -1,5 +1,6 @@
 package software.ralf.storymile.discovery.presentation
 
+import software.ralf.storymile.shows.PodcastRow
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween

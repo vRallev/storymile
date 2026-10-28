@@ -73,3 +73,10 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
     }
   }
 }
+
+internal val ShowPresenter.Source.transitionKey: String
+  get() = when (this) {
+    ShowPresenter.Source.Browse -> "browse"
+    ShowPresenter.Source.Search -> "search"
+    is ShowPresenter.Source.Topic -> "topic-${topic.name}"
+  }
