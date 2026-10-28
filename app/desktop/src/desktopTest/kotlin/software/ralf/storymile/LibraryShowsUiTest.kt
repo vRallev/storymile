@@ -85,6 +85,8 @@ class LibraryShowsUiTest {
         }
         onNodeWithTag("library-tab-shows").assertIsSelected()
         onNodeWithText("The Quiet Current").assertIsDisplayed()
+        runOnIdle { size.value = DesktopWindowSizes.desktop }
+        onNodeWithTag("show-title", useUnmergedTree = true).assertTextEquals("The Quiet Current")
       }
     }
   }
@@ -98,12 +100,14 @@ class LibraryShowsUiTest {
       }
       composeRobot<ShowRobot> { follow() }
       composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
+      runOnUiThread { onNodeWithTag("library-tab-shows").performClick() }
+      onNodeWithTag("library-shows-list").assertIsDisplayed()
       runOnUiThread {
-        onNodeWithTag("library-tab-shows").performClick()
         onNodeWithTag("discovery-podcast-https://feeds.test/quiet-current").performClick()
-        onNodeWithTag("show-detail").performScrollToNode(hasTestTag("show-follow"))
-        onNodeWithTag("show-follow").performClick()
       }
+      onNodeWithTag("library-show-details").assertIsDisplayed()
+      runOnUiThread { onNodeWithTag("show-detail").performScrollToNode(hasTestTag("show-follow")) }
+      runOnUiThread { onNodeWithTag("show-follow").performClick() }
       waitUntilCatching("Empty shows state displayed") {
         onNodeWithText("No followed shows").assertIsDisplayed()
       }

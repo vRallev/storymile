@@ -1,6 +1,7 @@
 package software.ralf.storymile.shows
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,9 +42,15 @@ import software.ralf.storymile.shows.generated.resources.follow_error
 import software.ralf.storymile.shows.generated.resources.hide_description
 import software.ralf.storymile.shows.generated.resources.no_description
 import software.ralf.storymile.shows.generated.resources.show_description
+import software.ralf.storymile.templates.LocalAnimatedVisibilityScope
 import software.ralf.storymile.theme.AppTheme
 
-/** Displays show metadata, follow controls, and episodes inside its caller's navigation. */
+/**
+ * Displays show metadata, follow controls, and episodes inside its caller's navigation.
+ *
+ * [headerVisibilityScope] controls header transitions. Episode rows keep the current navigation
+ * scope.
+ */
 @Composable
 fun ShowDetails(
   model: ShowDetailsModel,
@@ -50,11 +58,13 @@ fun ShowDetails(
   pane: Boolean = false,
   transitionSource: String? = null,
   stackedArtwork: Boolean = false,
+  headerVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
   ShowDetailsLayout(
       pane = pane,
       transitionSource = transitionSource,
       stackedArtwork = stackedArtwork,
+      headerVisibilityScope = headerVisibilityScope,
     )
     .Content(model, modifier)
 }
@@ -63,6 +73,7 @@ private class ShowDetailsLayout(
   private val pane: Boolean,
   private val transitionSource: String?,
   private val stackedArtwork: Boolean,
+  private val headerVisibilityScope: AnimatedVisibilityScope?,
 ) {
   @Composable
   fun Content(model: ShowDetailsModel, modifier: Modifier) {
@@ -118,7 +129,10 @@ private class ShowDetailsLayout(
   ) {
     val podcast = model.podcast
     val source = transitionSource
-    Box {
+    CompositionLocalProvider(
+      LocalAnimatedVisibilityScope provides
+        (headerVisibilityScope ?: LocalAnimatedVisibilityScope.current),
+    ) {
       BoxWithConstraints(Modifier.fillMaxWidth()) {
         if (!stackedArtwork && (pane || maxWidth / LocalDensity.current.fontScale >= 440.dp)) {
           Row(
