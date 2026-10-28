@@ -3,28 +3,44 @@ package software.ralf.storymile.discovery.presentation
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -102,6 +118,71 @@ class ShowContentRendererTest {
 
   private fun ComposeUiTest.followButtonColor() =
     onNodeWithTag("show-follow").captureToImage().toPixelMap().let { it[12, it.height / 2] }
+
+  @Test
+  fun `follow controls retain Material sizing across display densities`() {
+    listOf(Density(1f), Density(2f), Density(3f), Density(density = 2f, fontScale = 1.5f))
+      .forEach { density ->
+        listOf(false, true).forEach { followed ->
+          runDesktopComposeUiTest(
+            width = (600 * density.density).toInt(),
+            height = (500 * density.density).toInt(),
+          ) {
+            val model = model().copy(followed = followed)
+            val label = if (followed) "Following" else "Follow"
+            setContent {
+              CompositionLocalProvider(LocalDensity provides density) {
+                StorymileTheme(environment = themeEnvironment, darkTheme = true) {
+                  Surface(color = AppTheme.colorScheme.background) {
+                    Column {
+                      Box(Modifier.weight(1f)) {
+                        ShowContentRenderer().renderCompose(model, Modifier.fillMaxSize())
+                      }
+                      // The original control uses Material's vector icon and inherited button text.
+                      Button(
+                        onClick = {},
+                        modifier = Modifier.widthIn(min = 180.dp).testTag("follow-reference"),
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+                      ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                          Icon(
+                            imageVector = if (followed) Icons.Filled.Check else Icons.Filled.Add,
+                            contentDescription = null,
+                            modifier = Modifier.testTag("follow-reference-icon"),
+                          )
+                          Spacer(Modifier.width(8.dp))
+                          Text(label)
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            val reference = onNodeWithTag("follow-reference").getUnclippedBoundsInRoot()
+            onNodeWithTag("show-follow")
+              .assertWidthIsEqualTo(reference.right - reference.left)
+              .assertHeightIsEqualTo(reference.bottom - reference.top)
+            val referenceIcon =
+              onNodeWithTag("follow-reference-icon", useUnmergedTree = true)
+                .getUnclippedBoundsInRoot()
+            onNodeWithTag("show-follow-icon", useUnmergedTree = true)
+              .assertWidthIsEqualTo(referenceIcon.right - referenceIcon.left)
+              .assertHeightIsEqualTo(referenceIcon.bottom - referenceIcon.top)
+            val layouts = mutableListOf<TextLayoutResult>()
+            val labels = onAllNodesWithText(label, useUnmergedTree = true)
+            repeat(2) { index ->
+              labels[index].performSemanticsAction(SemanticsActions.GetTextLayoutResult) {
+                it(layouts)
+              }
+            }
+            assertThat(layouts[0].layoutInput.style.fontSize)
+              .isEqualTo(layouts[1].layoutInput.style.fontSize)
+            assertThat(layouts[0].size).isEqualTo(layouts[1].size)
+          }
+        }
+      }
+  }
 
   @Test
   fun `podcast title wrapping moves the header and episodes smoothly in both directions`() =

@@ -21,8 +21,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -267,10 +265,10 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
         contentPadding =
           PaddingValues(horizontal = if (LocalShowPane.current) 12.dp else 24.dp, vertical = 12.dp),
       ) {
-        AnimatedContent(targetState = model.followed, label = "Follow state") { followed ->
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(if (followed) Icons.Filled.Check else Icons.Filled.Add, null)
-            Spacer(Modifier.width(8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          key(model.podcast.id) { FollowIcon(followed = model.followed) }
+          Spacer(Modifier.width(8.dp))
+          AnimatedContent(targetState = model.followed, label = "Follow label") { followed ->
             Text(stringResource(if (followed) Res.string.following else Res.string.follow))
           }
         }
