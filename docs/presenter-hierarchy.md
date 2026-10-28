@@ -40,7 +40,7 @@ flowchart TD
   ShowContentPresenter --> EpisodesPresenter
   TabsPresenter -->|Library| LibraryPresenter
   LibraryPresenter -->|root| LibraryContent
-  LibraryContent --> LibraryShowsPresenter
+  LibraryPresenter -->|content| LibraryShowsPresenter
   LibraryShowsPresenter -->|opens| EpisodeDetailsPresenter
   LibraryPresenter -->|pushed entries| DiscoveryPresenterImpl
   LibraryPresenter -->|pushed entry| ShowPresenter

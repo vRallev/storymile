@@ -11,6 +11,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -85,7 +86,10 @@ class LibraryShowsUiTest {
         }
         onNodeWithTag("library-tab-shows").assertIsSelected()
         onNodeWithText("The Quiet Current").assertIsDisplayed()
+        // Dismiss the navigation tooltip before resizing replaces the bottom bar.
+        runOnUiThread { onNodeWithTag("library-pager").performMouseInput { moveTo(center) } }
         runOnIdle { size.value = DesktopWindowSizes.desktop }
+        onNodeWithTag("show-detail").performScrollToNode(hasTestTag("show-title"))
         onNodeWithTag("show-title", useUnmergedTree = true).assertTextEquals("The Quiet Current")
       }
     }
