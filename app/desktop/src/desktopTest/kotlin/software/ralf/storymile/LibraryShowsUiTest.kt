@@ -18,6 +18,7 @@ import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
+import software.ralf.app.platform.robot.waitUntilCatching
 import software.ralf.storymile.discovery.DiscoveryRobot
 import software.ralf.storymile.discovery.ShowRobot
 import software.ralf.storymile.tabs.TabsPresenter
