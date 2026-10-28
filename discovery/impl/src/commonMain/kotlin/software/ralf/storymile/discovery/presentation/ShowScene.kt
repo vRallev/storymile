@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -38,12 +39,13 @@ import software.ralf.storymile.theme.AppTheme
 internal data class ShowScene(
   override val entries: List<NavEntry<Int>>,
   override val previousEntries: List<NavEntry<Int>>,
-  val catalog: ShowContentPresenter.Model,
+  val catalog: State<ShowContentPresenter.Model>,
   val catalogState: LazyListState,
 ) : Scene<Int> {
   override val key: Any = entries.last().contentKey
 
   override val content: @Composable () -> Unit = {
+    val catalog = catalog.value
     val scope = LocalNavAnimatedContentScope.current
     val episode = entries.size > 1
     val progress by

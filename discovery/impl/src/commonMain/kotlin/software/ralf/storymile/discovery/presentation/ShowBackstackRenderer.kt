@@ -61,14 +61,15 @@ internal class ShowBackstackRenderer : PresenterBackstackRenderer<ShowPresenter.
     val wide = LocalShowPane.current
     val currentWide by rememberUpdatedState(wide)
     val catalog = requireNotNull(LocalCatalog.current)
+    val currentCatalog = rememberUpdatedState(catalog.model)
     val strategy =
-      remember(wide, catalog) {
+      remember(wide, catalog.state) {
         SceneStrategy<Int> { entries ->
           if (wide) {
             ShowScene(
               entries = entries,
               previousEntries = entries.dropLast(1),
-              catalog = catalog.model,
+              catalog = currentCatalog,
               catalogState = catalog.state,
             )
           } else {
