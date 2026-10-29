@@ -180,7 +180,9 @@ internal fun EpisodeRow(
     FilledIconButton(
       onClick = {},
       enabled = false,
-      modifier = Modifier.testTag("episode-play-$index"),
+      modifier =
+        Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Play)
+          .testTag("episode-play-$index"),
     ) {
       Icon(Icons.Filled.PlayArrow, stringResource(Res.string.play_episode, details.episode.title))
     }

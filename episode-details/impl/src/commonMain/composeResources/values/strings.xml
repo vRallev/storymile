@@ -3,4 +3,10 @@
   <string name="episode_author">By %1$s</string>
   <string name="episode_published">Published %1$s</string>
   <string name="episode_no_description">No description available.</string>
+  <string name="episode_play_now">Play now</string>
+  <string name="episode_add_to_queue">Add to queue</string>
+  <string name="episode_save">Save</string>
+  <string name="episode_download">Download</string>
+  <string name="episode_more">More</string>
+  <string name="episode_show_notes">Show notes</string>
 </resources>

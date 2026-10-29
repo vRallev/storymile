@@ -3,26 +3,49 @@ package software.ralf.storymile.episodedetails
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextMotion
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
@@ -31,10 +54,16 @@ import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.storymile.coil.PodcastArtwork
 import software.ralf.storymile.design.TitleBar
 import software.ralf.storymile.episode.details.impl.generated.resources.Res
+import software.ralf.storymile.episode.details.impl.generated.resources.episode_add_to_queue
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_author
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_details
+import software.ralf.storymile.episode.details.impl.generated.resources.episode_download
+import software.ralf.storymile.episode.details.impl.generated.resources.episode_more
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_no_description
+import software.ralf.storymile.episode.details.impl.generated.resources.episode_play_now
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_published
+import software.ralf.storymile.episode.details.impl.generated.resources.episode_save
+import software.ralf.storymile.episode.details.impl.generated.resources.episode_show_notes
 import software.ralf.storymile.templates.LocalAnimatedVisibilityScope
 import software.ralf.storymile.theme.AppTheme
 
@@ -84,6 +113,13 @@ class EpisodeDetailsRenderer : ComposeRenderer<EpisodeDetailsPresenterImpl.Model
                   .aspectRatio(1f),
             )
             Metadata(model)
+            Actions(model)
+            HorizontalDivider(color = AppTheme.colorScheme.outlineVariant)
+            Text(
+              text = stringResource(Res.string.episode_show_notes),
+              modifier = Modifier.semantics { heading() },
+              style = AppTheme.typography.titleMedium,
+            )
             Text(
               text =
                 model.details.description.ifBlank {
@@ -101,6 +137,110 @@ class EpisodeDetailsRenderer : ComposeRenderer<EpisodeDetailsPresenterImpl.Model
           }
         }
       }
+    }
+  }
+
+  @Composable
+  private fun Actions(model: EpisodeDetailsPresenterImpl.Model) {
+    Column(
+      modifier = Modifier.testTag("episode-details-actions"),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val buttonsPerRow = if (maxWidth < 320.dp * LocalDensity.current.fontScale) 1 else 2
+        FlowRow(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          verticalArrangement = Arrangement.spacedBy(8.dp),
+          maxItemsInEachRow = buttonsPerRow,
+        ) {
+          OutlinedButton(
+            onClick = model.onPlayNow,
+            modifier =
+              Modifier.weight(1f)
+                .episodeSharedElement(
+                  episodeKey = model.details.key,
+                  element = EpisodeSharedElement.Play,
+                  fromPreviousEntry = true,
+                )
+                .testTag("episode-details-play"),
+            border = BorderStroke(1.dp, AppTheme.colorScheme.primary),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+          ) {
+            Icon(
+              imageVector = Icons.Filled.PlayArrow,
+              contentDescription = null,
+              modifier = Modifier.size(ButtonDefaults.IconSize),
+            )
+            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+            Text(stringResource(Res.string.episode_play_now), textAlign = TextAlign.Center)
+          }
+          Button(
+            onClick = model.onAddToQueue,
+            modifier = Modifier.weight(1f).testTag("episode-details-add-to-queue"),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+          ) {
+            Icon(
+              imageVector = Icons.AutoMirrored.Filled.PlaylistAdd,
+              contentDescription = null,
+              modifier = Modifier.size(ButtonDefaults.IconSize),
+            )
+            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+            Text(stringResource(Res.string.episode_add_to_queue), textAlign = TextAlign.Center)
+          }
+        }
+      }
+      Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+        SecondaryAction(
+          label = stringResource(Res.string.episode_save),
+          icon = Icons.Outlined.BookmarkBorder,
+          tag = "episode-details-save",
+          onClick = model.onSave,
+          modifier = Modifier.weight(1f),
+        )
+        SecondaryAction(
+          label = stringResource(Res.string.episode_download),
+          icon = Icons.Outlined.FileDownload,
+          tag = "episode-details-download",
+          onClick = model.onDownload,
+          modifier = Modifier.weight(1f),
+        )
+        SecondaryAction(
+          label = stringResource(Res.string.episode_more),
+          icon = Icons.Filled.MoreVert,
+          tag = "episode-details-more",
+          onClick = model.onMore,
+          modifier = Modifier.weight(1f),
+        )
+      }
+    }
+  }
+
+  @Composable
+  private fun SecondaryAction(
+    label: String,
+    icon: ImageVector,
+    tag: String,
+    onClick: () -> Unit,
+    modifier: Modifier,
+  ) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+      OutlinedIconButton(
+        onClick = onClick,
+        modifier = Modifier.testTag(tag),
+        border = BorderStroke(1.dp, AppTheme.colorScheme.outlineVariant),
+        colors =
+          IconButtonDefaults.outlinedIconButtonColors(contentColor = AppTheme.colorScheme.primary),
+      ) {
+        Icon(imageVector = icon, contentDescription = label)
+      }
+      Text(
+        text = label,
+        modifier = Modifier.clearAndSetSemantics {},
+        style = AppTheme.typography.labelMedium,
+        color = AppTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+      )
     }
   }
 

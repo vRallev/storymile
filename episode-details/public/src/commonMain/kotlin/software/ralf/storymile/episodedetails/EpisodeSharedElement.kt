@@ -24,7 +24,9 @@ enum class EpisodeSharedElement {
   /** Description preview and full text. */
   Description,
   /** Formatted episode duration. */
-  Duration;
+  Duration,
+  /** Play control in the episode row and details screen. */
+  Play;
 
   internal data class Key(val source: Any, val episode: String, val element: EpisodeSharedElement)
 }
