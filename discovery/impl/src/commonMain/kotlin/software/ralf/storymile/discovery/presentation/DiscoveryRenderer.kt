@@ -121,8 +121,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     BoxWithConstraints(
       modifier.fillMaxSize().discoveryScreenTransition().clipToBounds().testTag("discovery-screen"),
     ) {
-      // AGP lint resolves the public API to a restricted JVM typealias.
-      @Suppress("RestrictedApi") val wide = maxWidth / LocalDensity.current.fontScale >= 760.dp
+      val wide = maxWidth / LocalDensity.current.fontScale >= 760.dp
       val edgeToEdgeEpisodes = maxWidth < 600.dp
       val padding = if (edgeToEdgeEpisodes) 16.dp else 32.dp
       val listState = rememberLazyListState()
@@ -471,8 +470,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
         ?: if (featured) ShowPresenter.Source.Browse else ShowPresenter.Source.Search
     if (featured) {
       BoxWithConstraints(Modifier.fillMaxWidth()) {
-        @Suppress("RestrictedApi") val narrow = maxWidth / LocalDensity.current.fontScale < 300.dp
-        if (narrow) {
+        if (maxWidth / LocalDensity.current.fontScale < 300.dp) {
           Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             podcasts.forEach { podcast ->
               FeaturedPodcast(podcast, model.onPodcastSelected, Modifier.fillMaxWidth())

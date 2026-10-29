@@ -41,8 +41,7 @@ class ShowRenderer : ComposeRenderer<ShowPresenter.Model>() {
   @Composable
   override fun Compose(model: ShowPresenter.Model, modifier: Modifier) {
     BoxWithConstraints(modifier.fillMaxSize().discoveryScreenTransition().clipToBounds()) {
-      // AGP lint resolves the public API to a restricted JVM typealias.
-      @Suppress("RestrictedApi") val wide = maxWidth / LocalDensity.current.fontScale >= 760.dp
+      val wide = maxWidth / LocalDensity.current.fontScale >= 760.dp
       val selectedIndex = model.content.podcasts.indexOfFirst { it.id == model.content.podcast.id }
       val catalogState =
         rememberLazyListState(

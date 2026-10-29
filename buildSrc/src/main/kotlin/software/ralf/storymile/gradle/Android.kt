@@ -9,7 +9,14 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 
 internal fun configureAndroidLint(lint: Lint) {
   lint.warningsAsErrors = true
-  lint.disable += setOf("AndroidGradlePluginVersion", "GradleDependency", "NewerVersionAvailable")
+  lint.disable +=
+    setOf(
+      "AndroidGradlePluginVersion",
+      "GradleDependency",
+      "NewerVersionAvailable",
+      // Compose's public fontScale API uses a restricted JVM typealias.
+      "RestrictedApi",
+    )
 }
 
 internal fun Project.configureAndroidLifecycle(configurationName: String) {

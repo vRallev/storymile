@@ -41,8 +41,7 @@ fun TabHeader(
   profileIconModifier: Modifier = Modifier,
 ) {
   BoxWithConstraints(modifier.fillMaxWidth().testTag("tab-header")) {
-    // AGP lint resolves the public API to a restricted JVM typealias.
-    @Suppress("RestrictedApi") val fontScale = LocalDensity.current.fontScale
+    val fontScale = LocalDensity.current.fontScale
     val availableHeight = maxHeight / fontScale
     val tight = availableHeight < 700.dp
     val compact = maxWidth < 600.dp || availableHeight < 600.dp
