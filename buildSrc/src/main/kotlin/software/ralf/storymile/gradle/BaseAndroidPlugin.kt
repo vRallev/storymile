@@ -35,6 +35,7 @@ internal class BaseAndroidPlugin : Plugin<Project> {
       isIncludeAndroidResources = false
       isReturnDefaultValues = true
     }
+    configureAndroidLifecycle(configurationName = "implementation")
     configureAndroidLint(android.lint)
     configureAndroidPackaging(android.packaging)
     configureAndroidInstrumentedTests(android)
