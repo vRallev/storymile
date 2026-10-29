@@ -59,7 +59,10 @@ class HomeContentRenderer : ComposeRenderer<HomeContentPresenter.Model>() {
           maxWidth >= 760.dp &&
             LocalScreenSize.current.orientation == ScreenSize.Orientation.LANDSCAPE
         val phone = maxWidth < 600.dp
+        // AGP lint resolves the public API to a restricted JVM typealias.
+        @Suppress("RestrictedApi")
         val compact = maxHeight < 700.dp || LocalDensity.current.fontScale > 1.3f
+        @Suppress("RestrictedApi")
         val promptSpacing =
           when {
             maxHeight / LocalDensity.current.fontScale < 400.dp -> 4.dp
@@ -124,6 +127,7 @@ class HomeContentRenderer : ComposeRenderer<HomeContentPresenter.Model>() {
     modifier: Modifier,
   ) {
     BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
+      @Suppress("RestrictedApi")
       val promptWeight = if (maxHeight / LocalDensity.current.fontScale < 200.dp) 2f else 1f
       Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = if (compact) 0.dp else 24.dp),
@@ -172,7 +176,7 @@ class HomeContentRenderer : ComposeRenderer<HomeContentPresenter.Model>() {
     onDiscover: () -> Unit,
     modifier: Modifier,
   ) {
-    val largeText = LocalDensity.current.fontScale > 1.3f
+    @Suppress("RestrictedApi") val largeText = LocalDensity.current.fontScale > 1.3f
     Column(
       modifier = modifier,
       horizontalAlignment = Alignment.CenterHorizontally,

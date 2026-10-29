@@ -51,7 +51,8 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
   override fun Compose(model: DownloadsPresenterImpl.Model, modifier: Modifier) {
     val window = LocalScreenSize.current
     BoxWithConstraints(modifier.fillMaxSize().testTag("downloads-screen")) {
-      val short = maxHeight / LocalDensity.current.fontScale < 600.dp
+      // AGP lint resolves the public API to a restricted JVM typealias.
+      @Suppress("RestrictedApi") val short = maxHeight / LocalDensity.current.fontScale < 600.dp
       val compact = window.width < 600.dp || short
       val horizontal = short && maxWidth >= 560.dp
       val sidePadding = if (maxWidth < 600.dp) 20.dp else 32.dp

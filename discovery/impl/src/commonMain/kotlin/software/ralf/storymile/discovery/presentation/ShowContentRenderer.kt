@@ -130,7 +130,10 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
         (LocalShowParentVisibilityScope.current ?: LocalAnimatedVisibilityScope.current),
     ) {
       BoxWithConstraints(Modifier.fillMaxWidth()) {
-        if (LocalShowPane.current || maxWidth / LocalDensity.current.fontScale >= 440.dp) {
+        // AGP lint resolves the public API to a restricted JVM typealias.
+        @Suppress("RestrictedApi")
+        val wide = LocalShowPane.current || maxWidth / LocalDensity.current.fontScale >= 440.dp
+        if (wide) {
           Row(
             modifier = modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(24.dp),
