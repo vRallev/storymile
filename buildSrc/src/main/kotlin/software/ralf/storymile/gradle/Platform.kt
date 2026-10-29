@@ -1,5 +1,6 @@
 package software.ralf.storymile.gradle
 
+import com.android.build.api.dsl.Lint
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.Copy
@@ -20,6 +21,7 @@ internal sealed interface Platform {
   private class Android(private val project: Project) : Platform {
     override fun configurePlatform() {
       project.plugins.apply(Plugins.ANDROID_LINT)
+      configureAndroidLint(project.extensions.getByType(Lint::class.java))
       project.plugins.apply(Plugins.ANDROID_MULTIPLATFORM)
 
       with(project.androidKmpTarget) {
@@ -34,6 +36,7 @@ internal sealed interface Platform {
         configureAndroidPackaging(packaging)
       }
 
+      project.configureAndroidLifecycle(configurationName = "androidMainImplementation")
       project.releaseTask.configure { it.dependsOn("lintAndroidMain") }
     }
 
