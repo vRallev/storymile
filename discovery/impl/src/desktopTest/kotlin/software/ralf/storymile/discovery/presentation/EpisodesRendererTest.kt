@@ -30,6 +30,8 @@ import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.episodedetails.EpisodeDetails
 import software.ralf.storymile.podcast.PodcastEnclosure
 import software.ralf.storymile.podcast.PodcastEpisode
+import software.ralf.storymile.shows.Episodes
+import software.ralf.storymile.shows.ShowEpisodes
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.StorymileTheme
 import software.ralf.storymile.theme.testing.FakeThemeEnvironment
@@ -41,7 +43,7 @@ class EpisodesRendererTest {
   fun `episode section renders loading empty and retryable partial failures`() =
     runDesktopComposeUiTest(width = 412, height = 916) {
       var retries = 0
-      val state = mutableStateOf(EpisodesPresenter.Model(emptyList(), true, false, { retries++ }))
+      val state = mutableStateOf(ShowEpisodes(emptyList(), true, false, { retries++ }))
       setContent {
         ThemedContent {
           Column { Episodes("Episodes to try", state.value, Modifier) }
@@ -77,7 +79,7 @@ class EpisodesRendererTest {
               podcast = podcast,
               podcasts = listOf(podcast),
               source = ShowPresenter.Source.Browse,
-              episodes = EpisodesPresenter.Model(List(100) { episode(it) }, false, false, {}),
+              episodes = ShowEpisodes(List(100) { episode(it) }, false, false, {}),
               descriptionExpanded = false,
               followed = false,
               followEnabled = true,
@@ -116,7 +118,7 @@ class EpisodesRendererTest {
   }
 
   private fun episode(index: Int) =
-    EpisodesPresenter.Episode(
+    ShowEpisodes.Episode(
       details =
         EpisodeDetails(
           feedUrl = "feed",

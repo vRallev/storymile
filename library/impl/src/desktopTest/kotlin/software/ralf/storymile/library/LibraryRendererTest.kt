@@ -102,7 +102,11 @@ class LibraryRendererTest {
   fun `tab clicks and swipes stay synchronized and retain selection when returning`() =
     runDesktopComposeUiTest(width = 480, height = 840) {
       val renderer = LibraryRenderer()
-      val presenter = LibraryPresenterImpl(UnusedDiscoveryFactory)
+      val presenter =
+        LibraryPresenterImpl(
+          discoveryPresenterFactory = UnusedDiscoveryFactory,
+          showsPresenter = testShowsPresenter(),
+        )
       var visible by mutableStateOf(true)
       setContent {
         val stateHolder = rememberSaveableStateHolder()

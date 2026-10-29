@@ -22,6 +22,7 @@ import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.podcast.PodcastFeed
 import software.ralf.storymile.podcast.PodcastFeedRepository
 import software.ralf.storymile.podcast.PodcastFeedRepository.State as FeedState
+import software.ralf.storymile.shows.ShowEpisodes
 
 class ShowContentPresenter(
   private val catalog: PodcastDiscoveryRepository,
@@ -129,7 +130,7 @@ class ShowContentPresenter(
     val podcast: DiscoveredPodcast,
     val podcasts: List<DiscoveredPodcast>,
     val source: ShowPresenter.Source,
-    val episodes: EpisodesPresenter.Model,
+    val episodes: ShowEpisodes,
     val descriptionExpanded: Boolean,
     val followed: Boolean,
     val followEnabled: Boolean,

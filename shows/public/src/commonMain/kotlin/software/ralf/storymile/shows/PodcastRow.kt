@@ -1,4 +1,4 @@
-package software.ralf.storymile.discovery.presentation
+package software.ralf.storymile.shows
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,19 +21,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import software.ralf.storymile.discovery.DiscoveredPodcast
-import software.ralf.storymile.discovery.presentation.PodcastSharedElement.Companion.podcastSharedElement
+import software.ralf.storymile.shows.PodcastSharedElement.Companion.podcastSharedElement
 import software.ralf.storymile.theme.AppTheme
 
+/** Displays a selectable show row. A null transition source disables shared elements. */
 @Composable
-internal fun PodcastRow(
+fun PodcastRow(
   podcast: DiscoveredPodcast,
   onClick: () -> Unit,
   selected: Boolean = false,
-  transitionSource: ShowPresenter.Source? = null,
+  transitionSource: String? = null,
+  modifier: Modifier = Modifier,
+  subtitle: String? = podcast.author,
+  trailingContent: (@Composable () -> Unit)? = null,
 ) {
   Surface(
     onClick = onClick,
-    modifier = Modifier.fillMaxWidth().testTag("discovery-podcast-${podcast.id}"),
+    modifier = modifier.fillMaxWidth().testTag("discovery-podcast-${podcast.id}"),
     color = if (selected) AppTheme.colorScheme.secondaryContainer else Color.Transparent,
     shape = RoundedCornerShape(16.dp),
   ) {
@@ -59,7 +63,7 @@ internal fun PodcastRow(
           maxLines = 3,
           overflow = TextOverflow.Ellipsis,
         )
-        podcast.author?.let { author ->
+        subtitle?.let { author ->
           Text(
             text = author,
             modifier =
@@ -72,11 +76,15 @@ internal fun PodcastRow(
           )
         }
       }
-      Icon(
-        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-        contentDescription = null,
-        tint = AppTheme.colorScheme.primary,
-      )
+      if (trailingContent != null) {
+        trailingContent()
+      } else {
+        Icon(
+          imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.primary,
+        )
+      }
     }
   }
 }

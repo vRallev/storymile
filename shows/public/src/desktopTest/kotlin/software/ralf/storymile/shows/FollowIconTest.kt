@@ -1,4 +1,4 @@
-package software.ralf.storymile.discovery.presentation
+package software.ralf.storymile.shows
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
