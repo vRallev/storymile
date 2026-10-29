@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
@@ -18,9 +19,13 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Density
 import assertk.assertThat
+import assertk.assertions.containsExactly
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
+import assertk.assertions.isLessThanOrEqualTo
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
@@ -37,6 +42,7 @@ class EpisodeDetailsRendererTest {
   @Test
   fun `full details scroll and back stays reachable across window sizes and large text`() {
     listOf(
+        Triple(first = 320, second = 700, third = 1f),
         Triple(first = 412, second = 916, third = 1f),
         Triple(first = 800, second = 600, third = 1f),
         Triple(first = 1100, second = 360, third = 1f),
@@ -45,6 +51,7 @@ class EpisodeDetailsRendererTest {
       .forEach { (width, height, fontScale) ->
         runDesktopComposeUiTest(width = width, height = height) {
           var backs = 0
+          val invokedActions = mutableListOf<String>()
           val details =
             details("<p>A journey through nature &amp; science.</p>".repeat(30) + "<p>The end.</p>")
           setContent {
@@ -58,6 +65,11 @@ class EpisodeDetailsRendererTest {
                       model =
                         EpisodeDetailsPresenterImpl.Model(
                           details = details,
+                          onPlayNow = { invokedActions += "play" },
+                          onAddToQueue = { invokedActions += "add-to-queue" },
+                          onSave = { invokedActions += "save" },
+                          onDownload = { invokedActions += "download" },
+                          onMore = { invokedActions += "more" },
                           onBack = { backs++ },
                         ),
                       modifier = Modifier,
@@ -70,6 +82,37 @@ class EpisodeDetailsRendererTest {
           val file = File("build/reports/screenshots/episode-details-$width-$height.png")
           file.parentFile.mkdirs()
           ImageIO.write(onRoot().captureToImage().toAwtImage(), "png", file)
+          listOf("play", "add-to-queue", "save", "download", "more").forEach { action ->
+            onNodeWithTag("episode-details-$action")
+              .performScrollTo()
+              .assertIsDisplayed()
+              .assertIsEnabled()
+              .performClick()
+            runOnIdle {
+              assertThat(invokedActions).containsExactly(action)
+              invokedActions.clear()
+            }
+          }
+          onNodeWithTag("episode-details-actions").performScrollTo()
+          val actionsFile = File(file.parentFile, "episode-actions-$width-$height.png")
+          ImageIO.write(onRoot().captureToImage().toAwtImage(), "png", actionsFile)
+          listOf("Play now", "Add to queue").forEach { label ->
+            val layouts = mutableListOf<TextLayoutResult>()
+            onNodeWithText(label, useUnmergedTree = true).performSemanticsAction(
+              SemanticsActions.GetTextLayoutResult,
+            ) {
+              it(layouts)
+            }
+            val layout = layouts.single()
+            assertThat(layout.lineCount, "$label stays on one line at $width and $fontScale")
+              .isEqualTo(1)
+            assertThat(layout.didOverflowHeight).isFalse()
+            assertThat(layout.getLineEnd(0)).isEqualTo(label.length)
+            assertThat(layout.getLineRight(0) - layout.getLineLeft(0))
+              .isLessThanOrEqualTo(layout.size.width.toFloat())
+          }
+          onNodeWithTag("episode-details-title").assertTextEquals(details.episode.title)
+          runOnIdle { assertThat(backs).isEqualTo(0) }
           onNodeWithTag("episode-details-description")
             .performScrollTo()
             .assertTextEquals(details.description)
@@ -83,7 +126,18 @@ class EpisodeDetailsRendererTest {
   fun `selecting another episode resets an embedded pane to the top`() =
     runDesktopComposeUiTest(width = 480, height = 600) {
       val first = details("<p>A long episode description.</p>".repeat(100))
-      val model = mutableStateOf(EpisodeDetailsPresenterImpl.Model(details = first, onBack = {}))
+      val model =
+        mutableStateOf(
+          EpisodeDetailsPresenterImpl.Model(
+            details = first,
+            onPlayNow = {},
+            onAddToQueue = {},
+            onSave = {},
+            onDownload = {},
+            onMore = {},
+            onBack = {},
+          ),
+        )
       setContent {
         CompositionLocalProvider(
           LocalDensity provides Density(1f),
@@ -127,6 +181,11 @@ class EpisodeDetailsRendererTest {
                 model =
                   EpisodeDetailsPresenterImpl.Model(
                     details = details,
+                    onPlayNow = {},
+                    onAddToQueue = {},
+                    onSave = {},
+                    onDownload = {},
+                    onMore = {},
                     onBack = {},
                   ),
                 modifier = Modifier,
@@ -134,7 +193,7 @@ class EpisodeDetailsRendererTest {
           }
         }
       }
-      onNodeWithText("No description available.").assertIsDisplayed()
+      onNodeWithText("No description available.").performScrollTo().assertIsDisplayed()
       onNodeWithTag("episode-details-duration").assertDoesNotExist()
     }
 

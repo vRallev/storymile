@@ -10,9 +10,25 @@ class EpisodeDetailsPresenterImpl(private val details: EpisodeDetails) :
   @Composable
   override fun present(input: Unit): Model {
     val backstack = LocalBackstackScope.requireNotNull()
-    return Model(details = details, onBack = { backstack.pop() })
+    return Model(
+      details = details,
+      onPlayNow = {},
+      onAddToQueue = {},
+      onSave = {},
+      onDownload = {},
+      onMore = {},
+      onBack = { backstack.pop() },
+    )
   }
 
   /** Renderer state retains the selected episode snapshot. */
-  data class Model(val details: EpisodeDetails, val onBack: () -> Unit) : BaseModel
+  data class Model(
+    val details: EpisodeDetails,
+    val onPlayNow: () -> Unit,
+    val onAddToQueue: () -> Unit,
+    val onSave: () -> Unit,
+    val onDownload: () -> Unit,
+    val onMore: () -> Unit,
+    val onBack: () -> Unit,
+  ) : BaseModel
 }

@@ -37,10 +37,10 @@ import software.ralf.storymile.discovery.ShowRobot
 
 class EpisodeDetailsUiTest {
   private val uiTestRule = DesktopUiTestRule()
-  private val elements = listOf("artwork", "title", "subtitle", "description", "duration")
+  private val elements = listOf("artwork", "title", "subtitle", "description", "duration", "play")
 
   @Test
-  fun `discovery episode shares artwork and text with details and returns to its row`() {
+  fun `discovery episode shares artwork text and play control with details and returns to its row`() {
     assertNavigation(fromShow = false, size = DpSize(width = 412.dp, height = 916.dp))
   }
 
@@ -79,7 +79,8 @@ class EpisodeDetailsUiTest {
         onNodeWithTag("show-detail").performScrollToNode(hasTestTag("episode-0"))
       }
       waitForIdle()
-      val origin = listOf("artwork", "title", "subtitle").associateWith { bounds("episode-$it-0") }
+      val origin =
+        listOf("artwork", "title", "subtitle", "play").associateWith { bounds("episode-$it-0") }
       val root = onRoot().fetchSemanticsNode().boundsInRoot
       val distance = minOf(300f, root.width / 2)
       repeat(2) {
@@ -100,6 +101,9 @@ class EpisodeDetailsUiTest {
         // The shared bounds resize; the parent navigation transition only slides and fades.
         assertThat(preview.width).isGreaterThan(origin.getValue("artwork").width)
         assertThat(preview.width).isLessThan(destination.getValue("artwork").width)
+        val playPreview = bounds("episode-details-play")
+        assertThat(playPreview.width).isGreaterThan(origin.getValue("play").width)
+        assertThat(playPreview.width).isLessThan(destination.getValue("play").width)
 
         mouse { moveTo(Offset(x = 2f + distance * 0.2f, y = root.height / 2)) }
         val reversed = bounds("episode-details-artwork")
@@ -188,6 +192,10 @@ class EpisodeDetailsUiTest {
           assertThat(forward[10].bounds.getValue(element), "$element keeps moving")
             .isNotEqualTo(destination.getValue(element))
         }
+        assertThat(forward[10].bounds.getValue("play").width)
+          .isGreaterThan(origin.getValue("play").width)
+        assertThat(forward[10].bounds.getValue("play").width)
+          .isLessThan(destination.getValue("play").width)
         onNodeWithTag("episode-details-title").assertTextEquals("The Quiet Current episode 1")
         onNodeWithTag("episode-details-duration").assertTextEquals("30:00")
         saveFrame("$scenario-details")
