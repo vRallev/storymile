@@ -7,7 +7,6 @@ storymile {
 }
 
 dependencies {
-  androidMainImplementation libs.androidx.lifecycle.runtime
   commonMainImplementation project(':http:public')
   commonMainImplementation project(':runtime-mode:public')
   commonMainImplementation libs.ktor.client.core

@@ -5,7 +5,3 @@ plugins {
 storymile {
   enableComposeUi true
 }
-
-dependencies {
-  androidMainImplementation libs.androidx.lifecycle.runtime
-}

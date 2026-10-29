@@ -34,6 +34,7 @@ internal sealed interface Platform {
         configureAndroidPackaging(packaging)
       }
 
+      project.configureAndroidLifecycle(configurationName = "androidMainImplementation")
       project.releaseTask.configure { it.dependsOn("lintAndroidMain") }
     }
 

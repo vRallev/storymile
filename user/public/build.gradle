@@ -6,7 +6,3 @@ storymile {
   enableComposePresenters true
   addPublicModuleDependencies true
 }
-
-dependencies {
-  androidMainImplementation libs.androidx.lifecycle.runtime
-}

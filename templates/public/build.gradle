@@ -7,7 +7,3 @@ storymile {
   enableMetro true
   enableComposePresenters true
 }
-
-dependencies {
-  androidMainImplementation libs.androidx.lifecycle.runtime
-}

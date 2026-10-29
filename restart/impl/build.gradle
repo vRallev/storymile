@@ -7,6 +7,5 @@ storymile {
 }
 
 dependencies {
-  androidMainImplementation libs.androidx.lifecycle.runtime
   androidMainImplementation libs.process.phoenix
 }
