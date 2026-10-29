@@ -8,4 +8,6 @@ storymile {
 
 dependencies {
   commonMainApi project(':http:public')
+
+  androidMainImplementation libs.androidx.lifecycle.runtime
 }

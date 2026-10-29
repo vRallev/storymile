@@ -12,13 +12,6 @@ internal fun configureAndroidLint(lint: Lint) {
   lint.disable += setOf("AndroidGradlePluginVersion", "GradleDependency", "NewerVersionAvailable")
 }
 
-internal fun Project.configureAndroidLifecycle(configurationName: String) {
-  val lifecycleRuntime = libs.findLibrary("androidx-lifecycle-runtime").get()
-  dependencies.constraints.addProvider(configurationName, lifecycleRuntime) {
-    it.because("AGP 9.5 requires Lifecycle lint checks without obsolete Kotlin APIs.")
-  }
-}
-
 internal fun configureAndroidPackaging(packaging: Packaging) {
   packaging.resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
 }

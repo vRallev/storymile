@@ -5,3 +5,7 @@ plugins {
 storymile {
   enableComposePresenters true
 }
+
+dependencies {
+  androidMainImplementation libs.androidx.lifecycle.runtime
+}
