@@ -29,34 +29,36 @@ internal fun LibraryPanes(
   val window = LocalWindowInfo.current.containerDpSize
   val info = currentWindowAdaptiveInfoV2()
   val directive = calculatePaneScaffoldDirective(info)
+  val availableWidth = width / LocalDensity.current.fontScale
   val split =
     showAvailable &&
-      width / LocalDensity.current.fontScale >= 720.dp &&
+      availableWidth >= 720.dp &&
       !info.windowPosture.isTabletop &&
       (window.width >= window.height || directive.excludedBounds.isNotEmpty())
-  val openDetail = showAvailable && (split || detailRequested)
+  val showDetail = split || (showAvailable && detailRequested)
+  val showList = split || !showDetail
+  val paneGap = if (split) 12.dp else 0.dp
   ListDetailPaneScaffold(
     directive =
       directive.copy(
         maxHorizontalPartitions = if (split) 2 else 1,
-        horizontalPartitionSpacerSize = if (split) 12.dp else 0.dp,
+        horizontalPartitionSpacerSize = paneGap,
       ),
     value =
       ThreePaneScaffoldValue(
-        primary = if (openDetail) PaneAdaptedValue.Expanded else PaneAdaptedValue.Hidden,
-        secondary =
-          if (split || !openDetail) PaneAdaptedValue.Expanded else PaneAdaptedValue.Hidden,
+        primary = paneValue(showDetail),
+        secondary = paneValue(showList),
         tertiary = PaneAdaptedValue.Hidden,
       ),
     listPane = {
-      if (split || !openDetail) {
-        Box(Modifier.fillMaxSize().clipToBounds()) { content(split) }
+      if (showList) {
+        Box(Modifier.preferredWidth(0.5f).fillMaxSize().clipToBounds()) { content(split) }
       }
     },
     detailPane = {
-      if (openDetail) {
+      if (showDetail) {
         Box(
-          Modifier.fillMaxSize().clipToBounds().padding(top = if (split) 24.dp else 0.dp),
+          Modifier.preferredWidth(0.5f).fillMaxSize().clipToBounds().padding(top = paneGap * 2),
         ) {
           detail(split)
         }
@@ -64,3 +66,7 @@ internal fun LibraryPanes(
     },
   )
 }
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+private fun paneValue(visible: Boolean): PaneAdaptedValue =
+  if (visible) PaneAdaptedValue.Expanded else PaneAdaptedValue.Hidden
