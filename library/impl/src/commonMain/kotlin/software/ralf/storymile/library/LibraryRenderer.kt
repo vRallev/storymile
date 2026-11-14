@@ -36,6 +36,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -217,32 +218,38 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
           modifier =
             Modifier.testTag("library-tab-${tab.name.lowercase()}")
               .heightIn(min = 72.dp)
-              .padding(horizontal = 4.dp, vertical = 8.dp),
+              .padding(4.dp)
+              .clip(AppTheme.shapes.small),
         ) {
-          Icon(
-            imageVector =
-              when (tab) {
-                Tab.QUEUE -> Icons.AutoMirrored.Filled.FormatListBulleted
-                Tab.SHOWS -> Icons.Default.Podcasts
-                Tab.SAVED -> Icons.Default.Bookmark
-                Tab.HISTORY -> Icons.Default.History
-              },
-            contentDescription = null,
-          )
-          Spacer(Modifier.height(8.dp))
-          Text(
-            text =
-              stringResource(
+          Column(
+            modifier = Modifier.padding(vertical = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+          ) {
+            Icon(
+              imageVector =
                 when (tab) {
-                  Tab.QUEUE -> Res.string.library_queue
-                  Tab.SHOWS -> Res.string.library_shows
-                  Tab.SAVED -> Res.string.library_saved
-                  Tab.HISTORY -> Res.string.library_history
+                  Tab.QUEUE -> Icons.AutoMirrored.Filled.FormatListBulleted
+                  Tab.SHOWS -> Icons.Default.Podcasts
+                  Tab.SAVED -> Icons.Default.Bookmark
+                  Tab.HISTORY -> Icons.Default.History
                 },
-              ),
-            style = AppTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-          )
+              contentDescription = null,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+              text =
+                stringResource(
+                  when (tab) {
+                    Tab.QUEUE -> Res.string.library_queue
+                    Tab.SHOWS -> Res.string.library_shows
+                    Tab.SAVED -> Res.string.library_saved
+                    Tab.HISTORY -> Res.string.library_history
+                  },
+                ),
+              style = AppTheme.typography.bodyLarge,
+              textAlign = TextAlign.Center,
+            )
+          }
         }
       }
     }
