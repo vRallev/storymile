@@ -91,6 +91,12 @@ class LibraryUiTest {
       runOnUiThread { onNodeWithTag("show-back").performClick() }
       onNodeWithTag("library-tab-shows").assertIsSelected()
       onNodeWithTag(first).assertIsDisplayed()
+
+      openAndCheckArtworkTransition(
+        row = first,
+        artwork = "library-show-artwork-https://feeds.test/quiet-current",
+      )
+      onNodeWithTag("library-show-pane").assertIsDisplayed()
     }
   }
 
