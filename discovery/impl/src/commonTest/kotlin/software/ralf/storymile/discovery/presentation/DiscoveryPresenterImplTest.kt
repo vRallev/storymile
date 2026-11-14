@@ -18,9 +18,11 @@ import software.ralf.app.platform.presenter.backstack.nav3.withPresenterBackstac
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.app.platform.presenter.compose.test
 import software.ralf.storymile.discovery.DiscoveredPodcast
+import software.ralf.storymile.discovery.DiscoveryTopic
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.episodedetails.testing.FakeEpisodeDetailsPresenterFactory
 import software.ralf.storymile.http.HttpResponse
+import software.ralf.storymile.podcastshows.ShowSource
 
 class DiscoveryPresenterImplTest {
   @Test
@@ -32,7 +34,7 @@ class DiscoveryPresenterImplTest {
         repository = repository,
         feeds = TestPodcastFeeds(),
         episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        savedShows = TestSavedShowRepository(),
+        showPresenterFactory = TestShowPresenterFactory(),
       )
 
     presenter.testCatalog(this) {
@@ -62,7 +64,7 @@ class DiscoveryPresenterImplTest {
         repository = repository,
         feeds = TestPodcastFeeds(),
         episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        savedShows = TestSavedShowRepository(),
+        showPresenterFactory = TestShowPresenterFactory(),
       )
 
     presenter.testCatalog(this) {
@@ -98,7 +100,7 @@ class DiscoveryPresenterImplTest {
         repository = repository,
         feeds = TestPodcastFeeds(),
         episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        savedShows = TestSavedShowRepository(),
+        showPresenterFactory = TestShowPresenterFactory(),
       )
 
     presenter.testCatalog(this) {
@@ -128,7 +130,7 @@ class DiscoveryPresenterImplTest {
         repository = repository,
         feeds = TestPodcastFeeds(),
         episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        savedShows = TestSavedShowRepository(),
+        showPresenterFactory = TestShowPresenterFactory(),
       )
 
     presenter.testCatalog(this) {
@@ -162,7 +164,7 @@ class DiscoveryPresenterImplTest {
         repository = repository,
         feeds = TestPodcastFeeds(),
         episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        savedShows = TestSavedShowRepository(),
+        showPresenterFactory = TestShowPresenterFactory(),
         topic = DiscoveryTopic.NATURE,
       )
 
@@ -186,7 +188,8 @@ class DiscoveryPresenterImplTest {
   }
 
   @Test
-  fun `opening a show preserves the response order and back returns to the catalog`() = runTest {
+  fun `opening a show passes the selected podcast and ordered catalog`() = runTest {
+    val shows = TestShowPresenterFactory()
     val repository = TestPodcastCatalog()
     val podcasts = listOf(podcast("first"), podcast("second"))
     repository.updatePopular(State.Success(podcasts))
@@ -195,32 +198,29 @@ class DiscoveryPresenterImplTest {
         repository = repository,
         feeds = TestPodcastFeeds(),
         episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        savedShows = TestSavedShowRepository(),
+        showPresenterFactory = shows,
       )
     val backstack = FakePresenterBackstackScope(presenter)
 
     presenter.testCatalog(this, backstack) {
       val model = awaitItem()
       model.onPodcastSelected(podcasts[1])
-      val show = backstack.backstack.last()
-      assertThat(show).isInstanceOf<ShowPresenter>()
-      // ShowPresenter's model is renderer-only; inspect it through its presenter output.
-      (show as ShowPresenter).withPresenterBackstackScope(backstack).test(this@runTest) {
-        val detail = awaitItem().content
-        assertThat(detail.podcast).isEqualTo(podcasts[1])
-        assertThat(detail.podcasts).isEqualTo(podcasts)
-        assertThat(detail.source).isEqualTo(ShowPresenter.Source.Browse)
-        detail.onPodcastSelected(podcasts[0])
-        assertThat(awaitItem().content.podcast).isEqualTo(podcasts[0])
-        detail.onBack()
-        assertThat(backstack.backstack).containsExactly(presenter)
-      }
+      assertThat(shows.opened)
+        .containsExactly(
+          TestShowPresenterFactory.Opened(
+            podcast = podcasts[1],
+            catalog = podcasts,
+            source = ShowSource.Browse,
+          ),
+        )
+      assertThat(backstack.backstack).containsExactly(presenter, shows.presenter)
     }
   }
 
   @Test
   fun `show header keeps topic or search context`() = runTest {
     listOf(DiscoveryTopic.NATURE, null).forEach { topic ->
+      val shows = TestShowPresenterFactory()
       val repository = TestPodcastCatalog()
       val selectedPodcast = podcast("first")
       repository.response = HttpResponse.Success(listOf(selectedPodcast), 200)
@@ -230,7 +230,7 @@ class DiscoveryPresenterImplTest {
           repository = repository,
           feeds = TestPodcastFeeds(),
           episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-          savedShows = TestSavedShowRepository(),
+          showPresenterFactory = shows,
           topic = topic,
         )
       val backstack = FakePresenterBackstackScope(presenter)
@@ -247,12 +247,8 @@ class DiscoveryPresenterImplTest {
           model = expectMostRecentItem()
         }
         model.onPodcastSelected(selectedPodcast)
-        val show = backstack.backstack.last() as ShowPresenter
-        show.withPresenterBackstackScope(backstack).test(this@runTest) {
-          val expectedSource =
-            if (topic == null) ShowPresenter.Source.Search else ShowPresenter.Source.Topic(topic)
-          assertThat(awaitItem().content.source).isEqualTo(expectedSource)
-        }
+        val expectedSource = if (topic == null) ShowSource.Search else ShowSource.Topic(topic)
+        assertThat(shows.opened.single().source).isEqualTo(expectedSource)
       }
     }
   }
@@ -276,7 +272,7 @@ class DiscoveryPresenterImplTest {
         repository = repository,
         feeds = feeds,
         episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        savedShows = TestSavedShowRepository(),
+        showPresenterFactory = TestShowPresenterFactory(),
       )
     presenter.testCatalog(this) {
       val initial = awaitItem()
@@ -289,39 +285,6 @@ class DiscoveryPresenterImplTest {
       assertThat(expectMostRecentItem().episodes.episodes).isEmpty()
       assertThat(feeds.requested).containsExactly("one")
       assertThat(repository.lookedUp).containsExactly("missing")
-    }
-  }
-
-  @Test
-  fun `show selection observes the selected feed and drops the previous episodes`() = runTest {
-    val feeds = TestPodcastFeeds()
-    val first = podcast("one").copy(feedUrl = "one")
-    val second = podcast("two").copy(feedUrl = "two")
-    val presenter =
-      ShowPresenter(
-        catalog = TestPodcastCatalog(),
-        feeds = feeds,
-        episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        savedShows = TestSavedShowRepository(),
-        initialPodcast = first,
-        podcasts = listOf(first, second),
-        source = ShowPresenter.Source.Browse,
-      )
-    presenter.withPresenterBackstackScope(FakePresenterBackstackScope()).test(this) {
-      val initial = awaitItem().content
-      assertThat(initial.episodes.loading).isEqualTo(true)
-      assertThat(feeds.requested.distinct()).containsExactly("one")
-      initial.onPodcastSelected(second)
-      val switched = awaitItem().content
-      assertThat(switched.podcast).isEqualTo(second)
-      assertThat(switched.episodes.episodes).isEmpty()
-      assertThat(feeds.requested.distinct()).containsExactly("one", "two")
-      feeds.update("two", software.ralf.storymile.podcast.PodcastFeedRepository.State.Error)
-      val failed = awaitItem().content
-      assertThat(failed.episodes.failed).isEqualTo(true)
-      failed.episodes.onRetry()
-      assertThat(feeds.refreshed).containsExactly("two")
-      assertThat(awaitItem().content.episodes.loading).isEqualTo(true)
     }
   }
 

@@ -6,7 +6,7 @@ import software.ralf.storymile.discovery.DiscoveryPresenter
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.podcast.PodcastFeedRepository
-import software.ralf.storymile.podcast.SavedShowRepository
+import software.ralf.storymile.podcastshows.ShowPresenter
 import software.ralf.storymile.user.UserScope
 
 @Inject
@@ -15,14 +15,14 @@ class DiscoveryPresenterFactory(
   private val repository: PodcastDiscoveryRepository,
   private val feeds: PodcastFeedRepository,
   private val episodeDetailsFactory: EpisodeDetailsPresenter.Factory,
-  private val savedShows: SavedShowRepository,
+  private val showPresenterFactory: ShowPresenter.Factory,
 ) : DiscoveryPresenter.Factory {
   override fun create(focusSearch: Boolean): DiscoveryPresenter<*> =
     DiscoveryPresenterImpl(
       repository = repository,
       feeds = feeds,
       episodeDetailsFactory = episodeDetailsFactory,
-      savedShows = savedShows,
+      showPresenterFactory = showPresenterFactory,
       focusSearch = focusSearch,
     )
 }

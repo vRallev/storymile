@@ -29,11 +29,12 @@ import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.coroutine.CoroutineScopeScoped
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository
-import software.ralf.storymile.discovery.presentation.ShowContentPresenter
-import software.ralf.storymile.discovery.presentation.ShowPresenter
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.podcast.PodcastFeedRepository
 import software.ralf.storymile.podcast.SavedShowRepository
+import software.ralf.storymile.podcastshows.ShowContentPresenter
+import software.ralf.storymile.podcastshows.ShowSelection
+import software.ralf.storymile.podcastshows.ShowSource
 import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.OkioStoragePlatform
 import software.ralf.storymile.storage.Storage
@@ -95,13 +96,16 @@ class FollowShowPersistenceTest {
         feeds = feeds,
         episodeDetailsFactory = user.episodeDetailsFactory,
         savedShows = user.savedShows,
-        initialPodcast =
-          (catalog.popular.first { it is PodcastDiscoveryRepository.State.Success }
-              as PodcastDiscoveryRepository.State.Success)
-            .podcasts
-            .first(),
-        podcasts = emptyList(),
-        source = ShowPresenter.Source.Browse,
+        selection =
+          ShowSelection.Discovery(
+            initialPodcast =
+              (catalog.popular.first { it is PodcastDiscoveryRepository.State.Success }
+                  as PodcastDiscoveryRepository.State.Success)
+                .podcasts
+                .first(),
+            podcasts = emptyList(),
+          ),
+        source = ShowSource.Browse,
         onBack = {},
       )
       .withPresenterBackstackScope(FakePresenterBackstackScope())
