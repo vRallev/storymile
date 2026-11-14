@@ -8,6 +8,13 @@
   <string name="library_queue_empty_description">Add episodes to choose what plays next.</string>
   <string name="library_shows_empty_title">No followed shows</string>
   <string name="library_shows_empty_description">Follow podcasts to see them here.</string>
+  <string name="library_following">Following</string>
+  <string name="library_shows_error">Could not load followed shows.</string>
+  <string name="library_shows_retry">Try again</string>
+  <plurals name="library_show_episode_count">
+    <item quantity="one">%1$d episode</item>
+    <item quantity="other">%1$d episodes</item>
+  </plurals>
   <string name="library_saved_empty_title">No saved episodes</string>
   <string name="library_saved_empty_description">Save episodes to find them here.</string>
   <string name="library_history_empty_title">No listening history yet</string>

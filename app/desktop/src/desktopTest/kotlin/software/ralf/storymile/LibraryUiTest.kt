@@ -1,20 +1,29 @@
 package software.ralf.storymile
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import assertk.assertThat
+import assertk.assertions.isLessThan
+import assertk.assertions.isStrictlyBetween
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
@@ -25,6 +34,71 @@ import software.ralf.storymile.tabs.TabsPresenter
 
 class LibraryUiTest {
   private val uiTestRule = DesktopUiTestRule()
+
+  @Test
+  fun `followed shows open shared details and unfollowing removes the library row`() {
+    val size = mutableStateOf(DesktopWindowSizes.phone)
+    uiTestRule.runRobotTest(
+      windowSize = DesktopWindowSizes.desktop,
+      darkTheme = false,
+      contentSize = size,
+    ) {
+      composeRobot<DiscoveryRobot> {
+        discover()
+        openPodcast("quiet-current")
+      }
+      composeRobot<ShowRobot> {
+        follow()
+        back()
+      }
+      composeRobot<DiscoveryRobot> { openPodcast("field-notes") }
+      composeRobot<ShowRobot> { follow() }
+      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
+      runOnUiThread { onNodeWithTag("library-tab-shows").performClick() }
+      onNodeWithText("Followed shows").assertIsDisplayed()
+      val first = "library-show-https://feeds.test/quiet-current"
+      val second = "library-show-https://feeds.test/field-notes"
+
+      openAndCheckArtworkTransition(
+        row = first,
+        artwork = "library-show-artwork-https://feeds.test/quiet-current",
+      )
+      composeRobot<ShowRobot> { seeShow() }
+      onNodeWithTag("show-title").assertTextEquals("The Quiet Current")
+      onNodeWithTag(first).assertDoesNotExist()
+      runOnUiThread {
+        onNodeWithTag("show-detail").performScrollToNode(hasTestTag("episode-0"))
+        onNodeWithTag("episode-0").performClick()
+      }
+      onNodeWithTag("episode-details-screen").assertIsDisplayed()
+      runOnUiThread { onNodeWithTag("episode-details-back").performClick() }
+      composeRobot<ShowRobot> { seeFollowing(true) }
+
+      runOnIdle { size.value = DesktopWindowSizes.desktop }
+      onNodeWithTag(first).assertIsDisplayed().assertIsSelected()
+      val list = onNodeWithTag("library-followed-shows").getUnclippedBoundsInRoot()
+      val pane = onNodeWithTag("library-show-pane").getUnclippedBoundsInRoot()
+      assertThat(list.right).isLessThan(pane.left)
+      openAndCheckArtworkTransition(
+        row = second,
+        artwork = "library-show-artwork-https://feeds.test/field-notes",
+      )
+      onNodeWithTag(second).assertIsDisplayed().assertIsSelected()
+      onNodeWithTag("show-title").assertTextEquals("Field Notes")
+      saveScreenshot("desktop-followed-shows")
+      composeRobot<ShowRobot> { unfollow() }
+      onNodeWithTag(second).assertDoesNotExist()
+      runOnUiThread { onNodeWithTag("show-back").performClick() }
+      onNodeWithTag("library-tab-shows").assertIsSelected()
+      onNodeWithTag(first).assertIsDisplayed()
+
+      openAndCheckArtworkTransition(
+        row = first,
+        artwork = "library-show-artwork-https://feeds.test/quiet-current",
+      )
+      onNodeWithTag("library-show-pane").assertIsDisplayed()
+    }
+  }
 
   @Test
   fun `library renders in the production graph on phone tablet and desktop in both themes`() {
@@ -131,6 +205,35 @@ class LibraryUiTest {
           onNodeWithTag("library-tab-history").assertIsSelected()
         }
       }
+  }
+
+  private fun ComposeUiTest.openAndCheckArtworkTransition(row: String, artwork: String) {
+    val origin = artworkBounds(artwork)
+    mainClock.autoAdvance = false
+    try {
+      runOnUiThread { onNodeWithTag(row).performClick() }
+      waitUntil(timeoutMillis = 5_000) {
+        mainClock.advanceTimeByFrame()
+        onAllNodes(hasTestTag("show-artwork"), useUnmergedTree = true)
+          .fetchSemanticsNodes()
+          .isNotEmpty()
+      }
+      mainClock.advanceTimeBy(112)
+      val frame = artworkBounds("show-artwork")
+      mainClock.advanceTimeBy(800)
+      val target = artworkBounds("show-artwork")
+      val distance = (target.center - origin.center).getDistance()
+      assertThat((frame.center - origin.center).getDistance()).isStrictlyBetween(1f, distance - 1f)
+      assertThat(frame.width).isStrictlyBetween(origin.width, target.width)
+    } finally {
+      mainClock.autoAdvance = true
+    }
+  }
+
+  private fun ComposeUiTest.artworkBounds(tag: String): Rect = runOnUiThread {
+    val coordinates =
+      onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().layoutInfo.coordinates
+    coordinates.findRootCoordinates().localBoundingBoxOf(coordinates, clipBounds = false)
   }
 
   private fun ComposeUiTest.saveScreenshot(name: String) {

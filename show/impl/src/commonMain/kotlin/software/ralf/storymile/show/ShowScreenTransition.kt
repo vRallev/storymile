@@ -1,0 +1,27 @@
+package software.ralf.storymile.show
+
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import software.ralf.storymile.templates.LocalAnimatedVisibilityScope
+import software.ralf.storymile.theme.AppTheme
+
+@Composable
+internal fun Modifier.showScreenTransition(): Modifier {
+  val visibilityScope = LocalAnimatedVisibilityScope.current
+  val transition =
+    if (visibilityScope == null) {
+      this
+    } else {
+      with(visibilityScope) {
+        animateEnterExit(
+          enter = fadeIn(tween(durationMillis = 100, delayMillis = 350)),
+          exit = fadeOut(tween(100)),
+        )
+      }
+    }
+  return transition.background(AppTheme.colorScheme.background)
+}

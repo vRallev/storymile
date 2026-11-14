@@ -1,0 +1,11 @@
+<resources>
+  <string name="back_to_followed_shows">Back to followed shows</string>
+  <string name="podcasts_to_explore">Podcasts to explore</string>
+  <string name="episodes">Episodes</string>
+  <string name="follow">Follow</string>
+  <string name="following">Following</string>
+  <string name="follow_error">Could not update this show. Try again.</string>
+  <string name="show_description">Show podcast description</string>
+  <string name="hide_description">Hide podcast description</string>
+  <string name="no_description">No description available.</string>
+</resources>

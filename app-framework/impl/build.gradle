@@ -33,6 +33,7 @@ dependencies {
   commonMainImplementation project(':presenter-navigation:impl')
   commonMainImplementation project(':restart:impl')
   commonMainImplementation project(':runtime-mode:impl')
+  commonMainImplementation project(':show:impl')
   commonMainImplementation project(':storage:impl')
   commonMainImplementation project(':tabs:impl')
   commonMainImplementation project(':templates:impl')
