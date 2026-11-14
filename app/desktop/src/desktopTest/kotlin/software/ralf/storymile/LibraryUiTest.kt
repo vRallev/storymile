@@ -10,6 +10,7 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -59,6 +60,9 @@ class LibraryUiTest {
               .forEach { (tab, title) ->
                 runOnUiThread { onNodeWithTag("library-tab-$tab").performClick() }
                 onNodeWithTag("library-tab-$tab").assertIsSelected()
+                waitUntil(timeoutMillis = 5_000) {
+                  onAllNodesWithText(title).fetchSemanticsNodes().isNotEmpty()
+                }
                 onNodeWithText(title).assertIsDisplayed()
                 saveScreenshot("$device-${if (darkTheme) "dark" else "light"}-$tab")
               }
@@ -71,7 +75,7 @@ class LibraryUiTest {
   fun `followed shows open from the library and keep their selection across layouts`() {
     val size = mutableStateOf(DesktopWindowSizes.phone)
     uiTestRule.runRobotTest(
-      windowSize = DesktopWindowSizes.desktop,
+      windowSize = DpSize(width = 1440.dp, height = 1000.dp),
       darkTheme = false,
       contentSize = size,
     ) {

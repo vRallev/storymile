@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 internal fun LibraryPanes(
   width: Dp,
-  showsTabActive: Boolean,
+  showAvailable: Boolean,
   detailRequested: Boolean,
   detail: @Composable (split: Boolean) -> Unit,
   content: @Composable (split: Boolean) -> Unit,
@@ -30,11 +30,11 @@ internal fun LibraryPanes(
   val info = currentWindowAdaptiveInfoV2()
   val directive = calculatePaneScaffoldDirective(info)
   val split =
-    showsTabActive &&
+    showAvailable &&
       width / LocalDensity.current.fontScale >= 720.dp &&
       !info.windowPosture.isTabletop &&
       (window.width >= window.height || directive.excludedBounds.isNotEmpty())
-  val openDetail = showsTabActive && (split || detailRequested)
+  val openDetail = showAvailable && (split || detailRequested)
   ListDetailPaneScaffold(
     directive =
       directive.copy(
@@ -48,12 +48,18 @@ internal fun LibraryPanes(
           if (split || !openDetail) PaneAdaptedValue.Expanded else PaneAdaptedValue.Hidden,
         tertiary = PaneAdaptedValue.Hidden,
       ),
-    listPane = { Box(Modifier.fillMaxSize().clipToBounds()) { content(split) } },
+    listPane = {
+      if (split || !openDetail) {
+        Box(Modifier.fillMaxSize().clipToBounds()) { content(split) }
+      }
+    },
     detailPane = {
-      Box(
-        Modifier.fillMaxSize().clipToBounds().padding(top = if (split) 24.dp else 0.dp),
-      ) {
-        detail(split)
+      if (openDetail) {
+        Box(
+          Modifier.fillMaxSize().clipToBounds().padding(top = if (split) 24.dp else 0.dp),
+        ) {
+          detail(split)
+        }
       }
     },
   )
