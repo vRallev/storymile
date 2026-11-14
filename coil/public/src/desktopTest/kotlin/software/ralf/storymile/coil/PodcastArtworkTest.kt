@@ -2,6 +2,7 @@ package software.ralf.storymile.coil
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -32,7 +33,7 @@ import kotlinx.coroutines.CompletableDeferred
 @OptIn(DelicateCoilApi::class)
 class PodcastArtworkTest {
   @Test
-  fun `loaded artwork stays visible while its URL changes`() {
+  fun `the placeholder does not show while loaded artwork is replaced`() {
     assertReplacement(samePodcast = true)
   }
 
@@ -76,7 +77,7 @@ class PodcastArtworkTest {
         var artworkUrl by mutableStateOf("https://example.invalid/cover.png")
         var artworkId by mutableStateOf("first")
         setContent {
-          MaterialTheme {
+          MaterialTheme(colorScheme = lightColorScheme(secondaryContainer = Color.Blue)) {
             PodcastArtwork(
               artworkUrl = artworkUrl,
               modifier = Modifier.size(100.dp).testTag("artwork"),
@@ -101,7 +102,13 @@ class PodcastArtworkTest {
           assertThat(artworkColor()).isNotEqualTo(Color.Red)
         }
         replacementReady.complete(Unit)
-        waitUntil { artworkColor() == Color.Green }
+        waitUntil {
+          val color = artworkColor()
+          if (samePodcast) {
+            assertThat(color.blue, "fallback showing through the artwork").isEqualTo(0f)
+          }
+          color == Color.Green
+        }
       }
     } finally {
       SingletonImageLoader.setUnsafe(previousImageLoader)
