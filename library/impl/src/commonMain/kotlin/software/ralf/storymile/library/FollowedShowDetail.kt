@@ -170,9 +170,10 @@ private fun ShowMetadata(model: Model, show: PodcastFeed, modifier: Modifier) {
       style = AppTheme.typography.headlineSmall,
       fontWeight = FontWeight.Bold,
     )
-    if (!show.author.isNullOrBlank()) {
+    val author = show.author
+    if (!author.isNullOrBlank()) {
       Text(
-        text = show.author,
+        text = author,
         style = AppTheme.typography.bodyMedium,
         color = AppTheme.colorScheme.onSurfaceVariant,
       )
