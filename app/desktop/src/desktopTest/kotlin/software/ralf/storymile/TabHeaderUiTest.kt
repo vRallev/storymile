@@ -72,7 +72,7 @@ class TabHeaderUiTest {
     val screenTag =
       when (tab) {
         TabsPresenter.Tab.HOME -> "home-screen"
-        TabsPresenter.Tab.LIBRARY -> "library-empty"
+        TabsPresenter.Tab.LIBRARY -> "library-screen"
         TabsPresenter.Tab.DOWNLOADS -> "downloads-screen"
       }
     val content = onNodeWithTag(screenTag).getUnclippedBoundsInRoot()

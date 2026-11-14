@@ -20,7 +20,6 @@
   <string name="loading_episodes">Loading episodes</string>
   <string name="episodes_error">Could not load episodes.</string>
   <string name="no_episodes">No episodes available.</string>
-  <string name="play_episode">Play %1$s</string>
   <string name="follow">Follow</string>
   <string name="following">Following</string>
   <string name="follow_error">Could not update this show. Try again.</string>

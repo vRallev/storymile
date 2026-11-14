@@ -13,4 +13,21 @@
   <string name="library_history_empty_title">No listening history yet</string>
   <string name="library_history_empty_description">Episodes you finish will appear here.</string>
   <string name="library_discover">Discover podcasts</string>
+  <string name="library_followed_shows">Followed shows</string>
+  <string name="library_following">Following</string>
+  <string name="library_shows_loading">Loading followed shows…</string>
+  <string name="library_shows_read_error">Could not load followed shows.</string>
+  <string name="library_shows_retry">Retry</string>
+  <string name="library_show_actions">Actions for %1$s</string>
+  <string name="library_unfollow">Unfollow</string>
+  <string name="library_unfollow_error">Could not unfollow the show. Try again.</string>
+  <string name="library_show_episodes">Episodes</string>
+  <string name="library_no_episodes">No episodes available.</string>
+  <string name="library_show_description">Show podcast description</string>
+  <string name="library_hide_description">Hide podcast description</string>
+  <string name="library_no_description">No description available.</string>
+  <plurals name="library_episode_count">
+    <item quantity="one">%1$d episode</item>
+    <item quantity="other">%1$d episodes</item>
+  </plurals>
 </resources>
