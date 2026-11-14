@@ -133,7 +133,7 @@ class ShowContentPresenterTest {
       catalog = catalog,
       feeds = TestPodcastFeeds(),
       episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-      database = TestPodcastDatabase(),
+      savedShows = TestSavedShowRepository(),
       initialPodcast = initialPodcast,
       podcasts = listOf(podcast("one"), podcast("two")),
       source = ShowPresenter.Source.Browse,

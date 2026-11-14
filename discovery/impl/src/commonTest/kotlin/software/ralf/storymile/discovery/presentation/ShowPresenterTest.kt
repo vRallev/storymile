@@ -104,7 +104,7 @@ class ShowPresenterTest {
           val backstack = LocalBackstackScope.requireNotNull()
           EpisodeModel(details = details, onBack = { backstack.pop() })
         },
-      database = TestPodcastDatabase(),
+      savedShows = TestSavedShowRepository(),
       initialPodcast = podcast("one"),
       podcasts = listOf(podcast("one"), podcast("two")),
       source = ShowPresenter.Source.Browse,

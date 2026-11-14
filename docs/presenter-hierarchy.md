@@ -97,7 +97,7 @@ The tabs presenter creates and composes only the selected screen. It retains the
 filter across tab changes. Library owns a backstack. Each empty tab opens Discovery.
 Back returns to the selected Library tab.
 [LibraryShowsPresenterImpl](../library-shows/impl/src/commonMain/kotlin/software/ralf/storymile/libraryshows/LibraryShowsPresenterImpl.kt)
-reads followed shows from the user database.
+reads followed shows through `SavedShowRepository`.
 [DownloadsPresenterImpl](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsPresenterImpl.kt)
 provides the empty Downloads screen, rendered by
 [DownloadsRenderer](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsRenderer.kt).

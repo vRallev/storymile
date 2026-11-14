@@ -10,7 +10,7 @@ storymile {
 
 dependencies {
   commonMainImplementation project(':coil:public')
-  commonMainImplementation project(':database:public')
+  commonMainImplementation project(':podcast:public')
   commonMainImplementation project(':theme:public')
   commonMainImplementation project(':user:public')
 }

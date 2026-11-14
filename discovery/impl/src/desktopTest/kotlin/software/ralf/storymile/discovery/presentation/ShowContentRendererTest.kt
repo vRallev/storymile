@@ -70,7 +70,7 @@ class ShowContentRendererTest {
   private val themeEnvironment = FakeThemeEnvironment()
 
   @Test
-  fun `follow button animates both directions and shows retryable failures`() {
+  fun `follow button animates both directions and can be disabled`() {
     listOf(false, true).forEach { darkTheme ->
       runDesktopComposeUiTest(width = 600, height = 900) {
         val state = mutableStateOf(model())
@@ -109,9 +109,6 @@ class ShowContentRendererTest {
         }
         runOnIdle { state.value = state.value.copy(followEnabled = false) }
         onNodeWithTag("show-follow").assertIsNotEnabled()
-        runOnIdle { state.value = state.value.copy(followEnabled = true, followFailed = true) }
-        onNodeWithTag("show-follow").assertIsEnabled()
-        onNodeWithTag("show-follow-error").assertIsDisplayed()
       }
     }
   }
@@ -332,7 +329,6 @@ class ShowContentRendererTest {
       descriptionExpanded = false,
       followed = false,
       followEnabled = true,
-      followFailed = false,
       onToggleFollow = {},
       onToggleDescription = {},
       onPodcastSelected = {},

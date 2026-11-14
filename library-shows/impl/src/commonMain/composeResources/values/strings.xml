@@ -1,5 +1,3 @@
 <resources>
   <string name="followed_shows">Followed shows</string>
-  <string name="followed_shows_error">Could not load followed shows.</string>
-  <string name="retry">Retry</string>
 </resources>

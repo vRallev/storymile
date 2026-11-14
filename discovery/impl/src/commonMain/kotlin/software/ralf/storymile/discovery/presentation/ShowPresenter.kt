@@ -9,17 +9,17 @@ import software.ralf.app.platform.presenter.backstack.nav3.backstack
 import software.ralf.app.platform.presenter.backstack.nav3.presenterBackstack
 import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.app.platform.presenter.compose.ComposePresenter
-import software.ralf.storymile.database.PodcastDatabase
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.podcast.PodcastFeedRepository
+import software.ralf.storymile.podcast.SavedShowRepository
 
 class ShowPresenter(
   private val catalog: PodcastDiscoveryRepository,
   private val feeds: PodcastFeedRepository,
   private val episodeDetailsFactory: EpisodeDetailsPresenter.Factory,
-  private val database: PodcastDatabase,
+  private val savedShows: SavedShowRepository,
   private val initialPodcast: DiscoveredPodcast,
   private val podcasts: List<DiscoveredPodcast>,
   private val source: Source,
@@ -32,7 +32,7 @@ class ShowPresenter(
         catalog = catalog,
         feeds = feeds,
         episodeDetailsFactory = episodeDetailsFactory,
-        database = database,
+        savedShows = savedShows,
         initialPodcast = initialPodcast,
         podcasts = podcasts,
         source = source,
