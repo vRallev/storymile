@@ -102,7 +102,11 @@ class LibraryRendererTest {
   fun `tab clicks and swipes stay synchronized and retain selection when returning`() =
     runDesktopComposeUiTest(width = 480, height = 840) {
       val renderer = LibraryRenderer()
-      val presenter = LibraryPresenterImpl(UnusedDiscoveryFactory)
+      val presenter =
+        LibraryPresenterImpl(
+          discoveryPresenterFactory = UnusedDiscoveryFactory,
+          showsPresenter = EmptyLibraryShowsPresenter,
+        )
       var visible by mutableStateOf(true)
       setContent {
         val stateHolder = rememberSaveableStateHolder()
@@ -137,7 +141,7 @@ class LibraryRendererTest {
       assertSelectedTab(tab = Tab.HISTORY, title = "No listening history yet")
 
       runOnIdle { visible = false }
-      onNodeWithTag("library-empty").assertDoesNotExist()
+      onNodeWithTag("library-screen").assertDoesNotExist()
       runOnIdle { visible = true }
       assertSelectedTab(tab = Tab.HISTORY, title = "No listening history yet")
       onNodeWithTag("library-tab-queue").performClick()
@@ -163,7 +167,7 @@ class LibraryRendererTest {
         useUnmergedTree = true,
       )
       .assertCountEquals(0)
-    val root = onNodeWithTag("library-empty").getUnclippedBoundsInRoot()
+    val root = onNodeWithTag("library-screen").getUnclippedBoundsInRoot()
     listOf(
         "tab-queue",
         "tab-shows",
@@ -216,7 +220,12 @@ class LibraryRendererTest {
   }
 
   private fun model(tab: Tab = Tab.QUEUE) =
-    Model(selectedTab = tab, onSelectTab = {}, onDiscoverPodcasts = {})
+    Model(
+      selectedTab = tab,
+      shows = EmptyLibraryShowsPresenter.Model,
+      onSelectTab = {},
+      onDiscoverPodcasts = {},
+    )
 
   @Composable
   private fun ThemedContent(fontScale: Float = 1f, content: @Composable () -> Unit) {

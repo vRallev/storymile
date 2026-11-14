@@ -3,16 +3,20 @@ package software.ralf.storymile
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import java.io.File
@@ -27,6 +31,56 @@ class LibraryUiTest {
   private val uiTestRule = DesktopUiTestRule()
 
   @Test
+  fun `following adds a passive row to Shows and unfollowing removes it`() {
+    val size = mutableStateOf(DesktopWindowSizes.phone)
+    uiTestRule.runRobotTest(
+      windowSize = DesktopWindowSizes.desktop,
+      darkTheme = true,
+      contentSize = size,
+    ) {
+      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
+      runOnUiThread { onNodeWithTag("library-tab-shows").performClick() }
+      waitUntilAtLeastOneExists(matcher = hasText("No followed shows"), timeoutMillis = 5_000)
+      runOnUiThread { onNodeWithTag("library-discover").performClick() }
+      composeRobot<DiscoveryRobot> { openPodcast("quiet-current") }
+      composeRobot<ShowRobot> {
+        follow()
+        back()
+      }
+      composeRobot<DiscoveryRobot> { backFromCatalog() }
+
+      val show = onNodeWithText("The Quiet Current")
+      waitUntilAtLeastOneExists(matcher = hasText("Followed shows"), timeoutMillis = 5_000)
+      show.assertIsDisplayed().assertHasNoClickAction()
+      runOnUiThread { show.performTouchInput { click() } }
+      onNodeWithTag("show-screen").assertDoesNotExist()
+      onNodeWithTag("library-tab-shows").assertIsSelected()
+      show.assertIsDisplayed()
+      saveScreenshot("followed-phone-dark")
+
+      listOf(DpSize(900.dp, 360.dp), DpSize(320.dp, 840.dp), DesktopWindowSizes.desktop).forEach {
+        next ->
+        runOnIdle { size.value = next }
+        onNodeWithText("Followed shows").assertIsDisplayed()
+        show.assertIsDisplayed()
+      }
+      saveScreenshot("followed-desktop-dark")
+      runOnIdle { size.value = DesktopWindowSizes.phone }
+
+      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.HOME) }
+      composeRobot<DiscoveryRobot> {
+        discover()
+        openPodcast("quiet-current")
+      }
+      composeRobot<ShowRobot> { unfollow() }
+      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
+      onNodeWithTag("library-tab-shows").assertIsSelected()
+      waitUntilAtLeastOneExists(matcher = hasText("No followed shows"), timeoutMillis = 5_000)
+      show.assertDoesNotExist()
+    }
+  }
+
+  @Test
   fun `library renders in the production graph on phone tablet and desktop in both themes`() {
     listOf(
         "phone" to DesktopWindowSizes.phone,
@@ -38,7 +92,7 @@ class LibraryUiTest {
           uiTestRule.runRobotTest(windowSize = size, darkTheme = darkTheme) {
             composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
             onNodeWithTag("tab-library").assertIsSelected()
-            onNodeWithTag("library-empty").assertIsDisplayed()
+            onNodeWithTag("library-screen").assertIsDisplayed()
             onNodeWithTag("library-illustration", useUnmergedTree = true).assertIsDisplayed()
             onNodeWithTag("library-empty-message", useUnmergedTree = true).assertIsDisplayed()
             onNodeWithTag("library-discover").assertIsDisplayed()
@@ -120,7 +174,7 @@ class LibraryUiTest {
               back()
             }
             composeRobot<DiscoveryRobot> { backFromCatalog() }
-            onNodeWithTag("library-empty").assertIsDisplayed()
+            onNodeWithTag("library-screen").assertIsDisplayed()
             onNodeWithTag("library-tab-$tab").assertIsSelected()
             onNodeWithTag("tab-library").assertIsSelected()
           }
@@ -134,7 +188,7 @@ class LibraryUiTest {
   }
 
   private fun ComposeUiTest.saveScreenshot(name: String) {
-    runOnUiThread { onNodeWithTag("library-empty").performMouseInput { moveTo(center) } }
+    runOnUiThread { onNodeWithTag("library-screen").performMouseInput { moveTo(center) } }
     val file = File("build/reports/screenshots/library-$name.png")
     file.parentFile.mkdirs()
     ImageIO.write(onNodeWithTag("app-shell").captureToImage().toAwtImage(), "png", file)

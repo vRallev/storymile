@@ -45,6 +45,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
+import software.ralf.app.platform.renderer.Render
 import software.ralf.storymile.design.TabHeader
 import software.ralf.storymile.library.LibraryPresenterImpl.Tab
 import software.ralf.storymile.library.impl.generated.resources.Res
@@ -74,7 +75,7 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
   @Composable
   override fun Compose(model: LibraryPresenterImpl.Model, modifier: Modifier) {
     BoxWithConstraints(
-      modifier.fillMaxSize().background(AppTheme.colorScheme.background).testTag("library-empty"),
+      modifier.fillMaxSize().background(AppTheme.colorScheme.background).testTag("library-screen"),
     ) {
       val compact = maxWidth < 600.dp
       val short = maxHeight < 480.dp
@@ -113,15 +114,23 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
             key = { Tab.entries[it].name },
           ) { page ->
             val tab = Tab.entries[page]
-            EmptyPage(
-              tab = tab,
-              onDiscoverPodcasts = model.onDiscoverPodcasts,
-              compact = compact,
-              short = short,
-              horizontal = horizontal,
-              large = large,
-              modifier = Modifier.fillMaxSize().padding(horizontal = sidePadding),
-            )
+            val pageModifier =
+              Modifier.fillMaxSize()
+                .padding(horizontal = sidePadding)
+                .testTag("library-page-${tab.name.lowercase()}")
+            if (tab == Tab.SHOWS && !model.shows.isEmpty) {
+              Render(model.shows, pageModifier)
+            } else {
+              EmptyPage(
+                tab = tab,
+                onDiscoverPodcasts = model.onDiscoverPodcasts,
+                compact = compact,
+                short = short,
+                horizontal = horizontal,
+                large = large,
+                modifier = pageModifier,
+              )
+            }
           }
         }
       }
@@ -138,58 +147,56 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
     large: Boolean,
     modifier: Modifier,
   ) {
-    Box(modifier.testTag("library-page-${tab.name.lowercase()}")) {
-      if (horizontal) {
-        Row(
-          modifier = Modifier.fillMaxSize().padding(vertical = 8.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.Center,
-        ) {
-          Illustration(
-            tab = tab,
-            modifier =
-              Modifier.padding(end = 24.dp)
-                .size(if (tab == Tab.HISTORY) 80.dp else 144.dp)
-                .testTag("library-illustration"),
-          )
-          EmptyMessage(
-            tab = tab,
-            onDiscoverPodcasts = onDiscoverPodcasts,
-            compact = true,
-            large = false,
-            horizontal = true,
-            modifier = Modifier.weight(1f, fill = false),
-          )
-        }
-      } else {
-        Column(
-          modifier = Modifier.fillMaxSize().padding(vertical = if (short) 8.dp else 24.dp),
-          horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.Center,
-        ) {
-          Illustration(
-            tab = tab,
-            modifier =
-              Modifier.weight(1f, fill = false)
-                .size(
-                  when {
-                    tab == Tab.HISTORY -> if (compact) 80.dp else if (large) 112.dp else 96.dp
-                    compact -> 164.dp
-                    large -> 256.dp
-                    else -> 216.dp
-                  },
-                )
-                .testTag("library-illustration"),
-          )
-          Spacer(Modifier.height(if (short) 8.dp else 24.dp))
-          EmptyMessage(
-            tab = tab,
-            onDiscoverPodcasts = onDiscoverPodcasts,
-            compact = compact,
-            large = large,
-            horizontal = false,
-          )
-        }
+    if (horizontal) {
+      Row(
+        modifier = modifier.padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+      ) {
+        Illustration(
+          tab = tab,
+          modifier =
+            Modifier.padding(end = 24.dp)
+              .size(if (tab == Tab.HISTORY) 80.dp else 144.dp)
+              .testTag("library-illustration"),
+        )
+        EmptyMessage(
+          tab = tab,
+          onDiscoverPodcasts = onDiscoverPodcasts,
+          compact = true,
+          large = false,
+          horizontal = true,
+          modifier = Modifier.weight(1f, fill = false),
+        )
+      }
+    } else {
+      Column(
+        modifier = modifier.padding(vertical = if (short) 8.dp else 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+      ) {
+        Illustration(
+          tab = tab,
+          modifier =
+            Modifier.weight(1f, fill = false)
+              .size(
+                when {
+                  tab == Tab.HISTORY -> if (compact) 80.dp else if (large) 112.dp else 96.dp
+                  compact -> 164.dp
+                  large -> 256.dp
+                  else -> 216.dp
+                },
+              )
+              .testTag("library-illustration"),
+        )
+        Spacer(Modifier.height(if (short) 8.dp else 24.dp))
+        EmptyMessage(
+          tab = tab,
+          onDiscoverPodcasts = onDiscoverPodcasts,
+          compact = compact,
+          large = large,
+          horizontal = false,
+        )
       }
     }
   }

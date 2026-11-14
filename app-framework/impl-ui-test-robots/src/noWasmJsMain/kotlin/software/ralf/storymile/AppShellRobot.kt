@@ -82,11 +82,10 @@ class AppShellRobot : ComposeRobot() {
         compose.onNodeWithTag("downloads-screen").assertIsDisplayed()
         compose.onNodeWithText("Listen anywhere").assertIsDisplayed()
       } else {
-        compose.onNodeWithTag("library-empty").assertIsDisplayed()
+        compose.onNodeWithTag("library-screen").assertIsDisplayed()
         compose.onNodeWithTag("library-tab-queue").assertIsDisplayed()
         compose.onNodeWithTag("library-tab-shows").assertIsDisplayed()
         compose.onNodeWithTag("library-tab-saved").assertIsDisplayed()
-        compose.onNodeWithTag("library-discover").assertIsDisplayed()
       }
     }
   }

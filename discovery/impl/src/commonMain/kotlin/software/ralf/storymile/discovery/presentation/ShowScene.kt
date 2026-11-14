@@ -84,7 +84,7 @@ internal data class ShowScene(
             )
           }
           items(catalog.podcasts, key = { it.id }) { podcast ->
-            PodcastRow(
+            DiscoveryPodcastRow(
               podcast = podcast,
               onClick = { catalog.onPodcastSelected(podcast) },
               selected = catalog.podcast.id == podcast.id,
