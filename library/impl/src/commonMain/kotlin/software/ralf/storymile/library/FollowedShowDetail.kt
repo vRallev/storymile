@@ -1,34 +1,39 @@
 package software.ralf.storymile.library
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
-import androidx.compose.material3.FilledIconButton
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
@@ -43,195 +48,246 @@ import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.coil.PodcastArtwork
 import software.ralf.storymile.design.TitleBar
 import software.ralf.storymile.episodedetails.EpisodeDetails
-import software.ralf.storymile.episodedetails.EpisodeSharedElement
-import software.ralf.storymile.episodedetails.episodeSharedElement
 import software.ralf.storymile.library.FollowedShowsPresenter.Model
 import software.ralf.storymile.library.impl.generated.resources.Res
-import software.ralf.storymile.library.impl.generated.resources.library_add_to_queue
+import software.ralf.storymile.library.impl.generated.resources.library_following
+import software.ralf.storymile.library.impl.generated.resources.library_hide_description
+import software.ralf.storymile.library.impl.generated.resources.library_no_description
 import software.ralf.storymile.library.impl.generated.resources.library_no_episodes
+import software.ralf.storymile.library.impl.generated.resources.library_show_description
 import software.ralf.storymile.library.impl.generated.resources.library_show_episodes
 import software.ralf.storymile.library.impl.generated.resources.library_shows
+import software.ralf.storymile.library.impl.generated.resources.library_unfollow_error
 import software.ralf.storymile.podcast.PodcastFeed
+import software.ralf.storymile.shows.component.ShowEpisodeRow
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.util.HtmlDescription
 
 @Composable
-internal fun FollowedShowScreen(model: Model, show: PodcastFeed, listState: LazyListState) {
-  if (LocalNavigationEventDispatcherOwner.current != null) {
+internal fun FollowedShowDetail(
+  model: Model,
+  show: PodcastFeed,
+  listState: LazyListState,
+  split: Boolean,
+) {
+  var descriptionExpanded by rememberSaveable(show.feedUrl) { mutableStateOf(false) }
+  if (!split && LocalNavigationEventDispatcherOwner.current != null) {
     NavigationBackHandler(
       state = rememberNavigationEventState(NavigationEventInfo.None),
       onBackCompleted = model.onCloseDetail,
     )
   }
-  Column(Modifier.fillMaxSize()) {
-    TitleBar(
-      title = stringResource(Res.string.library_shows),
-      onBack = model.onCloseDetail,
-      backButtonModifier = Modifier.testTag("library-show-back"),
-    )
-    Box(Modifier.weight(1f)) {
-      FollowedShowDetail(model = model, show = show, listState = listState)
-    }
-  }
-}
-
-@Composable
-internal fun FollowedShowDetail(model: Model, show: PodcastFeed, listState: LazyListState) {
-  BoxWithConstraints(Modifier.fillMaxSize().clipToBounds()) {
-    val sidePadding = if (maxWidth < 600.dp) 20.dp else 32.dp
-    val short = maxHeight < 480.dp
-    LazyColumn(
-      modifier = Modifier.fillMaxSize().testTag("library-show-detail"),
-      state = listState,
-      contentPadding = PaddingValues(horizontal = sidePadding, vertical = 16.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-      item(key = "show-header") { ShowHeader(model = model, show = show, short = short) }
-      item(key = "episodes-heading") {
-        HorizontalDivider(Modifier.padding(vertical = 8.dp))
-        Text(
-          text = stringResource(Res.string.library_show_episodes),
-          modifier = Modifier.semantics { heading() },
-          style = AppTheme.typography.titleLarge,
-          fontWeight = FontWeight.SemiBold,
+  BoxWithConstraints(Modifier.fillMaxSize()) {
+    val edgeToEdgeEpisodes = !split && maxWidth < 600.dp
+    val contentModifier = Modifier.padding(horizontal = if (edgeToEdgeEpisodes) 16.dp else 0.dp)
+    Column(Modifier.fillMaxSize()) {
+      if (!split) {
+        TitleBar(
+          title = stringResource(Res.string.library_shows),
+          onBack = model.onCloseDetail,
+          backButtonModifier = Modifier.testTag("library-show-back"),
         )
       }
-      if (show.episodes.isEmpty()) {
-        item(key = "no-episodes") {
-          Text(
-            text = stringResource(Res.string.library_no_episodes),
-            style = AppTheme.typography.bodyMedium,
-            color = AppTheme.colorScheme.onSurfaceVariant,
+      LazyColumn(
+        modifier =
+          Modifier.weight(1f)
+            .fillMaxWidth()
+            .padding(horizontal = if (edgeToEdgeEpisodes) 0.dp else 32.dp)
+            .testTag("library-show-detail"),
+        state = listState,
+        contentPadding = PaddingValues(vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+      ) {
+        item(key = "show-header") {
+          Column(contentModifier) {
+            ShowHeader(
+              model = model,
+              show = show,
+              split = split,
+              descriptionExpanded = descriptionExpanded,
+              onToggleDescription = { descriptionExpanded = !descriptionExpanded },
+            )
+            AnimatedVisibility(visible = descriptionExpanded) {
+              val description =
+                remember(show.description) { HtmlDescription.plainText(show.description) }
+              Text(
+                text = description ?: stringResource(Res.string.library_no_description),
+                modifier =
+                  Modifier.fillMaxWidth().padding(top = 16.dp).testTag("library-show-description"),
+                style = AppTheme.typography.bodyLarge,
+                color = AppTheme.colorScheme.onSurfaceVariant,
+              )
+            }
+          }
+        }
+        item(key = "episodes-divider") {
+          HorizontalDivider(
+            modifier = contentModifier,
+            color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+          )
+        }
+        item(key = "episodes-heading") {
+          Column(contentModifier) {
+            Text(
+              text = stringResource(Res.string.library_show_episodes),
+              modifier = Modifier.padding(bottom = 12.dp).semantics { heading() },
+              style = AppTheme.typography.titleLarge,
+              fontWeight = FontWeight.SemiBold,
+            )
+            if (show.episodes.isEmpty()) {
+              Text(
+                text = stringResource(Res.string.library_no_episodes),
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.colorScheme.onSurfaceVariant,
+              )
+            }
+          }
+        }
+        items(show.episodes, key = { "episode-${it.id}" }) { episode ->
+          val details =
+            remember(show, episode) {
+              EpisodeDetails(
+                feedUrl = show.feedUrl,
+                podcastTitle = show.title,
+                artworkUrl = episode.artworkUrl ?: show.artworkUrl,
+                episode = episode,
+              )
+            }
+          ShowEpisodeRow(
+            details = details,
+            onClick = { model.onOpenEpisode(details) },
+            tagId = episode.id,
+            edgeToEdge = edgeToEdgeEpisodes,
+            tagPrefix = "library-show-episode",
           )
         }
       }
-      items(show.episodes, key = { "episode-${it.id}" }) { episode ->
-        val details =
-          remember(show, episode) {
-            EpisodeDetails(
-              feedUrl = show.feedUrl,
-              podcastTitle = show.title,
-              artworkUrl = episode.artworkUrl ?: show.artworkUrl,
-              episode = episode,
-            )
-          }
-        SavedEpisodeRow(details = details, onClick = { model.onOpenEpisode(details) })
-      }
     }
   }
 }
 
 @Composable
-private fun ShowHeader(model: Model, show: PodcastFeed, short: Boolean) {
-  val description = remember(show.description) { HtmlDescription.plainText(show.description) }
-  BoxWithConstraints(Modifier.fillMaxWidth()) {
-    if (short && maxWidth / LocalDensity.current.fontScale >= 300.dp) {
-      Row(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.Top,
-      ) {
-        ShowArtwork(show = show, modifier = Modifier.size(104.dp))
-        ShowMetadata(model = model, show = show, modifier = Modifier.weight(1f))
-      }
-    } else {
-      Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        ShowArtwork(
-          show = show,
-          modifier = Modifier.fillMaxWidth().heightIn(max = 220.dp).aspectRatio(1.65f),
-        )
-        ShowMetadata(model = model, show = show, modifier = Modifier.fillMaxWidth())
-      }
-    }
-  }
-  if (!description.isNullOrBlank()) {
-    Text(
-      text = description,
-      modifier = Modifier.padding(top = 8.dp),
-      style = AppTheme.typography.bodyMedium,
-      color = AppTheme.colorScheme.onSurfaceVariant,
+private fun ShowHeader(
+  model: Model,
+  show: PodcastFeed,
+  split: Boolean,
+  descriptionExpanded: Boolean,
+  onToggleDescription: () -> Unit,
+) {
+  val metadata: @Composable (Modifier) -> Unit = { modifier ->
+    ShowMetadata(
+      model = model,
+      show = show,
+      split = split,
+      descriptionExpanded = descriptionExpanded,
+      onToggleDescription = onToggleDescription,
+      modifier = modifier,
     )
   }
-  if (model.unfollowFailed) {
-    UnfollowError()
+  BoxWithConstraints(Modifier.fillMaxWidth()) {
+    val readableWidth = maxWidth / LocalDensity.current.fontScale
+    if (readableWidth >= (if (split) 320.dp else 440.dp)) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(24.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Box(Modifier.weight(if (split) 0.6f else 0.8f)) {
+          ShowArtwork(show = show, modifier = Modifier.widthIn(max = 240.dp))
+        }
+        metadata(Modifier.weight(if (split) 1.4f else 1.2f))
+      }
+    } else {
+      Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+      ) {
+        ShowArtwork(show = show, modifier = Modifier.widthIn(max = 320.dp))
+        metadata(Modifier.fillMaxWidth())
+      }
+    }
   }
 }
 
 @Composable
 private fun ShowArtwork(show: PodcastFeed, modifier: Modifier) {
-  PodcastArtwork(artworkUrl = show.artworkUrl, modifier = modifier, artworkId = show.feedUrl)
+  PodcastArtwork(
+    artworkUrl = show.artworkUrl,
+    artworkId = show.feedUrl,
+    modifier = modifier.fillMaxWidth().aspectRatio(1f).testTag("library-show-artwork"),
+  )
 }
 
 @Composable
-private fun ShowMetadata(model: Model, show: PodcastFeed, modifier: Modifier) {
-  Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-    Text(
-      text = show.title,
-      modifier = Modifier.testTag("library-show-title").semantics { heading() },
-      style = AppTheme.typography.headlineSmall,
-      fontWeight = FontWeight.Bold,
-    )
-    val author = show.author
-    if (!author.isNullOrBlank()) {
-      Text(
-        text = author,
-        style = AppTheme.typography.bodyMedium,
-        color = AppTheme.colorScheme.onSurfaceVariant,
-      )
-    }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-      EpisodeCount(show.episodes.size)
-      Box(Modifier.weight(1f))
-      ShowFollowingLabel(showCheck = true)
-      ShowActions(
-        show = show,
-        canUnfollow = model.canUnfollow,
-        onUnfollow = model.onUnfollow,
-        modifier = Modifier.testTag("library-show-actions"),
-      )
-    }
-  }
-}
-
-@Composable
-private fun SavedEpisodeRow(details: EpisodeDetails, onClick: () -> Unit) {
-  Surface(
-    onClick = onClick,
-    modifier = Modifier.fillMaxWidth().testTag("library-show-episode-${details.episode.id}"),
-    color = Color.Transparent,
-    shape = RoundedCornerShape(12.dp),
-  ) {
-    Row(
-      modifier = Modifier.padding(vertical = 4.dp),
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      PodcastArtwork(
-        artworkUrl = details.artworkUrl,
-        modifier =
-          Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Artwork).size(56.dp),
-      )
-      Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+private fun ShowMetadata(
+  model: Model,
+  show: PodcastFeed,
+  split: Boolean,
+  descriptionExpanded: Boolean,
+  onToggleDescription: () -> Unit,
+  modifier: Modifier,
+) {
+  Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
         Text(
-          text = details.episode.title,
-          modifier = Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Title),
-          style = AppTheme.typography.titleSmall,
+          text = show.title,
+          modifier =
+            Modifier.weight(weight = 1f, fill = false).testTag("library-show-title").semantics {
+              heading()
+            },
+          style = AppTheme.typography.headlineSmall,
+          fontWeight = FontWeight.Bold,
         )
-        details.duration?.let {
-          Text(
-            text = it,
-            modifier = Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Duration),
-            style = AppTheme.typography.bodySmall,
-            color = AppTheme.colorScheme.onSurfaceVariant,
+        IconToggleButton(
+          checked = descriptionExpanded,
+          onCheckedChange = { onToggleDescription() },
+          modifier = Modifier.testTag("library-show-info"),
+        ) {
+          Icon(
+            imageVector = Icons.Outlined.Info,
+            contentDescription =
+              stringResource(
+                if (descriptionExpanded) Res.string.library_hide_description
+                else Res.string.library_show_description,
+              ),
           )
         }
       }
-      FilledIconButton(onClick = {}, enabled = false) {
-        Icon(
-          Icons.AutoMirrored.Filled.PlaylistAdd,
-          contentDescription = stringResource(Res.string.library_add_to_queue),
+      show.author?.let { author ->
+        Text(
+          text = author,
+          style = AppTheme.typography.bodyLarge,
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
     }
+    Button(
+      onClick = { model.onUnfollow(show.feedUrl) },
+      enabled = model.canUnfollow,
+      modifier = Modifier.widthIn(min = 180.dp).testTag("library-show-follow"),
+      colors =
+        ButtonDefaults.buttonColors(
+          containerColor = AppTheme.colorScheme.primaryContainer,
+          contentColor = AppTheme.colorScheme.onPrimaryContainer,
+        ),
+      contentPadding = PaddingValues(horizontal = if (split) 12.dp else 24.dp, vertical = 12.dp),
+    ) {
+      Icon(imageVector = Icons.Default.Check, contentDescription = null)
+      Spacer(Modifier.width(8.dp))
+      Text(stringResource(Res.string.library_following))
+    }
+    if (model.unfollowFailed) {
+      Text(
+        text = stringResource(Res.string.library_unfollow_error),
+        style = AppTheme.typography.bodyMedium,
+        color = AppTheme.colorScheme.error,
+      )
+    }
   }
-  HorizontalDivider(color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 }

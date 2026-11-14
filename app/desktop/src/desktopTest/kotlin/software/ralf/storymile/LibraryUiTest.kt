@@ -6,8 +6,12 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -20,6 +24,10 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import assertk.assertThat
+import assertk.assertions.isEqualTo
+import assertk.assertions.isGreaterThanOrEqualTo
+import assertk.assertions.isLessThan
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
@@ -76,7 +84,7 @@ class LibraryUiTest {
     val size = mutableStateOf(DesktopWindowSizes.phone)
     uiTestRule.runRobotTest(
       windowSize = DpSize(width = 1440.dp, height = 1000.dp),
-      darkTheme = false,
+      darkTheme = true,
       contentSize = size,
     ) {
       composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
@@ -104,12 +112,31 @@ class LibraryUiTest {
       onNodeWithTag(fieldNotes).assertIsDisplayed()
       onAllNodesWithTag("library-show-detail").assertCountEquals(0)
 
+      runOnUiThread { onNodeWithTag(quietCurrent).performClick() }
+      onNodeWithTag("title-bar-title").assertTextEquals("Shows")
+      val artwork = onNodeWithTag("library-show-artwork").getUnclippedBoundsInRoot()
+      val title = onNodeWithTag("library-show-title").getUnclippedBoundsInRoot()
+      assertThat(artwork.right - artwork.left).isEqualTo(artwork.bottom - artwork.top)
+      assertThat(artwork.right).isLessThan(title.left)
+      onNodeWithTag("library-show-description").assertDoesNotExist()
+      val info = onNodeWithTag("library-show-info").assertIsOff()
+      runOnUiThread { info.performClick() }
+      info.assertIsOn()
+      val description = onNodeWithTag("library-show-description").getUnclippedBoundsInRoot()
+      assertThat(description.top).isGreaterThanOrEqualTo(artwork.bottom)
+      runOnUiThread { info.performClick() }
+      info.assertIsOff()
+      onNodeWithTag("library-show-description").assertDoesNotExist()
+      saveScreenshot("phone-dark-show-detail")
+      runOnUiThread { onNodeWithTag("library-show-back").performClick() }
+      onNodeWithTag(quietCurrent).assertIsDisplayed()
+
       val portraitTablet = DpSize(width = 800.dp, height = 1000.dp)
       runOnIdle { size.value = portraitTablet }
       onNodeWithTag("library-shows-grid").assertIsDisplayed()
       runOnUiThread { onNodeWithTag(quietCurrent).performClick() }
       onNodeWithTag("library-show-back").assertIsDisplayed()
-      onNodeWithText("The Quiet Current").assertIsDisplayed()
+      onNodeWithTag("library-show-title").assertTextEquals("The Quiet Current").assertIsDisplayed()
 
       runOnIdle { size.value = DpSize(width = 900.dp, height = 360.dp) }
       onNodeWithTag("library-shows-list").assertIsDisplayed()
@@ -130,9 +157,8 @@ class LibraryUiTest {
       runOnIdle { size.value = DesktopWindowSizes.phone }
       onNodeWithTag("library-show-back").assertIsDisplayed()
       runOnUiThread {
-        onNodeWithTag("library-show-detail").performScrollToNode(hasTestTag("library-show-actions"))
-        onNodeWithTag("library-show-actions").performClick()
-        onNodeWithText("Unfollow").performClick()
+        onNodeWithTag("library-show-detail").performScrollToNode(hasTestTag("library-show-follow"))
+        onNodeWithTag("library-show-follow").performClick()
       }
       waitUntil(timeoutMillis = 5_000) {
         onAllNodesWithTag(quietCurrent).fetchSemanticsNodes().isEmpty() &&

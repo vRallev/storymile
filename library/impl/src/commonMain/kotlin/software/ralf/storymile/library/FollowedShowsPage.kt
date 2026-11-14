@@ -60,7 +60,6 @@ import software.ralf.storymile.library.impl.generated.resources.library_shows_lo
 import software.ralf.storymile.library.impl.generated.resources.library_shows_read_error
 import software.ralf.storymile.library.impl.generated.resources.library_shows_retry
 import software.ralf.storymile.library.impl.generated.resources.library_unfollow
-import software.ralf.storymile.library.impl.generated.resources.library_unfollow_error
 import software.ralf.storymile.podcast.PodcastFeed
 import software.ralf.storymile.shows.component.ShowRow
 import software.ralf.storymile.theme.AppTheme
@@ -257,7 +256,7 @@ private fun ShowsStatus(loading: Boolean, onRetry: () -> Unit = {}) {
 }
 
 @Composable
-internal fun ShowFollowingLabel(showCheck: Boolean = false) {
+private fun ShowFollowingLabel(showCheck: Boolean = false) {
   Surface(shape = RoundedCornerShape(50), color = AppTheme.colorScheme.secondaryContainer) {
     Row(
       modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
@@ -276,7 +275,7 @@ internal fun ShowFollowingLabel(showCheck: Boolean = false) {
 }
 
 @Composable
-internal fun ShowActions(
+private fun ShowActions(
   show: PodcastFeed,
   canUnfollow: Boolean,
   onUnfollow: (String) -> Unit,
@@ -300,19 +299,10 @@ internal fun ShowActions(
 }
 
 @Composable
-internal fun EpisodeCount(count: Int) {
+private fun EpisodeCount(count: Int) {
   Text(
     text = pluralStringResource(Res.plurals.library_episode_count, count, count),
     style = AppTheme.typography.bodyMedium,
     color = AppTheme.colorScheme.onSurfaceVariant,
-  )
-}
-
-@Composable
-internal fun UnfollowError() {
-  Text(
-    text = stringResource(Res.string.library_unfollow_error),
-    style = AppTheme.typography.bodyMedium,
-    color = AppTheme.colorScheme.error,
   )
 }

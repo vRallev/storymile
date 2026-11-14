@@ -22,8 +22,10 @@
   <string name="library_unfollow">Unfollow</string>
   <string name="library_unfollow_error">Could not unfollow the show. Try again.</string>
   <string name="library_show_episodes">Episodes</string>
-  <string name="library_no_episodes">No episodes available</string>
-  <string name="library_add_to_queue">Add to queue</string>
+  <string name="library_no_episodes">No episodes available.</string>
+  <string name="library_show_description">Show podcast description</string>
+  <string name="library_hide_description">Hide podcast description</string>
+  <string name="library_no_description">No description available.</string>
   <plurals name="library_episode_count">
     <item quantity="one">%1$d episode</item>
     <item quantity="other">%1$d episodes</item>

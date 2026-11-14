@@ -97,19 +97,12 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
         detailRequested = model.followedShows.detailRequested,
         detail = { split ->
           if (showDetail != null) {
-            if (split) {
-              FollowedShowDetail(
-                model = model.followedShows,
-                show = showDetail,
-                listState = showDetailState,
-              )
-            } else {
-              FollowedShowScreen(
-                model = model.followedShows,
-                show = showDetail,
-                listState = showDetailState,
-              )
-            }
+            FollowedShowDetail(
+              model = model.followedShows,
+              show = showDetail,
+              listState = showDetailState,
+              split = split,
+            )
           }
         },
       ) { split ->
