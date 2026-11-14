@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Text
@@ -43,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
+import software.ralf.storymile.design.ListDivider
 import software.ralf.storymile.design.TitleBar
 import software.ralf.storymile.discovery.impl.generated.resources.Res
 import software.ralf.storymile.discovery.impl.generated.resources.episodes
@@ -85,10 +85,9 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
             modifier = Modifier.weight(1.35f).testTag("show-detail"),
             state = detailState,
             contentPadding = PaddingValues(vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
           ) {
             item {
-              Column(contentModifier) {
+              Column(contentModifier.padding(bottom = 24.dp)) {
                 PodcastDetails(model = model, modifier = Modifier.fillMaxWidth())
                 AnimatedVisibility(visible = model.descriptionExpanded) {
                   Description(model)
@@ -96,13 +95,13 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
               }
             }
             item {
-              HorizontalDivider(
-                modifier = contentModifier,
-                color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-              )
+              ListDivider(modifier = contentModifier.padding(bottom = 24.dp))
             }
             item {
-              Column(contentModifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+              Column(
+                contentModifier.padding(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+              ) {
                 EpisodesHeading(stringResource(Res.string.episodes))
                 EpisodesStatus(model.episodes)
               }
@@ -110,7 +109,12 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
             itemsIndexed(model.episodes.episodes, key = { _, episode -> episode.key }) {
               index,
               episode ->
-              EpisodeRow(item = episode, index = index, edgeToEdge = edgeToEdgeEpisodes)
+              Column {
+                if (index > 0) {
+                  ListDivider(modifier = contentModifier.padding(vertical = 12.dp))
+                }
+                EpisodeRow(item = episode, index = index, edgeToEdge = edgeToEdgeEpisodes)
+              }
             }
           }
         }
