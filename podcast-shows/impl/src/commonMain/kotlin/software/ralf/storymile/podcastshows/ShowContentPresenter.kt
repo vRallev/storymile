@@ -46,14 +46,14 @@ class ShowContentPresenter(
     }
     return when (selection) {
       is ShowSelection.Discovery ->
-        DiscoveryShow(selection = selection, saved = saved, openEpisode = openEpisode)
+        presentDiscoveryShow(selection = selection, saved = saved, openEpisode = openEpisode)
       is ShowSelection.Saved ->
-        SavedShow(selection = selection, saved = saved, openEpisode = openEpisode)
+        presentSavedShow(selection = selection, saved = saved, openEpisode = openEpisode)
     }
   }
 
   @Composable
-  private fun DiscoveryShow(
+  private fun presentDiscoveryShow(
     selection: ShowSelection.Discovery,
     saved: List<PodcastFeed>?,
     openEpisode: (EpisodeDetails) -> Unit,
@@ -114,7 +114,7 @@ class ShowContentPresenter(
   }
 
   @Composable
-  private fun SavedShow(
+  private fun presentSavedShow(
     selection: ShowSelection.Saved,
     saved: List<PodcastFeed>?,
     openEpisode: (EpisodeDetails) -> Unit,
