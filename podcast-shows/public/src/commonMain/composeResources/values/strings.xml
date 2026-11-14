@@ -1,0 +1,15 @@
+<resources>
+  <string name="discover_podcasts">Discover podcasts</string>
+  <string name="library">Library</string>
+  <string name="followed_shows">Followed shows</string>
+  <string name="search_results">Search results</string>
+  <string name="topic_culture">Culture</string>
+  <string name="topic_nature">Nature</string>
+  <string name="topic_science">Science</string>
+  <string name="topic_technology">Technology</string>
+  <string name="loading_episodes">Loading episodes</string>
+  <string name="episodes_error">Could not load episodes.</string>
+  <string name="no_episodes">No episodes available.</string>
+  <string name="play_episode">Play %1$s</string>
+  <string name="retry">Try again</string>
+</resources>

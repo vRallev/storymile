@@ -3,22 +3,28 @@ package software.ralf.storymile
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.test.ComposeUiTest
-import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.click
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import assertk.assertThat
+import assertk.assertions.isGreaterThan
+import assertk.assertions.isLessThan
+import assertk.assertions.isTrue
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
@@ -31,7 +37,7 @@ class LibraryUiTest {
   private val uiTestRule = DesktopUiTestRule()
 
   @Test
-  fun `following adds a passive row to Shows and unfollowing removes it`() {
+  fun `saved shows open in Library and adapt while keeping the selected destination`() {
     val size = mutableStateOf(DesktopWindowSizes.phone)
     uiTestRule.runRobotTest(
       windowSize = DesktopWindowSizes.desktop,
@@ -42,43 +48,81 @@ class LibraryUiTest {
       runOnUiThread { onNodeWithTag("library-tab-shows").performClick() }
       waitUntilAtLeastOneExists(matcher = hasText("No followed shows"), timeoutMillis = 5_000)
       runOnUiThread { onNodeWithTag("library-discover").performClick() }
-      composeRobot<DiscoveryRobot> { openPodcast("quiet-current") }
-      composeRobot<ShowRobot> {
-        follow()
-        back()
+      listOf("quiet-current", "field-notes").forEach { podcast ->
+        composeRobot<DiscoveryRobot> { openPodcast(podcast) }
+        composeRobot<ShowRobot> {
+          follow()
+          back()
+        }
       }
       composeRobot<DiscoveryRobot> { backFromCatalog() }
 
-      val show = onNodeWithText("The Quiet Current")
+      val quietCurrent = onNodeWithTag("library-show-https://feeds.test/quiet-current")
+      val fieldNotes = onNodeWithTag("library-show-https://feeds.test/field-notes")
       waitUntilAtLeastOneExists(matcher = hasText("Followed shows"), timeoutMillis = 5_000)
-      show.assertIsDisplayed().assertHasNoClickAction()
-      runOnUiThread { show.performTouchInput { click() } }
-      onNodeWithTag("show-screen").assertDoesNotExist()
-      onNodeWithTag("library-tab-shows").assertIsSelected()
-      show.assertIsDisplayed()
       saveScreenshot("followed-phone-dark")
+      runOnUiThread { quietCurrent.performClick() }
+      onNodeWithTag("title-bar-title").assertTextEquals("Library")
+      onNodeWithTag("library-tab-shows").assertDoesNotExist()
+      onNodeWithTag("show-title").assertTextEquals("The Quiet Current")
+      composeRobot<ShowRobot> { seeFollowing(true) }
+      saveScreenshot("show-phone-dark")
 
-      listOf(DpSize(900.dp, 360.dp), DpSize(320.dp, 840.dp), DesktopWindowSizes.desktop).forEach {
-        next ->
-        runOnIdle { size.value = next }
-        onNodeWithText("Followed shows").assertIsDisplayed()
-        show.assertIsDisplayed()
-      }
-      saveScreenshot("followed-desktop-dark")
-      runOnIdle { size.value = DesktopWindowSizes.phone }
+      runOnIdle { size.value = DpSize(320.dp, 840.dp) }
+      onNodeWithTag("show-detail").assertIsDisplayed()
+      onNodeWithTag("show-list").assertDoesNotExist()
 
-      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.HOME) }
-      composeRobot<DiscoveryRobot> {
-        discover()
-        openPodcast("quiet-current")
+      listOf(DpSize(900.dp, 360.dp), DesktopWindowSizes.tablet, DesktopWindowSizes.desktop)
+        .forEach { next ->
+          runOnIdle { size.value = next }
+          onNodeWithTag("library-tab-shows").assertIsSelected()
+          onNodeWithTag("show-list").assertIsDisplayed()
+          quietCurrent.assertIsSelected()
+          assertThat(bounds("show-list").right).isLessThan(bounds("show-detail").left)
+          assertThat(bounds("show-list").top).isGreaterThan(bounds("library-tab-shows").top)
+        }
+      saveScreenshot("show-desktop-dark")
+
+      runOnUiThread { fieldNotes.performClick() }
+      fieldNotes.assertIsSelected()
+      onNodeWithTag("show-title").assertTextEquals("Field Notes")
+      runOnUiThread {
+        onNodeWithTag("show-detail").performScrollToNode(hasTestTag("episode-0"))
       }
-      composeRobot<ShowRobot> { unfollow() }
-      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
+      val showPaneBefore = bounds("show-detail")
+      mainClock.autoAdvance = false
+      val panePositions =
+        try {
+          runOnUiThread { onNodeWithTag("episode-0").performClick() }
+          List(24) {
+            mainClock.advanceTimeByFrame()
+            bounds("show-detail").left
+          }
+        } finally {
+          mainClock.autoAdvance = true
+        }
+      onNodeWithTag("episode-details-title").assertTextEquals("Field Notes episode 1")
       onNodeWithTag("library-tab-shows").assertIsSelected()
-      waitUntilAtLeastOneExists(matcher = hasText("No followed shows"), timeoutMillis = 5_000)
-      show.assertDoesNotExist()
+      onNodeWithTag("show-list").assertDoesNotExist()
+      val showPaneAfter = bounds("show-detail")
+      assertThat(panePositions.any { it > showPaneAfter.left && it < showPaneBefore.left }).isTrue()
+      assertThat(bounds("show-detail").right).isLessThan(bounds("episode-details-screen").left)
+      saveScreenshot("show-episode-desktop-dark")
+
+      runOnIdle { size.value = DesktopWindowSizes.phone }
+      onNodeWithTag("episode-details-title").assertTextEquals("Field Notes episode 1")
+      onNodeWithTag("show-list").assertDoesNotExist()
+      runOnUiThread { onNodeWithTag("episode-details-back").performClick() }
+      onNodeWithTag("show-title").assertTextEquals("Field Notes")
+      composeRobot<ShowRobot> { unfollow() }
+      runOnUiThread { onNodeWithTag("show-back").performClick() }
+      onNodeWithTag("library-tab-shows").assertIsSelected()
+      quietCurrent.assertIsDisplayed()
+      fieldNotes.assertDoesNotExist()
     }
   }
+
+  private fun ComposeUiTest.bounds(tag: String) = onNodeWithTag(tag).getUnclippedBoundsInRoot()
 
   @Test
   fun `library renders in the production graph on phone tablet and desktop in both themes`() {

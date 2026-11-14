@@ -30,6 +30,7 @@ dependencies {
   commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':player:impl')
   commonMainImplementation project(':playlist:impl')
+  commonMainImplementation project(':podcast-shows:impl')
   commonMainImplementation project(':podcast:impl')
   commonMainImplementation project(':presenter-navigation:impl')
   commonMainImplementation project(':restart:impl')

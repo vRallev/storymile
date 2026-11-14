@@ -37,10 +37,16 @@ class LibraryPresenterImpl(
     val contentPresenter = remember {
       ComposePresenter<Unit, Model> {
         val backstack = LocalBackstackScope.requireNotNull()
+        val shows = showsPresenter.present(Unit)
         Model(
           selectedTab = selectedTab,
-          shows = showsPresenter.present(Unit),
-          onSelectTab = { selectedTab = it },
+          shows = shows,
+          onSelectTab = {
+            if (selectedTab == Tab.SHOWS && it != Tab.SHOWS) {
+              shows.onCloseShow()
+            }
+            selectedTab = it
+          },
           onDiscoverPodcasts = { backstack.push(discoveryPresenterFactory.create()) },
         )
       }

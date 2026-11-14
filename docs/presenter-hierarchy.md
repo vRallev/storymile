@@ -14,15 +14,16 @@ flowchart TD
   HomePresenter["HomePresenterImpl\nbackstack"]
   HomeContentPresenter["HomeContentPresenter\nempty home"]
   DiscoveryPresenterImpl["DiscoveryPresenterImpl\nbrowse, topics, and search"]
-  ShowPresenter["ShowPresenter\nshow backstack"]
-  ShowContentPresenter["ShowContentPresenter\npodcast preview"]
+  ShowPresenter["ShowPresenterImpl\nshow backstack"]
+  ShowContentPresenter["ShowContentPresenter\nshow details"]
   EpisodeDetailsPresenter["EpisodeDetailsPresenterImpl\nepisode details"]
   EpisodesPresenter["EpisodesPresenter\nfeed episodes"]
   DownloadsPresenter["DownloadsPresenterImpl\nempty downloads"]
   TabsPresenter["TabsPresenterImpl\ntabs"]
   LibraryPresenter["LibraryPresenterImpl\nbackstack"]
   LibraryContent["Library content\ntabs"]
-  LibraryShowsPresenter["LibraryShowsPresenterImpl\nfollowed shows"]
+  LibraryShowsPresenter["LibraryShowsPresenterImpl\nShows backstack"]
+  FollowedShows["Followed shows list"]
   PlaybackPresenter["PlaybackPresenterImpl\ncollapsed and expanded playback"]
 
   TemplateProvider -->|launches| AppTemplatePresenter
@@ -37,10 +38,11 @@ flowchart TD
   DiscoveryPresenterImpl -->|browse and topics| EpisodesPresenter
   ShowPresenter -->|root| ShowContentPresenter
   ShowPresenter -->|pushed entry| EpisodeDetailsPresenter
-  ShowContentPresenter --> EpisodesPresenter
   TabsPresenter -->|Library| LibraryPresenter
   LibraryPresenter -->|root| LibraryContent
   LibraryContent -->|Shows| LibraryShowsPresenter
+  LibraryShowsPresenter -->|root| FollowedShows
+  LibraryShowsPresenter -->|pushed entry| ShowPresenter
   LibraryPresenter -->|pushed entries| DiscoveryPresenterImpl
   LibraryPresenter -->|pushed entry| ShowPresenter
   LibraryPresenter -->|pushed entry| EpisodeDetailsPresenter
@@ -73,13 +75,14 @@ shows the welcome screen.
 Discover and Search push
 [DiscoveryPresenterImpl](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/DiscoveryPresenterImpl.kt).
 Topic selection pushes another catalog. Podcast selection pushes
-[ShowPresenter](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/ShowPresenter.kt).
+[ShowPresenterImpl](../podcast-shows/impl/src/commonMain/kotlin/software/ralf/storymile/podcastshows/ShowPresenterImpl.kt).
 It owns a nested backstack rooted at
-[ShowContentPresenter](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/ShowContentPresenter.kt).
-Discovery and show content compose
+[ShowContentPresenter](../podcast-shows/impl/src/commonMain/kotlin/software/ralf/storymile/podcastshows/ShowContentPresenter.kt).
+Discovery composes
 [EpisodesPresenter](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/EpisodesPresenter.kt)
-for feed episodes, rendered by the shared
-[episode components](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/Episodes.kt).
+for recommendations. The show content presenter supplies episodes for the selected show.
+Both use the shared
+[episode components](../podcast-shows/public/src/commonMain/kotlin/software/ralf/storymile/podcastshows/Episodes.kt).
 Episode selection pushes the reusable
 [episode details presenter](../episode-details/impl/src/commonMain/kotlin/software/ralf/storymile/episodedetails/EpisodeDetailsPresenterImpl.kt)
 through its [public factory](../episode-details/public/src/commonMain/kotlin/software/ralf/storymile/episodedetails/EpisodeDetailsPresenter.kt).
@@ -97,7 +100,8 @@ The tabs presenter creates and composes only the selected screen. It retains the
 filter across tab changes. Library owns a backstack. Each empty tab opens Discovery.
 Back returns to the selected Library tab.
 [LibraryShowsPresenterImpl](../library-shows/impl/src/commonMain/kotlin/software/ralf/storymile/libraryshows/LibraryShowsPresenterImpl.kt)
-reads followed shows through `SavedShowRepository`.
+reads followed shows through `SavedShowRepository` and pushes the shared show presenter in its own
+backstack. Saved show details use stored metadata and episodes until the feed loads.
 [DownloadsPresenterImpl](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsPresenterImpl.kt)
 provides the empty Downloads screen, rendered by
 [DownloadsRenderer](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsRenderer.kt).
@@ -130,16 +134,16 @@ wide panes. The illustration shrinks to keep the content within the window.
 
 [DiscoveryRenderer](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/DiscoveryRenderer.kt)
 adapts browsing, topics, and search to the available width.
-[ShowRenderer](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/ShowRenderer.kt)
-renders the show backstack. In wide layouts, its navigation scene shows the catalog beside
-the podcast. Episode selection slides the catalog out, moves the podcast left, and opens episode
-details on the right. Back reverses the transition.
-[ShowContentRenderer](../discovery/impl/src/commonMain/kotlin/software/ralf/storymile/discovery/presentation/ShowContentRenderer.kt)
+[ShowRenderer](../podcast-shows/impl/src/commonMain/kotlin/software/ralf/storymile/podcastshows/ShowRenderer.kt)
+renders the show backstack. In wide layouts, it places the source list beside the selected show.
+Episode selection slides the list out, moves the show left, and opens episode details on the right.
+Back reverses the transition.
+[ShowContentRenderer](../podcast-shows/impl/src/commonMain/kotlin/software/ralf/storymile/podcastshows/ShowContentRenderer.kt)
 renders the podcast and its episodes. Narrow layouts show one destination at a time.
 Resizing preserves the selected episode and presenter stack.
 
 [LibraryRenderer](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryRenderer.kt)
-renders the tabs and their empty states.
+renders the tabs and their empty states. For wide Shows layouts, the tabs stay above the panes.
 [LibraryShowsRenderer](../library-shows/impl/src/commonMain/kotlin/software/ralf/storymile/libraryshows/LibraryShowsRenderer.kt)
 lists followed shows.
 

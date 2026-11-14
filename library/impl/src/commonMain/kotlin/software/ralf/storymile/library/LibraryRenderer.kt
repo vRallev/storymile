@@ -37,6 +37,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -67,7 +68,9 @@ import software.ralf.storymile.library.impl.generated.resources.library_shows
 import software.ralf.storymile.library.impl.generated.resources.library_shows_empty_description
 import software.ralf.storymile.library.impl.generated.resources.library_shows_empty_title
 import software.ralf.storymile.library.impl.generated.resources.library_shows_illustration
-import software.ralf.storymile.library.impl.generated.resources.library_title
+import software.ralf.storymile.podcastshows.ShowSource
+import software.ralf.storymile.podcastshows.supportsShowPanes
+import software.ralf.storymile.podcastshows.title
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.theme.AppTheme
 
@@ -83,11 +86,18 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
       val horizontal = !compact && short
       val large = maxWidth >= 1000.dp && !short
       val sidePadding = if (compact) 20.dp else 32.dp
+      val showBack = model.shows.onBack.takeIf { model.selectedTab == Tab.SHOWS }
+      val showPanes = maxWidth.supportsShowPanes(LocalDensity.current.fontScale)
+      val fullScreenShow = showBack != null && !showPanes
       Column(Modifier.fillMaxSize()) {
-        TabHeader(
-          title = stringResource(Res.string.library_title),
-          windowWidth = LocalScreenSize.current.width,
-        )
+        if (!fullScreenShow) {
+          TabHeader(
+            title = ShowSource.Library.title(),
+            windowWidth = LocalScreenSize.current.width,
+            onBack = showBack,
+            backButtonModifier = Modifier.testTag("show-back"),
+          )
+        }
         val pagerState =
           rememberPagerState(initialPage = model.selectedTab.ordinal) { Tab.entries.size }
         val currentModel by rememberUpdatedState(model)
@@ -104,23 +114,24 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
             }
         }
         Column(Modifier.weight(1f)) {
-          Tabs(
-            model = model,
-            pagerState = pagerState,
-            modifier = Modifier.padding(horizontal = sidePadding),
-          )
+          if (!fullScreenShow) {
+            Tabs(
+              model = model,
+              pagerState = pagerState,
+              modifier = Modifier.padding(horizontal = sidePadding),
+            )
+          }
           HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxWidth().weight(1f).testTag("library-pager"),
             key = { Tab.entries[it].name },
+            userScrollEnabled = !fullScreenShow,
           ) { page ->
             val tab = Tab.entries[page]
             val pageModifier =
-              Modifier.fillMaxSize()
-                .padding(horizontal = sidePadding)
-                .testTag("library-page-${tab.name.lowercase()}")
+              Modifier.fillMaxSize().testTag("library-page-${tab.name.lowercase()}")
             if (tab == Tab.SHOWS && !model.shows.isEmpty) {
-              Render(model.shows, pageModifier)
+              Render(model.shows.content, pageModifier)
             } else {
               EmptyPage(
                 tab = tab,
@@ -129,7 +140,7 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
                 short = short,
                 horizontal = horizontal,
                 large = large,
-                modifier = pageModifier,
+                modifier = pageModifier.padding(horizontal = sidePadding),
               )
             }
           }
