@@ -9,6 +9,7 @@ storymile {
 
 dependencies {
   commonMainImplementation project(':discovery:public')
+  commonMainImplementation project(':library-shows:public')
   commonMainImplementation project(':presenter-navigation:public')
   commonMainImplementation project(':templates:public')
   commonMainImplementation project(':theme:public')

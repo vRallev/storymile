@@ -21,7 +21,8 @@ flowchart TD
   DownloadsPresenter["DownloadsPresenterImpl\nempty downloads"]
   TabsPresenter["TabsPresenterImpl\ntabs"]
   LibraryPresenter["LibraryPresenterImpl\nbackstack"]
-  LibraryContent["Library content\nempty library"]
+  LibraryContent["Library content\ntabs"]
+  LibraryShowsPresenter["LibraryShowsPresenterImpl\nfollowed shows"]
   PlaybackPresenter["PlaybackPresenterImpl\ncollapsed and expanded playback"]
 
   TemplateProvider -->|launches| AppTemplatePresenter
@@ -39,6 +40,7 @@ flowchart TD
   ShowContentPresenter --> EpisodesPresenter
   TabsPresenter -->|Library| LibraryPresenter
   LibraryPresenter -->|root| LibraryContent
+  LibraryContent -->|Shows| LibraryShowsPresenter
   LibraryPresenter -->|pushed entries| DiscoveryPresenterImpl
   LibraryPresenter -->|pushed entry| ShowPresenter
   LibraryPresenter -->|pushed entry| EpisodeDetailsPresenter
@@ -94,6 +96,8 @@ The tabs presenter creates and composes only the selected screen. It retains the
 [library](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryPresenterImpl.kt)
 filter across tab changes. Library owns a backstack. Each empty tab opens Discovery.
 Back returns to the selected Library tab.
+[LibraryShowsPresenterImpl](../library-shows/impl/src/commonMain/kotlin/software/ralf/storymile/libraryshows/LibraryShowsPresenterImpl.kt)
+reads followed shows from the user database.
 [DownloadsPresenterImpl](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsPresenterImpl.kt)
 provides the empty Downloads screen, rendered by
 [DownloadsRenderer](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsRenderer.kt).
@@ -135,7 +139,9 @@ renders the podcast and its episodes. Narrow layouts show one destination at a t
 Resizing preserves the selected episode and presenter stack.
 
 [LibraryRenderer](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryRenderer.kt)
-shows Queue, Shows, Saved, and History placeholders at phone, tablet, and desktop widths.
+renders the tabs and their empty states.
+[LibraryShowsRenderer](../library-shows/impl/src/commonMain/kotlin/software/ralf/storymile/libraryshows/LibraryShowsRenderer.kt)
+lists followed shows.
 
 [PlaybackScreenRenderer](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackScreenRenderer.kt)
 shows artwork, episode details, playback controls, and chapters. Its collapse button calls the template's

@@ -490,8 +490,8 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     } else {
       Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         podcasts.forEach { podcast ->
-          PodcastRow(
-            podcast,
+          DiscoveryPodcastRow(
+            podcast = podcast,
             onClick = { model.onPodcastSelected(podcast) },
             transitionSource = source,
           )

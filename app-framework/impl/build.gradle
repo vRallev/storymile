@@ -25,6 +25,7 @@ dependencies {
   commonMainImplementation project(':home:impl')
   commonMainImplementation project(':http:impl')
   commonMainImplementation project(':launch-animation:public')
+  commonMainImplementation project(':library-shows:impl')
   commonMainImplementation project(':library:impl')
   commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':player:impl')
