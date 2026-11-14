@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.coil.PodcastArtwork
+import software.ralf.storymile.design.ListDivider
 import software.ralf.storymile.discovery.impl.generated.resources.Res
 import software.ralf.storymile.discovery.impl.generated.resources.episodes_error
 import software.ralf.storymile.discovery.impl.generated.resources.loading_episodes
@@ -56,10 +56,7 @@ internal fun Episodes(
     EpisodesStatus(model, contentModifier)
     model.episodes.forEachIndexed { index, episode ->
       if (index > 0) {
-        HorizontalDivider(
-          modifier = contentModifier,
-          color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-        )
+        ListDivider(modifier = contentModifier)
       }
       key(episode.key) { EpisodeRow(item = episode, index = index, edgeToEdge = edgeToEdge) }
     }
