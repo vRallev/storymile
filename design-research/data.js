@@ -4747,8 +4747,8 @@ window.STORYMILE_DESIGN = {
         1280
       ],
       "title": "Queue",
-      "width": 993,
-      "height": 1584,
+      "width": 992,
+      "height": 1585,
       "preview": "previews/android-tablet-portrait-library-queue-light.webp",
       "thumbnail": "previews/android-tablet-portrait-library-queue-light-small.webp"
     },
@@ -4763,8 +4763,8 @@ window.STORYMILE_DESIGN = {
         1280
       ],
       "title": "Queue",
-      "width": 992,
-      "height": 1586,
+      "width": 1008,
+      "height": 1560,
       "preview": "previews/android-tablet-portrait-library-queue-dark.webp",
       "thumbnail": "previews/android-tablet-portrait-library-queue-dark-small.webp"
     },
@@ -4811,8 +4811,8 @@ window.STORYMILE_DESIGN = {
         800
       ],
       "title": "Queue",
-      "width": 1585,
-      "height": 992,
+      "width": 1584,
+      "height": 993,
       "preview": "previews/android-tablet-landscape-library-queue-light.webp",
       "thumbnail": "previews/android-tablet-landscape-library-queue-light-small.webp"
     },
@@ -4827,8 +4827,8 @@ window.STORYMILE_DESIGN = {
         800
       ],
       "title": "Queue",
-      "width": 1586,
-      "height": 992,
+      "width": 1584,
+      "height": 993,
       "preview": "previews/android-tablet-landscape-library-queue-dark.webp",
       "thumbnail": "previews/android-tablet-landscape-library-queue-dark-small.webp"
     },
