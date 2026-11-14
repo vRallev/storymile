@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Rect
@@ -55,16 +56,21 @@ class PlaybackTransition(private val progress: () -> Float) {
    * hidden content from placement, input, and accessibility. Starts fading in after [startFraction]
    * of progress toward that state; the value must be in `[0, 1)`.
    */
+  @Composable
   fun Modifier.fade(expanded: Boolean, startFraction: Float = 0f): Modifier {
     require(startFraction >= 0f && startFraction < 1f)
     fun opacity(): Float {
       val progress = if (expanded) fraction else 1f - fraction
       return ((progress - startFraction) / (1f - startFraction)).coerceIn(0f, 1f)
     }
+    val visible by
+      remember(this@PlaybackTransition, expanded, startFraction) {
+        derivedStateOf(structuralEqualityPolicy()) { opacity() > 0f }
+      }
     return layout { measurable, constraints ->
       val placeable = measurable.measure(constraints)
       layout(placeable.width, placeable.height) {
-        if (opacity() > 0f) {
+        if (visible) {
           placeable.placeRelative(0, 0)
         }
       }
