@@ -4,30 +4,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.launch
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.compose.ComposePresenter
-import software.ralf.storymile.database.PodcastDatabase
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
-import software.ralf.storymile.podcast.PodcastFeed
 import software.ralf.storymile.podcast.PodcastFeedRepository
 import software.ralf.storymile.podcast.PodcastFeedRepository.State as FeedState
+import software.ralf.storymile.podcast.SavedShowRepository
 
 class ShowContentPresenter(
   private val catalog: PodcastDiscoveryRepository,
   private val feeds: PodcastFeedRepository,
   private val episodeDetailsFactory: EpisodeDetailsPresenter.Factory,
-  private val database: PodcastDatabase,
+  private val savedShows: SavedShowRepository,
   private val initialPodcast: DiscoveredPodcast,
   private val podcasts: List<DiscoveredPodcast>,
   private val source: ShowPresenter.Source,
@@ -56,13 +50,9 @@ class ShowContentPresenter(
         }
       }
     val feed = (feedState as? FeedState.Success)?.feed
-    var databaseRetry by remember { mutableIntStateOf(0) }
-    val saved = savedFeedUrls(databaseRetry)
-    var updating by remember(podcast.id, feedUrl) { mutableStateOf(false) }
-    var updateFailed by remember(podcast.id, feedUrl) { mutableStateOf(false) }
-    val followed = saved?.getOrNull()?.contains(feedUrl) == true
-    val followEnabled = !updating && saved != null && (followed || feed != null || saved.isFailure)
-    val coroutineScope = rememberCoroutineScope()
+    val saved by savedShows.shows.collectAsState()
+    val followed = feedUrl != null && saved?.any { it.feedUrl == feedUrl } == true
+    val followEnabled = saved != null && (followed || feed != null)
     return Model(
       podcast = selected,
       podcasts = podcasts,
@@ -71,24 +61,12 @@ class ShowContentPresenter(
       descriptionExpanded = descriptionExpanded,
       followed = followed,
       followEnabled = followEnabled,
-      followFailed = updateFailed || saved?.isFailure == true,
       onToggleFollow = {
-        if (saved?.isFailure == true) {
-          databaseRetry++
-        } else if (followEnabled && !updating) {
-          updating = true
-          updateFailed = false
-          coroutineScope.launch {
-            try {
-              setFollowed(feedUrl = requireNotNull(feedUrl), feed = feed, followed = !followed)
-            } catch (exception: Exception) {
-              if (exception is CancellationException) {
-                throw exception
-              }
-              updateFailed = true
-            } finally {
-              updating = false
-            }
+        if (followEnabled && feedUrl != null) {
+          if (followed) {
+            savedShows.remove(feedUrl)
+          } else {
+            savedShows.save(requireNotNull(feed).copy(feedUrl = feedUrl))
           }
         }
       },
@@ -98,33 +76,6 @@ class ShowContentPresenter(
     )
   }
 
-  private suspend fun setFollowed(feedUrl: String, feed: PodcastFeed?, followed: Boolean) {
-    if (followed) {
-      database.insert(requireNotNull(feed).copy(feedUrl = feedUrl))
-    } else {
-      database.delete(feedUrl)
-    }
-  }
-
-  @Composable
-  private fun savedFeedUrls(retry: Int): Result<Set<String>>? =
-    key(retry) {
-      val state by
-        produceState<Result<Set<String>>?>(null) {
-          try {
-            database.podcasts.collect { podcasts ->
-              value = Result.success(podcasts.map { it.feedUrl }.toSet())
-            }
-          } catch (exception: Exception) {
-            if (exception is CancellationException) {
-              throw exception
-            }
-            value = Result.failure(exception)
-          }
-        }
-      state
-    }
-
   data class Model(
     val podcast: DiscoveredPodcast,
     val podcasts: List<DiscoveredPodcast>,
@@ -133,7 +84,6 @@ class ShowContentPresenter(
     val descriptionExpanded: Boolean,
     val followed: Boolean,
     val followEnabled: Boolean,
-    val followFailed: Boolean,
     val onToggleFollow: () -> Unit,
     val onToggleDescription: () -> Unit,
     val onPodcastSelected: (DiscoveredPodcast) -> Unit,

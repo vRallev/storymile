@@ -81,7 +81,6 @@ class EpisodesRendererTest {
               descriptionExpanded = false,
               followed = false,
               followEnabled = true,
-              followFailed = false,
               onToggleFollow = {},
               onToggleDescription = {},
               onPodcastSelected = {},

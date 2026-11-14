@@ -15,6 +15,7 @@ import java.nio.file.Files
 import kotlin.test.Test
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.job
 import kotlinx.coroutines.test.runTest
@@ -27,12 +28,12 @@ import software.ralf.app.platform.presenter.compose.test
 import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.coroutine.CoroutineScopeScoped
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
-import software.ralf.storymile.database.PodcastDatabase
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository
 import software.ralf.storymile.discovery.presentation.ShowContentPresenter
 import software.ralf.storymile.discovery.presentation.ShowPresenter
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.podcast.PodcastFeedRepository
+import software.ralf.storymile.podcast.SavedShowRepository
 import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.OkioStoragePlatform
 import software.ralf.storymile.storage.Storage
@@ -62,7 +63,7 @@ class FollowShowPersistenceTest {
         graph.showPresenter(user).test(this) {
           awaitModel { it.followEnabled }.onToggleFollow()
           awaitModel { it.followed && it.followEnabled }
-          val saved = user.database.podcasts.first().single()
+          val saved = user.savedShows.shows.filterNotNull().first().single()
           assertThat(saved.title).isEqualTo("The Quiet Current")
           assertThat(saved.episodes.size).isEqualTo(3)
           cancelAndIgnoreRemainingEvents()
@@ -72,14 +73,14 @@ class FollowShowPersistenceTest {
         graph.showPresenter(user).test(this) {
           awaitModel { it.followed && it.followEnabled }.onToggleFollow()
           awaitModel { !it.followed && it.followEnabled }
-          assertThat(user.database.podcasts.first()).isEmpty()
+          assertThat(user.savedShows.shows.filterNotNull().first()).isEmpty()
           cancelAndIgnoreRemainingEvents()
         }
       }
       withApplication(storageFactory) { graph, user ->
         graph.showPresenter(user).test(this) {
           assertThat(awaitModel { it.followEnabled }.followed).isFalse()
-          assertThat(user.database.podcasts.first()).isEmpty()
+          assertThat(user.savedShows.shows.filterNotNull().first()).isEmpty()
           cancelAndIgnoreRemainingEvents()
         }
       }
@@ -93,7 +94,7 @@ class FollowShowPersistenceTest {
         catalog = catalog,
         feeds = feeds,
         episodeDetailsFactory = user.episodeDetailsFactory,
-        database = user.database,
+        savedShows = user.savedShows,
         initialPodcast =
           (catalog.popular.first { it is PodcastDiscoveryRepository.State.Success }
               as PodcastDiscoveryRepository.State.Success)
@@ -155,7 +156,7 @@ class FollowShowPersistenceTest {
 
   @ContributesTo(UserScope::class)
   interface UserBindings {
-    val database: PodcastDatabase
+    val savedShows: SavedShowRepository
     val episodeDetailsFactory: EpisodeDetailsPresenter.Factory
     @ForScope(UserScope::class) val coroutineOwner: CoroutineScopeScoped
   }

@@ -47,7 +47,6 @@ import software.ralf.storymile.design.TitleBar
 import software.ralf.storymile.discovery.impl.generated.resources.Res
 import software.ralf.storymile.discovery.impl.generated.resources.episodes
 import software.ralf.storymile.discovery.impl.generated.resources.follow
-import software.ralf.storymile.discovery.impl.generated.resources.follow_error
 import software.ralf.storymile.discovery.impl.generated.resources.following
 import software.ralf.storymile.discovery.impl.generated.resources.hide_description
 import software.ralf.storymile.discovery.impl.generated.resources.no_description
@@ -276,14 +275,6 @@ class ShowContentRenderer : ComposeRenderer<ShowContentPresenter.Model>() {
             Text(stringResource(if (followed) Res.string.following else Res.string.follow))
           }
         }
-      }
-      if (model.followFailed) {
-        Text(
-          text = stringResource(Res.string.follow_error),
-          modifier = Modifier.testTag("show-follow-error"),
-          color = AppTheme.colorScheme.error,
-          style = AppTheme.typography.bodyMedium,
-        )
       }
     }
   }

@@ -15,7 +15,6 @@ import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
 import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.app.platform.presenter.compose.text.PresenterTextFieldState
-import software.ralf.storymile.database.PodcastDatabase
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.DiscoveryPresenter
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository
@@ -23,12 +22,13 @@ import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.podcast.PodcastFeedRepository
+import software.ralf.storymile.podcast.SavedShowRepository
 
 class DiscoveryPresenterImpl(
   private val repository: PodcastDiscoveryRepository,
   private val feeds: PodcastFeedRepository,
   private val episodeDetailsFactory: EpisodeDetailsPresenter.Factory,
-  private val database: PodcastDatabase,
+  private val savedShows: SavedShowRepository,
   private val topic: DiscoveryTopic? = null,
   private val focusSearch: Boolean = false,
 ) : DiscoveryPresenter<DiscoveryPresenterImpl.Model> {
@@ -79,7 +79,7 @@ class DiscoveryPresenterImpl(
             repository = repository,
             feeds = feeds,
             episodeDetailsFactory = episodeDetailsFactory,
-            database = database,
+            savedShows = savedShows,
             topic = it,
           ),
         )
@@ -90,7 +90,7 @@ class DiscoveryPresenterImpl(
             catalog = repository,
             feeds = feeds,
             episodeDetailsFactory = episodeDetailsFactory,
-            database = database,
+            savedShows = savedShows,
             initialPodcast = podcast,
             podcasts = (state as? CatalogState.Ready)?.podcasts.orEmpty(),
             source =

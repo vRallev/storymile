@@ -32,7 +32,7 @@ class DiscoveryPresenterImplTest {
         repository = repository,
         feeds = TestPodcastFeeds(),
         episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        database = TestPodcastDatabase(),
+        savedShows = TestSavedShowRepository(),
       )
 
     presenter.testCatalog(this) {
@@ -62,7 +62,7 @@ class DiscoveryPresenterImplTest {
         repository = repository,
         feeds = TestPodcastFeeds(),
         episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        database = TestPodcastDatabase(),
+        savedShows = TestSavedShowRepository(),
       )
 
     presenter.testCatalog(this) {
@@ -98,7 +98,7 @@ class DiscoveryPresenterImplTest {
         repository = repository,
         feeds = TestPodcastFeeds(),
         episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        database = TestPodcastDatabase(),
+        savedShows = TestSavedShowRepository(),
       )
 
     presenter.testCatalog(this) {
@@ -128,7 +128,7 @@ class DiscoveryPresenterImplTest {
         repository = repository,
         feeds = TestPodcastFeeds(),
         episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        database = TestPodcastDatabase(),
+        savedShows = TestSavedShowRepository(),
       )
 
     presenter.testCatalog(this) {
@@ -162,7 +162,7 @@ class DiscoveryPresenterImplTest {
         repository = repository,
         feeds = TestPodcastFeeds(),
         episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        database = TestPodcastDatabase(),
+        savedShows = TestSavedShowRepository(),
         topic = DiscoveryTopic.NATURE,
       )
 
@@ -195,7 +195,7 @@ class DiscoveryPresenterImplTest {
         repository = repository,
         feeds = TestPodcastFeeds(),
         episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        database = TestPodcastDatabase(),
+        savedShows = TestSavedShowRepository(),
       )
     val backstack = FakePresenterBackstackScope(presenter)
 
@@ -230,7 +230,7 @@ class DiscoveryPresenterImplTest {
           repository = repository,
           feeds = TestPodcastFeeds(),
           episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-          database = TestPodcastDatabase(),
+          savedShows = TestSavedShowRepository(),
           topic = topic,
         )
       val backstack = FakePresenterBackstackScope(presenter)
@@ -276,7 +276,7 @@ class DiscoveryPresenterImplTest {
         repository = repository,
         feeds = feeds,
         episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        database = TestPodcastDatabase(),
+        savedShows = TestSavedShowRepository(),
       )
     presenter.testCatalog(this) {
       val initial = awaitItem()
@@ -302,7 +302,7 @@ class DiscoveryPresenterImplTest {
         catalog = TestPodcastCatalog(),
         feeds = feeds,
         episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
-        database = TestPodcastDatabase(),
+        savedShows = TestSavedShowRepository(),
         initialPodcast = first,
         podcasts = listOf(first, second),
         source = ShowPresenter.Source.Browse,

@@ -7,8 +7,11 @@ storymile {
 }
 
 dependencies {
+  commonMainImplementation project(':database:public')
   commonMainImplementation project(':http:public')
+  commonMainImplementation project(':logging:public')
   commonMainImplementation project(':runtime-mode:public')
+  commonMainImplementation project(':user:public')
   commonMainImplementation libs.ktor.client.core
   commonMainImplementation libs.xmlutil.core
 
