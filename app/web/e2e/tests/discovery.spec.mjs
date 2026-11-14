@@ -68,6 +68,9 @@ test('loads real-mode charts after retry and searches topics in the browser', as
   await expect(discover).toBeVisible();
   await discover.click({ force: true });
   const retry = page.locator('[id="discovery-retry"]');
+  // Wait for navigation and text layout before using the canvas button's semantics bounds.
+  await expect(page.locator('[id="home-screen"]')).not.toBeAttached();
+  await expect(retry).toHaveText('Try again');
   await expect(retry).toBeVisible();
   await retry.click({ force: true });
 
