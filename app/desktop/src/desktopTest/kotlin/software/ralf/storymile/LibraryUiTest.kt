@@ -3,14 +3,18 @@ package software.ralf.storymile
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.unit.DpSize
@@ -38,7 +42,7 @@ class LibraryUiTest {
           uiTestRule.runRobotTest(windowSize = size, darkTheme = darkTheme) {
             composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
             onNodeWithTag("tab-library").assertIsSelected()
-            onNodeWithTag("library-empty").assertIsDisplayed()
+            onNodeWithTag("library-screen").assertIsDisplayed()
             onNodeWithTag("library-illustration", useUnmergedTree = true).assertIsDisplayed()
             onNodeWithTag("library-empty-message", useUnmergedTree = true).assertIsDisplayed()
             onNodeWithTag("library-discover").assertIsDisplayed()
@@ -61,6 +65,77 @@ class LibraryUiTest {
           }
         }
       }
+  }
+
+  @Test
+  fun `followed shows open from the library and keep their selection across layouts`() {
+    val size = mutableStateOf(DesktopWindowSizes.phone)
+    uiTestRule.runRobotTest(
+      windowSize = DesktopWindowSizes.desktop,
+      darkTheme = false,
+      contentSize = size,
+    ) {
+      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
+      runOnUiThread { onNodeWithTag("library-tab-shows").performClick() }
+      waitUntil(timeoutMillis = 5_000) {
+        onAllNodesWithTag("library-discover").fetchSemanticsNodes().size == 1
+      }
+      runOnUiThread { onNodeWithTag("library-discover").performClick() }
+      composeRobot<DiscoveryRobot> { openPodcast("quiet-current") }
+      composeRobot<ShowRobot> {
+        follow()
+        back()
+      }
+      composeRobot<DiscoveryRobot> { openPodcast("field-notes") }
+      composeRobot<ShowRobot> {
+        follow()
+        back()
+      }
+      composeRobot<DiscoveryRobot> { backFromCatalog() }
+
+      val quietCurrent = "library-show-https://feeds.test/quiet-current"
+      val fieldNotes = "library-show-https://feeds.test/field-notes"
+      onNodeWithTag("library-tab-shows").assertIsSelected()
+      onNodeWithTag(quietCurrent).assertIsDisplayed()
+      onNodeWithTag(fieldNotes).assertIsDisplayed()
+      onAllNodesWithTag("library-show-detail").assertCountEquals(0)
+
+      val portraitTablet = DpSize(width = 800.dp, height = 1000.dp)
+      runOnIdle { size.value = portraitTablet }
+      onNodeWithTag("library-shows-grid").assertIsDisplayed()
+      runOnUiThread { onNodeWithTag(quietCurrent).performClick() }
+      onNodeWithTag("library-show-back").assertIsDisplayed()
+      onNodeWithText("The Quiet Current").assertIsDisplayed()
+
+      runOnIdle { size.value = DpSize(width = 900.dp, height = 360.dp) }
+      onNodeWithTag("library-shows-list").assertIsDisplayed()
+      onNodeWithTag(quietCurrent).assertIsSelected()
+
+      runOnIdle { size.value = DesktopWindowSizes.desktop }
+      onNodeWithTag("library-shows-list").assertIsDisplayed()
+      onNodeWithTag(quietCurrent).assertIsSelected()
+      val firstEpisode = "library-show-episode-0"
+      runOnUiThread {
+        onNodeWithTag("library-show-detail").performScrollToNode(hasTestTag(firstEpisode))
+        onNodeWithTag(firstEpisode).performClick()
+      }
+      onNodeWithTag("episode-details-title").assertIsDisplayed()
+      runOnUiThread { onNodeWithTag("episode-details-back").performClick() }
+      onNodeWithTag(quietCurrent).assertIsSelected()
+
+      runOnIdle { size.value = DesktopWindowSizes.phone }
+      onNodeWithTag("library-show-back").assertIsDisplayed()
+      runOnUiThread {
+        onNodeWithTag("library-show-detail").performScrollToNode(hasTestTag("library-show-actions"))
+        onNodeWithTag("library-show-actions").performClick()
+        onNodeWithText("Unfollow").performClick()
+      }
+      waitUntil(timeoutMillis = 5_000) {
+        onAllNodesWithTag(quietCurrent).fetchSemanticsNodes().isEmpty() &&
+          onAllNodesWithTag(fieldNotes).fetchSemanticsNodes().size == 1
+      }
+      onNodeWithTag("library-tab-shows").assertIsSelected()
+    }
   }
 
   @Test
@@ -120,7 +195,7 @@ class LibraryUiTest {
               back()
             }
             composeRobot<DiscoveryRobot> { backFromCatalog() }
-            onNodeWithTag("library-empty").assertIsDisplayed()
+            onNodeWithTag("library-screen").assertIsDisplayed()
             onNodeWithTag("library-tab-$tab").assertIsSelected()
             onNodeWithTag("tab-library").assertIsSelected()
           }
@@ -134,7 +209,7 @@ class LibraryUiTest {
   }
 
   private fun ComposeUiTest.saveScreenshot(name: String) {
-    runOnUiThread { onNodeWithTag("library-empty").performMouseInput { moveTo(center) } }
+    runOnUiThread { onNodeWithTag("library-screen").performMouseInput { moveTo(center) } }
     val file = File("build/reports/screenshots/library-$name.png")
     file.parentFile.mkdirs()
     ImageIO.write(onNodeWithTag("app-shell").captureToImage().toAwtImage(), "png", file)

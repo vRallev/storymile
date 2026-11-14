@@ -14,6 +14,8 @@ import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.app.platform.presenter.compose.saveable.rememberReturningSaveableStateHolder
 import software.ralf.app.platform.presenter.compose.test
 import software.ralf.storymile.discovery.DiscoveryPresenter
+import software.ralf.storymile.episodedetails.testing.FakeEpisodeDetailsPresenterFactory
+import software.ralf.storymile.library.FollowedShowsPresenter.State
 import software.ralf.storymile.library.LibraryPresenterImpl.Tab
 import software.ralf.storymile.presenternavigation.DefaultBackstackModel
 
@@ -63,7 +65,9 @@ class LibraryPresenterImplTest {
       assertThat(model.selectedTab).isEqualTo(Tab.QUEUE)
 
       model.onSelectTab(Tab.SHOWS)
-      model = awaitItem().content()
+      do {
+        model = awaitItem().content()
+      } while (model.followedShows.state !is State.Loaded)
       assertThat(model.selectedTab).isEqualTo(Tab.SHOWS)
 
       model.onSelectTab(Tab.SAVED)
@@ -89,7 +93,9 @@ class LibraryPresenterImplTest {
       Tab.entries.forEach { tab ->
         if (library.selectedTab != tab) {
           library.onSelectTab(tab)
-          library = awaitItem().content()
+          do {
+            library = awaitItem().content()
+          } while (tab == Tab.SHOWS && library.followedShows.state !is State.Loaded)
         }
         library.onDiscoverPodcasts()
 
@@ -107,7 +113,15 @@ class LibraryPresenterImplTest {
     }
   }
 
-  private fun createPresenter(): LibraryPresenterImpl = LibraryPresenterImpl(FakeDiscoveryFactory())
+  private fun createPresenter(): LibraryPresenterImpl =
+    LibraryPresenterImpl(
+      discoveryPresenterFactory = FakeDiscoveryFactory(),
+      followedShowsPresenter =
+        FollowedShowsPresenter(
+          database = FakePodcastDatabase(),
+          episodeDetailsFactory = FakeEpisodeDetailsPresenterFactory(),
+        ),
+    )
 
   private fun DefaultBackstackModel.content(): LibraryPresenterImpl.Model =
     backstack.single() as LibraryPresenterImpl.Model

@@ -1,28 +1,11 @@
 package software.ralf.storymile.discovery.presentation
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.presentation.PodcastSharedElement.Companion.podcastSharedElement
-import software.ralf.storymile.theme.AppTheme
+import software.ralf.storymile.shows.component.ShowRow
 
 @Composable
 internal fun PodcastRow(
@@ -31,52 +14,26 @@ internal fun PodcastRow(
   selected: Boolean = false,
   transitionSource: ShowPresenter.Source? = null,
 ) {
-  Surface(
+  ShowRow(
+    title = podcast.title,
+    subtitle = podcast.author,
     onClick = onClick,
-    modifier = Modifier.fillMaxWidth().testTag("discovery-podcast-${podcast.id}"),
-    color = if (selected) AppTheme.colorScheme.secondaryContainer else Color.Transparent,
-    shape = RoundedCornerShape(16.dp),
-  ) {
-    Row(
-      Modifier.padding(8.dp),
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
+    artwork = { modifier ->
       PodcastArtwork(
-        podcast,
-        Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Artwork)
-          .testTag("discovery-artwork-${podcast.id}")
-          .size(76.dp),
+        podcast = podcast,
+        modifier =
+          Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Artwork)
+            .testTag("discovery-artwork-${podcast.id}")
+            .then(modifier),
       )
-      Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
-          text = podcast.title,
-          modifier =
-            Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Title)
-              .testTag("discovery-title-${podcast.id}"),
-          style = AppTheme.typography.titleMedium,
-          fontWeight = FontWeight.SemiBold,
-          maxLines = 3,
-          overflow = TextOverflow.Ellipsis,
-        )
-        podcast.author?.let { author ->
-          Text(
-            text = author,
-            modifier =
-              Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Author)
-                .testTag("discovery-author-${podcast.id}"),
-            style = AppTheme.typography.bodyMedium,
-            color = AppTheme.colorScheme.onSurfaceVariant,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-          )
-        }
-      }
-      Icon(
-        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-        contentDescription = null,
-        tint = AppTheme.colorScheme.primary,
-      )
-    }
-  }
+    },
+    modifier = Modifier.testTag("discovery-podcast-${podcast.id}"),
+    selected = selected,
+    titleModifier =
+      Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Title)
+        .testTag("discovery-title-${podcast.id}"),
+    subtitleModifier =
+      Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Author)
+        .testTag("discovery-author-${podcast.id}"),
+  )
 }

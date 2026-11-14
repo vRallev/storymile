@@ -21,8 +21,10 @@ import software.ralf.storymile.user.UserScope
 
 @Inject
 @ContributesBinding(UserScope::class, binding = binding<LibraryPresenter<*>>())
-class LibraryPresenterImpl(private val discoveryPresenterFactory: DiscoveryPresenter.Factory) :
-  LibraryPresenter<DefaultBackstackModel> {
+class LibraryPresenterImpl(
+  private val discoveryPresenterFactory: DiscoveryPresenter.Factory,
+  private val followedShowsPresenter: FollowedShowsPresenter,
+) : LibraryPresenter<DefaultBackstackModel> {
   @Composable
   override fun present(input: Unit): DefaultBackstackModel {
     var selectedTab by
@@ -36,6 +38,7 @@ class LibraryPresenterImpl(private val discoveryPresenterFactory: DiscoveryPrese
         val backstack = LocalBackstackScope.requireNotNull()
         Model(
           selectedTab = selectedTab,
+          followedShows = followedShowsPresenter.present(selectedTab == Tab.SHOWS),
           onSelectTab = { selectedTab = it },
           onDiscoverPodcasts = { backstack.push(discoveryPresenterFactory.create()) },
         )
@@ -57,6 +60,7 @@ class LibraryPresenterImpl(private val discoveryPresenterFactory: DiscoveryPrese
    */
   data class Model(
     val selectedTab: Tab,
+    val followedShows: FollowedShowsPresenter.Model,
     val onSelectTab: (Tab) -> Unit,
     val onDiscoverPodcasts: () -> Unit,
   ) : BaseModel

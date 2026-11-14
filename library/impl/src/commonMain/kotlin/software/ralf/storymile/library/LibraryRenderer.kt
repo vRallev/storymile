@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -32,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -74,38 +77,63 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
   @Composable
   override fun Compose(model: LibraryPresenterImpl.Model, modifier: Modifier) {
     BoxWithConstraints(
-      modifier.fillMaxSize().background(AppTheme.colorScheme.background).testTag("library-empty"),
+      modifier.fillMaxSize().background(AppTheme.colorScheme.background).testTag("library-screen"),
     ) {
       val compact = maxWidth < 600.dp
       val short = maxHeight < 480.dp
       val horizontal = !compact && short
       val large = maxWidth >= 1000.dp && !short
       val sidePadding = if (compact) 20.dp else 32.dp
-      Column(Modifier.fillMaxSize()) {
-        TabHeader(
-          title = stringResource(Res.string.library_title),
-          windowWidth = LocalScreenSize.current.width,
-        )
-        val pagerState =
-          rememberPagerState(initialPage = model.selectedTab.ordinal) { Tab.entries.size }
-        val currentModel by rememberUpdatedState(model)
-        LaunchedEffect(model.selectedTab) {
-          pagerState.animateScrollToPage(model.selectedTab.ordinal)
-        }
-        LaunchedEffect(pagerState) {
-          snapshotFlow { pagerState.settledPage }
-            .collect { page ->
-              val tab = Tab.entries[page]
-              if (tab != currentModel.selectedTab) {
-                currentModel.onSelectTab(tab)
-              }
+      val showListState = rememberLazyGridState()
+      val showDetail = model.followedShows.selectedShow
+      val showDetailState = key(showDetail?.feedUrl) { rememberLazyListState() }
+      val pagerState =
+        rememberPagerState(initialPage = model.selectedTab.ordinal) { Tab.entries.size }
+      val currentModel by rememberUpdatedState(model)
+      LaunchedEffect(model.selectedTab) {
+        pagerState.animateScrollToPage(model.selectedTab.ordinal)
+      }
+      LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }
+          .collect { page ->
+            val tab = Tab.entries[page]
+            if (tab != currentModel.selectedTab) {
+              currentModel.onSelectTab(tab)
             }
-        }
-        Column(Modifier.weight(1f)) {
+          }
+      }
+      val showAvailable = model.selectedTab == Tab.SHOWS && showDetail != null
+      LibraryPanes(
+        width = maxWidth,
+        showsTabActive = showAvailable,
+        detailRequested = model.followedShows.detailRequested,
+        detail = { split ->
+          if (showDetail != null) {
+            if (split) {
+              FollowedShowDetail(
+                model = model.followedShows,
+                show = showDetail,
+                listState = showDetailState,
+              )
+            } else {
+              FollowedShowScreen(
+                model = model.followedShows,
+                show = showDetail,
+                listState = showDetailState,
+              )
+            }
+          }
+        },
+      ) { split ->
+        Column(Modifier.fillMaxSize()) {
+          TabHeader(
+            title = stringResource(Res.string.library_title),
+            windowWidth = LocalScreenSize.current.width,
+          )
           Tabs(
             model = model,
             pagerState = pagerState,
-            modifier = Modifier.padding(horizontal = sidePadding),
+            modifier = Modifier.padding(horizontal = if (split) 16.dp else sidePadding),
           )
           HorizontalPager(
             state = pagerState,
@@ -113,15 +141,28 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
             key = { Tab.entries[it].name },
           ) { page ->
             val tab = Tab.entries[page]
-            EmptyPage(
-              tab = tab,
-              onDiscoverPodcasts = model.onDiscoverPodcasts,
-              compact = compact,
-              short = short,
-              horizontal = horizontal,
-              large = large,
-              modifier = Modifier.fillMaxSize().padding(horizontal = sidePadding),
-            )
+            val emptyPage: @Composable () -> Unit = {
+              EmptyPage(
+                tab = tab,
+                onDiscoverPodcasts = model.onDiscoverPodcasts,
+                compact = compact,
+                short = short,
+                horizontal = horizontal,
+                large = large,
+                modifier = Modifier.fillMaxSize().padding(horizontal = sidePadding),
+              )
+            }
+            if (tab == Tab.SHOWS) {
+              FollowedShowsPage(
+                model = model.followedShows,
+                grid = !split && !compact && !short,
+                split = split,
+                gridState = showListState,
+                emptyPage = emptyPage,
+              )
+            } else {
+              emptyPage()
+            }
           }
         }
       }
