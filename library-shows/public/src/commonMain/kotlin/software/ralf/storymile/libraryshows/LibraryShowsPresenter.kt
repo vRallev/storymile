@@ -9,5 +9,20 @@ interface LibraryShowsPresenter : ComposePresenter<Unit, LibraryShowsPresenter.M
   interface Model : BaseModel {
     /** True after a successful load with no followed shows. */
     val isEmpty: Boolean
+
+    /** The list of followed shows, including its loading state. */
+    val list: BaseModel
+
+    /** The current show's navigation model, or null when only the list is open. */
+    val selectedShow: BaseModel?
+
+    /** Opens the first listed show if no show is open. Null until there is a followed show. */
+    val onOpenFirstShow: (() -> Unit)?
+
+    /** Closes the episode details. Null when no episode is open. */
+    val onCloseEpisode: (() -> Unit)?
+
+    /** Returns to the list from any show destination. */
+    val onCloseShow: () -> Unit
   }
 }

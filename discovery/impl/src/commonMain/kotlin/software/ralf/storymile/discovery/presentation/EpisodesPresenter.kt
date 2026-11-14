@@ -5,28 +5,26 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
-import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
-import software.ralf.app.platform.presenter.backstack.nav3.backstack
 import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository.State as CatalogState
-import software.ralf.storymile.episodedetails.EpisodeDetails
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.podcast.PodcastFeedRepository
 import software.ralf.storymile.podcast.PodcastFeedRepository.State
+import software.ralf.storymile.podcastshows.EpisodesModel
+import software.ralf.storymile.podcastshows.episodeRows
 
 class EpisodesPresenter(
   private val catalog: PodcastDiscoveryRepository,
   private val repository: PodcastFeedRepository,
   private val episodeDetailsFactory: EpisodeDetailsPresenter.Factory,
   private val episodesPerPodcast: Int = Int.MAX_VALUE,
-  private val replaceOpenEpisode: Boolean = false,
-) : ComposePresenter<List<DiscoveredPodcast>, EpisodesPresenter.Model> {
+) : ComposePresenter<List<DiscoveredPodcast>, EpisodesModel> {
   @Composable
-  override fun present(input: List<DiscoveredPodcast>): Model {
+  override fun present(input: List<DiscoveredPodcast>): EpisodesModel {
     val backstack = LocalBackstackScope.requireNotNull()
     val sources =
       input
@@ -53,29 +51,12 @@ class EpisodesPresenter(
         url to state
       }
     }
-    return Model(
+    return EpisodesModel(
       episodes =
         states.flatMap { (url, state) ->
           if (state is State.Success) {
-            state.feed.episodes.take(episodesPerPodcast).map { episode ->
-              val details =
-                EpisodeDetails(
-                  feedUrl = url,
-                  podcastTitle = state.feed.title,
-                  artworkUrl = episode.artworkUrl ?: state.feed.artworkUrl,
-                  episode = episode,
-                )
-              Episode(
-                details = details,
-                onClick = {
-                  val presenter = episodeDetailsFactory.create(details)
-                  if (replaceOpenEpisode && backstack.backstack.size > 1) {
-                    backstack.replaceTop(presenter)
-                  } else {
-                    backstack.push(presenter)
-                  }
-                },
-              )
+            state.feed.episodeRows(feedUrl = url, limit = episodesPerPodcast) { details ->
+              backstack.push(episodeDetailsFactory.create(details))
             }
           } else {
             emptyList()
@@ -96,15 +77,4 @@ class EpisodesPresenter(
   }
 
   private data class Source(val url: String?, val id: String?, val lookup: CatalogState?)
-
-  data class Episode(val details: EpisodeDetails, val onClick: () -> Unit) {
-    val key: String = details.key
-  }
-
-  data class Model(
-    val episodes: List<Episode>,
-    val loading: Boolean,
-    val failed: Boolean,
-    val onRetry: () -> Unit,
-  ) : BaseModel
 }

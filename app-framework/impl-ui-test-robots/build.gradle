@@ -35,6 +35,7 @@ dependencies {
   commonMainImplementation project(':playlist:impl')
   commonMainImplementation project(':playlist:impl-robots')
   commonMainImplementation project(':playlist:public')
+  commonMainImplementation project(':podcast-shows:impl')
   commonMainImplementation project(':podcast:impl')
   commonMainImplementation project(':podcast:impl-robots')
   commonMainImplementation project(':presenter-navigation:impl')

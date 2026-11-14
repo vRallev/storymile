@@ -1,0 +1,18 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  enableComposeUi true
+  enableComposePresenters true
+}
+
+dependencies {
+  commonMainApi project(':discovery:public')
+  commonMainApi project(':episode-details:public')
+  commonMainApi project(':podcast:public')
+
+  commonMainImplementation project(':coil:public')
+  commonMainImplementation project(':templates:public')
+  commonMainImplementation project(':theme:public')
+}

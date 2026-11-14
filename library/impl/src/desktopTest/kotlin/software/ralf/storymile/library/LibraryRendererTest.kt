@@ -12,6 +12,7 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
@@ -55,7 +56,7 @@ class LibraryRendererTest {
     listOf(Triple(320, 568, 1f), Triple(900, 280, 1f), Triple(480, 700, 1.5f)).forEach {
       (width, height, fontScale) ->
       runDesktopComposeUiTest(width = width, height = height) {
-        val renderer = LibraryRenderer()
+        val renderer = LibraryPagesRenderer()
         var tab by mutableStateOf(Tab.QUEUE)
         setContent {
           ThemedContent(fontScale) { renderer.renderCompose(model(tab), Modifier.fillMaxSize()) }
@@ -81,7 +82,7 @@ class LibraryRendererTest {
   @Test
   fun `illustration shrinks when the window gets shorter while controls remain visible`() =
     runDesktopComposeUiTest(width = 480, height = 840) {
-      val renderer = LibraryRenderer()
+      val renderer = LibraryPagesRenderer()
       var height by mutableStateOf(840.dp)
       setContent {
         ThemedContent {
@@ -101,7 +102,7 @@ class LibraryRendererTest {
   @Test
   fun `tab clicks and swipes stay synchronized and retain selection when returning`() =
     runDesktopComposeUiTest(width = 480, height = 840) {
-      val renderer = LibraryRenderer()
+      val renderer = LibraryPagesRenderer()
       val presenter =
         LibraryPresenterImpl(
           discoveryPresenterFactory = UnusedDiscoveryFactory,
@@ -114,7 +115,11 @@ class LibraryRendererTest {
           if (visible) {
             stateHolder.SaveableStateProvider("library") {
               renderer.renderCompose(
-                model = presenter.present(Unit).backstack.single() as Model,
+                model =
+                  LibraryPagesRenderer.Model(
+                    library = presenter.present(Unit).backstack.single() as Model,
+                    showsContent = null,
+                  ),
                 modifier = Modifier.fillMaxSize(),
               )
             }
@@ -141,7 +146,7 @@ class LibraryRendererTest {
       assertSelectedTab(tab = Tab.HISTORY, title = "No listening history yet")
 
       runOnIdle { visible = false }
-      onNodeWithTag("library-screen").assertDoesNotExist()
+      onNodeWithTag("library-pager").assertDoesNotExist()
       runOnIdle { visible = true }
       assertSelectedTab(tab = Tab.HISTORY, title = "No listening history yet")
       onNodeWithTag("library-tab-queue").performClick()
@@ -220,18 +225,28 @@ class LibraryRendererTest {
   }
 
   private fun model(tab: Tab = Tab.QUEUE) =
-    Model(
-      selectedTab = tab,
-      shows = EmptyLibraryShowsPresenter.Model,
-      onSelectTab = {},
-      onDiscoverPodcasts = {},
+    LibraryPagesRenderer.Model(
+      library =
+        Model(
+          selectedTab = tab,
+          shows = EmptyLibraryShowsPresenter.Model,
+          onSelectTab = {},
+          onDiscoverPodcasts = {},
+        ),
+      showsContent = null,
     )
 
   @Composable
   private fun ThemedContent(fontScale: Float = 1f, content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalDensity provides Density(1f, fontScale)) {
       StorymileTheme(environment = themeEnvironment, darkTheme = false) {
-        Box(Modifier.fillMaxSize().background(AppTheme.colorScheme.background)) { content() }
+        Box(
+          Modifier.fillMaxSize()
+            .background(AppTheme.colorScheme.background)
+            .testTag("library-screen"),
+        ) {
+          content()
+        }
       }
     }
   }
