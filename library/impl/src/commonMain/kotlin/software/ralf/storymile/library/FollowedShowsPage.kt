@@ -106,6 +106,7 @@ private fun ShowList(
     val columns =
       if (grid) GridCells.Adaptive(208.dp * LocalDensity.current.fontScale) else GridCells.Fixed(1)
     val sidePadding = if (maxWidth < 600.dp) 20.dp else 32.dp
+    val dividerSpacing = 4.dp
     val showManagement = selected != null && maxWidth / LocalDensity.current.fontScale >= 410.dp
     LazyVerticalGrid(
       columns = columns,
@@ -114,7 +115,7 @@ private fun ShowList(
       state = gridState,
       contentPadding = PaddingValues(horizontal = sidePadding, vertical = 16.dp),
       horizontalArrangement = Arrangement.spacedBy(16.dp),
-      verticalArrangement = Arrangement.spacedBy(if (grid) 16.dp else 4.dp),
+      verticalArrangement = Arrangement.spacedBy(if (grid) 16.dp else dividerSpacing),
     ) {
       item(key = "heading", span = { GridItemSpan(maxLineSpan) }) {
         Text(
@@ -129,7 +130,7 @@ private fun ShowList(
         if (grid) {
           ShowTile(show = show, onClick = onClick)
         } else {
-          Column {
+          Column(verticalArrangement = Arrangement.spacedBy(dividerSpacing)) {
             FollowedShowRow(
               show = show,
               selected = selected?.feedUrl == show.feedUrl,
