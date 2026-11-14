@@ -1,16 +1,31 @@
 pluginManagement {
   repositories {
-    google()
+    google {
+      content {
+        includeGroupAndSubgroups 'androidx'
+        includeGroupAndSubgroups 'com.android'
+        includeGroup 'com.google.testing.platform'
+      }
+    }
     mavenCentral()
-    gradlePluginPortal()
   }
 }
 
 dependencyResolutionManagement {
   repositories {
-    google()
+    google {
+      content {
+        includeGroupAndSubgroups 'androidx'
+        includeGroupAndSubgroups 'com.android'
+        includeGroup 'com.google.testing.platform'
+      }
+    }
     mavenCentral()
-    gradlePluginPortal()
+    gradlePluginPortal {
+      content {
+        includeModule 'io.github.terrakok', 'kmp-hierarchy'
+      }
+    }
   }
 
   versionCatalogs {

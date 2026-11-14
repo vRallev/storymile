@@ -1,8 +1,12 @@
 pluginManagement {
   repositories {
-    google()
     mavenCentral()
-    gradlePluginPortal()
+    gradlePluginPortal {
+      content {
+        includeGroupAndSubgroups 'com.gradle'
+        includeGroupAndSubgroups 'org.gradle.toolchains'
+      }
+    }
   }
 }
 
@@ -13,7 +17,13 @@ plugins {
 
 dependencyResolutionManagement {
   repositories {
-    google()
+    google {
+      content {
+        includeGroupAndSubgroups 'androidx'
+        includeGroupAndSubgroups 'com.android'
+        includeGroup 'com.google.testing.platform'
+      }
+    }
     mavenCentral()
   }
 }
