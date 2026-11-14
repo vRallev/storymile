@@ -1,11 +1,15 @@
 package software.ralf.storymile.discovery.presentation
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.presentation.PodcastSharedElement.Companion.podcastSharedElement
 import software.ralf.storymile.shows.component.ShowRow
+import software.ralf.storymile.theme.AppTheme
 
 @Composable
 internal fun PodcastRow(
@@ -35,5 +39,12 @@ internal fun PodcastRow(
     subtitleModifier =
       Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Author)
         .testTag("discovery-author-${podcast.id}"),
+    trailingContent = {
+      Icon(
+        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+        contentDescription = null,
+        tint = AppTheme.colorScheme.primary,
+      )
+    },
   )
 }

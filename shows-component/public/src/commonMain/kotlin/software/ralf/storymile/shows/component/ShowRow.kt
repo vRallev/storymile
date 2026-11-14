@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,7 +22,7 @@ import software.ralf.storymile.theme.AppTheme
 
 /**
  * Shows a tappable podcast summary. Apply the modifier passed to [artwork] to reserve the artwork
- * space. [trailingContent] defaults to a chevron; replace it to add row actions.
+ * space. Use [trailingContent] to add content at the end of the row.
  */
 @Composable
 fun ShowRow(
@@ -78,20 +75,7 @@ fun ShowRow(
         }
         supportingContent?.invoke()
       }
-      if (trailingContent == null) {
-        ShowChevron()
-      } else {
-        trailingContent()
-      }
+      trailingContent?.invoke()
     }
   }
-}
-
-@Composable
-private fun ShowChevron() {
-  Icon(
-    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-    contentDescription = null,
-    tint = AppTheme.colorScheme.primary,
-  )
 }
