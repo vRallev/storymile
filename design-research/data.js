@@ -4748,7 +4748,7 @@ window.STORYMILE_DESIGN = {
       ],
       "title": "Queue",
       "width": 992,
-      "height": 1585,
+      "height": 1586,
       "preview": "previews/android-tablet-portrait-library-queue-light.webp",
       "thumbnail": "previews/android-tablet-portrait-library-queue-light-small.webp"
     },

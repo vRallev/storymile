@@ -255,7 +255,7 @@
     "The supplied blue paper boat remains the brand mark. Profile opens from the avatar; primary destinations are Home, Library, and Downloads.",
     "Phone detail screens become neighboring panes in larger windows. Playback and selection persist when the window changes.",
     "Library tabs are Queue, Shows, Saved, and History. The player shortcut opens the same queue. Finished episodes remain in History after they leave the queue.",
-    "Library Queue uses an episode list with a sort menu and manual reordering. Sorting changes upcoming playback order. Playback controls stay in the compact bottom bar.",
+    "Library Queue uses an episode list with manual reordering. Drag handles change upcoming playback order. Playback controls stay in the compact bottom bar.",
     "Queue and Chapters are separate choices from the player; they do not form an automatic sequence.",
     "Add to queue is the primary episode action and appends without interrupting playback. Play now starts immediately. Queuing does not save or download an episode.",
     "Saving keeps a Library bookmark. Downloading stores audio locally. Removing a download keeps the bookmark.",
