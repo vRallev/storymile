@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Podcasts
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab as MaterialTab
@@ -36,6 +38,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,6 +49,7 @@ import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.storymile.design.TabHeader
+import software.ralf.storymile.library.LibraryPresenterImpl.FollowedShowsState
 import software.ralf.storymile.library.LibraryPresenterImpl.Tab
 import software.ralf.storymile.library.impl.generated.resources.Res
 import software.ralf.storymile.library.impl.generated.resources.library_discover
@@ -64,9 +68,12 @@ import software.ralf.storymile.library.impl.generated.resources.library_saved_em
 import software.ralf.storymile.library.impl.generated.resources.library_shows
 import software.ralf.storymile.library.impl.generated.resources.library_shows_empty_description
 import software.ralf.storymile.library.impl.generated.resources.library_shows_empty_title
+import software.ralf.storymile.library.impl.generated.resources.library_shows_error
 import software.ralf.storymile.library.impl.generated.resources.library_shows_illustration
+import software.ralf.storymile.library.impl.generated.resources.library_shows_retry
 import software.ralf.storymile.library.impl.generated.resources.library_title
 import software.ralf.storymile.screen.LocalScreenSize
+import software.ralf.storymile.show.LocalShowInPane
 import software.ralf.storymile.theme.AppTheme
 
 @ContributesRenderer
@@ -81,6 +88,10 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
       val horizontal = !compact && short
       val large = maxWidth >= 1000.dp && !short
       val sidePadding = if (compact) 20.dp else 32.dp
+      val inPane = LocalShowInPane.current
+      val showGrid =
+        !inPane && maxWidth < maxHeight && maxWidth / LocalDensity.current.fontScale >= 600.dp
+      val showListState = rememberLazyGridState()
       Column(Modifier.fillMaxSize()) {
         TabHeader(
           title = stringResource(Res.string.library_title),
@@ -113,15 +124,42 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
             key = { Tab.entries[it].name },
           ) { page ->
             val tab = Tab.entries[page]
-            EmptyPage(
-              tab = tab,
-              onDiscoverPodcasts = model.onDiscoverPodcasts,
-              compact = compact,
-              short = short,
-              horizontal = horizontal,
-              large = large,
-              modifier = Modifier.fillMaxSize().padding(horizontal = sidePadding),
-            )
+            val pageModifier = Modifier.fillMaxSize().padding(horizontal = sidePadding)
+            val shows = model.shows
+            if (tab != Tab.SHOWS || (shows is FollowedShowsState.Ready && shows.feeds.isEmpty())) {
+              EmptyPage(
+                tab = tab,
+                onDiscoverPodcasts = model.onDiscoverPodcasts,
+                compact = compact,
+                short = short,
+                horizontal = horizontal,
+                large = large,
+                modifier = pageModifier,
+              )
+            } else if (shows is FollowedShowsState.Ready) {
+              FollowedShows(
+                shows = shows.feeds,
+                selectedShowUrl = model.selectedShowUrl,
+                onShowSelected = model.onShowSelected,
+                state = showListState,
+                asGrid = showGrid,
+                inPane = inPane,
+                modifier = pageModifier,
+              )
+            } else {
+              Box(pageModifier, contentAlignment = Alignment.Center) {
+                if (shows is FollowedShowsState.Error) {
+                  Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(stringResource(Res.string.library_shows_error))
+                    Button(onClick = shows.onRetry) {
+                      Text(stringResource(Res.string.library_shows_retry))
+                    }
+                  }
+                } else {
+                  CircularProgressIndicator()
+                }
+              }
+            }
           }
         }
       }

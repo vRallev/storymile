@@ -14,8 +14,10 @@ import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.app.platform.presenter.compose.saveable.rememberReturningSaveableStateHolder
 import software.ralf.app.platform.presenter.compose.test
 import software.ralf.storymile.discovery.DiscoveryPresenter
+import software.ralf.storymile.library.LibraryPresenterImpl.FollowedShowsState.Ready
+import software.ralf.storymile.library.LibraryPresenterImpl.NavigationModel
 import software.ralf.storymile.library.LibraryPresenterImpl.Tab
-import software.ralf.storymile.presenternavigation.DefaultBackstackModel
+import software.ralf.storymile.podcast.PodcastFeed
 
 class LibraryPresenterImplTest {
   @Test
@@ -107,9 +109,60 @@ class LibraryPresenterImplTest {
     }
   }
 
-  private fun createPresenter(): LibraryPresenterImpl = LibraryPresenterImpl(FakeDiscoveryFactory())
+  @Test
+  fun `follow and unfollow update the list while show selection replaces the detail`() = runTest {
+    val database = TestLibraryDatabase()
+    val first = feed("first")
+    val second = feed("second")
+    createPresenter(database).test(this) {
+      val initial = awaitItem().content()
+      val loaded = if (initial.shows is Ready) initial else awaitItem().content()
+      assertThat(loaded.shows).isEqualTo(Ready(emptyList()))
+      loaded.onSelectTab(Tab.SHOWS)
+      assertThat(awaitItem().content().selectedTab).isEqualTo(Tab.SHOWS)
+      database.insert(first)
+      assertThat(awaitItem().content().shows).isEqualTo(Ready(listOf(first)))
+      database.insert(second)
+      val listed = awaitItem().content()
+      assertThat(listed.shows).isEqualTo(Ready(listOf(first, second)))
+      listed.onShowSelected(first)
+      val opened = awaitItem()
+      assertThat(opened.backstack.last()).isEqualTo(TestShowFactory.Model(first))
+      (opened.backstack.first() as LibraryPresenterImpl.Model).onShowSelected(second)
 
-  private fun DefaultBackstackModel.content(): LibraryPresenterImpl.Model =
+      val replaced = awaitItem()
+      assertThat(replaced.backstack.size).isEqualTo(2)
+      assertThat(replaced.backstack.last()).isEqualTo(TestShowFactory.Model(second))
+      database.delete(first.feedUrl)
+      val updated = awaitItem()
+      updated.onBack()
+      val returned = awaitItem().content()
+      assertThat(returned.shows).isEqualTo(Ready(listOf(second)))
+      assertThat(returned.selectedTab).isEqualTo(Tab.SHOWS)
+    }
+  }
+
+  private fun feed(name: String) =
+    PodcastFeed(
+      feedUrl = "https://example.test/$name.xml",
+      title = name,
+      description = null,
+      author = null,
+      artworkUrl = null,
+      link = null,
+      episodes = emptyList(),
+    )
+
+  private fun createPresenter(
+    database: TestLibraryDatabase = TestLibraryDatabase(),
+  ): LibraryPresenterImpl =
+    LibraryPresenterImpl(
+      discoveryPresenterFactory = FakeDiscoveryFactory(),
+      showFactory = TestShowFactory,
+      database = database,
+    )
+
+  private fun NavigationModel.content(): LibraryPresenterImpl.Model =
     backstack.single() as LibraryPresenterImpl.Model
 
   private class FakeDiscoveryFactory : DiscoveryPresenter.Factory {

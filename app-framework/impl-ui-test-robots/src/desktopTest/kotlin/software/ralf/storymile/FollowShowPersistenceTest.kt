@@ -29,10 +29,10 @@ import software.ralf.app.platform.scope.coroutine.CoroutineScopeScoped
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.database.PodcastDatabase
 import software.ralf.storymile.discovery.PodcastDiscoveryRepository
-import software.ralf.storymile.discovery.presentation.ShowContentPresenter
-import software.ralf.storymile.discovery.presentation.ShowPresenter
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.podcast.PodcastFeedRepository
+import software.ralf.storymile.show.ShowContentPresenter
+import software.ralf.storymile.show.ShowOrigin
 import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.OkioStoragePlatform
 import software.ralf.storymile.storage.Storage
@@ -100,7 +100,7 @@ class FollowShowPersistenceTest {
             .podcasts
             .first(),
         podcasts = emptyList(),
-        source = ShowPresenter.Source.Browse,
+        source = ShowOrigin.Browse,
         onBack = {},
       )
       .withPresenterBackstackScope(FakePresenterBackstackScope())

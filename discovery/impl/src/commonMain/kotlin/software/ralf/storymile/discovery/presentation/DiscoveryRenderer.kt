@@ -74,7 +74,6 @@ import software.ralf.storymile.design.TitleBar
 import software.ralf.storymile.discovery.DiscoveredPodcast
 import software.ralf.storymile.discovery.impl.generated.resources.Res
 import software.ralf.storymile.discovery.impl.generated.resources.browse_topics
-import software.ralf.storymile.discovery.impl.generated.resources.discover_podcasts
 import software.ralf.storymile.discovery.impl.generated.resources.episodes_to_try
 import software.ralf.storymile.discovery.impl.generated.resources.featured_podcasts
 import software.ralf.storymile.discovery.impl.generated.resources.filter_all_nature
@@ -85,13 +84,15 @@ import software.ralf.storymile.discovery.impl.generated.resources.loading_podcas
 import software.ralf.storymile.discovery.impl.generated.resources.no_podcasts
 import software.ralf.storymile.discovery.impl.generated.resources.podcasts_to_explore
 import software.ralf.storymile.discovery.impl.generated.resources.retry
-import software.ralf.storymile.discovery.impl.generated.resources.search_results
 import software.ralf.storymile.discovery.impl.generated.resources.topic_culture_subtitle
 import software.ralf.storymile.discovery.impl.generated.resources.topic_nature_subtitle
 import software.ralf.storymile.discovery.impl.generated.resources.topic_science_subtitle
 import software.ralf.storymile.discovery.impl.generated.resources.topic_technology_subtitle
 import software.ralf.storymile.discovery.impl.generated.resources.try_another_search
-import software.ralf.storymile.discovery.presentation.PodcastSharedElement.Companion.podcastSharedElement
+import software.ralf.storymile.show.Episodes
+import software.ralf.storymile.show.ShowOrigin
+import software.ralf.storymile.show.ShowSharedElement
+import software.ralf.storymile.show.showSharedElement
 import software.ralf.storymile.templates.LocalAnimatedVisibilityScope
 import software.ralf.storymile.templates.SharedNavigationElement
 import software.ralf.storymile.templates.sharedNavigationBounds
@@ -144,7 +145,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
       Column(Modifier.fillMaxSize()) {
         if (!floatingSearch) {
           TitleBar(
-            title = stringResource(requireNotNull(model.topic).titleResource),
+            title = requireNotNull(model.topic).showOrigin.title(),
             onBack = model.onBack,
             backButtonModifier = Modifier.testTag("discovery-back"),
           )
@@ -188,7 +189,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
         ) {
           Column {
             TitleBar(
-              title = stringResource(Res.string.discover_podcasts),
+              title = ShowOrigin.Browse.title(),
               onBack = model.onBack,
               backButtonModifier = Modifier.testTag("discovery-back"),
               titleModifier =
@@ -394,7 +395,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
           FilterChip(
             selected = false,
             onClick = { model.onTopicSelected(topic) },
-            label = { Text(stringResource(topic.titleResource)) },
+            label = { Text(topic.showOrigin.title()) },
             modifier = Modifier.testTag("discovery-topic-${topic.name}"),
             shape = CircleShape,
           )
@@ -434,13 +435,11 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
   ) {
     Crossfade(
       targetState =
-        stringResource(
-          when {
-            featured -> Res.string.featured_podcasts
-            model.topic != null -> Res.string.podcasts_to_explore
-            else -> Res.string.search_results
-          },
-        ),
+        when {
+          featured -> stringResource(Res.string.featured_podcasts)
+          model.topic != null -> stringResource(Res.string.podcasts_to_explore)
+          else -> ShowOrigin.Search.title()
+        },
       modifier = modifier.testTag("discovery-results-title"),
       animationSpec = tween(FADE_DURATION_MILLIS),
       label = "discovery-results-title",
@@ -465,9 +464,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     featured: Boolean,
     model: DiscoveryPresenterImpl.Model,
   ) {
-    val source =
-      model.topic?.let { ShowPresenter.Source.Topic(it) }
-        ?: if (featured) ShowPresenter.Source.Browse else ShowPresenter.Source.Search
+    val source = model.topic?.showOrigin ?: if (featured) ShowOrigin.Browse else ShowOrigin.Search
     if (featured) {
       BoxWithConstraints(Modifier.fillMaxWidth()) {
         if (maxWidth / LocalDensity.current.fontScale < 300.dp) {
@@ -515,10 +512,10 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
       Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         PodcastArtwork(
           podcast,
-          Modifier.podcastSharedElement(
-              podcast,
-              ShowPresenter.Source.Browse,
-              PodcastSharedElement.Artwork,
+          Modifier.showSharedElement(
+              podcastId = podcast.id,
+              source = ShowOrigin.Browse,
+              element = ShowSharedElement.Artwork,
             )
             .testTag("discovery-artwork-${podcast.id}")
             .fillMaxWidth()
@@ -527,10 +524,10 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
         Text(
           text = podcast.title,
           modifier =
-            Modifier.podcastSharedElement(
-                podcast,
-                ShowPresenter.Source.Browse,
-                PodcastSharedElement.Title,
+            Modifier.showSharedElement(
+                podcastId = podcast.id,
+                source = ShowOrigin.Browse,
+                element = ShowSharedElement.Title,
               )
               .testTag("discovery-title-${podcast.id}"),
           style = AppTheme.typography.titleMedium,
@@ -542,10 +539,10 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
           Text(
             text = author,
             modifier =
-              Modifier.podcastSharedElement(
-                  podcast,
-                  ShowPresenter.Source.Browse,
-                  PodcastSharedElement.Author,
+              Modifier.showSharedElement(
+                  podcastId = podcast.id,
+                  source = ShowOrigin.Browse,
+                  element = ShowSharedElement.Author,
                 )
                 .testTag("discovery-author-${podcast.id}"),
             style = AppTheme.typography.bodyMedium,

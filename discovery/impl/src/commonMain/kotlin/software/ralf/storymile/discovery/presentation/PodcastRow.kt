@@ -21,20 +21,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import software.ralf.storymile.discovery.DiscoveredPodcast
-import software.ralf.storymile.discovery.presentation.PodcastSharedElement.Companion.podcastSharedElement
+import software.ralf.storymile.show.ShowOrigin
+import software.ralf.storymile.show.ShowSharedElement
+import software.ralf.storymile.show.showSharedElement
 import software.ralf.storymile.theme.AppTheme
 
 @Composable
 internal fun PodcastRow(
   podcast: DiscoveredPodcast,
   onClick: () -> Unit,
-  selected: Boolean = false,
-  transitionSource: ShowPresenter.Source? = null,
+  transitionSource: ShowOrigin? = null,
 ) {
   Surface(
     onClick = onClick,
     modifier = Modifier.fillMaxWidth().testTag("discovery-podcast-${podcast.id}"),
-    color = if (selected) AppTheme.colorScheme.secondaryContainer else Color.Transparent,
+    color = Color.Transparent,
     shape = RoundedCornerShape(16.dp),
   ) {
     Row(
@@ -44,7 +45,11 @@ internal fun PodcastRow(
     ) {
       PodcastArtwork(
         podcast,
-        Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Artwork)
+        Modifier.showSharedElement(
+            podcastId = podcast.id,
+            source = transitionSource,
+            element = ShowSharedElement.Artwork,
+          )
           .testTag("discovery-artwork-${podcast.id}")
           .size(76.dp),
       )
@@ -52,7 +57,11 @@ internal fun PodcastRow(
         Text(
           text = podcast.title,
           modifier =
-            Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Title)
+            Modifier.showSharedElement(
+                podcastId = podcast.id,
+                source = transitionSource,
+                element = ShowSharedElement.Title,
+              )
               .testTag("discovery-title-${podcast.id}"),
           style = AppTheme.typography.titleMedium,
           fontWeight = FontWeight.SemiBold,
@@ -63,7 +72,11 @@ internal fun PodcastRow(
           Text(
             text = author,
             modifier =
-              Modifier.podcastSharedElement(podcast, transitionSource, PodcastSharedElement.Author)
+              Modifier.showSharedElement(
+                  podcastId = podcast.id,
+                  source = transitionSource,
+                  element = ShowSharedElement.Author,
+                )
                 .testTag("discovery-author-${podcast.id}"),
             style = AppTheme.typography.bodyMedium,
             color = AppTheme.colorScheme.onSurfaceVariant,
