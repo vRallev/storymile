@@ -16,17 +16,6 @@
   <string name="podcasts_to_explore">Podcasts to explore</string>
   <string name="search_results">Search results</string>
   <string name="episodes_to_try">Episodes to try</string>
-  <string name="episodes">Episodes</string>
-  <string name="loading_episodes">Loading episodes</string>
-  <string name="episodes_error">Could not load episodes.</string>
-  <string name="no_episodes">No episodes available.</string>
-  <string name="play_episode">Play %1$s</string>
-  <string name="follow">Follow</string>
-  <string name="following">Following</string>
-  <string name="follow_error">Could not update this show. Try again.</string>
-  <string name="show_description">Show podcast description</string>
-  <string name="hide_description">Hide podcast description</string>
-  <string name="no_description">No description available.</string>
   <string name="loading_podcasts">Loading podcasts</string>
   <string name="load_error">Could not load podcasts.</string>
   <string name="retry">Try again</string>

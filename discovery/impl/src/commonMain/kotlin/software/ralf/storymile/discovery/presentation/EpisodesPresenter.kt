@@ -5,7 +5,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
-import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
 import software.ralf.app.platform.presenter.backstack.nav3.backstack
 import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
@@ -17,6 +16,7 @@ import software.ralf.storymile.episodedetails.EpisodeDetails
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.podcast.PodcastFeedRepository
 import software.ralf.storymile.podcast.PodcastFeedRepository.State
+import software.ralf.storymile.shows.ShowEpisodes
 
 class EpisodesPresenter(
   private val catalog: PodcastDiscoveryRepository,
@@ -24,9 +24,9 @@ class EpisodesPresenter(
   private val episodeDetailsFactory: EpisodeDetailsPresenter.Factory,
   private val episodesPerPodcast: Int = Int.MAX_VALUE,
   private val replaceOpenEpisode: Boolean = false,
-) : ComposePresenter<List<DiscoveredPodcast>, EpisodesPresenter.Model> {
+) : ComposePresenter<List<DiscoveredPodcast>, ShowEpisodes> {
   @Composable
-  override fun present(input: List<DiscoveredPodcast>): Model {
+  override fun present(input: List<DiscoveredPodcast>): ShowEpisodes {
     val backstack = LocalBackstackScope.requireNotNull()
     val sources =
       input
@@ -53,7 +53,7 @@ class EpisodesPresenter(
         url to state
       }
     }
-    return Model(
+    return ShowEpisodes(
       episodes =
         states.flatMap { (url, state) ->
           if (state is State.Success) {
@@ -65,7 +65,7 @@ class EpisodesPresenter(
                   artworkUrl = episode.artworkUrl ?: state.feed.artworkUrl,
                   episode = episode,
                 )
-              Episode(
+              ShowEpisodes.Episode(
                 details = details,
                 onClick = {
                   val presenter = episodeDetailsFactory.create(details)
@@ -96,15 +96,4 @@ class EpisodesPresenter(
   }
 
   private data class Source(val url: String?, val id: String?, val lookup: CatalogState?)
-
-  data class Episode(val details: EpisodeDetails, val onClick: () -> Unit) {
-    val key: String = details.key
-  }
-
-  data class Model(
-    val episodes: List<Episode>,
-    val loading: Boolean,
-    val failed: Boolean,
-    val onRetry: () -> Unit,
-  ) : BaseModel
 }

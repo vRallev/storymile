@@ -86,7 +86,7 @@ class AppShellRobot : ComposeRobot() {
         compose.onNodeWithTag("library-tab-queue").assertIsDisplayed()
         compose.onNodeWithTag("library-tab-shows").assertIsDisplayed()
         compose.onNodeWithTag("library-tab-saved").assertIsDisplayed()
-        compose.onNodeWithTag("library-discover").assertIsDisplayed()
+        compose.onNodeWithTag("library-pager").assertIsDisplayed()
       }
     }
   }

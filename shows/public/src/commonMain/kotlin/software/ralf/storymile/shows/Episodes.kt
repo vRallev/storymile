@@ -1,4 +1,4 @@
-package software.ralf.storymile.discovery.presentation
+package software.ralf.storymile.shows
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,20 +31,21 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.coil.PodcastArtwork
-import software.ralf.storymile.discovery.impl.generated.resources.Res
-import software.ralf.storymile.discovery.impl.generated.resources.episodes_error
-import software.ralf.storymile.discovery.impl.generated.resources.loading_episodes
-import software.ralf.storymile.discovery.impl.generated.resources.no_episodes
-import software.ralf.storymile.discovery.impl.generated.resources.play_episode
-import software.ralf.storymile.discovery.impl.generated.resources.retry
 import software.ralf.storymile.episodedetails.EpisodeSharedElement
 import software.ralf.storymile.episodedetails.episodeSharedElement
+import software.ralf.storymile.shows.generated.resources.Res
+import software.ralf.storymile.shows.generated.resources.episodes_error
+import software.ralf.storymile.shows.generated.resources.loading_episodes
+import software.ralf.storymile.shows.generated.resources.no_episodes
+import software.ralf.storymile.shows.generated.resources.play_episode
+import software.ralf.storymile.shows.generated.resources.retry
 import software.ralf.storymile.theme.AppTheme
 
+/** Displays a short episode list with loading and retry states. */
 @Composable
-internal fun Episodes(
+fun Episodes(
   title: String?,
-  model: EpisodesPresenter.Model,
+  model: ShowEpisodes,
   modifier: Modifier,
   edgeToEdge: Boolean = false,
 ) {
@@ -66,8 +67,9 @@ internal fun Episodes(
   }
 }
 
+/** Displays an accessible episode section heading. */
 @Composable
-internal fun EpisodesHeading(title: String, modifier: Modifier = Modifier) {
+fun EpisodesHeading(title: String, modifier: Modifier = Modifier) {
   Text(
     text = title,
     modifier = modifier.semantics { heading() },
@@ -76,8 +78,9 @@ internal fun EpisodesHeading(title: String, modifier: Modifier = Modifier) {
   )
 }
 
+/** Displays loading, failure, or empty episode state. */
 @Composable
-internal fun EpisodesStatus(model: EpisodesPresenter.Model, modifier: Modifier = Modifier) {
+fun EpisodesStatus(model: ShowEpisodes, modifier: Modifier = Modifier) {
   Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
     if (model.loading) {
       Row(
@@ -109,9 +112,10 @@ internal fun EpisodesStatus(model: EpisodesPresenter.Model, modifier: Modifier =
   }
 }
 
+/** Opens episode details when the row is selected. */
 @Composable
-internal fun EpisodeRow(
-  item: EpisodesPresenter.Episode,
+fun EpisodeRow(
+  item: ShowEpisodes.Episode,
   index: Int,
   edgeToEdge: Boolean = false,
 ) {
