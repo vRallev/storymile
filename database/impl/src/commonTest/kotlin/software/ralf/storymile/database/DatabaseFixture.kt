@@ -12,6 +12,7 @@ import software.ralf.app.platform.scope.register
 import software.ralf.storymile.podcast.PodcastEnclosure
 import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.podcast.PodcastFeed
+import software.ralf.storymile.podcast.QueuedEpisode
 import software.ralf.storymile.storage.testing.FakeStorage
 
 class DatabaseFixture(path: String? = null) {
@@ -20,13 +21,16 @@ class DatabaseFixture(path: String? = null) {
     CoroutineScopeScoped(Dispatchers.Default + SupervisorJob() + CoroutineName("database-test"))
   private val scope = Scope.buildRootScope("database-test") { addCoroutineScopeScoped(owner) }
 
-  val database: PodcastDatabase =
+  private val userDatabase =
     UserPodcastDatabase(
         storage = FakeStorage(databasePath = path),
         coroutineScope = owner.createChild(),
         platform = PlatformDatabase(),
       )
       .also { scope.register(it) }
+
+  val database: PodcastDatabase = userDatabase
+  val queue: EpisodeQueueDatabase = userDatabase
 
   suspend fun close() {
     if (!scope.isDestroyed()) {
@@ -35,7 +39,7 @@ class DatabaseFixture(path: String? = null) {
     owner.coroutineContext.job.join()
   }
 
-  suspend fun <T> use(block: suspend (PodcastDatabase) -> T): T {
+  suspend fun <T> use(block: suspend DatabaseFixture.(PodcastDatabase) -> T): T {
     return try {
       block(database)
     } finally {
@@ -44,6 +48,14 @@ class DatabaseFixture(path: String? = null) {
   }
 
   companion object {
+    fun queuedEpisode(podcast: PodcastFeed, episode: PodcastEpisode): QueuedEpisode =
+      QueuedEpisode(
+        feedUrl = podcast.feedUrl,
+        podcastTitle = podcast.title,
+        artworkUrl = episode.artworkUrl ?: podcast.artworkUrl,
+        episode = episode,
+      )
+
     fun podcast(): PodcastFeed =
       PodcastFeed(
         feedUrl = "https://feeds.test/show.xml",

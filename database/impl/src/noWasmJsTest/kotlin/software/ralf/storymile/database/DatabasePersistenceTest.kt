@@ -18,17 +18,25 @@ class DatabasePersistenceTest {
       FileSystem.SYSTEM.createDirectories(directory)
       val path = (directory / "podcasts.db").toString()
       val podcast = DatabaseFixture.podcast()
+      val queued =
+        podcast.episodes.map { DatabaseFixture.queuedEpisode(podcast = podcast, episode = it) }
       try {
-        DatabaseFixture(path).use { database -> database.insert(podcast) }
+        DatabaseFixture(path).use { database ->
+          database.insert(podcast)
+          queued.forEach { queue.enqueue(it) }
+        }
         DatabaseFixture().use { memory ->
           assertThat(memory.podcasts.first()).isEmpty()
+          assertThat(queue.queuedEpisodes.first()).isEmpty()
           memory.insert(podcast.copy(title = "Fake mode"))
         }
         DatabaseFixture((directory / "other-user.db").toString()).use { other ->
           assertThat(other.podcasts.first()).isEmpty()
+          assertThat(queue.queuedEpisodes.first()).isEmpty()
         }
         DatabaseFixture(path).use { reopened ->
           assertThat(reopened.podcasts.first()).isEqualTo(listOf(podcast))
+          assertThat(queue.queuedEpisodes.first()).isEqualTo(queued)
           reopened.delete(podcast.feedUrl)
         }
         DatabaseFixture(path).use { reopened ->

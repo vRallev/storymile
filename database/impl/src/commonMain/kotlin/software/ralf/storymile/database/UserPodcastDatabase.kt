@@ -1,7 +1,11 @@
 package software.ralf.storymile.database
 
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.ForScope
+import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import dev.zacsweers.metro.binding
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -19,24 +23,32 @@ import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import software.ralf.app.platform.inject.metro.ContributesScoped
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.Scoped
 import software.ralf.storymile.podcast.PodcastFeed
+import software.ralf.storymile.podcast.QueuedEpisode
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.user.UserScope
 
+@Inject
 @SingleIn(UserScope::class)
-@ContributesScoped(UserScope::class)
+@ContributesBinding(UserScope::class, binding = binding<PodcastDatabase>())
+@ContributesBinding(UserScope::class, binding = binding<EpisodeQueueDatabase>())
+@ContributesIntoSet(UserScope::class, binding = binding<@ForScope(UserScope::class) Scoped>())
 class UserPodcastDatabase(
   @ForScope(UserScope::class) private val storage: Storage,
   @ForScope(UserScope::class) private val coroutineScope: CoroutineScope,
   private val platform: DatabasePlatform,
-) : PodcastDatabase, Scoped {
+) : PodcastDatabase, EpisodeQueueDatabase, Scoped {
   private val database = CompletableDeferred<RoomPodcastDatabase>()
 
   override val podcasts: Flow<List<PodcastFeed>> = channelFlow {
-    operation { dao -> dao.observe().collect { rows -> send(rows.map { it.toPodcast() }) } }
+    operation { it.podcasts().observe().collect { rows -> send(rows.map { it.toPodcast() }) } }
+  }
+    .distinctUntilChanged()
+
+  override val queuedEpisodes: Flow<List<QueuedEpisode>> = channelFlow {
+    operation { it.queue().observe().collect { rows -> send(rows.map { it.toQueuedEpisode() }) } }
   }
     .distinctUntilChanged()
 
@@ -64,9 +76,17 @@ class UserPodcastDatabase(
     }
   }
 
-  override suspend fun insert(podcast: PodcastFeed) = operation { it.insert(podcast) }
+  override suspend fun insert(podcast: PodcastFeed) = operation { it.podcasts().insert(podcast) }
 
-  override suspend fun delete(feedUrl: String) = operation { it.delete(feedUrl) }
+  override suspend fun delete(feedUrl: String) = operation { it.podcasts().delete(feedUrl) }
+
+  override suspend fun enqueue(episode: QueuedEpisode) = operation {
+    it.queue().insert(QueuedEpisodeEntity.from(episode))
+  }
+
+  override suspend fun removeFromQueue(feedUrl: String, episodeId: String) = operation {
+    it.queue().delete(feedUrl = feedUrl, episodeId = episodeId)
+  }
 
   private suspend fun awaitPreviousOwner(path: String?) {
     if (path == null) {
@@ -89,14 +109,14 @@ class UserPodcastDatabase(
     previous.forEach { it.join() }
   }
 
-  private suspend fun <T> operation(block: suspend (PodcastDao) -> T): T {
+  private suspend fun <T> operation(block: suspend (RoomPodcastDatabase) -> T): T {
     coroutineScope.coroutineContext.ensureActive()
     val callerContext = currentCoroutineContext()
     callerContext.ensureActive()
     val operation =
       coroutineScope.async(callerContext.minusKey(Job)) {
         try {
-          Result.success(block(database.await().podcasts()))
+          Result.success(block(database.await()))
         } catch (exception: Throwable) {
           Result.failure(exception)
         }
