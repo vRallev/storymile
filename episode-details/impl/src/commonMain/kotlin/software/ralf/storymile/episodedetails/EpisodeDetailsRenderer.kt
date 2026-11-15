@@ -23,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.BookmarkBorder
@@ -39,12 +40,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextMotion
@@ -64,6 +65,7 @@ import software.ralf.storymile.episode.details.impl.generated.resources.episode_
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_no_description
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_play_now
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_published
+import software.ralf.storymile.episode.details.impl.generated.resources.episode_remove_from_queue
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_save
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_show_notes
 import software.ralf.storymile.templates.LocalAnimatedVisibilityScope
@@ -177,20 +179,28 @@ class EpisodeDetailsRenderer : ComposeRenderer<EpisodeDetailsPresenterImpl.Model
             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
             Text(stringResource(Res.string.episode_play_now), textAlign = TextAlign.Center)
           }
-          if (!model.isQueued) {
-            Button(
-              onClick = model.onAddToQueue,
-              modifier = Modifier.weight(1f).testTag("episode-details-add-to-queue"),
-              contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            ) {
-              Icon(
-                imageVector = Icons.AutoMirrored.Filled.PlaylistAdd,
-                contentDescription = null,
-                modifier = Modifier.size(ButtonDefaults.IconSize),
-              )
-              Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-              Text(stringResource(Res.string.episode_add_to_queue), textAlign = TextAlign.Center)
-            }
+          val queueLabel =
+            if (model.isQueued) Res.string.episode_in_queue else Res.string.episode_add_to_queue
+          val removeFromQueueLabel = stringResource(Res.string.episode_remove_from_queue)
+          Button(
+            onClick = model.onToggleQueue,
+            enabled = model.queueEnabled,
+            modifier =
+              Modifier.weight(1f).testTag("episode-details-add-to-queue").semantics {
+                if (model.isQueued) {
+                  onClick(label = removeFromQueueLabel, action = null)
+                }
+              },
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+          ) {
+            Icon(
+              imageVector =
+                if (model.isQueued) Icons.Filled.Check else Icons.AutoMirrored.Filled.PlaylistAdd,
+              contentDescription = null,
+              modifier = Modifier.size(ButtonDefaults.IconSize),
+            )
+            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+            Text(text = stringResource(queueLabel), textAlign = TextAlign.Center)
           }
         }
       }
@@ -287,17 +297,6 @@ class EpisodeDetailsRenderer : ComposeRenderer<EpisodeDetailsPresenterImpl.Model
               .testTag("episode-details-duration"),
           style = AppTheme.typography.bodyMedium.copy(textMotion = TextMotion.Animated),
           color = AppTheme.colorScheme.onSurfaceVariant,
-        )
-      }
-      if (model.isQueued) {
-        Text(
-          text = stringResource(Res.string.episode_in_queue),
-          modifier =
-            Modifier.clip(AppTheme.shapes.small)
-              .background(AppTheme.colorScheme.secondaryContainer)
-              .padding(horizontal = 10.dp, vertical = 4.dp),
-          style = AppTheme.typography.labelMedium,
-          color = AppTheme.colorScheme.onSecondaryContainer,
         )
       }
       details.episode.author

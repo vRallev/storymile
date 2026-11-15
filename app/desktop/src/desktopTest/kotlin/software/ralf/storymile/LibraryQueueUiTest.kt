@@ -97,8 +97,15 @@ class LibraryQueueUiTest {
       first.assertIsDisplayed()
       runOnUiThread { first.performClick() }
       detailsTitle.assertIsDisplayed().assertTextEquals(firstTitle)
-      onNodeWithText("In queue").assertExists()
-      onNodeWithTag("episode-details-add-to-queue").assertDoesNotExist()
+      val queueButton = onNodeWithTag("episode-details-add-to-queue").assertTextEquals("In queue")
+      runOnUiThread { queueButton.performScrollTo().performClick() }
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("episode-details-add-to-queue") and hasText("Add to queue"),
+        timeoutMillis = 5_000,
+      )
+      runOnUiThread { onNodeWithTag("episode-details-back").performClick() }
+      first.assertIsDisplayed().assertTextContains(secondTitle)
+      second.assertDoesNotExist()
     }
   }
 
@@ -112,7 +119,10 @@ class LibraryQueueUiTest {
     runOnUiThread {
       onNodeWithTag("episode-details-add-to-queue").performScrollTo().performClick()
     }
-    waitUntilAtLeastOneExists(matcher = hasText("In queue"), timeoutMillis = 5_000)
+    waitUntilAtLeastOneExists(
+      matcher = hasTestTag("episode-details-add-to-queue") and hasText("In queue"),
+      timeoutMillis = 5_000,
+    )
     runOnUiThread { onNodeWithTag("episode-details-back").performClick() }
   }
 }

@@ -1,8 +1,9 @@
 package software.ralf.storymile.episodedetails
 
 import assertk.assertThat
-import assertk.assertions.isEmpty
-import assertk.assertions.isEqualTo
+import assertk.assertions.containsExactly
+import assertk.assertions.isFalse
+import assertk.assertions.isTrue
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +18,7 @@ import software.ralf.storymile.podcast.QueuedEpisode
 
 class EpisodeDetailsPresenterImplTest {
   @Test
-  fun `add to queue saves the selected episode with its show metadata`() = runTest {
+  fun `queue button adds episode metadata and removes only the selected episode`() = runTest {
     val queue = RecordingQueue()
     val details =
       EpisodeDetails(
@@ -41,31 +42,51 @@ class EpisodeDetailsPresenterImplTest {
               ),
           ),
       )
+    val queuedEpisode =
+      QueuedEpisode(
+        feedUrl = details.feedUrl,
+        podcastTitle = details.podcastTitle,
+        artworkUrl = details.artworkUrl,
+        episode = details.episode,
+      )
+    val otherFeedEpisode = queuedEpisode.copy(feedUrl = "https://example.test/other-feed")
     val presenter = EpisodeDetailsPresenterImpl(details = details, queue = queue)
     presenter.withPresenterBackstackScope(FakePresenterBackstackScope()).test(this) {
-      val model = awaitItem()
-      assertThat(queue.saved).isEmpty()
-      model.onAddToQueue()
-      assertThat(queue.saved.single())
-        .isEqualTo(
-          QueuedEpisode(
-            feedUrl = details.feedUrl,
-            podcastTitle = details.podcastTitle,
-            artworkUrl = details.artworkUrl,
-            episode = details.episode,
-          ),
-        )
+      assertThat(awaitItem().queueEnabled).isFalse()
+      queue.load(listOf(otherFeedEpisode))
+      val ready = awaitItem()
+      assertThat(ready.queueEnabled).isTrue()
+      assertThat(ready.isQueued).isFalse()
+
+      ready.onToggleQueue()
+      val queued = awaitItem()
+      assertThat(queued.isQueued).isTrue()
+      assertThat(checkNotNull(queue.episodes.value))
+        .containsExactly(otherFeedEpisode, queuedEpisode)
+
+      queued.onToggleQueue()
+      assertThat(awaitItem().isQueued).isFalse()
+      assertThat(checkNotNull(queue.episodes.value)).containsExactly(otherFeedEpisode)
     }
   }
 
   private class RecordingQueue : QueueRepository {
-    val saved = mutableListOf<QueuedEpisode>()
-    override val episodes: StateFlow<List<QueuedEpisode>?> = MutableStateFlow(null)
+    override val episodes: StateFlow<List<QueuedEpisode>?>
+      field = MutableStateFlow<List<QueuedEpisode>?>(null)
 
-    override fun save(episode: QueuedEpisode) {
-      saved += episode
+    fun load(episodes: List<QueuedEpisode>) {
+      this.episodes.value = episodes
     }
 
-    override fun remove(feedUrl: String, episodeId: String): Unit = error("Unexpected remove")
+    override fun save(episode: QueuedEpisode) {
+      episodes.value = checkNotNull(episodes.value) + episode
+    }
+
+    override fun remove(feedUrl: String, episodeId: String) {
+      episodes.value =
+        checkNotNull(episodes.value).filterNot {
+          it.feedUrl == feedUrl && it.episode.id == episodeId
+        }
+    }
   }
 }
