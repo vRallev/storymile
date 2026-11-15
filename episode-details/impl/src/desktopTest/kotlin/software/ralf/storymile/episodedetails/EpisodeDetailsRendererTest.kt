@@ -118,7 +118,16 @@ class EpisodeDetailsRendererTest {
           val queue = onNodeWithTag("episode-details-add-to-queue")
           val playBounds = play.getUnclippedBoundsInRoot()
           val queueBounds = queue.getUnclippedBoundsInRoot()
-          runOnIdle { isQueued.value = true }
+          mainClock.autoAdvance = false
+          try {
+            runOnUiThread { isQueued.value = true }
+            mainClock.advanceTimeBy(48)
+            queue.assertTextEquals("In queue")
+            assertThat(play.getUnclippedBoundsInRoot()).isEqualTo(playBounds)
+            assertThat(queue.getUnclippedBoundsInRoot()).isEqualTo(queueBounds)
+          } finally {
+            mainClock.autoAdvance = true
+          }
           queue.assertIsEnabled().assertTextEquals("In queue")
           assertThat(play.getUnclippedBoundsInRoot()).isEqualTo(playBounds)
           assertThat(queue.getUnclippedBoundsInRoot()).isEqualTo(queueBounds)

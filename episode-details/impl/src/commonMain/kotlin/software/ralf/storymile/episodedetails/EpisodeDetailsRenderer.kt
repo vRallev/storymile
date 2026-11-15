@@ -1,5 +1,6 @@
 package software.ralf.storymile.episodedetails
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -22,8 +23,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.BookmarkBorder
@@ -179,8 +178,6 @@ class EpisodeDetailsRenderer : ComposeRenderer<EpisodeDetailsPresenterImpl.Model
             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
             Text(stringResource(Res.string.episode_play_now), textAlign = TextAlign.Center)
           }
-          val queueLabel =
-            if (model.isQueued) Res.string.episode_in_queue else Res.string.episode_add_to_queue
           val removeFromQueueLabel = stringResource(Res.string.episode_remove_from_queue)
           Button(
             onClick = model.onToggleQueue,
@@ -193,14 +190,23 @@ class EpisodeDetailsRenderer : ComposeRenderer<EpisodeDetailsPresenterImpl.Model
               },
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
           ) {
-            Icon(
-              imageVector =
-                if (model.isQueued) Icons.Filled.Check else Icons.AutoMirrored.Filled.PlaylistAdd,
-              contentDescription = null,
-              modifier = Modifier.size(ButtonDefaults.IconSize),
-            )
-            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-            Text(text = stringResource(queueLabel), textAlign = TextAlign.Center)
+            key(model.details.key) {
+              QueueIcon(
+                isQueued = model.isQueued,
+                modifier = Modifier.size(ButtonDefaults.IconSize),
+              )
+              Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+              AnimatedContent(targetState = model.isQueued, label = "Queue label") { isQueued ->
+                val label =
+                  if (isQueued) Res.string.episode_in_queue else Res.string.episode_add_to_queue
+                Text(
+                  text = stringResource(label),
+                  modifier =
+                    if (isQueued == model.isQueued) Modifier else Modifier.clearAndSetSemantics {},
+                  textAlign = TextAlign.Center,
+                )
+              }
+            }
           }
         }
       }
