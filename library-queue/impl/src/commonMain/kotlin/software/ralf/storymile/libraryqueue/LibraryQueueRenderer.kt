@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -17,9 +16,9 @@ import androidx.compose.ui.unit.dp
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.app.platform.renderer.Render
+import software.ralf.storymile.design.PaneDivider
 import software.ralf.storymile.episodedetails.LocalEpisodeDetailsPane
 import software.ralf.storymile.podcastshows.supportsShowPanes
-import software.ralf.storymile.theme.AppTheme
 
 @ContributesRenderer
 class LibraryQueueRenderer : ComposeRenderer<LibraryQueuePresenterImpl.ListModel>() {
@@ -45,7 +44,7 @@ class LibraryQueueRenderer : ComposeRenderer<LibraryQueuePresenterImpl.ListModel
             modifier = Modifier.weight(1.25f).fillMaxHeight().padding(horizontal = sidePadding),
           )
           if (selection != null) {
-            VerticalDivider(color = AppTheme.colorScheme.outlineVariant)
+            PaneDivider()
             CompositionLocalProvider(LocalEpisodeDetailsPane provides true) {
               Render(model = selection.content, modifier = Modifier.weight(1f).fillMaxHeight())
             }
