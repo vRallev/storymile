@@ -1,5 +1,4 @@
 <resources>
-  <string name="library_title">Library</string>
   <string name="library_queue">Queue</string>
   <string name="library_shows">Shows</string>
   <string name="library_saved">Saved</string>

@@ -9,6 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,12 +29,14 @@ import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.LocalOnToggleTheme
 import software.ralf.storymile.theme.generated.resources.Res
+import software.ralf.storymile.theme.generated.resources.back
 import software.ralf.storymile.theme.generated.resources.storymile
 
 /**
  * Shared tab title and profile control. Shows the app brand in tall phone layouts, using the full
  * [windowWidth] to avoid repeating the navigation sidebar's brand. [title] is localized by the
  * caller. [appBarTitleModifier] applies to the brand name, or to [title] when the brand is hidden.
+ * Pass [onBack] and [backButtonModifier] to show a back button beside the tab title.
  */
 @Composable
 fun TabHeader(
@@ -39,6 +45,8 @@ fun TabHeader(
   modifier: Modifier = Modifier,
   appBarTitleModifier: Modifier = Modifier,
   profileIconModifier: Modifier = Modifier,
+  onBack: (() -> Unit)? = null,
+  backButtonModifier: Modifier = Modifier,
 ) {
   BoxWithConstraints(modifier.fillMaxWidth().testTag("tab-header")) {
     val fontScale = LocalDensity.current.fontScale
@@ -88,6 +96,7 @@ fun TabHeader(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
+        TabBackButton(onBack, backButtonModifier)
         Text(
           text = title,
           modifier =
@@ -112,6 +121,15 @@ fun TabHeader(
           )
         }
       }
+    }
+  }
+}
+
+@Composable
+private fun TabBackButton(onBack: (() -> Unit)?, modifier: Modifier) {
+  if (onBack != null) {
+    IconButton(onClick = onBack, modifier = modifier.size(48.dp)) {
+      Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
     }
   }
 }

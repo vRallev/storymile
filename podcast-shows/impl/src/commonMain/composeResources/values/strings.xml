@@ -1,0 +1,9 @@
+<resources>
+  <string name="podcasts_to_explore">Podcasts to explore</string>
+  <string name="episodes">Episodes</string>
+  <string name="follow">Follow</string>
+  <string name="following">Following</string>
+  <string name="show_description">Show podcast description</string>
+  <string name="hide_description">Hide podcast description</string>
+  <string name="no_description">No description available.</string>
+</resources>
