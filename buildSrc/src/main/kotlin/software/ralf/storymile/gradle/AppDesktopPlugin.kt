@@ -2,6 +2,7 @@ package software.ralf.storymile.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.testing.Test
 import org.jetbrains.compose.ComposeExtension
 import org.jetbrains.compose.desktop.DesktopExtension
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
@@ -11,6 +12,11 @@ public open class AppDesktopPlugin : Plugin<Project> {
     target.plugins.apply(BasePlugin::class.java)
     target.plugins.apply(KmpPlugin::class.java)
     target.plugins.apply(Plugins.COMPOSE_HOT_RELOAD)
+
+    target.tasks.withType(Test::class.java).configureEach {
+      // Separate JVMs isolate the global robot registry and Compose state.
+      it.maxParallelForks = 2
+    }
 
     target.plugins.withId(Plugins.COMPOSE_MULTIPLATFORM) { target.configureDesktopApplication() }
   }
