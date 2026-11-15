@@ -86,7 +86,7 @@ class LibraryPagesRenderer : ComposeRenderer<LibraryPagesRenderer.Model>() {
         TabHeader(
           title = ShowSource.Library.title(),
           windowWidth = LocalScreenSize.current.width,
-          onBack = model.onCloseEpisode.takeIf { model.library.selectedTab == Tab.SHOWS },
+          onBack = model.onCloseShowEpisode.takeIf { model.library.selectedTab == Tab.SHOWS },
           backButtonModifier = Modifier.testTag("show-back"),
         )
         val pagerState =
@@ -116,18 +116,21 @@ class LibraryPagesRenderer : ComposeRenderer<LibraryPagesRenderer.Model>() {
         ) { page ->
           val tab = Tab.entries[page]
           val pageModifier = Modifier.fillMaxSize().testTag("library-page-${tab.name.lowercase()}")
-          if (tab == Tab.SHOWS && model.showsContent != null) {
-            Render(model.showsContent, pageModifier)
-          } else {
-            EmptyPage(
-              tab = tab,
-              onDiscoverPodcasts = model.library.onDiscoverPodcasts,
-              compact = compact,
-              short = short,
-              horizontal = horizontal,
-              large = large,
-              modifier = pageModifier.padding(horizontal = sidePadding),
-            )
+          when {
+            tab == Tab.SHOWS && model.showsContent != null ->
+              Render(model.showsContent, pageModifier)
+            tab == Tab.QUEUE && !model.library.queue.isEmpty ->
+              Render(model.library.queue.list, pageModifier)
+            else ->
+              EmptyPage(
+                tab = tab,
+                onDiscoverPodcasts = model.library.onDiscoverPodcasts,
+                compact = compact,
+                short = short,
+                horizontal = horizontal,
+                large = large,
+                modifier = pageModifier.padding(horizontal = sidePadding),
+              )
           }
         }
       }
@@ -347,6 +350,6 @@ class LibraryPagesRenderer : ComposeRenderer<LibraryPagesRenderer.Model>() {
   data class Model(
     val library: LibraryPresenterImpl.Model,
     val showsContent: BaseModel?,
-    val onCloseEpisode: (() -> Unit)? = null,
+    val onCloseShowEpisode: (() -> Unit)? = null,
   ) : BaseModel
 }

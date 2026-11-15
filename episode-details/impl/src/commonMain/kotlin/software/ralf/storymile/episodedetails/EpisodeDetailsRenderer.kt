@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -58,6 +59,7 @@ import software.ralf.storymile.episode.details.impl.generated.resources.episode_
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_author
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_details
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_download
+import software.ralf.storymile.episode.details.impl.generated.resources.episode_in_queue
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_more
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_no_description
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_play_now
@@ -175,18 +177,20 @@ class EpisodeDetailsRenderer : ComposeRenderer<EpisodeDetailsPresenterImpl.Model
             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
             Text(stringResource(Res.string.episode_play_now), textAlign = TextAlign.Center)
           }
-          Button(
-            onClick = model.onAddToQueue,
-            modifier = Modifier.weight(1f).testTag("episode-details-add-to-queue"),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-          ) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Filled.PlaylistAdd,
-              contentDescription = null,
-              modifier = Modifier.size(ButtonDefaults.IconSize),
-            )
-            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-            Text(stringResource(Res.string.episode_add_to_queue), textAlign = TextAlign.Center)
+          if (!model.isQueued) {
+            Button(
+              onClick = model.onAddToQueue,
+              modifier = Modifier.weight(1f).testTag("episode-details-add-to-queue"),
+              contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+            ) {
+              Icon(
+                imageVector = Icons.AutoMirrored.Filled.PlaylistAdd,
+                contentDescription = null,
+                modifier = Modifier.size(ButtonDefaults.IconSize),
+              )
+              Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+              Text(stringResource(Res.string.episode_add_to_queue), textAlign = TextAlign.Center)
+            }
           }
         }
       }
@@ -283,6 +287,17 @@ class EpisodeDetailsRenderer : ComposeRenderer<EpisodeDetailsPresenterImpl.Model
               .testTag("episode-details-duration"),
           style = AppTheme.typography.bodyMedium.copy(textMotion = TextMotion.Animated),
           color = AppTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+      if (model.isQueued) {
+        Text(
+          text = stringResource(Res.string.episode_in_queue),
+          modifier =
+            Modifier.clip(AppTheme.shapes.small)
+              .background(AppTheme.colorScheme.secondaryContainer)
+              .padding(horizontal = 10.dp, vertical = 4.dp),
+          style = AppTheme.typography.labelMedium,
+          color = AppTheme.colorScheme.onSecondaryContainer,
         )
       }
       details.episode.author

@@ -106,6 +106,7 @@ class LibraryRendererTest {
       val presenter =
         LibraryPresenterImpl(
           discoveryPresenterFactory = UnusedDiscoveryFactory,
+          queuePresenter = EmptyLibraryQueuePresenter,
           showsPresenter = EmptyLibraryShowsPresenter,
         )
       var visible by mutableStateOf(true)
@@ -229,6 +230,7 @@ class LibraryRendererTest {
       library =
         Model(
           selectedTab = tab,
+          queue = EmptyLibraryQueuePresenter.Model,
           shows = EmptyLibraryShowsPresenter.Model,
           onSelectTab = {},
           onDiscoverPodcasts = {},

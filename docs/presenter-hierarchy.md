@@ -22,6 +22,7 @@ flowchart TD
   TabsPresenter["TabsPresenterImpl\ntabs"]
   LibraryPresenter["LibraryPresenterImpl\nbackstack"]
   LibraryContent["Library content\ntabs"]
+  LibraryQueuePresenter["LibraryQueuePresenterImpl\nQueue backstack"]
   LibraryShowsPresenter["LibraryShowsPresenterImpl\nShows backstack"]
   FollowedShows["Followed shows list"]
   PlaybackPresenter["PlaybackPresenterImpl\ncollapsed and expanded playback"]
@@ -40,6 +41,8 @@ flowchart TD
   ShowPresenter -->|pushed entry| EpisodeDetailsPresenter
   TabsPresenter -->|Library| LibraryPresenter
   LibraryPresenter -->|root| LibraryContent
+  LibraryContent -->|Queue| LibraryQueuePresenter
+  LibraryQueuePresenter -->|preview or pushed entry| EpisodeDetailsPresenter
   LibraryContent -->|Shows| LibraryShowsPresenter
   LibraryShowsPresenter -->|root| FollowedShows
   LibraryShowsPresenter -->|pushed entry| ShowPresenter
@@ -99,6 +102,8 @@ The tabs presenter creates and composes only the selected screen. It retains the
 [library](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryPresenterImpl.kt)
 filter across tab changes. Library owns a backstack. Each empty tab opens Discovery.
 Back returns to the selected Library tab.
+[LibraryQueuePresenterImpl](../library-queue/impl/src/commonMain/kotlin/software/ralf/storymile/libraryqueue/LibraryQueuePresenterImpl.kt)
+reads the saved queue and uses the shared episode details presenter.
 [LibraryShowsPresenterImpl](../library-shows/impl/src/commonMain/kotlin/software/ralf/storymile/libraryshows/LibraryShowsPresenterImpl.kt)
 reads followed shows through `SavedShowRepository` and pushes the shared show presenter in its own
 backstack. Saved show details use stored metadata and episodes until the feed loads.
@@ -143,9 +148,10 @@ renders the podcast and its episodes. Narrow layouts show one destination at a t
 Resizing preserves the selected episode and presenter stack.
 
 [LibraryRenderer](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryRenderer.kt)
-opens the first followed show by default in wide layouts. Back closes the episode details and
-returns to the list and show panes. Switching Library tabs preserves the show and episode.
-On phones, the tabs and list share a navigation entry.
+opens the first followed show in wide layouts. Back returns to the list and show panes.
+Queue shows the first episode beside the list until the user selects another.
+On phones, Queue and Shows open details in a separate entry. Switching Library tabs preserves
+the selection.
 [LibraryShowsRenderer](../library-shows/impl/src/commonMain/kotlin/software/ralf/storymile/libraryshows/LibraryShowsRenderer.kt)
 lists followed shows.
 

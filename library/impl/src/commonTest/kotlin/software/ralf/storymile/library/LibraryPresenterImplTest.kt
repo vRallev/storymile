@@ -110,6 +110,7 @@ class LibraryPresenterImplTest {
   private fun createPresenter(): LibraryPresenterImpl =
     LibraryPresenterImpl(
       discoveryPresenterFactory = FakeDiscoveryFactory(),
+      queuePresenter = EmptyLibraryQueuePresenter,
       showsPresenter = EmptyLibraryShowsPresenter,
     )
 
