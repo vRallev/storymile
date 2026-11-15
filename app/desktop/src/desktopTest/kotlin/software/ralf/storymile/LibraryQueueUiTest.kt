@@ -13,6 +13,7 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -101,8 +102,15 @@ class LibraryQueueUiTest {
       first.assertIsDisplayed()
       runOnUiThread { first.performClick() }
       detailsTitle.assertIsDisplayed().assertTextEquals(firstTitle)
-      onNodeWithText("In queue").assertExists()
-      onNodeWithTag("episode-details-add-to-queue").assertDoesNotExist()
+      val queueButton = onNodeWithTag("episode-details-add-to-queue").assertTextEquals("In queue")
+      runOnUiThread { queueButton.performScrollTo().performClick() }
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("episode-details-add-to-queue") and hasText("Add to queue"),
+        timeoutMillis = 5_000,
+      )
+      runOnUiThread { onNodeWithTag("episode-details-back").performClick() }
+      first.assertIsDisplayed().assertTextContains(secondTitle)
+      second.assertDoesNotExist()
     }
   }
 
@@ -198,10 +206,13 @@ class LibraryQueueUiTest {
       onNodeWithTag("episode-$index").performClick()
     }
     onNodeWithTag("episode-details-title").assertTextEquals(title)
-    runOnUiThread {
-      onNodeWithTag("episode-details-add-to-queue").performScrollTo().performClick()
-    }
-    waitUntilAtLeastOneExists(matcher = hasText("In queue"), timeoutMillis = 5_000)
+    val queueButton = hasTestTag("episode-details-add-to-queue")
+    waitUntilAtLeastOneExists(matcher = queueButton and isEnabled(), timeoutMillis = 5_000)
+    runOnUiThread { onNode(queueButton).performScrollTo().performClick() }
+    waitUntilAtLeastOneExists(
+      matcher = queueButton and hasText("In queue"),
+      timeoutMillis = 5_000,
+    )
     runOnUiThread { onNodeWithTag("episode-details-back").performClick() }
   }
 }

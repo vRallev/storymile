@@ -6,6 +6,7 @@
   <string name="episode_play_now">Play now</string>
   <string name="episode_add_to_queue">Add to queue</string>
   <string name="episode_in_queue">In queue</string>
+  <string name="episode_remove_from_queue">Remove from queue</string>
   <string name="episode_save">Save</string>
   <string name="episode_download">Download</string>
   <string name="episode_more">More</string>

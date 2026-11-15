@@ -17,27 +17,33 @@ class EpisodeDetailsPresenterImpl(
   override fun present(input: Unit): Model {
     val backstack = LocalBackstackScope.requireNotNull()
     val queued by queue.episodes.collectAsState()
+    val queueEnabled = queued != null
+    val isQueued =
+      queued?.any { it.feedUrl == details.feedUrl && it.episode.id == details.episode.id } == true
     return Model(
       details = details,
       onPlayNow = {},
-      onAddToQueue = {
-        queue.save(
-          QueuedEpisode(
-            feedUrl = details.feedUrl,
-            podcastTitle = details.podcastTitle,
-            artworkUrl = details.artworkUrl,
-            episode = details.episode,
-          ),
-        )
+      onToggleQueue = {
+        when {
+          !queueEnabled -> Unit
+          isQueued -> queue.remove(feedUrl = details.feedUrl, episodeId = details.episode.id)
+          else ->
+            queue.save(
+              QueuedEpisode(
+                feedUrl = details.feedUrl,
+                podcastTitle = details.podcastTitle,
+                artworkUrl = details.artworkUrl,
+                episode = details.episode,
+              ),
+            )
+        }
       },
       onSave = {},
       onDownload = {},
       onMore = {},
       onBack = { backstack.pop() },
-      isQueued =
-        queued?.any {
-          it.feedUrl == details.feedUrl && it.episode.id == details.episode.id
-        } == true,
+      isQueued = isQueued,
+      queueEnabled = queueEnabled,
     )
   }
 
@@ -45,11 +51,12 @@ class EpisodeDetailsPresenterImpl(
   data class Model(
     val details: EpisodeDetails,
     val onPlayNow: () -> Unit,
-    val onAddToQueue: () -> Unit,
+    val onToggleQueue: () -> Unit,
     val onSave: () -> Unit,
     val onDownload: () -> Unit,
     val onMore: () -> Unit,
     val onBack: () -> Unit,
     val isQueued: Boolean = false,
+    val queueEnabled: Boolean = true,
   ) : BaseModel
 }

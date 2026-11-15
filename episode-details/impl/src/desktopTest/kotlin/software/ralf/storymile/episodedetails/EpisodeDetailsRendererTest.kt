@@ -12,6 +12,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -51,6 +52,7 @@ class EpisodeDetailsRendererTest {
       .forEach { (width, height, fontScale) ->
         runDesktopComposeUiTest(width = width, height = height) {
           var backs = 0
+          val isQueued = mutableStateOf(false)
           val invokedActions = mutableListOf<String>()
           val details =
             details("<p>A journey through nature &amp; science.</p>".repeat(30) + "<p>The end.</p>")
@@ -66,11 +68,12 @@ class EpisodeDetailsRendererTest {
                         EpisodeDetailsPresenterImpl.Model(
                           details = details,
                           onPlayNow = { invokedActions += "play" },
-                          onAddToQueue = { invokedActions += "add-to-queue" },
+                          onToggleQueue = { invokedActions += "add-to-queue" },
                           onSave = { invokedActions += "save" },
                           onDownload = { invokedActions += "download" },
                           onMore = { invokedActions += "more" },
                           onBack = { backs++ },
+                          isQueued = isQueued.value,
                         ),
                       modifier = Modifier,
                     )
@@ -111,6 +114,23 @@ class EpisodeDetailsRendererTest {
             assertThat(layout.getLineRight(0) - layout.getLineLeft(0))
               .isLessThanOrEqualTo(layout.size.width.toFloat())
           }
+          val play = onNodeWithTag("episode-details-play")
+          val queue = onNodeWithTag("episode-details-add-to-queue")
+          val playBounds = play.getUnclippedBoundsInRoot()
+          val queueBounds = queue.getUnclippedBoundsInRoot()
+          mainClock.autoAdvance = false
+          try {
+            runOnUiThread { isQueued.value = true }
+            mainClock.advanceTimeBy(48)
+            queue.assertTextEquals("In queue")
+            assertThat(play.getUnclippedBoundsInRoot()).isEqualTo(playBounds)
+            assertThat(queue.getUnclippedBoundsInRoot()).isEqualTo(queueBounds)
+          } finally {
+            mainClock.autoAdvance = true
+          }
+          queue.assertIsEnabled().assertTextEquals("In queue")
+          assertThat(play.getUnclippedBoundsInRoot()).isEqualTo(playBounds)
+          assertThat(queue.getUnclippedBoundsInRoot()).isEqualTo(queueBounds)
           onNodeWithTag("episode-details-title").assertTextEquals(details.episode.title)
           runOnIdle { assertThat(backs).isEqualTo(0) }
           onNodeWithTag("episode-details-description")
@@ -131,7 +151,7 @@ class EpisodeDetailsRendererTest {
           EpisodeDetailsPresenterImpl.Model(
             details = first,
             onPlayNow = {},
-            onAddToQueue = {},
+            onToggleQueue = {},
             onSave = {},
             onDownload = {},
             onMore = {},
@@ -182,7 +202,7 @@ class EpisodeDetailsRendererTest {
                   EpisodeDetailsPresenterImpl.Model(
                     details = details,
                     onPlayNow = {},
-                    onAddToQueue = {},
+                    onToggleQueue = {},
                     onSave = {},
                     onDownload = {},
                     onMore = {},
