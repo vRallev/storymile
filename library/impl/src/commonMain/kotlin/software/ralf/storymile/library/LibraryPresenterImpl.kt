@@ -15,6 +15,7 @@ import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
 import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.storymile.discovery.DiscoveryPresenter
+import software.ralf.storymile.libraryqueue.LibraryQueuePresenter
 import software.ralf.storymile.libraryshows.LibraryShowsPresenter
 import software.ralf.storymile.presenternavigation.DefaultBackstackModel
 import software.ralf.storymile.presenternavigation.presenterBackstackDefault
@@ -24,6 +25,7 @@ import software.ralf.storymile.user.UserScope
 @ContributesBinding(UserScope::class, binding = binding<LibraryPresenter<*>>())
 class LibraryPresenterImpl(
   private val discoveryPresenterFactory: DiscoveryPresenter.Factory,
+  private val queuePresenter: LibraryQueuePresenter,
   private val showsPresenter: LibraryShowsPresenter,
 ) : LibraryPresenter<DefaultBackstackModel> {
   @Composable
@@ -39,6 +41,7 @@ class LibraryPresenterImpl(
         val backstack = LocalBackstackScope.requireNotNull()
         Model(
           selectedTab = selectedTab,
+          queue = queuePresenter.present(Unit),
           shows = showsPresenter.present(Unit),
           onSelectTab = { selectedTab = it },
           onDiscoverPodcasts = { backstack.push(discoveryPresenterFactory.create()) },
@@ -61,6 +64,7 @@ class LibraryPresenterImpl(
    */
   data class Model(
     val selectedTab: Tab,
+    val queue: LibraryQueuePresenter.Model,
     val shows: LibraryShowsPresenter.Model,
     val onSelectTab: (Tab) -> Unit,
     val onDiscoverPodcasts: () -> Unit,

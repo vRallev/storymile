@@ -1,0 +1,5 @@
+<resources>
+  <string name="library_queue_heading">Queued episodes</string>
+  <string name="library_queue_reorder">Reorder %1$s</string>
+  <string name="library_queue_remove">Remove %1$s from queue</string>
+</resources>

@@ -1,6 +1,8 @@
 package software.ralf.storymile.episodedetails
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
 import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
@@ -14,6 +16,7 @@ class EpisodeDetailsPresenterImpl(
   @Composable
   override fun present(input: Unit): Model {
     val backstack = LocalBackstackScope.requireNotNull()
+    val queued by queue.episodes.collectAsState()
     return Model(
       details = details,
       onPlayNow = {},
@@ -31,6 +34,10 @@ class EpisodeDetailsPresenterImpl(
       onDownload = {},
       onMore = {},
       onBack = { backstack.pop() },
+      isQueued =
+        queued?.any {
+          it.feedUrl == details.feedUrl && it.episode.id == details.episode.id
+        } == true,
     )
   }
 
@@ -43,5 +50,6 @@ class EpisodeDetailsPresenterImpl(
     val onDownload: () -> Unit,
     val onMore: () -> Unit,
     val onBack: () -> Unit,
+    val isQueued: Boolean = false,
   ) : BaseModel
 }
