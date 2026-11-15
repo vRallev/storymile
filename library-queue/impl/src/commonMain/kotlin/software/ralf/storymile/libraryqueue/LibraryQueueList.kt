@@ -33,12 +33,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextMotion
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.coil.PodcastArtwork
 import software.ralf.storymile.design.ListDivider
 import software.ralf.storymile.episodedetails.EpisodeDetails
+import software.ralf.storymile.episodedetails.EpisodeSharedElement
+import software.ralf.storymile.episodedetails.episodeSharedElement
 import software.ralf.storymile.library.queue.impl.generated.resources.Res
 import software.ralf.storymile.library.queue.impl.generated.resources.library_queue_heading
 import software.ralf.storymile.library.queue.impl.generated.resources.library_queue_remove
@@ -109,6 +112,8 @@ private fun QueueEpisodeRow(
   modifier: Modifier,
 ) {
   val currentOnReorder by rememberUpdatedState(onReorder)
+  val titleStyle = if (compact) AppTheme.typography.titleSmall else AppTheme.typography.titleMedium
+  val metadataStyle = if (compact) AppTheme.typography.bodySmall else AppTheme.typography.bodyMedium
   val metadataColor =
     if (isSelected) {
       AppTheme.colorScheme.onSecondaryContainer
@@ -128,7 +133,10 @@ private fun QueueEpisodeRow(
     ) {
       PodcastArtwork(
         artworkUrl = details.artworkUrl,
-        modifier = Modifier.size(if (compact) 64.dp else 88.dp),
+        modifier =
+          Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Artwork)
+            .testTag("library-queue-artwork-$index")
+            .size(if (compact) 64.dp else 88.dp),
       )
       Column(
         modifier = Modifier.weight(1f),
@@ -136,14 +144,20 @@ private fun QueueEpisodeRow(
       ) {
         Text(
           text = details.episode.title,
-          style = if (compact) AppTheme.typography.titleSmall else AppTheme.typography.titleMedium,
+          modifier =
+            Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Title)
+              .testTag("library-queue-title-$index"),
+          style = titleStyle.copy(textMotion = TextMotion.Animated),
           fontWeight = FontWeight.SemiBold,
           maxLines = 2,
           overflow = TextOverflow.Ellipsis,
         )
         Text(
           text = details.podcastTitle,
-          style = if (compact) AppTheme.typography.bodySmall else AppTheme.typography.bodyMedium,
+          modifier =
+            Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Subtitle)
+              .testTag("library-queue-subtitle-$index"),
+          style = metadataStyle.copy(textMotion = TextMotion.Animated),
           color = metadataColor,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
@@ -151,7 +165,10 @@ private fun QueueEpisodeRow(
         details.duration?.let { duration ->
           Text(
             text = duration,
-            style = if (compact) AppTheme.typography.bodySmall else AppTheme.typography.bodyMedium,
+            modifier =
+              Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Duration)
+                .testTag("library-queue-duration-$index"),
+            style = metadataStyle.copy(textMotion = TextMotion.Animated),
             color = metadataColor,
           )
         }

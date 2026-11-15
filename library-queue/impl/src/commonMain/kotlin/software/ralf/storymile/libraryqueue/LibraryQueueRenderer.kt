@@ -19,6 +19,7 @@ import software.ralf.app.platform.renderer.Render
 import software.ralf.storymile.design.PaneDivider
 import software.ralf.storymile.episodedetails.LocalEpisodeDetailsPane
 import software.ralf.storymile.podcastshows.supportsShowPanes
+import software.ralf.storymile.templates.LocalSharedTransitionScope
 
 @ContributesRenderer
 class LibraryQueueRenderer : ComposeRenderer<LibraryQueuePresenterImpl.ListModel>() {
@@ -31,22 +32,27 @@ class LibraryQueueRenderer : ComposeRenderer<LibraryQueuePresenterImpl.ListModel
         CircularProgressIndicator(Modifier.align(Alignment.Center))
       } else {
         val sidePadding = if (maxWidth < 600.dp) 20.dp else 32.dp
-        val selection =
-          model.selection.takeIf { maxWidth.supportsShowPanes(LocalDensity.current.fontScale) }
-        Row(modifier = Modifier.fillMaxSize()) {
-          LibraryQueueList(
-            episodes = episodes,
-            selectedEpisodeKey = selection?.episodeKey,
-            onSelect = model.onSelect,
-            onReorder = model.onReorder,
-            onRemove = model.onRemove,
-            state = listState,
-            modifier = Modifier.weight(1.25f).fillMaxHeight().padding(horizontal = sidePadding),
-          )
-          if (selection != null) {
-            PaneDivider()
-            CompositionLocalProvider(LocalEpisodeDetailsPane provides true) {
-              Render(model = selection.content, modifier = Modifier.weight(1f).fillMaxHeight())
+        val wide = maxWidth.supportsShowPanes(LocalDensity.current.fontScale)
+        val selection = model.selection.takeIf { wide }
+        CompositionLocalProvider(
+          LocalSharedTransitionScope provides
+            LocalSharedTransitionScope.current.takeUnless { wide },
+        ) {
+          Row(modifier = Modifier.fillMaxSize()) {
+            LibraryQueueList(
+              episodes = episodes,
+              selectedEpisodeKey = selection?.episodeKey,
+              onSelect = model.onSelect,
+              onReorder = model.onReorder,
+              onRemove = model.onRemove,
+              state = listState,
+              modifier = Modifier.weight(1.25f).fillMaxHeight().padding(horizontal = sidePadding),
+            )
+            if (selection != null) {
+              PaneDivider()
+              CompositionLocalProvider(LocalEpisodeDetailsPane provides true) {
+                Render(model = selection.content, modifier = Modifier.weight(1f).fillMaxHeight())
+              }
             }
           }
         }
