@@ -43,7 +43,7 @@ import software.ralf.storymile.user.UserScope
 
 class FollowShowPersistenceTest {
   @Test
-  fun `follow and unfollow survive application recreation in the guest database`() = runTest {
+  fun `following survives restarts with an old guest database on disk`() = runTest {
     val root = Files.createTempDirectory("storymile-follow").toString().toPath()
     val platform =
       object : OkioStoragePlatform(FileSystem.SYSTEM, Dispatchers.IO) {
@@ -60,9 +60,15 @@ class FollowShowPersistenceTest {
         ): Storage = DefaultStorage(namespace, coroutineScope, platform)
       }
     try {
+      val legacyStorage = DefaultStorage("user-guest", backgroundScope, platform)
+      val incompatibleDatabase = requireNotNull(legacyStorage.databasePath("podcasts")).toPath()
+      FileSystem.SYSTEM.write(incompatibleDatabase) { writeUtf8("Incompatible database") }
       withApplication(storageFactory) { graph, user ->
         graph.showPresenter(user).test(this) {
-          awaitModel { it.followEnabled }.onToggleFollow()
+          val initial = awaitModel { it.followEnabled }
+          assertThat(initial.followed).isFalse()
+          assertThat(user.savedShows.shows.filterNotNull().first()).isEmpty()
+          initial.onToggleFollow()
           awaitModel { it.followed && it.followEnabled }
           val saved = user.savedShows.shows.filterNotNull().first().single()
           assertThat(saved.title).isEqualTo("The Quiet Current")
@@ -85,6 +91,8 @@ class FollowShowPersistenceTest {
           cancelAndIgnoreRemainingEvents()
         }
       }
+      assertThat(FileSystem.SYSTEM.read(incompatibleDatabase) { readUtf8() })
+        .isEqualTo("Incompatible database")
     } finally {
       FileSystem.SYSTEM.deleteRecursively(root)
     }

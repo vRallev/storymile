@@ -56,7 +56,8 @@ class UserPodcastDatabase(
     coroutineScope.launch {
       var opened: RoomPodcastDatabase? = null
       try {
-        val path = storage.databasePath("podcasts")
+        // Start with a fresh database because the queue changed the version 1 schema.
+        val path = storage.databasePath("podcasts-with-queue")
         awaitPreviousOwner(path)
         opened =
           platform.open(
