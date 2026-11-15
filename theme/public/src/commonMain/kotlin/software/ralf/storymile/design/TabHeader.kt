@@ -1,5 +1,10 @@
 package software.ralf.storymile.design
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -9,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -91,11 +97,7 @@ fun TabHeader(
         }
         Spacer(Modifier.height(if (tight) 8.dp else 20.dp))
       }
-      Row(
-        Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
+      Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         TabBackButton(onBack, backButtonModifier)
         Text(
           text = title,
@@ -114,6 +116,7 @@ fun TabHeader(
           color = AppTheme.colorScheme.onBackground,
         )
         if (!showBrand) {
+          Spacer(Modifier.width(16.dp))
           ProfileButton(
             onClick = {},
             modifier = Modifier.testTag("tab-profile"),
@@ -127,8 +130,16 @@ fun TabHeader(
 
 @Composable
 private fun TabBackButton(onBack: (() -> Unit)?, modifier: Modifier) {
-  if (onBack != null) {
-    IconButton(onClick = onBack, modifier = modifier.size(48.dp)) {
+  AnimatedVisibility(
+    visible = onBack != null,
+    enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(),
+    exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + fadeOut(),
+  ) {
+    IconButton(
+      onClick = { onBack?.invoke() },
+      modifier = Modifier.padding(end = 16.dp).then(modifier).size(48.dp),
+      enabled = onBack != null,
+    ) {
       Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
     }
   }
