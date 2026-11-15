@@ -15,6 +15,7 @@ import java.nio.file.Files
 import kotlin.test.Test
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.job
@@ -60,8 +61,10 @@ class FollowShowPersistenceTest {
         ): Storage = DefaultStorage(namespace, coroutineScope, platform)
       }
     try {
-      val legacyStorage = DefaultStorage("user-guest", backgroundScope, platform)
-      val incompatibleDatabase = requireNotNull(legacyStorage.databasePath("podcasts")).toPath()
+      val incompatibleDatabase = coroutineScope {
+        val legacyStorage = DefaultStorage("user-guest", this, platform)
+        requireNotNull(legacyStorage.databasePath("podcasts")).toPath()
+      }
       FileSystem.SYSTEM.write(incompatibleDatabase) { writeUtf8("Incompatible database") }
       withApplication(storageFactory) { graph, user ->
         graph.showPresenter(user).test(this) {
