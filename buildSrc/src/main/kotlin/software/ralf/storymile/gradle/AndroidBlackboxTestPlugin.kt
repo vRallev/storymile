@@ -17,7 +17,7 @@ public open class AndroidBlackboxTestPlugin : Plugin<Project> {
   private fun Project.configureAndroid() {
     val android = extensions.getByType(TestExtension::class.java)
     android.namespace = "software.ralf.storymile.blackbox"
-    android.compileSdk = androidCompileSdk
+    android.compileSdk { configureAndroidCompileSdk(this) }
     android.targetProjectPath = ":app:android"
     // Instrument the test APK itself so the production app runs in its own process.
     android.experimentalProperties["android.experimental.self-instrumenting"] = true

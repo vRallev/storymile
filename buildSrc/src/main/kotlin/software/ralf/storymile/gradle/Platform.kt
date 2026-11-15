@@ -25,7 +25,7 @@ internal sealed interface Platform {
       project.plugins.apply(Plugins.ANDROID_MULTIPLATFORM)
 
       with(project.androidKmpTarget) {
-        compileSdk = project.androidCompileSdk
+        compileSdk { project.configureAndroidCompileSdk(this) }
         minSdk = project.androidMinSdk
         compilerOptions { jvmTarget.set(project.jvmTarget) }
         withHostTest { isReturnDefaultValues = true }
