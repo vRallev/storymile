@@ -4,12 +4,12 @@ import androidx.compose.runtime.Composable
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
 import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
-import software.ralf.storymile.podcast.EpisodeQueueRepository
+import software.ralf.storymile.podcast.QueueRepository
 import software.ralf.storymile.podcast.QueuedEpisode
 
 class EpisodeDetailsPresenterImpl(
   private val details: EpisodeDetails,
-  private val queue: EpisodeQueueRepository,
+  private val queue: QueueRepository,
 ) : EpisodeDetailsPresenter<EpisodeDetailsPresenterImpl.Model> {
   @Composable
   override fun present(input: Unit): Model {

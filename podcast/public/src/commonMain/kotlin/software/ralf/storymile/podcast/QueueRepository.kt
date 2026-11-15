@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
  * Stores the current user's episode queue. Writes return immediately and run in submission order
  * while the user scope is active. Observe [episodes] for saved changes. Failed writes are logged.
  */
-interface EpisodeQueueRepository {
+interface QueueRepository {
   /**
    * Episodes in queue order. The first collector starts loading. The value is null until a read
    * succeeds and empty when the queue is empty. Failed reads keep the last value and retry.

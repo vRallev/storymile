@@ -10,9 +10,9 @@ import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.presenter.backstack.nav3.FakePresenterBackstackScope
 import software.ralf.app.platform.presenter.backstack.nav3.withPresenterBackstackScope
 import software.ralf.app.platform.presenter.compose.test
-import software.ralf.storymile.podcast.EpisodeQueueRepository
 import software.ralf.storymile.podcast.PodcastEnclosure
 import software.ralf.storymile.podcast.PodcastEpisode
+import software.ralf.storymile.podcast.QueueRepository
 import software.ralf.storymile.podcast.QueuedEpisode
 
 class EpisodeDetailsPresenterImplTest {
@@ -58,7 +58,7 @@ class EpisodeDetailsPresenterImplTest {
     }
   }
 
-  private class RecordingQueue : EpisodeQueueRepository {
+  private class RecordingQueue : QueueRepository {
     val saved = mutableListOf<QueuedEpisode>()
     override val episodes: StateFlow<List<QueuedEpisode>?> = MutableStateFlow(null)
 

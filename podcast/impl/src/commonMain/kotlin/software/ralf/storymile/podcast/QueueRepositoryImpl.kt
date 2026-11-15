@@ -12,10 +12,10 @@ import software.ralf.storymile.user.UserScope
 @Inject
 @SingleIn(UserScope::class)
 @ContributesBinding(UserScope::class)
-class EpisodeQueueRepositoryImpl(
+class QueueRepositoryImpl(
   private val database: EpisodeQueueDatabase,
   @ForScope(UserScope::class) coroutineScope: CoroutineScope,
-) : EpisodeQueueRepository {
+) : QueueRepository {
   private val changes =
     UserDatabaseChanges(
       data = database.queuedEpisodes,
