@@ -21,8 +21,10 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.scene.Scene
@@ -59,9 +61,9 @@ internal data class ShowScene(
       val paneSpace = maxWidth - paneGap
       val catalogWidth = paneSpace * (0.85f / 2.2f)
       val wideWidth = paneSpace - catalogWidth
-      val podcastWidth = wideWidth + (catalogWidth - wideWidth) * progress
+      val podcastWidth = { wideWidth + (catalogWidth - wideWidth) * progress }
       val travel = catalogWidth + paneGap
-      val podcastOffset = travel * (1f - progress)
+      val podcastOffset = { travel * (1f - progress) }
       if (!episode) {
         ShowList(
           catalog = catalog,
@@ -72,25 +74,40 @@ internal data class ShowScene(
               .testTag("show-list"),
         )
       }
-      Box(Modifier.offset(x = podcastOffset).width(podcastWidth).fillMaxHeight()) {
+      Box(
+        Modifier.offset { IntOffset(x = podcastOffset().roundToPx(), y = 0) }
+          .layout { measurable, constraints ->
+            val width = constraints.constrainWidth(podcastWidth().roundToPx())
+            val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
+            layout(width = width, height = placeable.height) {
+              placeable.placeRelative(x = 0, y = 0)
+            }
+          }
+          .fillMaxHeight(),
+      ) {
         entries.first().Content()
       }
       if (!episode) {
         VerticalDivider(
           modifier =
-            Modifier.offset(x = podcastOffset - gutter - 1.dp).testTag("show-catalog-divider"),
+            Modifier.offset { IntOffset(x = (podcastOffset() - gutter - 1.dp).roundToPx(), y = 0) }
+              .testTag("show-catalog-divider"),
           color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
         )
       }
       if (episode) {
         VerticalDivider(
           modifier =
-            Modifier.offset(x = podcastOffset + podcastWidth + gutter)
+            Modifier.offset {
+                IntOffset(x = (podcastOffset() + podcastWidth() + gutter).roundToPx(), y = 0)
+              }
               .testTag("show-episode-divider"),
           color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
         )
         Box(
-          Modifier.offset(x = podcastOffset + podcastWidth + paneGap)
+          Modifier.offset {
+              IntOffset(x = (podcastOffset() + podcastWidth() + paneGap).roundToPx(), y = 0)
+            }
             .width(wideWidth)
             .fillMaxHeight(),
         ) {
