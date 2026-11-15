@@ -55,7 +55,9 @@ class LibraryQueuePresenterImpl(
             }
           },
           onReorder = {},
-          onRemove = {},
+          onRemove = { episode ->
+            queue.remove(feedUrl = episode.feedUrl, episodeId = episode.episode.id)
+          },
         )
       }
     }

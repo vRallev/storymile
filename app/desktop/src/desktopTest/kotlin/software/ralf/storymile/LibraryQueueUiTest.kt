@@ -55,12 +55,10 @@ class LibraryQueueUiTest {
       val first = onNodeWithTag("library-queue-episode-0")
       val second = onNodeWithTag("library-queue-episode-1")
       val detailsTitle = onNodeWithTag("episode-details-title")
-      listOf("library-queue-reorder-1", "library-queue-remove-0").forEach { control ->
-        runOnUiThread { onNodeWithTag(control).performTouchInput { click() } }
-        detailsTitle.assertDoesNotExist()
-        first.assertIsDisplayed().assertTextContains(firstTitle)
-        second.assertIsDisplayed().assertTextContains(secondTitle)
-      }
+      runOnUiThread { onNodeWithTag("library-queue-reorder-1").performTouchInput { click() } }
+      detailsTitle.assertDoesNotExist()
+      first.assertIsDisplayed().assertTextContains(firstTitle)
+      second.assertIsDisplayed().assertTextContains(secondTitle)
       runOnUiThread {
         onNodeWithTag("library-queue-reorder-1").performTouchInput {
           swipe(start = center, end = center.copy(y = center.y - 50f))
@@ -111,6 +109,62 @@ class LibraryQueueUiTest {
       runOnUiThread { onNodeWithTag("episode-details-back").performClick() }
       first.assertIsDisplayed().assertTextContains(secondTitle)
       second.assertDoesNotExist()
+    }
+  }
+
+  @Test
+  fun `removing queued episodes keeps their order and shows the empty state after the last one`() {
+    val size = mutableStateOf(DesktopWindowSizes.phone)
+    uiTestRule.runRobotTest(windowSize = DesktopWindowSizes.tablet, contentSize = size) {
+      composeRobot<DiscoveryRobot> {
+        discover()
+        openPodcast("quiet-current")
+      }
+      val firstTitle = "The Quiet Current episode 2"
+      val secondTitle = "The Quiet Current episode 1"
+      val thirdTitle = "The Quiet Current episode 3"
+      queueEpisode(index = 1, title = firstTitle)
+      queueEpisode(index = 0, title = secondTitle)
+      queueEpisode(index = 2, title = thirdTitle)
+      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("library-queue-remove-1"),
+        timeoutMillis = 5_000,
+      )
+
+      runOnUiThread { onNodeWithTag("library-queue-remove-1").performTouchInput { click() } }
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("library-queue-episode-1") and hasText(thirdTitle),
+        timeoutMillis = 5_000,
+      )
+      val first = onNodeWithTag("library-queue-episode-0")
+      val second = onNodeWithTag("library-queue-episode-1")
+      val detailsTitle = onNodeWithTag("episode-details-title")
+      first.assertIsDisplayed().assertTextContains(firstTitle)
+      second.assertIsDisplayed().assertTextContains(thirdTitle)
+      onNodeWithTag("library-queue-episode-2").assertDoesNotExist()
+      onNodeWithText(secondTitle).assertDoesNotExist()
+      detailsTitle.assertDoesNotExist()
+
+      runOnIdle { size.value = DesktopWindowSizes.tablet }
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("episode-details-title") and hasText(firstTitle),
+        timeoutMillis = 5_000,
+      )
+      first.assertIsSelected()
+      runOnUiThread { onNodeWithTag("library-queue-remove-0").performTouchInput { click() } }
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("episode-details-title") and hasText(thirdTitle),
+        timeoutMillis = 5_000,
+      )
+      first.assertIsDisplayed().assertIsSelected().assertTextContains(thirdTitle)
+      second.assertDoesNotExist()
+
+      runOnUiThread { onNodeWithTag("library-queue-remove-0").performTouchInput { click() } }
+      waitUntilAtLeastOneExists(matcher = hasText("Your queue is empty"), timeoutMillis = 5_000)
+      onNodeWithText("Your queue is empty").assertIsDisplayed()
+      onNodeWithTag("library-queue-list").assertDoesNotExist()
+      detailsTitle.assertDoesNotExist()
     }
   }
 
