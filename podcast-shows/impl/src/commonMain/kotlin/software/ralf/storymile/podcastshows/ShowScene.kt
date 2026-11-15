@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -31,10 +30,10 @@ import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.coil.PodcastArtwork
+import software.ralf.storymile.design.PaneDivider
 import software.ralf.storymile.design.PodcastRow
 import software.ralf.storymile.podcast.shows.impl.generated.resources.Res
 import software.ralf.storymile.podcast.shows.impl.generated.resources.podcasts_to_explore
-import software.ralf.storymile.theme.AppTheme
 
 internal data class ShowScene(
   override val entries: List<NavEntry<Int>>,
@@ -88,21 +87,19 @@ internal data class ShowScene(
         entries.first().Content()
       }
       if (!episode) {
-        VerticalDivider(
+        PaneDivider(
           modifier =
             Modifier.offset { IntOffset(x = (podcastOffset() - gutter - 1.dp).roundToPx(), y = 0) }
               .testTag("show-catalog-divider"),
-          color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
         )
       }
       if (episode) {
-        VerticalDivider(
+        PaneDivider(
           modifier =
             Modifier.offset {
                 IntOffset(x = (podcastOffset() + podcastWidth() + gutter).roundToPx(), y = 0)
               }
               .testTag("show-episode-divider"),
-          color = AppTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
         )
         Box(
           Modifier.offset {
