@@ -11,6 +11,7 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -116,11 +117,11 @@ class LibraryQueueUiTest {
       onNodeWithTag("episode-$index").performClick()
     }
     onNodeWithTag("episode-details-title").assertTextEquals(title)
-    runOnUiThread {
-      onNodeWithTag("episode-details-add-to-queue").performScrollTo().performClick()
-    }
+    val queueButton = hasTestTag("episode-details-add-to-queue")
+    waitUntilAtLeastOneExists(matcher = queueButton and isEnabled(), timeoutMillis = 5_000)
+    runOnUiThread { onNode(queueButton).performScrollTo().performClick() }
     waitUntilAtLeastOneExists(
-      matcher = hasTestTag("episode-details-add-to-queue") and hasText("In queue"),
+      matcher = queueButton and hasText("In queue"),
       timeoutMillis = 5_000,
     )
     runOnUiThread { onNodeWithTag("episode-details-back").performClick() }
