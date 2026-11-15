@@ -51,10 +51,13 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
@@ -75,7 +78,9 @@ import androidx.compose.ui.semantics.collapse
 import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
 import dev.zacsweers.metro.Inject
@@ -481,7 +486,7 @@ class AppTemplateRenderer(
         // Keep per-frame position reads out of composition and measurement.
         .graphicsLayer {
           val radius = cornerRadius()
-          shape = RoundedCornerShape(topStart = radius, topEnd = radius)
+          shape = if (radius == 0.dp) RectangleShape else PlaybackSheetShape(radius)
           clip = true
         }
         .background(surfaceColor)
@@ -564,7 +569,7 @@ class AppTemplateRenderer(
         .layout { measurable, constraints ->
           val content = measurable.measure(constraints)
           layout(content.width, content.height) {
-            if (transition.fraction > 0f) {
+            if (visible) {
               content.placeRelative(0, 0)
             }
           }
@@ -594,6 +599,25 @@ class AppTemplateRenderer(
           Render(content, Modifier.fillMaxSize())
         }
       }
+    }
+  }
+
+  private data class PlaybackSheetShape(val radius: Dp) : Shape {
+    override fun createOutline(
+      size: Size,
+      layoutDirection: LayoutDirection,
+      density: Density,
+    ): Outline {
+      val radiusPx =
+        with(density) { radius.toPx() }.coerceAtMost(size.width / 2).coerceAtMost(size.height)
+      // Keep the top corners and put the bottom corners below the app shell's clip.
+      // Equal radii let Android clip to a round rect without rasterizing a path.
+      return Outline.Rounded(
+        RoundRect(
+          rect = Rect(left = 0f, top = 0f, right = size.width, bottom = size.height + radiusPx),
+          cornerRadius = CornerRadius(radiusPx),
+        ),
+      )
     }
   }
 }
