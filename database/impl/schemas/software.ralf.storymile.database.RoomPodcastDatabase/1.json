@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "c99c4292151c06c29e0a819cf01ce036",
+    "identityHash": "af8d1ed076aeac6ed69c02cc6f837b26",
     "entities": [
       {
         "tableName": "shows",
@@ -149,111 +149,11 @@
             ]
           }
         ]
-      },
-      {
-        "tableName": "queued_episodes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`position` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `feedUrl` TEXT NOT NULL, `podcastTitle` TEXT NOT NULL, `artworkUrl` TEXT, `episodeId` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `author` TEXT, `episodeArtworkUrl` TEXT, `publishedAt` TEXT, `durationMillis` INTEGER, `url` TEXT NOT NULL, `type` TEXT, `length` INTEGER)",
-        "fields": [
-          {
-            "fieldPath": "position",
-            "columnName": "position",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "feedUrl",
-            "columnName": "feedUrl",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "podcastTitle",
-            "columnName": "podcastTitle",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "artworkUrl",
-            "columnName": "artworkUrl",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "episodeId",
-            "columnName": "episodeId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "title",
-            "columnName": "title",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "description",
-            "columnName": "description",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "author",
-            "columnName": "author",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "episodeArtworkUrl",
-            "columnName": "episodeArtworkUrl",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "publishedAt",
-            "columnName": "publishedAt",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "durationMillis",
-            "columnName": "durationMillis",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "enclosure.url",
-            "columnName": "url",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "enclosure.type",
-            "columnName": "type",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "enclosure.length",
-            "columnName": "length",
-            "affinity": "INTEGER"
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": true,
-          "columnNames": [
-            "position"
-          ]
-        },
-        "indices": [
-          {
-            "name": "index_queued_episodes_feedUrl_episodeId",
-            "unique": true,
-            "columnNames": [
-              "feedUrl",
-              "episodeId"
-            ],
-            "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_queued_episodes_feedUrl_episodeId` ON `${TABLE_NAME}` (`feedUrl`, `episodeId`)"
-          }
-        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c99c4292151c06c29e0a819cf01ce036')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'af8d1ed076aeac6ed69c02cc6f837b26')"
     ]
   }
 }
