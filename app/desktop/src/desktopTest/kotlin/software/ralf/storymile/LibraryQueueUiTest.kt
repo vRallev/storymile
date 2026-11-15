@@ -1,6 +1,8 @@
 package software.ralf.storymile
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
@@ -20,6 +22,8 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import assertk.assertThat
+import assertk.assertions.isGreaterThan
+import assertk.assertions.isLessThan
 import assertk.assertions.isLessThanOrEqualTo
 import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
@@ -99,6 +103,91 @@ class LibraryQueueUiTest {
       detailsTitle.assertIsDisplayed().assertTextEquals(firstTitle)
       onNodeWithText("In queue").assertExists()
       onNodeWithTag("episode-details-add-to-queue").assertDoesNotExist()
+    }
+  }
+
+  @Test
+  fun `phone queue shares the episode artwork and metadata when opening and closing details`() {
+    uiTestRule.runPhoneRobotTest {
+      composeRobot<DiscoveryRobot> {
+        discover()
+        openPodcast("quiet-current")
+      }
+      val title = "The Quiet Current episode 1"
+      queueEpisode(index = 0, title = title)
+      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
+      val row = "library-queue-episode-0"
+      waitUntilAtLeastOneExists(matcher = hasTestTag(row), timeoutMillis = 5_000)
+      waitForIdle()
+      val elements = listOf("artwork", "title", "subtitle", "duration")
+      val source = elements.associateWith { bounds("library-queue-$it-0") }
+
+      mainClock.autoAdvance = false
+      try {
+        runOnUiThread { onNodeWithTag(row).performClick() }
+        awaitEntry("episode-details-screen")
+        mainClock.advanceTimeBy(96)
+        val opening = elements.associateWith { bounds("episode-details-$it") }
+        mainClock.advanceTimeBy(1_000)
+        val details = elements.associateWith { bounds("episode-details-$it") }
+        onNodeWithTag("episode-details-title").assertTextEquals(title)
+
+        runOnUiThread { onNodeWithTag("episode-details-back").performClick() }
+        awaitEntry(row)
+        mainClock.advanceTimeBy(96)
+        val closing = elements.associateWith { bounds("library-queue-$it-0") }
+        mainClock.advanceTimeBy(1_000)
+        elements.forEach { element ->
+          val start = source.getValue(element)
+          val end = details.getValue(element)
+          assertMovesBetween(
+            frame = opening.getValue(element),
+            start = start,
+            end = end,
+            label = "$element opening",
+          )
+          assertMovesBetween(
+            frame = closing.getValue(element),
+            start = end,
+            end = start,
+            label = "$element closing",
+          )
+          assertThat((bounds("library-queue-$element-0").center - start.center).getDistance())
+            .isLessThan(1f)
+        }
+        listOf(opening, closing).forEach { frame ->
+          val width = assertThat(frame.getValue("artwork").width, "artwork resizes")
+          width.isGreaterThan(source.getValue("artwork").width)
+          width.isLessThan(details.getValue("artwork").width)
+        }
+        onNodeWithTag(row).assertIsDisplayed()
+        onNodeWithTag("episode-details-screen").assertDoesNotExist()
+      } finally {
+        mainClock.autoAdvance = true
+      }
+    }
+  }
+
+  private fun ComposeUiTest.awaitEntry(tag: String) {
+    waitUntil(timeoutMillis = 5_000) {
+      mainClock.advanceTimeByFrame()
+      onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isNotEmpty()
+    }
+    mainClock.advanceTimeByFrame()
+  }
+
+  private fun ComposeUiTest.bounds(tag: String): Rect = runOnUiThread {
+    val coordinates =
+      onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().layoutInfo.coordinates
+    coordinates.findRootCoordinates().localBoundingBoxOf(coordinates, clipBounds = false)
+  }
+
+  private fun assertMovesBetween(frame: Rect, start: Rect, end: Rect, label: String) {
+    val distance = (end.center - start.center).getDistance()
+    listOf(start, end).forEach { endpoint ->
+      val movement = assertThat((frame.center - endpoint.center).getDistance(), "$label position")
+      movement.isGreaterThan(1f)
+      movement.isLessThan(distance - 1f)
     }
   }
 

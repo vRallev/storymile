@@ -12,6 +12,7 @@ dependencies {
   commonMainImplementation project(':episode-details:public')
   commonMainImplementation project(':podcast-shows:public')
   commonMainImplementation project(':podcast:public')
+  commonMainImplementation project(':templates:public')
   commonMainImplementation project(':theme:public')
   commonMainImplementation project(':user:public')
 }
