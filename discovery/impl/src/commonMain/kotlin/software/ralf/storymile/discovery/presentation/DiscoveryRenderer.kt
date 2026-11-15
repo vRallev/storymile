@@ -60,6 +60,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
@@ -126,13 +127,27 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
     BoxWithConstraints(
       modifier.fillMaxSize().podcastScreenTransition().clipToBounds().testTag("discovery-screen"),
     ) {
-      val wide = maxWidth.supportsShowPanes(LocalDensity.current.fontScale)
+      val density = LocalDensity.current
+      val wide = maxWidth.supportsShowPanes(density.fontScale)
       val edgeToEdgeEpisodes = maxWidth < 600.dp
       val padding = if (edgeToEdgeEpisodes) 16.dp else 32.dp
       val listState = rememberLazyListState()
       var requestedFocus by rememberSaveable { mutableStateOf(false) }
       val floatingSearch = model.topic == null
-      var headerHeight by rememberSaveable { mutableIntStateOf(0) }
+      val headerHeight = rememberSaveable { mutableIntStateOf(0) }
+      val listSidePadding = if (edgeToEdgeEpisodes) 0.dp else padding
+      val contentPadding =
+        remember(floatingSearch, listSidePadding, density, headerHeight) {
+          val fixedPadding = PaddingValues(horizontal = listSidePadding, vertical = 16.dp)
+          if (floatingSearch) {
+            object : PaddingValues by fixedPadding {
+              override fun calculateTopPadding(): Dp =
+                with(density) { headerHeight.intValue.toDp() }
+            }
+          } else {
+            fixedPadding
+          }
+        }
       val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
       val scrollConnection =
         remember(scrollBehavior) {
@@ -160,14 +175,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
               .then(if (floatingSearch) Modifier.nestedScroll(scrollConnection) else Modifier)
               .testTag("discovery-list"),
           state = listState,
-          contentPadding =
-            PaddingValues(
-              start = if (edgeToEdgeEpisodes) 0.dp else padding,
-              end = if (edgeToEdgeEpisodes) 0.dp else padding,
-              top =
-                if (floatingSearch) with(LocalDensity.current) { headerHeight.toDp() } else 16.dp,
-              bottom = 16.dp,
-            ),
+          contentPadding = contentPadding,
           verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
           catalogItems(
@@ -183,7 +191,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
             Modifier.fillMaxWidth()
               .offset { IntOffset(0, scrollBehavior.state.heightOffset.roundToInt()) }
               .onSizeChanged {
-                headerHeight = it.height
+                headerHeight.intValue = it.height
                 scrollBehavior.state.heightOffsetLimit = -it.height.toFloat()
                 scrollBehavior.state.heightOffset =
                   scrollBehavior.state.heightOffset.coerceIn(-it.height.toFloat(), 0f)
