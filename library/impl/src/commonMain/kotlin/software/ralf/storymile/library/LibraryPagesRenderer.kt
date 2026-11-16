@@ -124,6 +124,8 @@ class LibraryPagesRenderer : ComposeRenderer<LibraryPagesRenderer.Model>() {
               Render(model.showsContent, pageModifier)
             tab == Tab.QUEUE && !model.library.queue.isEmpty ->
               Render(model.library.queue.list, pageModifier)
+            tab == Tab.SAVED && !model.library.saved.isEmpty ->
+              Render(model.library.saved.list, pageModifier)
             else ->
               EmptyPage(
                 tab = tab,

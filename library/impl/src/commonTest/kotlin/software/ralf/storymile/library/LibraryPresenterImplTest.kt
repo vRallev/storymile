@@ -111,6 +111,7 @@ class LibraryPresenterImplTest {
       discoveryPresenterFactory = FakeDiscoveryFactory(),
       queuePresenter = EmptyLibraryQueuePresenter,
       showsPresenter = EmptyLibraryShowsPresenter,
+      savedPresenter = EmptyLibrarySavedPresenter,
     )
 
   private fun LibraryPresenterImpl.BackstackModel.root(): LibraryPresenterImpl.Model =

@@ -24,6 +24,7 @@ flowchart TD
   LibraryContent["Library content\ntabs"]
   LibraryQueuePresenter["LibraryQueuePresenterImpl\nQueue backstack"]
   LibraryShowsPresenter["LibraryShowsPresenterImpl\nShows backstack"]
+  LibrarySavedPresenter["LibrarySavedPresenterImpl\nSaved backstack"]
   FollowedShows["Followed shows list"]
   PlaybackPresenter["PlaybackPresenterImpl\ncollapsed and expanded playback"]
 
@@ -46,6 +47,8 @@ flowchart TD
   LibraryContent -->|Shows| LibraryShowsPresenter
   LibraryShowsPresenter -->|root| FollowedShows
   LibraryShowsPresenter -->|pushed entry| ShowPresenter
+  LibraryContent -->|Saved| LibrarySavedPresenter
+  LibrarySavedPresenter -->|preview or pushed entry| EpisodeDetailsPresenter
   LibraryPresenter -->|pushed entries| DiscoveryPresenterImpl
   LibraryPresenter -->|pushed entry| ShowPresenter
   LibraryPresenter -->|pushed entry| EpisodeDetailsPresenter
@@ -105,6 +108,8 @@ reads the saved queue and uses the shared episode details presenter.
 [LibraryShowsPresenterImpl](../library-shows/impl/src/commonMain/kotlin/software/ralf/storymile/libraryshows/LibraryShowsPresenterImpl.kt)
 reads followed shows through `SavedShowRepository` and pushes the shared show presenter in its own
 backstack. Saved show details use stored metadata and episodes until the feed loads.
+[LibrarySavedPresenterImpl](../library-saved/impl/src/commonMain/kotlin/software/ralf/storymile/librarysaved/LibrarySavedPresenterImpl.kt)
+reads saved episodes and uses the shared episode details presenter.
 [DownloadsPresenterImpl](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsPresenterImpl.kt)
 provides the empty Downloads screen, rendered by
 [DownloadsRenderer](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsRenderer.kt).
@@ -147,9 +152,9 @@ Resizing preserves the selected episode and presenter stack.
 
 [LibraryRenderer](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryRenderer.kt)
 opens the first followed show in wide layouts. Back returns to the list and show panes.
-Queue shows the first episode beside the list until the user selects another.
-On phones, Queue and Shows open details in a separate entry. Switching Library tabs preserves
-the selection.
+Queue and Saved show the first episode beside the list until the user selects another.
+On phones, Queue, Shows, and Saved open details in a separate entry.
+Switching Library tabs preserves the selection.
 [LibraryShowsRenderer](../library-shows/impl/src/commonMain/kotlin/software/ralf/storymile/libraryshows/LibraryShowsRenderer.kt)
 lists followed shows.
 

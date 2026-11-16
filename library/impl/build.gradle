@@ -10,6 +10,7 @@ storymile {
 dependencies {
   commonMainImplementation project(':discovery:public')
   commonMainImplementation project(':library-queue:public')
+  commonMainImplementation project(':library-saved:public')
   commonMainImplementation project(':library-shows:public')
   commonMainImplementation project(':podcast-shows:public')
   commonMainImplementation project(':presenter-navigation:public')

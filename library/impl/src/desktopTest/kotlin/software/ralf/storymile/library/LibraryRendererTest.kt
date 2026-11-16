@@ -109,6 +109,7 @@ class LibraryRendererTest {
           discoveryPresenterFactory = UnusedDiscoveryFactory,
           queuePresenter = EmptyLibraryQueuePresenter,
           showsPresenter = EmptyLibraryShowsPresenter,
+          savedPresenter = EmptyLibrarySavedPresenter,
         )
       var visible by mutableStateOf(true)
       setContent {
@@ -242,6 +243,7 @@ class LibraryRendererTest {
           selectedTab = tab,
           queue = EmptyLibraryQueuePresenter.Model,
           shows = EmptyLibraryShowsPresenter.Model,
+          saved = EmptyLibrarySavedPresenter.Model,
           onSelectTab = {},
           onDiscoverPodcasts = {},
         ),
