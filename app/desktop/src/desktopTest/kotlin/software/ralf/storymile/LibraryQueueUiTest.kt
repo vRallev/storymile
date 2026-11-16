@@ -215,17 +215,17 @@ class LibraryQueueUiTest {
       val queueButton = onNodeWithTag("episode-details-add-to-queue").assertTextEquals("In queue")
       runOnUiThread { queueButton.performScrollTo().performClick() }
       waitUntilAtLeastOneExists(
-        matcher = hasTestTag("episode-details-add-to-queue") and hasText("Add to queue"),
+        matcher = hasTestTag("library-queue-episode-0") and hasText(firstTitle),
         timeoutMillis = 5_000,
       )
-      runOnUiThread { onNodeWithTag("episode-details-back").performClick() }
       first.assertIsDisplayed().assertTextContains(firstTitle)
       second.assertDoesNotExist()
+      detailsTitle.assertDoesNotExist()
     }
   }
 
   @Test
-  fun `removing queued episodes keeps their order and shows the empty state after the last one`() {
+  fun `removing queued episodes updates selection and shows the empty state after the last one`() {
     val size = mutableStateOf(DesktopWindowSizes.phone)
     uiTestRule.runRobotTest(windowSize = DesktopWindowSizes.tablet, contentSize = size) {
       composeRobot<DiscoveryRobot> {
@@ -266,14 +266,20 @@ class LibraryQueueUiTest {
         timeoutMillis = 5_000,
       )
       first.assertIsSelected()
-      runOnUiThread { onNodeWithTag("library-queue-remove-0").performTouchInput { click() } }
+      runOnUiThread { second.performClick() }
+      second.assertIsSelected()
+      detailsTitle.assertIsDisplayed().assertTextEquals(thirdTitle)
+
+      runOnUiThread { onNodeWithTag("library-queue-remove-1").performTouchInput { click() } }
       waitUntilAtLeastOneExists(
-        matcher = hasTestTag("episode-details-title") and hasText(thirdTitle),
+        matcher = hasTestTag("episode-details-title") and hasText(firstTitle),
         timeoutMillis = 5_000,
       )
-      first.assertIsDisplayed().assertIsSelected().assertTextContains(thirdTitle)
+      first.assertIsDisplayed().assertIsSelected().assertTextContains(firstTitle)
       second.assertDoesNotExist()
 
+      runOnUiThread { first.performClick() }
+      detailsTitle.assertIsDisplayed().assertTextEquals(firstTitle)
       assertLastEpisodeFadesBeforeEmptyState(tab = "queue", emptyTitle = "Your queue is empty") {
         runOnUiThread { onNodeWithTag("library-queue-remove-0").performTouchInput { click() } }
       }
