@@ -27,7 +27,7 @@ interface TabsPresenter : ComposePresenter<Unit, TabsPresenter.Model> {
     val selectedTab: Tab,
     /** Content for the selected destination. */
     val content: BaseModel,
-    /** Selects a destination. Home returns to its welcome screen. Playback does not change. */
+    /** Opens a destination at its root. Library keeps its selected page. Playback continues. */
     val onSelectTab: (Tab) -> Unit,
   ) : BaseModel
 }

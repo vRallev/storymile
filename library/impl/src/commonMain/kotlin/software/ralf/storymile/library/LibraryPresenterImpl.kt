@@ -12,13 +12,14 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
+import software.ralf.app.platform.presenter.backstack.nav3.backstack
+import software.ralf.app.platform.presenter.backstack.nav3.presenterBackstack
 import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.storymile.discovery.DiscoveryPresenter
 import software.ralf.storymile.libraryqueue.LibraryQueuePresenter
 import software.ralf.storymile.libraryshows.LibraryShowsPresenter
 import software.ralf.storymile.presenternavigation.DefaultBackstackModel
-import software.ralf.storymile.presenternavigation.presenterBackstackDefault
 import software.ralf.storymile.user.UserScope
 
 @Inject
@@ -27,9 +28,9 @@ class LibraryPresenterImpl(
   private val discoveryPresenterFactory: DiscoveryPresenter.Factory,
   private val queuePresenter: LibraryQueuePresenter,
   private val showsPresenter: LibraryShowsPresenter,
-) : LibraryPresenter<DefaultBackstackModel> {
+) : LibraryPresenter<LibraryPresenterImpl.BackstackModel> {
   @Composable
-  override fun present(input: Unit): DefaultBackstackModel {
+  override fun present(input: Unit): BackstackModel {
     var selectedTab by
       rememberSaveable(
         stateSaver = Saver(save = { tab: Tab -> tab.name }, restore = { Tab.valueOf(it) }),
@@ -48,7 +49,19 @@ class LibraryPresenterImpl(
         )
       }
     }
-    return presenterBackstackDefault(contentPresenter)
+    return presenterBackstack(contentPresenter) { models ->
+      val root = models.first() as Model
+      BackstackModel(
+        content = DefaultBackstackModel(backstack = models, onBack = { pop() }),
+        onLibrarySelected = {
+          while (backstack.size > 1) {
+            pop()
+          }
+          root.queue.onCloseEpisode()
+          root.shows.onCloseShow()
+        },
+      )
+    }
   }
 
   enum class Tab {
@@ -57,6 +70,12 @@ class LibraryPresenterImpl(
     SAVED,
     HISTORY,
   }
+
+  /** [content] supplies the delegated renderer's navigation state. */
+  data class BackstackModel(
+    val content: DefaultBackstackModel,
+    override val onLibrarySelected: () -> Unit,
+  ) : LibraryPresenter.Model
 
   /**
    * Renderer-only state starts with Queue and retains the selected tab when leaving Library.

@@ -35,11 +35,14 @@ class TabsPresenterImpl(
     return TabsPresenter.Model(
       selectedTab = selectedTab,
       content = content,
-      onSelectTab = {
-        if (it == TabsPresenter.Tab.HOME && content is HomePresenter.Model) {
-          content.onHomeSelected()
+      onSelectTab = { tab ->
+        when (tab) {
+          TabsPresenter.Tab.HOME -> (content as? HomePresenter.Model)?.onHomeSelected?.invoke()
+          TabsPresenter.Tab.LIBRARY ->
+            (content as? LibraryPresenter.Model)?.onLibrarySelected?.invoke()
+          TabsPresenter.Tab.DOWNLOADS -> Unit
         }
-        selectedTab = it
+        selectedTab = tab
       },
     )
   }

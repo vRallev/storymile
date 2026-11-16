@@ -35,6 +35,39 @@ class LibraryQueueUiTest {
   private val uiTestRule = DesktopUiTestRule()
 
   @Test
+  fun `tapping the Library tab returns from episode details to the queue`() {
+    uiTestRule.runPhoneRobotTest {
+      composeRobot<DiscoveryRobot> {
+        discover()
+        openPodcast("quiet-current")
+      }
+      val title = "The Quiet Current episode 1"
+      queueEpisode(index = 0, title = title)
+      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
+
+      val rowTag = "library-queue-episode-0"
+      waitUntilAtLeastOneExists(matcher = hasTestTag(rowTag), timeoutMillis = 5_000)
+      val row = onNodeWithTag(rowTag)
+      val details = onNodeWithTag("episode-details-title")
+
+      runOnUiThread { row.performClick() }
+      details.assertIsDisplayed().assertTextEquals(title)
+      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
+      row.assertIsDisplayed().assertTextContains(title)
+      details.assertDoesNotExist()
+
+      runOnUiThread { row.performClick() }
+      details.assertIsDisplayed().assertTextEquals(title)
+      composeRobot<AppShellRobot> {
+        selectTab(TabsPresenter.Tab.DOWNLOADS)
+        selectTab(TabsPresenter.Tab.LIBRARY)
+      }
+      row.assertIsDisplayed().assertTextContains(title)
+      details.assertDoesNotExist()
+    }
+  }
+
+  @Test
   fun `queue shows episodes in enqueue order and opens details across window sizes`() {
     val size = mutableStateOf(DesktopWindowSizes.phone)
     uiTestRule.runRobotTest(windowSize = DesktopWindowSizes.tablet, contentSize = size) {
