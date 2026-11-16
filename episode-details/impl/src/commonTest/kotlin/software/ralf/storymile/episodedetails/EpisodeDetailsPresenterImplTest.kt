@@ -156,5 +156,8 @@ class EpisodeDetailsPresenterImplTest {
     override fun remove(episode: SavedEpisode) {
       episodes.value = checkNotNull(episodes.value) - episode
     }
+
+    override fun removeWithUndo(episode: SavedEpisode, onRemoved: (undo: () -> Unit) -> Unit) =
+      error("Unexpected saved episode removal with undo")
   }
 }

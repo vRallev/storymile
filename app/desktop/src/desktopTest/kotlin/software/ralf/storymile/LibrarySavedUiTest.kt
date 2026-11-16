@@ -36,7 +36,7 @@ class LibrarySavedUiTest {
   private val uiTestRule = DesktopUiTestRule()
 
   @Test
-  fun `saved episodes show newest first and removing a selected episode updates the detail pane`() {
+  fun `undo restores saved episodes in their previous order`() {
     val size = mutableStateOf(DesktopWindowSizes.phone)
     uiTestRule.runRobotTest(windowSize = DesktopWindowSizes.tablet, contentSize = size) {
       val titles = List(3) { "The Quiet Current episode ${it + 1}" }
@@ -63,6 +63,14 @@ class LibrarySavedUiTest {
       third.assertDoesNotExist()
       details.assertDoesNotExist()
 
+      undoSavedRemoval()
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("library-saved-episode-1") and hasText(titles[0]),
+        timeoutMillis = 5_000,
+      )
+      first.assertTextContains(titles[2])
+      third.assertTextContains(titles[1])
+
       runOnIdle { size.value = DesktopWindowSizes.tablet }
       waitUntilAtLeastOneExists(
         matcher = hasTestTag("episode-details-title") and hasText(titles[2]),
@@ -78,20 +86,39 @@ class LibrarySavedUiTest {
 
       runOnUiThread { second.performClick() }
       second.assertIsSelected()
-      details.assertIsDisplayed().assertTextEquals(titles[1])
-      removeEpisode(titles[1])
+      details.assertIsDisplayed().assertTextEquals(titles[0])
+      removeEpisode(titles[0])
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("library-saved-episode-1") and hasText(titles[1]),
+        timeoutMillis = 5_000,
+      )
       waitUntilAtLeastOneExists(
         matcher = hasTestTag("episode-details-title") and hasText(titles[2]),
         timeoutMillis = 5_000,
       )
       first.assertIsSelected()
-      second.assertDoesNotExist()
+      second.assertIsNotSelected()
+      third.assertDoesNotExist()
+
+      removeEpisode(titles[1])
+      waitUntil(timeoutMillis = 5_000) {
+        onAllNodes(hasTestTag("library-saved-episode-1")).fetchSemanticsNodes().isEmpty()
+      }
 
       assertLastEpisodeFadesBeforeEmptyState(tab = "saved", emptyTitle = "No saved episodes") {
         removeEpisode(titles[2])
       }
       onNodeWithText("No saved episodes").assertIsDisplayed()
       details.assertDoesNotExist()
+
+      undoSavedRemoval()
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("library-saved-episode-0") and hasText(titles[2]),
+        timeoutMillis = 5_000,
+      )
+      first.assertIsDisplayed().assertIsSelected()
+      second.assertDoesNotExist()
+      details.assertTextEquals(titles[2])
     }
   }
 
@@ -181,6 +208,13 @@ class LibrarySavedUiTest {
         click()
       }
     }
+  }
+
+  private fun ComposeUiTest.undoSavedRemoval() {
+    waitUntilAtLeastOneExists(matcher = hasText("Undo"), timeoutMillis = 5_000)
+    onNodeWithText("Removed from saved episodes").assertIsDisplayed()
+    val undo = onNodeWithText("Undo").assertIsDisplayed()
+    runOnUiThread { undo.performClick() }
   }
 
   private fun ComposeUiTest.awaitTransitionEntry(tag: String) {

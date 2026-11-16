@@ -19,4 +19,11 @@ interface SavedEpisodeRepository {
 
   /** Removes [episode] if its feed URL and episode ID are saved. */
   fun remove(episode: SavedEpisode)
+
+  /**
+   * Removes [episode] if saved. After a successful removal, calls [onRemoved] on the writer's
+   * coroutine with an action that restores the episode to its previous place in the saved list.
+   * Undo does nothing if the episode is already saved again.
+   */
+  fun removeWithUndo(episode: SavedEpisode, onRemoved: (undo: () -> Unit) -> Unit)
 }

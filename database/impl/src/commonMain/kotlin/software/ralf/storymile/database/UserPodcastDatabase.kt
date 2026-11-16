@@ -111,7 +111,9 @@ class UserPodcastDatabase(
     )
   }
 
-  override suspend fun save(episode: SavedEpisode) = operation { it.save(episode) }
+  override suspend fun save(episode: SavedEpisode, previousId: Long?) = operation {
+    it.save(saved = episode, previousId = previousId)
+  }
 
   override suspend fun removeSavedEpisode(feedUrl: String, episodeId: String) = operation {
     it.removeSavedEpisode(feedUrl = feedUrl, episodeId = episodeId)

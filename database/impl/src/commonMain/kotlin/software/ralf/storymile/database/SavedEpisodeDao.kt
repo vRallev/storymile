@@ -23,9 +23,13 @@ interface SavedEpisodeDao {
 
   @Query(
     """
-    DELETE FROM saved_episodes
-    WHERE episodeId IN (SELECT id FROM episodes WHERE showId = :showId AND sourceEpisodeId = :sourceEpisodeId)
+    SELECT saved_episodes.id
+    FROM saved_episodes
+    JOIN episodes ON episodes.id = saved_episodes.episodeId
+    WHERE episodes.showId = :showId AND episodes.sourceEpisodeId = :sourceEpisodeId
     """,
   )
-  suspend fun delete(showId: Long, sourceEpisodeId: String): Int
+  suspend fun findId(showId: Long, sourceEpisodeId: String): Long?
+
+  @Query("DELETE FROM saved_episodes WHERE id = :id") suspend fun delete(id: Long)
 }
