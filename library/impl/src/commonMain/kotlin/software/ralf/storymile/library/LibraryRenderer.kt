@@ -3,22 +3,35 @@ package software.ralf.storymile.library
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.app.platform.renderer.Render
 import software.ralf.storymile.library.LibraryPresenterImpl.Tab
+import software.ralf.storymile.library.impl.generated.resources.Res
+import software.ralf.storymile.library.impl.generated.resources.library_queue_removed
+import software.ralf.storymile.library.impl.generated.resources.library_queue_undo
+import software.ralf.storymile.libraryqueue.LibraryQueuePresenter
 import software.ralf.storymile.libraryqueue.LocalLibraryQueueListState
 import software.ralf.storymile.librarysaved.LocalLibrarySavedListState
 import software.ralf.storymile.podcastshows.supportsShowPanes
@@ -86,7 +99,33 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
             modifier = Modifier.fillMaxSize(),
           )
         }
+        QueueRemovalSnackbar(
+          removal = model.queue.removal,
+          modifier = Modifier.align(Alignment.BottomCenter).widthIn(max = 560.dp),
+        )
       }
     }
+  }
+
+  @Composable
+  private fun QueueRemovalSnackbar(removal: LibraryQueuePresenter.Removal?, modifier: Modifier) {
+    val host = remember { SnackbarHostState() }
+    val message = stringResource(Res.string.library_queue_removed)
+    val undo = stringResource(Res.string.library_queue_undo)
+    LaunchedEffect(removal) {
+      if (removal == null) {
+        return@LaunchedEffect
+      }
+      try {
+        val result =
+          host.showSnackbar(message = message, actionLabel = undo, duration = SnackbarDuration.Long)
+        if (result == SnackbarResult.ActionPerformed) {
+          removal.undo()
+        }
+      } finally {
+        removal.dismiss()
+      }
+    }
+    SnackbarHost(hostState = host, modifier = modifier)
   }
 }

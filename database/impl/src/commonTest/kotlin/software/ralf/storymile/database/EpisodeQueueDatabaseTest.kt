@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import assertk.assertThat
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
+import assertk.assertions.isNull
 import kotlin.test.Test
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -42,6 +43,44 @@ class EpisodeQueueDatabaseTest {
         queue.enqueue(first)
         assertThat(awaitItem()).isEqualTo(listOf(second, other, first))
       }
+    }
+  }
+
+  @Test
+  fun `restoring an episode reuses its position when free and appends when occupied`() = runTest {
+    DatabaseFixture().use {
+      val podcast = DatabaseFixture.podcast()
+      val first =
+        DatabaseFixture.queuedEpisode(podcast = podcast, episode = podcast.episodes.first())
+      val second = first.copy(feedUrl = "https://feeds.test/second.xml")
+      val removed = first.copy(feedUrl = "https://feeds.test/removed.xml")
+      val last = first.copy(feedUrl = "https://feeds.test/last.xml")
+      listOf(first, second, removed, last).forEach { queue.enqueue(it) }
+
+      val position =
+        checkNotNull(
+          queue.removeFromQueue(feedUrl = removed.feedUrl, episodeId = removed.episode.id),
+        )
+      assertThat(queue.removeFromQueue(feedUrl = removed.feedUrl, episodeId = removed.episode.id))
+        .isNull()
+      val freePosition =
+        checkNotNull(queue.removeFromQueue(feedUrl = second.feedUrl, episodeId = second.episode.id))
+
+      queue.enqueue(episode = removed, preferredPosition = position)
+      assertThat(queue.queuedEpisodes.first()).isEqualTo(listOf(first, removed, last))
+
+      queue.removeFromQueue(feedUrl = removed.feedUrl, episodeId = removed.episode.id)
+      queue.moveInQueue(
+        feedUrl = first.feedUrl,
+        episodeId = first.episode.id,
+        targetFeedUrl = last.feedUrl,
+        targetEpisodeId = last.episode.id,
+      )
+      queue.enqueue(episode = removed, preferredPosition = position)
+      assertThat(queue.queuedEpisodes.first()).isEqualTo(listOf(last, first, removed))
+
+      queue.enqueue(episode = removed, preferredPosition = freePosition)
+      assertThat(queue.queuedEpisodes.first()).isEqualTo(listOf(last, first, removed))
     }
   }
 

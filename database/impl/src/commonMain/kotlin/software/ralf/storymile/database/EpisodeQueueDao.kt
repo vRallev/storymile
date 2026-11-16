@@ -20,10 +20,18 @@ interface EpisodeQueueDao {
   @Query(
     """
     INSERT OR IGNORE INTO queued_episodes (episodeId, position)
-    SELECT :episodeId, COALESCE(MAX(position), 0) + 1 FROM queued_episodes
+    VALUES (
+      :episodeId,
+      CASE
+        WHEN :preferredPosition IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM queued_episodes WHERE position = :preferredPosition
+        ) THEN :preferredPosition
+        ELSE (SELECT COALESCE(MAX(position), 0) + 1 FROM queued_episodes)
+      END
+    )
     """,
   )
-  suspend fun append(episodeId: Long)
+  suspend fun insert(episodeId: Long, preferredPosition: Long?)
 
   @Query(
     """
@@ -31,7 +39,7 @@ interface EpisodeQueueDao {
     WHERE episodeId IN (SELECT id FROM episodes WHERE showId = :showId AND sourceEpisodeId = :sourceEpisodeId)
     """,
   )
-  suspend fun delete(showId: Long, sourceEpisodeId: String): Int
+  suspend fun delete(showId: Long, sourceEpisodeId: String)
 
   @Query(
     """
