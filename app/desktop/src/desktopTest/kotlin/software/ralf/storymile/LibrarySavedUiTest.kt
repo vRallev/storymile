@@ -52,7 +52,9 @@ class LibrarySavedUiTest {
       third.assertIsDisplayed().assertTextContains(titles[1])
       titles.forEach { onNodeWithContentDescription("Reorder $it").assertDoesNotExist() }
 
-      removeEpisode(titles[0])
+      assertSurvivingEpisodeMovesWithoutClipping(tab = "saved", index = 2) {
+        removeEpisode(titles[0])
+      }
       waitUntilAtLeastOneExists(
         matcher = hasTestTag("library-saved-episode-1") and hasText(titles[1]),
         timeoutMillis = 5_000,
@@ -85,8 +87,9 @@ class LibrarySavedUiTest {
       first.assertIsSelected()
       second.assertDoesNotExist()
 
-      removeEpisode(titles[2])
-      waitUntilAtLeastOneExists(matcher = hasText("No saved episodes"), timeoutMillis = 5_000)
+      assertLastEpisodeFadesBeforeEmptyState(tab = "saved", emptyTitle = "No saved episodes") {
+        removeEpisode(titles[2])
+      }
       onNodeWithText("No saved episodes").assertIsDisplayed()
       details.assertDoesNotExist()
     }

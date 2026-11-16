@@ -244,7 +244,9 @@ class LibraryQueueUiTest {
         timeoutMillis = 5_000,
       )
 
-      runOnUiThread { onNodeWithTag("library-queue-remove-1").performTouchInput { click() } }
+      assertSurvivingEpisodeMovesWithoutClipping(tab = "queue", index = 2) {
+        runOnUiThread { onNodeWithTag("library-queue-remove-1").performTouchInput { click() } }
+      }
       waitUntilAtLeastOneExists(
         matcher = hasTestTag("library-queue-episode-1") and hasText(thirdTitle),
         timeoutMillis = 5_000,
@@ -272,8 +274,9 @@ class LibraryQueueUiTest {
       first.assertIsDisplayed().assertIsSelected().assertTextContains(thirdTitle)
       second.assertDoesNotExist()
 
-      runOnUiThread { onNodeWithTag("library-queue-remove-0").performTouchInput { click() } }
-      waitUntilAtLeastOneExists(matcher = hasText("Your queue is empty"), timeoutMillis = 5_000)
+      assertLastEpisodeFadesBeforeEmptyState(tab = "queue", emptyTitle = "Your queue is empty") {
+        runOnUiThread { onNodeWithTag("library-queue-remove-0").performTouchInput { click() } }
+      }
       onNodeWithText("Your queue is empty").assertIsDisplayed()
       onNodeWithTag("library-queue-list").assertDoesNotExist()
       detailsTitle.assertDoesNotExist()

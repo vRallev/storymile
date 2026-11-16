@@ -1,5 +1,11 @@
 package software.ralf.storymile.library
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -119,26 +125,63 @@ class LibraryPagesRenderer : ComposeRenderer<LibraryPagesRenderer.Model>() {
         ) { page ->
           val tab = Tab.entries[page]
           val pageModifier = Modifier.fillMaxSize().testTag("library-page-${tab.name.lowercase()}")
-          when {
-            tab == Tab.SHOWS && model.showsContent != null ->
-              Render(model.showsContent, pageModifier)
-            tab == Tab.QUEUE && !model.library.queue.isEmpty ->
-              Render(model.library.queue.list, pageModifier)
-            tab == Tab.SAVED && !model.library.saved.isEmpty ->
-              Render(model.library.saved.list, pageModifier)
-            else ->
-              EmptyPage(
-                tab = tab,
-                onDiscoverPodcasts = model.library.onDiscoverPodcasts,
-                compact = compact,
-                short = short,
-                horizontal = horizontal,
-                large = large,
-                modifier = pageModifier.padding(horizontal = sidePadding),
-              )
+          val emptyPage: @Composable () -> Unit = {
+            EmptyPage(
+              tab = tab,
+              onDiscoverPodcasts = model.library.onDiscoverPodcasts,
+              compact = compact,
+              short = short,
+              horizontal = horizontal,
+              large = large,
+              modifier = Modifier.fillMaxSize().padding(horizontal = sidePadding),
+            )
+          }
+          Box(pageModifier) {
+            when (tab) {
+              Tab.QUEUE ->
+                EpisodePage(
+                  isEmpty = model.library.queue.isEmpty,
+                  list = model.library.queue.list,
+                  emptyPage = emptyPage,
+                )
+              Tab.SAVED ->
+                EpisodePage(
+                  isEmpty = model.library.saved.isEmpty,
+                  list = model.library.saved.list,
+                  emptyPage = emptyPage,
+                )
+              Tab.SHOWS -> {
+                if (model.showsContent != null) {
+                  Render(model.showsContent, Modifier.fillMaxSize())
+                } else {
+                  emptyPage()
+                }
+              }
+              Tab.HISTORY -> emptyPage()
+            }
           }
         }
       }
+    }
+  }
+
+  @Composable
+  private fun EpisodePage(isEmpty: Boolean, list: BaseModel, emptyPage: @Composable () -> Unit) {
+    val transition = updateTransition(targetState = isEmpty, label = "Empty episode list")
+    transition.AnimatedVisibility(
+      visible = { !it },
+      enter = fadeIn(tween(200)),
+      exit = fadeOut(tween(150)),
+    ) {
+      Render(list, Modifier.fillMaxSize())
+    }
+    // Keep the list composed through removal so the last row can animate out.
+    AnimatedVisibility(
+      visible = isEmpty && transition.currentState,
+      enter = fadeIn(tween(200)),
+      exit = ExitTransition.None,
+    ) {
+      emptyPage()
     }
   }
 
