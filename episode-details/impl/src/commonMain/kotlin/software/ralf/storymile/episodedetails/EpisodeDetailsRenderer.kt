@@ -1,6 +1,7 @@
 package software.ralf.storymile.episodedetails
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -44,6 +45,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
@@ -258,12 +260,23 @@ class EpisodeDetailsRenderer : ComposeRenderer<EpisodeDetailsPresenterImpl.Model
       OutlinedIconButton(
         onClick = onClick,
         enabled = enabled,
-        modifier = Modifier.testTag(tag),
+        modifier = Modifier.testTag(tag).semantics { this.contentDescription = contentDescription },
         border = BorderStroke(1.dp, AppTheme.colorScheme.outlineVariant),
         colors =
           IconButtonDefaults.outlinedIconButtonColors(contentColor = AppTheme.colorScheme.primary),
       ) {
-        Icon(imageVector = icon, contentDescription = contentDescription)
+        Crossfade(
+          targetState = icon,
+          modifier = Modifier.size(24.dp),
+          animationSpec = tween(durationMillis = 120),
+          label = "episode-action-icon",
+        ) { imageVector ->
+          Icon(
+            imageVector = imageVector,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+          )
+        }
       }
       Text(
         text = label,
