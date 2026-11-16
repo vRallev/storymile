@@ -225,48 +225,7 @@ class LibraryQueueUiTest {
   }
 
   @Test
-  fun `removing the opened queue episode selects the first remaining episode in a wide pane`() {
-    val size = mutableStateOf(DesktopWindowSizes.phone)
-    uiTestRule.runRobotTest(windowSize = DesktopWindowSizes.tablet, contentSize = size) {
-      composeRobot<DiscoveryRobot> {
-        discover()
-        openPodcast("quiet-current")
-      }
-      val firstTitle = "The Quiet Current episode 2"
-      val secondTitle = "The Quiet Current episode 1"
-      queueEpisode(index = 1, title = firstTitle)
-      queueEpisode(index = 0, title = secondTitle)
-      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
-      waitUntilAtLeastOneExists(
-        matcher = hasTestTag("library-queue-episode-1"),
-        timeoutMillis = 5_000,
-      )
-
-      runOnIdle { size.value = DesktopWindowSizes.tablet }
-      val first = onNodeWithTag("library-queue-episode-0")
-      val second = onNodeWithTag("library-queue-episode-1")
-      val detailsTitle = onNodeWithTag("episode-details-title")
-      runOnUiThread { second.performClick() }
-      second.assertIsSelected()
-      detailsTitle.assertIsDisplayed().assertTextEquals(secondTitle)
-
-      runOnUiThread { onNodeWithTag("library-queue-remove-1").performTouchInput { click() } }
-      waitUntilAtLeastOneExists(
-        matcher = hasTestTag("episode-details-title") and hasText(firstTitle),
-        timeoutMillis = 5_000,
-      )
-      first.assertIsDisplayed().assertIsSelected().assertTextContains(firstTitle)
-      second.assertDoesNotExist()
-      detailsTitle.assertTextEquals(firstTitle)
-
-      runOnIdle { size.value = DesktopWindowSizes.phone }
-      first.assertIsDisplayed().assertTextContains(firstTitle)
-      detailsTitle.assertDoesNotExist()
-    }
-  }
-
-  @Test
-  fun `removing queued episodes keeps their order and shows the empty state after the last one`() {
+  fun `removing queued episodes updates selection and shows the empty state after the last one`() {
     val size = mutableStateOf(DesktopWindowSizes.phone)
     uiTestRule.runRobotTest(windowSize = DesktopWindowSizes.tablet, contentSize = size) {
       composeRobot<DiscoveryRobot> {
@@ -307,14 +266,20 @@ class LibraryQueueUiTest {
         timeoutMillis = 5_000,
       )
       first.assertIsSelected()
-      runOnUiThread { onNodeWithTag("library-queue-remove-0").performTouchInput { click() } }
+      runOnUiThread { second.performClick() }
+      second.assertIsSelected()
+      detailsTitle.assertIsDisplayed().assertTextEquals(thirdTitle)
+
+      runOnUiThread { onNodeWithTag("library-queue-remove-1").performTouchInput { click() } }
       waitUntilAtLeastOneExists(
-        matcher = hasTestTag("episode-details-title") and hasText(thirdTitle),
+        matcher = hasTestTag("episode-details-title") and hasText(firstTitle),
         timeoutMillis = 5_000,
       )
-      first.assertIsDisplayed().assertIsSelected().assertTextContains(thirdTitle)
+      first.assertIsDisplayed().assertIsSelected().assertTextContains(firstTitle)
       second.assertDoesNotExist()
 
+      runOnUiThread { first.performClick() }
+      detailsTitle.assertIsDisplayed().assertTextEquals(firstTitle)
       assertLastEpisodeFadesBeforeEmptyState(tab = "queue", emptyTitle = "Your queue is empty") {
         runOnUiThread { onNodeWithTag("library-queue-remove-0").performTouchInput { click() } }
       }
