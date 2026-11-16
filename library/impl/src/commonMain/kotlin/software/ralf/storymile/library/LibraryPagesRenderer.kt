@@ -54,15 +54,18 @@ import software.ralf.storymile.library.impl.generated.resources.library_discover
 import software.ralf.storymile.library.impl.generated.resources.library_history
 import software.ralf.storymile.library.impl.generated.resources.library_history_empty_description
 import software.ralf.storymile.library.impl.generated.resources.library_history_empty_title
+import software.ralf.storymile.library.impl.generated.resources.library_history_heading
 import software.ralf.storymile.library.impl.generated.resources.library_history_illustration
 import software.ralf.storymile.library.impl.generated.resources.library_illustration
 import software.ralf.storymile.library.impl.generated.resources.library_queue
 import software.ralf.storymile.library.impl.generated.resources.library_queue_empty_description
 import software.ralf.storymile.library.impl.generated.resources.library_queue_empty_title
+import software.ralf.storymile.library.impl.generated.resources.library_queue_heading
 import software.ralf.storymile.library.impl.generated.resources.library_queue_illustration
 import software.ralf.storymile.library.impl.generated.resources.library_saved
 import software.ralf.storymile.library.impl.generated.resources.library_saved_empty_description
 import software.ralf.storymile.library.impl.generated.resources.library_saved_empty_title
+import software.ralf.storymile.library.impl.generated.resources.library_saved_heading
 import software.ralf.storymile.library.impl.generated.resources.library_shows
 import software.ralf.storymile.library.impl.generated.resources.library_shows_empty_description
 import software.ralf.storymile.library.impl.generated.resources.library_shows_empty_title
@@ -83,14 +86,14 @@ class LibraryPagesRenderer : ComposeRenderer<LibraryPagesRenderer.Model>() {
       val large = maxWidth >= 1000.dp && !short
       val sidePadding = if (compact) 20.dp else 32.dp
       Column(Modifier.fillMaxSize()) {
+        val pagerState =
+          rememberPagerState(initialPage = model.library.selectedTab.ordinal) { Tab.entries.size }
         TabHeader(
-          title = ShowSource.Library.title(),
+          title = Tab.entries[pagerState.currentPage].title(),
           windowWidth = LocalScreenSize.current.width,
           onBack = model.onCloseShowEpisode.takeIf { model.library.selectedTab == Tab.SHOWS },
           backButtonModifier = Modifier.testTag("show-back"),
         )
-        val pagerState =
-          rememberPagerState(initialPage = model.library.selectedTab.ordinal) { Tab.entries.size }
         val currentModel by rememberUpdatedState(model)
         LaunchedEffect(model.library.selectedTab) {
           pagerState.animateScrollToPage(model.library.selectedTab.ordinal)
@@ -330,6 +333,15 @@ class LibraryPagesRenderer : ComposeRenderer<LibraryPagesRenderer.Model>() {
       }
     }
   }
+
+  @Composable
+  private fun Tab.title(): String =
+    when (this) {
+      Tab.QUEUE -> stringResource(Res.string.library_queue_heading)
+      Tab.SHOWS -> ShowSource.Library.title()
+      Tab.SAVED -> stringResource(Res.string.library_saved_heading)
+      Tab.HISTORY -> stringResource(Res.string.library_history_heading)
+    }
 
   private fun Tab.emptyTitle(): StringResource =
     when (this) {

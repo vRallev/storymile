@@ -20,6 +20,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
@@ -156,6 +157,15 @@ class LibraryRendererTest {
 
   private fun ComposeUiTest.assertSelectedTab(tab: Tab, title: String) {
     onNodeWithTag("library-tab-${tab.name.lowercase()}").assertIsSelected()
+    onNodeWithTag("tab-title")
+      .assertTextEquals(
+        when (tab) {
+          Tab.QUEUE -> "Queued episodes"
+          Tab.SHOWS -> "Followed shows"
+          Tab.SAVED -> "Saved episodes"
+          Tab.HISTORY -> "Listening history"
+        },
+      )
     onNodeWithText(title).assertIsDisplayed()
     assertContentFits(tab)
   }

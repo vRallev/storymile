@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
@@ -55,6 +56,8 @@ class LibraryQueueUiTest {
       val first = onNodeWithTag("library-queue-episode-0")
       val second = onNodeWithTag("library-queue-episode-1")
       val detailsTitle = onNodeWithTag("episode-details-title")
+      onNodeWithTag("tab-title").assertTextEquals("Queued episodes")
+      onAllNodes(hasText("Queued episodes")).assertCountEquals(1)
       runOnUiThread { onNodeWithTag("library-queue-reorder-1").performTouchInput { click() } }
       detailsTitle.assertDoesNotExist()
       first.assertIsDisplayed().assertTextContains(firstTitle)

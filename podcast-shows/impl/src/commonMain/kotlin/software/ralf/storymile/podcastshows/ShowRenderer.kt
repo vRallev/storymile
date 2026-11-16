@@ -29,17 +29,16 @@ class ShowRenderer : ComposeRenderer<ShowPresenterImpl.Model>() {
   override fun Compose(model: ShowPresenterImpl.Model, modifier: Modifier) {
     BoxWithConstraints(modifier.fillMaxSize().podcastScreenTransition().clipToBounds()) {
       val wide = maxWidth.supportsShowPanes(LocalDensity.current.fontScale)
-      val selectedIndex =
+      val initialListIndex =
         when (val pane = model.content.pane) {
-          is ShowListPane.Discovery ->
-            pane.podcasts.indexOfFirst { it.id == model.content.podcast.id }
+          is ShowListPane.Discovery -> {
+            val selectedIndex = pane.podcasts.indexOfFirst { it.id == model.content.podcast.id }
+            if (selectedIndex > 0) selectedIndex + 1 else 0
+          }
           is ShowListPane.Saved ->
-            pane.shows.indexOfFirst { it.feedUrl == model.content.podcast.id }
+            pane.shows.indexOfFirst { it.feedUrl == model.content.podcast.id }.coerceAtLeast(0)
         }
-      val catalogState =
-        rememberLazyListState(
-          initialFirstVisibleItemIndex = if (selectedIndex <= 0) 0 else selectedIndex + 1,
-        )
+      val catalogState = rememberLazyListState(initialFirstVisibleItemIndex = initialListIndex)
       val renderer = remember { ShowBackstackRenderer() }
       Column(
         Modifier.fillMaxSize()

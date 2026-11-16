@@ -1,6 +1,5 @@
 <resources>
   <string name="discover_podcasts">Discover podcasts</string>
-  <string name="library">Library</string>
   <string name="followed_shows">Followed shows</string>
   <string name="search_results">Search results</string>
   <string name="topic_culture">Culture</string>

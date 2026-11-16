@@ -13,13 +13,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.coil.PodcastArtwork
 import software.ralf.storymile.design.ListDivider
 import software.ralf.storymile.design.PodcastRow
 import software.ralf.storymile.podcast.PodcastFeed
-import software.ralf.storymile.podcast.shows.generated.resources.Res
-import software.ralf.storymile.podcast.shows.generated.resources.followed_shows
 import software.ralf.storymile.podcastshows.PodcastSharedElement.Companion.podcastSharedElement
 
 /**
@@ -40,12 +37,6 @@ fun FollowedShows(
     state = state,
     contentPadding = PaddingValues(vertical = 16.dp),
   ) {
-    item {
-      EpisodesHeading(
-        title = stringResource(Res.string.followed_shows),
-        modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
-      )
-    }
     itemsIndexed(shows, key = { _, show -> show.feedUrl }) { index, show ->
       val id = show.feedUrl
       val isSelected = id == selectedFeedUrl

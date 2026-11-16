@@ -43,10 +43,8 @@ import software.ralf.storymile.episodedetails.EpisodeDetails
 import software.ralf.storymile.episodedetails.EpisodeSharedElement
 import software.ralf.storymile.episodedetails.episodeSharedElement
 import software.ralf.storymile.library.queue.impl.generated.resources.Res
-import software.ralf.storymile.library.queue.impl.generated.resources.library_queue_heading
 import software.ralf.storymile.library.queue.impl.generated.resources.library_queue_remove
 import software.ralf.storymile.library.queue.impl.generated.resources.library_queue_reorder
-import software.ralf.storymile.podcastshows.EpisodesHeading
 import software.ralf.storymile.theme.AppTheme
 
 @Composable
@@ -66,12 +64,6 @@ internal fun LibraryQueueList(
       state = state,
       contentPadding = PaddingValues(vertical = 16.dp),
     ) {
-      item {
-        EpisodesHeading(
-          title = stringResource(Res.string.library_queue_heading),
-          modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
-        )
-      }
       itemsIndexed(episodes, key = { _, details -> details.key }) { index, details ->
         val isSelected = details.key == selectedEpisodeKey
         val rowModifier = Modifier.testTag("library-queue-episode-$index")
