@@ -30,9 +30,17 @@ import software.ralf.storymile.theme.LocalDarkThemeOverride
  *
  * A fresh application, root scope, Metro graph, and Compose presenter stream are created for each
  * test and destroyed after the Compose test scene closes. Each test starts with an empty library.
- * [withEpisodes] enables the playback preview before running the test.
+ * [withEpisodes] enables the playback preview before running the test. [withQueuePlayback] enables
+ * the production player in Real mode with the test catalog and feeds.
  */
-class DesktopUiTestRule(private val withEpisodes: Boolean = false) {
+class DesktopUiTestRule(
+  private val withEpisodes: Boolean = false,
+  private val withQueuePlayback: Boolean = false,
+) {
+  init {
+    require(!withEpisodes || !withQueuePlayback)
+  }
+
   /** Runs [block] in the phone preset, optionally overriding the system theme with [darkTheme]. */
   fun runPhoneRobotTest(darkTheme: Boolean? = null, block: ComposeUiTest.() -> Unit) {
     runRobotTest(windowSize = DesktopWindowSizes.phone, darkTheme = darkTheme, block = block)
@@ -71,7 +79,11 @@ class DesktopUiTestRule(private val withEpisodes: Boolean = false) {
     block: ComposeUiTest.() -> Unit,
   ) {
     val desktopApp = DesktopApp {
-      createGraphFactory<TestDesktopAppGraph.Factory>().create(it)
+      if (withQueuePlayback) {
+        createGraphFactory<QueuePlaybackDesktopTestGraph.Factory>().create(it)
+      } else {
+        createGraphFactory<TestDesktopAppGraph.Factory>().create(it)
+      }
     }
     RobotInternals.setRootScopeProvider(desktopApp)
 
