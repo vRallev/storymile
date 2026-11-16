@@ -9,6 +9,9 @@ abstract class AudioPlayer {
   /** Replaces the source, resets position, and prepares it without starting playback. */
   abstract fun load(source: String)
 
+  /** Stops playback, releases the current source, and resets [state]. */
+  abstract fun clear()
+
   /** Starts playback, including when the current source is still preparing. */
   abstract fun play()
 

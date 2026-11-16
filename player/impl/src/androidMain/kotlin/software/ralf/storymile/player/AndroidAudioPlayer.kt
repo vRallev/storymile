@@ -97,6 +97,13 @@ class AndroidAudioPlayer(
     }
   }
 
+  override fun clear() {
+    if (!closed) {
+      releasePlayer()
+      state.value = State()
+    }
+  }
+
   override fun pause() {
     command { it.pause() }
   }

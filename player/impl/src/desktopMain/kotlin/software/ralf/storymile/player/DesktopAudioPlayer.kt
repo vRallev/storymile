@@ -89,7 +89,11 @@ internal constructor(
   ) : this(coroutineScope, { Mp3Decoder.decode(it) }, { JavaSoundOutput() })
 
   override fun load(source: String) {
-    send(Command.Load(source))
+    send(Command.SetSource(source))
+  }
+
+  override fun clear() {
+    send(Command.SetSource(null))
   }
 
   override fun play() {
@@ -129,7 +133,7 @@ internal constructor(
 
   private fun handle(command: Command, coroutineScope: CoroutineScope) {
     when (command) {
-      is Command.Load -> prepare(command.source, coroutineScope)
+      is Command.SetSource -> prepare(command.source, coroutineScope)
       is Command.Prepared -> prepared(command)
       is Command.Failed -> {
         if (command.generation == generation) {
@@ -151,13 +155,17 @@ internal constructor(
     }
   }
 
-  private fun prepare(source: String, coroutineScope: CoroutineScope) {
+  private fun prepare(source: String?, coroutineScope: CoroutineScope) {
     generation++
     preparation?.cancel()
+    preparation = null
     session?.close()
     session = null
     playRequested = false
     state.value = State(source = source)
+    if (source == null) {
+      return
+    }
     val requestedGeneration = generation
     preparation = coroutineScope.launch {
       try {
@@ -318,7 +326,7 @@ internal constructor(
   }
 
   private sealed interface Command {
-    data class Load(val source: String) : Command
+    data class SetSource(val source: String?) : Command
 
     data class Prepared(val generation: Long, val audio: PcmAudio) : Command
 

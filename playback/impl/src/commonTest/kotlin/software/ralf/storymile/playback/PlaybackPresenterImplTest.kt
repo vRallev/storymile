@@ -14,12 +14,19 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.app.platform.presenter.compose.test
+import software.ralf.storymile.player.Player
 import software.ralf.storymile.player.testing.FakePlayer
 import software.ralf.storymile.playlist.EpisodeId
 import software.ralf.storymile.playlist.Playlist
 import software.ralf.storymile.playlist.PlaylistId
 import software.ralf.storymile.playlist.PlaylistName
+import software.ralf.storymile.playlist.PlaylistRepository
 import software.ralf.storymile.playlist.testing.FakePlaylistRepository
+import software.ralf.storymile.podcast.PodcastEnclosure
+import software.ralf.storymile.podcast.PodcastEpisode
+import software.ralf.storymile.podcast.QueuedEpisode
+import software.ralf.storymile.runtimemode.RuntimeMode
+import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 
 class PlaybackPresenterImplTest {
   private val PlaybackPresenterImpl.Model.player: PlaybackPresenterImpl.PlayerModel
@@ -28,7 +35,7 @@ class PlaybackPresenterImplTest {
   @Test
   fun `playback is absent until a playlist contains episodes`() = runTest {
     val repository = FakePlaylistRepository(emptyList())
-    val presenter: PlaybackPresenter = PlaybackPresenterImpl(repository, FakePlayer())
+    val presenter: PlaybackPresenter = presenter(repository)
 
     presenter.test(this) {
       awaitItem().assertPlayback(visible = false)
@@ -50,7 +57,7 @@ class PlaybackPresenterImplTest {
   @Test
   fun `playback state survives unavailable content`() = runTest {
     val repository = FakePlaylistRepository(listOf(playlist()))
-    val presenter = PlaybackPresenterImpl(repository, FakePlayer())
+    val presenter = presenter(repository)
 
     presenter.testPlayer(this) {
       awaitItem().player.onSeek(123)
@@ -72,7 +79,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `collapsed and expanded controls share playback state`() = runTest {
-    val presenter = PlaybackPresenterImpl(FakePlaylistRepository(listOf(playlist())), FakePlayer())
+    val presenter = presenter(FakePlaylistRepository(listOf(playlist())))
 
     presenter.testPlayer(this) {
       var model = awaitItem()
@@ -108,7 +115,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `seeking and skips stay within the current episode`() = runTest {
-    val presenter = PlaybackPresenterImpl(FakePlaylistRepository(listOf(playlist())), FakePlayer())
+    val presenter = presenter(FakePlaylistRepository(listOf(playlist())))
 
     presenter.testPlayer(this) {
       var player = awaitItem().player
@@ -146,7 +153,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `chapter selection and seeking keep the active chapter in sync`() = runTest {
-    val presenter = PlaybackPresenterImpl(FakePlaylistRepository(listOf(playlist())), FakePlayer())
+    val presenter = presenter(FakePlaylistRepository(listOf(playlist())))
 
     presenter.testPlayer(this) {
       var player = awaitItem().player
@@ -167,7 +174,7 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `queue selection loads the episode and preserves listening preferences`() = runTest {
-    val presenter = PlaybackPresenterImpl(FakePlaylistRepository(listOf(playlist())), FakePlayer())
+    val presenter = presenter(FakePlaylistRepository(listOf(playlist())))
 
     presenter.testPlayer(this) {
       var player = awaitItem().player
@@ -209,6 +216,64 @@ class PlaybackPresenterImplTest {
       expectNoEvents()
     }
   }
+
+  @Test
+  fun `real playback follows the Library Queue independently of playlists`() = runTest {
+    val repository = FakePlaylistRepository(listOf(playlist()))
+    val player = FakePlayer()
+    val presenter = presenter(repository = repository, player = player, mode = RuntimeMode.Real)
+
+    presenter.testPlayer(this) {
+      awaitItem().assertPlayback(visible = false)
+      repository.update(emptyList())
+
+      val current = queued("Current episode")
+      val next = queued("Next episode")
+      player.publish(Player.State(episode = current, upcomingEpisodes = listOf(next)))
+      val model = awaitItem()
+      model.assertPlayback(visible = true)
+      assertThat(requireNotNull(model.collapsed).player).isSameInstanceAs(model.player)
+      assertThat(model.player.title).isEqualTo(current.episode.title)
+      assertThat(model.player.showTitle).isEqualTo(current.podcastTitle)
+      assertThat(model.player.artworkUrl).isEqualTo(current.artworkUrl)
+      assertThat(model.player.queue.map { it.title }).isEqualTo(listOf(next.episode.title))
+      model.player.onEpisode(0)
+      assertThat(player.playRequests).isEqualTo(listOf(next))
+
+      player.publish(Player.State())
+      awaitItem().assertPlayback(visible = false)
+    }
+  }
+
+  private fun presenter(
+    repository: PlaylistRepository,
+    player: Player = FakePlayer(),
+    mode: RuntimeMode = RuntimeMode.Fake,
+  ) =
+    PlaybackPresenterImpl(
+      playlistRepository = repository,
+      player = player,
+      runtimeModeController = FakeRuntimeModeController(mode),
+    )
+
+  private fun queued(title: String) =
+    QueuedEpisode(
+      feedUrl = "https://example.com/feed",
+      podcastTitle = "Podcast",
+      artworkUrl = "https://example.com/cover.png",
+      episode =
+        PodcastEpisode(
+          id = title,
+          title = title,
+          description = null,
+          author = null,
+          artworkUrl = null,
+          publishedAt = null,
+          duration = null,
+          enclosure =
+            PodcastEnclosure(url = "https://example.com/audio.mp3", type = null, length = null),
+        ),
+    )
 
   private fun playlist(): Playlist =
     Playlist(PlaylistId("playlist"), PlaylistName("Favorites"), listOf(EpisodeId("episode")))

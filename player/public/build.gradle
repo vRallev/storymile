@@ -1,3 +1,7 @@
 plugins {
   id 'software.ralf.storymile.library.kmp'
 }
+
+dependencies {
+  commonMainApi project(':podcast:public')
+}

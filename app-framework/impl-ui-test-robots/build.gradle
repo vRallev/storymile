@@ -59,5 +59,6 @@ dependencies {
   commonTestImplementation project(':runtime-mode:impl')
   commonTestImplementation libs.coil.compose
 
+  desktopTestImplementation project(':podcast:public')
   desktopTestImplementation libs.okio
 }

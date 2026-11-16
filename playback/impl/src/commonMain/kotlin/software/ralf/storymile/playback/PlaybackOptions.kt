@@ -74,6 +74,7 @@ internal object PlaybackOptions {
       listOf(Panel.SLEEP, Panel.QUEUE, Panel.CHAPTERS).forEach { panel ->
         TextButton(
           onClick = { onSelect(panel) },
+          enabled = player.isPreview || panel == Panel.QUEUE,
           contentPadding = PaddingValues(horizontal = 0.dp, vertical = 8.dp),
           modifier = Modifier.weight(1f).testTag("playback-${panel.name.lowercase()}"),
         ) {
@@ -247,7 +248,9 @@ internal object PlaybackOptions {
       Panel.INFO -> {
         Text(player.title, style = AppTheme.typography.titleMedium)
         Text(player.showTitle, modifier = Modifier.padding(vertical = 8.dp))
-        Text(stringResource(Res.string.sample_description))
+        if (player.isPreview) {
+          Text(stringResource(Res.string.sample_description))
+        }
       }
     }
   }

@@ -76,7 +76,11 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
             Modifier.fillMaxSize().padding(horizontal = 32.dp),
             horizontalArrangement = Arrangement.spacedBy(32.dp),
           ) {
-            PlaybackArtwork(Modifier.size(artworkSize))
+            PlaybackArtwork(
+              modifier = Modifier.size(artworkSize),
+              artworkUrl = model.player.artworkUrl,
+              isPreview = model.player.isPreview,
+            )
             PlayerDetails(
               model.player,
               largeControls,
@@ -90,7 +94,11 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
           Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             // Measure the controls first, then fit the artwork into the remaining height.
             BoxWithConstraints(Modifier.weight(1f, fill = false)) {
-              PlaybackArtwork(Modifier.size(minOf(available, maxHeight)))
+              PlaybackArtwork(
+                modifier = Modifier.size(minOf(available, maxHeight)),
+                artworkUrl = model.player.artworkUrl,
+                isPreview = model.player.isPreview,
+              )
             }
             Spacer(Modifier.height(20.dp))
             PlayerDetails(
@@ -142,7 +150,9 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
         }
         PlaybackOptions.Actions(player, onPanel)
       }
-      PlaybackOptions.Chapter(player) { onPanel(PlaybackOptions.Panel.CHAPTERS) }
+      if (player.chapters.isNotEmpty()) {
+        PlaybackOptions.Chapter(player) { onPanel(PlaybackOptions.Panel.CHAPTERS) }
+      }
     }
   }
 

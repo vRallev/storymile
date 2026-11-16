@@ -115,9 +115,9 @@ provides the empty Downloads screen, rendered by
 [DownloadsRenderer](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsRenderer.kt).
 The user presenter places these models in the content, navigation, and playback slots of
 [AppTemplate](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/AppTemplate.kt).
-The playback presenter supplies its slots only when the current user's
-[playlists](../playlist/public/src/commonMain/kotlin/software/ralf/storymile/playlist/PlaylistRepository.kt)
-contain an episode.
+The playback presenter supplies its slots when the user-scoped
+[player](../player/public/src/commonMain/kotlin/software/ralf/storymile/player/Player.kt)
+selects an episode from the Library Queue. Fake mode still uses sample playlists.
 
 ## Adaptive rendering
 
@@ -159,15 +159,13 @@ Switching Library tabs preserves the selection.
 lists followed shows.
 
 [PlaybackScreenRenderer](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackScreenRenderer.kt)
-shows artwork, episode details, playback controls, and chapters. Its collapse button calls the template's
-[collapse action](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/LocalCollapsePlayback.kt).
+shows artwork, episode details, playback controls, and upcoming episodes. Its collapse button calls
+the template's [collapse action](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/LocalCollapsePlayback.kt).
 [PlaybackBarRenderer](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackBarRenderer.kt)
-shows artwork and compact controls. In fake mode, both layouts read audio state from the user-scoped
-[player](../player/public/src/commonMain/kotlin/software/ralf/storymile/player/Player.kt).
-Other playback options retain their placeholder state.
+shows artwork and compact controls. Both layouts read the same player state.
 [PlaybackTransition](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/PlaybackTransition.kt)
 moves shared artwork, text, and controls with the sheet. Controls present in only one layout fade.
-The sheet slides up when playback becomes available and down when no playlist contains episodes.
+The sheet slides up when playback becomes available and down when it becomes unavailable.
 
 ## Source set hierarchy
 

@@ -35,7 +35,12 @@ class PlaybackBarRenderer : ComposeRenderer<PlaybackPresenterImpl.BarModel>() {
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(if (tablet) 16.dp else 12.dp),
     ) {
-      PlaybackArtwork(Modifier.size(if (tablet) 72.dp else 40.dp), thumbnail = true)
+      PlaybackArtwork(
+        modifier = Modifier.size(if (tablet) 72.dp else 40.dp),
+        thumbnail = true,
+        artworkUrl = player.artworkUrl,
+        isPreview = player.isPreview,
+      )
       Column(if (wide) Modifier.weight(0.8f) else Modifier.weight(1f)) {
         PlaybackControls.Labels(player, compact = !tablet)
         if (tablet && !wide) {
