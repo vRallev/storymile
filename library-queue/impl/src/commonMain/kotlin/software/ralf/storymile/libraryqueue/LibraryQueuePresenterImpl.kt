@@ -1,6 +1,7 @@
 package software.ralf.storymile.libraryqueue
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -66,7 +67,13 @@ class LibraryQueuePresenterImpl(
     }
     return presenterBackstack(listPresenter) { models ->
       val list = models.first() as ListModel
-      val opened = models.last() as? DetailsModel
+      val destination = models.last() as? DetailsModel
+      val removed =
+        destination != null && list.episodes?.none { it.key == destination.episodeKey } == true
+      LaunchedEffect(destination?.episodeKey, removed) {
+        if (removed) pop()
+      }
+      val opened = destination.takeUnless { removed }
       val details =
         opened
           ?: list.episodes?.firstOrNull()?.let { first ->
@@ -90,13 +97,15 @@ class LibraryQueuePresenterImpl(
       episode = episode,
     )
 
+  /** Keeps the renderer's queue rows and selection in [list]. */
   data class Model(
     override val isEmpty: Boolean,
-    override val list: BaseModel,
+    override val list: ListModel,
     override val openedEpisode: BaseModel?,
     override val onCloseEpisode: () -> Unit,
   ) : LibraryQueuePresenter.Model
 
+  /** Renderer-only rows and actions, with the opened episode or first queue entry selected. */
   data class ListModel(
     val episodes: List<EpisodeDetails>?,
     val onSelect: (EpisodeDetails) -> Unit,
