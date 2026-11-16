@@ -16,6 +16,7 @@ import software.ralf.storymile.playlist.PlaylistRepository
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.user.UserScope
+import software.ralf.storymile.util.HtmlDescription
 
 @Inject
 @ContributesBinding(UserScope::class)
@@ -38,6 +39,10 @@ class PlaybackPresenterImpl(
   @Composable
   private fun presentReal(audio: Player.State): Model {
     val current = audio.episode ?: return Model(collapsed = null, expanded = null)
+    val description =
+      remember(current.episode.description) {
+        HtmlDescription.plainText(current.episode.description)
+      }
     val upcoming =
       remember(audio.upcomingEpisodes) {
         audio.upcomingEpisodes.map {
@@ -55,22 +60,15 @@ class PlaybackPresenterImpl(
         positionSeconds = (audio.positionMillis / 1000).toInt(),
         durationSeconds = (audio.durationMillis / 1000).toInt(),
         isPlaying = audio.playWhenReady || audio.isPlaying,
-        isBookmarked = false,
-        isDownloaded = false,
+        canSeek = audio.canSeek,
+        description = description,
         speed = audio.speed,
-        sleepMinutes = null,
-        chapters = emptyList(),
-        activeChapterIndex = -1,
         queue = upcoming,
         onPlayPause = { player.togglePlayback() },
         onSeek = { player.seekTo(it.toLong() * 1000) },
         onSkipBack = { player.seekTo(player.state.value.positionMillis - 15_000) },
         onSkipForward = { player.seekTo(player.state.value.positionMillis + 30_000) },
-        onBookmark = {},
-        onDownload = {},
         onSpeed = { player.setSpeed(it) },
-        onSleep = {},
-        onChapter = {},
         onEpisode = { index -> audio.upcomingEpisodes.getOrNull(index)?.let { player.play(it) } },
         error = audio.error,
         isPreview = false,
@@ -97,11 +95,7 @@ class PlaybackPresenterImpl(
     }
     var positionSeconds by remember { mutableIntStateOf(754) }
     var isPlaying by remember { mutableStateOf(true) }
-    var isBookmarked by remember { mutableStateOf(false) }
-    var isDownloaded by remember { mutableStateOf(false) }
     var speed by remember { mutableFloatStateOf(1.2f) }
-    var sleepMinutes by remember { mutableStateOf<Int?>(null) }
-    val chapters = remember(episode) { chapters(episode.durationSeconds) }
 
     val placeholder =
       PlayerModel(
@@ -110,12 +104,8 @@ class PlaybackPresenterImpl(
         positionSeconds = positionSeconds,
         durationSeconds = episode.durationSeconds,
         isPlaying = isPlaying,
-        isBookmarked = isBookmarked,
-        isDownloaded = isDownloaded,
+        canSeek = true,
         speed = speed,
-        sleepMinutes = sleepMinutes,
-        chapters = chapters,
-        activeChapterIndex = chapters.indexOfLast { it.startSeconds <= positionSeconds },
         queue = queue,
         onPlayPause = { isPlaying = !isPlaying },
         onSeek = { positionSeconds = it.coerceIn(0, episode.durationSeconds) },
@@ -123,16 +113,10 @@ class PlaybackPresenterImpl(
         onSkipForward = {
           positionSeconds = (positionSeconds + 30).coerceAtMost(episode.durationSeconds)
         },
-        onBookmark = { isBookmarked = !isBookmarked },
-        onDownload = { isDownloaded = !isDownloaded },
         onSpeed = {
           if (it.isFinite()) {
             speed = it.coerceIn(0.5f, 3f)
           }
-        },
-        onSleep = { sleepMinutes = it?.takeIf { minutes -> minutes > 0 } },
-        onChapter = { index ->
-          chapters.getOrNull(index)?.let { positionSeconds = it.startSeconds }
         },
         onEpisode = { index ->
           queue.getOrNull(index)?.let { next ->
@@ -140,13 +124,10 @@ class PlaybackPresenterImpl(
             queue = queue.filterIndexed { queueIndex, _ -> queueIndex != index }
             positionSeconds = 0
             isPlaying = true
-            isBookmarked = false
-            isDownloaded = false
           }
         },
       )
 
-    // Deferred options retain sample state; transport controls follow the audio.
     val playerModel =
       if (audio.title == null) {
         placeholder
@@ -158,7 +139,8 @@ class PlaybackPresenterImpl(
           showTitle = "Storymile test episodes",
           positionSeconds = position,
           durationSeconds = duration,
-          isPlaying = audio.isPlaying,
+          isPlaying = audio.playWhenReady || audio.isPlaying,
+          canSeek = audio.canSeek,
           speed = audio.speed,
           error = audio.error,
           onPlayPause = { player.togglePlayback() },
@@ -177,20 +159,8 @@ class PlaybackPresenterImpl(
     )
   }
 
-  private fun chapters(durationSeconds: Int): List<Chapter> =
-    listOf(
-        Chapter("Welcome to the quiet", 0),
-        Chapter("Letting go of the rush", 132),
-        Chapter("Finding a slower rhythm", 600),
-        Chapter("Space for stillness", 1080),
-        Chapter("Returning to yourself", 1425),
-        Chapter("Everyday rituals", 1790),
-        Chapter("Carrying calm with you", 2120),
-        Chapter("Closing thoughts", 2418),
-      )
-      .map { it.copy(startSeconds = it.startSeconds * durationSeconds / 2538) }
-
-  data class Chapter(val title: String, val startSeconds: Int)
+  private val Player.State.canSeek: Boolean
+    get() = isReady && !isComplete && error == null
 
   data class Episode(val title: String, val showTitle: String, val durationSeconds: Int)
 
@@ -200,26 +170,19 @@ class PlaybackPresenterImpl(
     val positionSeconds: Int,
     val durationSeconds: Int,
     val isPlaying: Boolean,
-    val isBookmarked: Boolean,
-    val isDownloaded: Boolean,
+    val canSeek: Boolean,
     val speed: Float,
-    val sleepMinutes: Int?,
-    val chapters: List<Chapter>,
-    val activeChapterIndex: Int,
     val queue: List<Episode>,
     val onPlayPause: () -> Unit,
     val onSeek: (Int) -> Unit,
     val onSkipBack: () -> Unit,
     val onSkipForward: () -> Unit,
-    val onBookmark: () -> Unit,
-    val onDownload: () -> Unit,
     val onSpeed: (Float) -> Unit,
-    val onSleep: (Int?) -> Unit,
-    val onChapter: (Int) -> Unit,
     val onEpisode: (Int) -> Unit,
     val error: String? = null,
     val isPreview: Boolean = true,
     val artworkUrl: String? = null,
+    val description: String? = null,
   )
 
   data class BarModel(val player: PlayerModel) : BaseModel

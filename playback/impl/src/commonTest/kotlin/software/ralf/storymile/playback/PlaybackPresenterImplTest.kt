@@ -84,31 +84,17 @@ class PlaybackPresenterImplTest {
     presenter.testPlayer(this) {
       var model = awaitItem()
       assertThat(requireNotNull(model.collapsed).player).isSameInstanceAs(model.player)
-      assertThat(model.player.activeChapterIndex).isEqualTo(2)
 
       requireNotNull(model.collapsed).player.onPlayPause()
       model = awaitItem()
       assertThat(model.player.isPlaying).isFalse()
 
-      model.player.onBookmark()
-      model = awaitItem()
-      assertThat(requireNotNull(model.collapsed).player.isBookmarked).isTrue()
-
-      model.player.onDownload()
-      model = awaitItem()
-      assertThat(requireNotNull(model.collapsed).player.isDownloaded).isTrue()
-
       model.player.onSpeed(1.5f)
-      model = awaitItem()
-      model.player.onSleep(30)
       model = awaitItem()
       requireNotNull(model.collapsed).player.onPlayPause()
       model = awaitItem()
       assertThat(model.player.isPlaying).isTrue()
-      assertThat(model.player.isBookmarked).isTrue()
-      assertThat(model.player.isDownloaded).isTrue()
       assertThat(model.player.speed).isEqualTo(1.5f)
-      assertThat(model.player.sleepMinutes).isEqualTo(30)
       assertThat(requireNotNull(model.collapsed).player).isSameInstanceAs(model.player)
     }
   }
@@ -132,14 +118,12 @@ class PlaybackPresenterImplTest {
       player.onSkipBack()
       player = awaitItem().player
       assertThat(player.positionSeconds).isEqualTo(0)
-      assertThat(player.activeChapterIndex).isEqualTo(0)
 
       player.onSeek(player.durationSeconds - 5)
       player = awaitItem().player
       player.onSkipForward()
       player = awaitItem().player
       assertThat(player.positionSeconds).isEqualTo(player.durationSeconds)
-      assertThat(player.activeChapterIndex).isEqualTo(player.chapters.lastIndex)
 
       player.onSeek(-100)
       player = awaitItem().player
@@ -152,42 +136,15 @@ class PlaybackPresenterImplTest {
   }
 
   @Test
-  fun `chapter selection and seeking keep the active chapter in sync`() = runTest {
-    val presenter = presenter(FakePlaylistRepository(listOf(playlist())))
-
-    presenter.testPlayer(this) {
-      var player = awaitItem().player
-      player.onChapter(4)
-      player = awaitItem().player
-      assertThat(player.positionSeconds).isEqualTo(player.chapters[4].startSeconds)
-      assertThat(player.activeChapterIndex).isEqualTo(4)
-
-      player.onSeek(player.chapters[4].startSeconds - 1)
-      player = awaitItem().player
-      assertThat(player.activeChapterIndex).isEqualTo(3)
-
-      player.onChapter(-1)
-      player.onChapter(player.chapters.size)
-      expectNoEvents()
-    }
-  }
-
-  @Test
-  fun `queue selection loads the episode and preserves listening preferences`() = runTest {
+  fun `queue selection loads the episode and preserves playback speed`() = runTest {
     val presenter = presenter(FakePlaylistRepository(listOf(playlist())))
 
     presenter.testPlayer(this) {
       var player = awaitItem().player
       val nextEpisode = player.queue[1]
-      player.onBookmark()
-      player = awaitItem().player
-      player.onDownload()
-      player = awaitItem().player
       player.onPlayPause()
       player = awaitItem().player
       player.onSpeed(1.5f)
-      player = awaitItem().player
-      player.onSleep(30)
       player = awaitItem().player
 
       player.onEpisode(1)
@@ -197,19 +154,11 @@ class PlaybackPresenterImplTest {
       assertThat(player.showTitle).isEqualTo(nextEpisode.showTitle)
       assertThat(player.durationSeconds).isEqualTo(nextEpisode.durationSeconds)
       assertThat(player.positionSeconds).isEqualTo(0)
-      assertThat(player.activeChapterIndex).isEqualTo(0)
       assertThat(player.queue.size).isEqualTo(2)
       assertThat(player.queue.contains(nextEpisode)).isFalse()
       assertThat(player.isPlaying).isTrue()
-      assertThat(player.isBookmarked).isFalse()
-      assertThat(player.isDownloaded).isFalse()
       assertThat(player.speed).isEqualTo(1.5f)
-      assertThat(player.sleepMinutes).isEqualTo(30)
       assertThat(requireNotNull(model.collapsed).player).isSameInstanceAs(player)
-
-      player.onSleep(null)
-      player = awaitItem().player
-      assertThat(player.sleepMinutes).isNull()
 
       player.onEpisode(-1)
       player.onEpisode(player.queue.size)
@@ -236,9 +185,14 @@ class PlaybackPresenterImplTest {
       assertThat(model.player.title).isEqualTo(current.episode.title)
       assertThat(model.player.showTitle).isEqualTo(current.podcastTitle)
       assertThat(model.player.artworkUrl).isEqualTo(current.artworkUrl)
+      assertThat(model.player.description).isEqualTo("Episode notes")
+      assertThat(model.player.canSeek).isFalse()
       assertThat(model.player.queue.map { it.title }).isEqualTo(listOf(next.episode.title))
       model.player.onEpisode(0)
       assertThat(player.playRequests).isEqualTo(listOf(next))
+
+      player.publish(player.state.value.copy(isReady = true))
+      assertThat(awaitItem().player.canSeek).isTrue()
 
       player.publish(Player.State())
       awaitItem().assertPlayback(visible = false)
@@ -265,7 +219,7 @@ class PlaybackPresenterImplTest {
         PodcastEpisode(
           id = title,
           title = title,
-          description = null,
+          description = "<p>Episode notes</p>",
           author = null,
           artworkUrl = null,
           publishedAt = null,

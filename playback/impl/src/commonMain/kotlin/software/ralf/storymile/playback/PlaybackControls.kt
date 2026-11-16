@@ -17,21 +17,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Forward30
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.DownloadForOffline
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconToggleButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -53,11 +51,10 @@ import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.playback.PlaybackPresenterImpl.PlayerModel
 import software.ralf.storymile.playback.impl.generated.resources.Res
 import software.ralf.storymile.playback.impl.generated.resources.back_fifteen
-import software.ralf.storymile.playback.impl.generated.resources.bookmark
-import software.ralf.storymile.playback.impl.generated.resources.download
 import software.ralf.storymile.playback.impl.generated.resources.forward_thirty
 import software.ralf.storymile.playback.impl.generated.resources.pause
 import software.ralf.storymile.playback.impl.generated.resources.play
+import software.ralf.storymile.playback.impl.generated.resources.playback_failed
 import software.ralf.storymile.playback.impl.generated.resources.playback_position
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize
@@ -72,56 +69,29 @@ internal object PlaybackControls {
     // Keep both labels beside the growing artwork until they can pass below it.
     val horizontalArc = if (stacked) screen.width * 0.1f else 0.dp
     val verticalArc = if (!stacked) 0.dp else if (screen.width < 600.dp) 64.dp else 96.dp
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-      Column(Modifier.weight(1f)) {
-        Label(
-          player.title,
-          key = "title",
-          expanded = true,
-          modifier = Modifier.fillMaxWidth(),
-          style = if (large) AppTheme.typography.titleLarge else AppTheme.typography.headlineSmall,
-          horizontalArc = horizontalArc,
-          verticalArc = verticalArc,
-          arcEasing = EaseOutCubic,
-        )
-        Spacer(Modifier.height(4.dp))
-        Label(
-          player.showTitle,
-          key = "subtitle",
-          expanded = true,
-          modifier = Modifier.fillMaxWidth(),
-          color = AppTheme.colorScheme.onSurfaceVariant,
-          style = if (large) AppTheme.typography.headlineSmall else AppTheme.typography.bodyLarge,
-          horizontalArc = horizontalArc,
-          verticalArc = verticalArc,
-          arcEasing = EaseOutCubic,
-        )
-      }
-      IconToggleButton(
-        checked = player.isBookmarked,
-        enabled = player.isPreview,
-        onCheckedChange = { player.onBookmark() },
-        modifier = Modifier.testTag("playback-bookmark"),
-      ) {
-        Icon(
-          if (player.isBookmarked) Icons.Default.Bookmark else Icons.Outlined.BookmarkBorder,
-          stringResource(Res.string.bookmark),
-          Modifier.size(28.dp),
-        )
-      }
-      IconToggleButton(
-        checked = player.isDownloaded,
-        enabled = player.isPreview,
-        onCheckedChange = { player.onDownload() },
-        modifier = Modifier.testTag("playback-download"),
-      ) {
-        Icon(
-          if (player.isDownloaded) Icons.Default.CheckCircleOutline
-          else Icons.Outlined.DownloadForOffline,
-          stringResource(Res.string.download),
-          Modifier.size(30.dp),
-        )
-      }
+    Column(Modifier.fillMaxWidth()) {
+      Label(
+        text = player.title,
+        key = "title",
+        expanded = true,
+        modifier = Modifier.fillMaxWidth(),
+        style = if (large) AppTheme.typography.titleLarge else AppTheme.typography.headlineSmall,
+        horizontalArc = horizontalArc,
+        verticalArc = verticalArc,
+        arcEasing = EaseOutCubic,
+      )
+      Spacer(Modifier.height(4.dp))
+      Label(
+        text = player.showTitle,
+        key = "subtitle",
+        expanded = true,
+        modifier = Modifier.fillMaxWidth(),
+        color = AppTheme.colorScheme.onSurfaceVariant,
+        style = if (large) AppTheme.typography.headlineSmall else AppTheme.typography.bodyLarge,
+        horizontalArc = horizontalArc,
+        verticalArc = verticalArc,
+        arcEasing = EaseOutCubic,
+      )
     }
   }
 
@@ -145,6 +115,15 @@ internal object PlaybackControls {
         color = AppTheme.colorScheme.onSurfaceVariant,
         maxLines = 1,
       )
+      if (player.error != null) {
+        Text(
+          text = stringResource(Res.string.playback_failed),
+          style = AppTheme.typography.bodySmall,
+          color = AppTheme.colorScheme.error,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+      }
     }
   }
 
@@ -170,6 +149,7 @@ internal object PlaybackControls {
             player.onSeek(it.roundToInt())
           }
         },
+        enabled = player.canSeek,
         valueRange = 0f..player.durationSeconds.coerceAtLeast(1).toFloat(),
         modifier =
           sliderModifier.testTag(tag).semantics {
@@ -183,6 +163,7 @@ internal object PlaybackControls {
           SharedPart("seek-thumb", expanded, shared, zIndexInOverlay = 1f) {
             SliderDefaults.Thumb(
               interactionSource = interaction,
+              enabled = player.canSeek,
               modifier = Modifier.testTag("playback-seek-thumb-$suffix"),
               thumbSize = DpSize(16.dp, 16.dp),
             )
@@ -191,7 +172,8 @@ internal object PlaybackControls {
         track = { state ->
           SharedPart("seek-track", expanded, shared) {
             SliderDefaults.Track(
-              state,
+              sliderState = state,
+              enabled = player.canSeek,
               modifier = Modifier.height(4.dp).testTag("playback-seek-track-$suffix"),
               thumbTrackGapSize = 0.dp,
               drawStopIndicator = null,
@@ -240,7 +222,8 @@ internal object PlaybackControls {
     )
   }
 
-  fun time(seconds: Int): String = "${seconds / 60}:${(seconds % 60).toString().padStart(2, '0')}"
+  private fun time(seconds: Int): String =
+    "${seconds / 60}:${(seconds % 60).toString().padStart(2, '0')}"
 
   @Composable
   fun inputEnabled(expanded: Boolean): Boolean {
@@ -275,10 +258,13 @@ internal object PlaybackControls {
     val suffix = if (expanded) "expanded" else "collapsed"
     val description =
       stringResource(if (forward) Res.string.forward_thirty else Res.string.back_fifteen)
+    val colors = IconButtonDefaults.iconButtonColors()
+    val tint = if (player.canSeek) colors.contentColor else colors.disabledContentColor
     Box(Modifier.size(if (compact) 48.dp else 64.dp), contentAlignment = Alignment.Center) {
       SharedPart("$direction-button", expanded, shared, Modifier.matchParentSize()) {
         IconButton(
           onClick = if (forward) player.onSkipForward else player.onSkipBack,
+          enabled = player.canSeek,
           modifier =
             Modifier.fillMaxSize()
               .testTag("playback-${if (compact) "bar-" else ""}$direction")
@@ -290,10 +276,12 @@ internal object PlaybackControls {
           Modifier.size(if (compact) 28.dp else 48.dp).testTag("playback-$direction-icon-$suffix"),
         ) {
           Box(Modifier.fillMaxSize().clearAndSetSemantics {}) {
-            if (forward) {
-              Icon(Icons.Default.Forward30, null, Modifier.fillMaxSize())
-            } else {
-              ReplayFifteen(Modifier.fillMaxSize())
+            CompositionLocalProvider(LocalContentColor provides tint) {
+              if (forward) {
+                Icon(Icons.Default.Forward30, null, Modifier.fillMaxSize())
+              } else {
+                ReplayFifteen(Modifier.fillMaxSize())
+              }
             }
           }
         }

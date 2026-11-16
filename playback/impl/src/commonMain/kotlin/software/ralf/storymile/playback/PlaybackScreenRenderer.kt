@@ -150,9 +150,6 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
         }
         PlaybackOptions.Actions(player, onPanel)
       }
-      if (player.chapters.isNotEmpty()) {
-        PlaybackOptions.Chapter(player) { onPanel(PlaybackOptions.Panel.CHAPTERS) }
-      }
     }
   }
 

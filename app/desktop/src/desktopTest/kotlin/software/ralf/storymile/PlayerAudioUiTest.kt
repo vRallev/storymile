@@ -5,9 +5,12 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
@@ -69,6 +72,21 @@ class PlayerAudioUiTest {
 
       composeRobot<AppShellRobot> { collapsePlayback() }
       seeAudioState(expanded = false, positionSeconds = 60, playing = false, speed = 2f)
+    }
+  }
+
+  @Test
+  fun `the compact player reports audio errors and disables seeking`() {
+    uiTestRule.runRobotTest(windowSize = DpSize(1440.dp, 900.dp)) {
+      robot<PlayerRobot> {
+        publish(Player.State(title = "Test episode 1", error = "Playback failed"))
+      }
+      waitUntilCatching("the compact player reports the failure", timeout = 3.seconds) {
+        onNodeWithText("Could not play this episode.").assertIsDisplayed()
+        onNodeWithTag("playback-bar-seek").assertIsNotEnabled()
+        onNodeWithTag("playback-bar-back").assertIsNotEnabled()
+        onNodeWithTag("playback-bar-forward").assertIsNotEnabled()
+      }
     }
   }
 
