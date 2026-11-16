@@ -76,16 +76,14 @@ class UserPodcastDatabase(
     }
   }
 
-  override suspend fun insert(podcast: PodcastFeed) = operation { it.podcasts().insert(podcast) }
+  override suspend fun insert(podcast: PodcastFeed) = operation { it.follow(podcast) }
 
-  override suspend fun delete(feedUrl: String) = operation { it.podcasts().delete(feedUrl) }
+  override suspend fun delete(feedUrl: String) = operation { it.unfollow(feedUrl) }
 
-  override suspend fun enqueue(episode: QueuedEpisode) = operation {
-    it.queue().insert(QueuedEpisodeEntity.from(episode))
-  }
+  override suspend fun enqueue(episode: QueuedEpisode) = operation { it.enqueue(episode) }
 
   override suspend fun removeFromQueue(feedUrl: String, episodeId: String) = operation {
-    it.queue().delete(feedUrl = feedUrl, episodeId = episodeId)
+    it.removeFromQueue(feedUrl = feedUrl, episodeId = episodeId)
   }
 
   private suspend fun awaitPreviousOwner(path: String?) {

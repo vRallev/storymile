@@ -2,54 +2,31 @@ package software.ralf.storymile.database
 
 import androidx.room3.Dao
 import androidx.room3.Insert
-import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Transaction
+import androidx.room3.Update
 import kotlinx.coroutines.flow.Flow
-import software.ralf.storymile.podcast.PodcastFeed
 
 @Dao
 interface PodcastDao {
   @Transaction
-  @Query("SELECT * FROM shows ORDER BY feedUrl")
+  @Query("SELECT * FROM shows WHERE isFollowed ORDER BY feedUrl")
   fun observe(): Flow<List<StoredPodcast>>
 
-  @Query("DELETE FROM shows WHERE feedUrl = :feedUrl") suspend fun delete(feedUrl: String)
+  @Query("SELECT id FROM shows WHERE feedUrl = :feedUrl")
+  suspend fun findShowId(feedUrl: String): Long?
 
-  @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertShow(show: ShowEntity)
+  @Query("SELECT * FROM shows WHERE feedUrl = :feedUrl")
+  suspend fun findShow(feedUrl: String): ShowEntity?
 
-  @Insert suspend fun insertEpisodes(episodes: List<EpisodeEntity>)
+  @Insert suspend fun insertShow(show: ShowEntity): Long
 
-  @Transaction
-  suspend fun insert(podcast: PodcastFeed) {
-    // Replacing the show cascades deletion of its previous episode snapshot.
-    insertShow(
-      ShowEntity(
-        feedUrl = podcast.feedUrl,
-        title = podcast.title,
-        description = podcast.description,
-        author = podcast.author,
-        artworkUrl = podcast.artworkUrl,
-        link = podcast.link,
-      ),
-    )
-    insertEpisodes(
-      podcast.episodes
-        .distinctBy { it.id }
-        .mapIndexed { position, episode ->
-          EpisodeEntity(
-            feedUrl = podcast.feedUrl,
-            id = episode.id,
-            position = position,
-            title = episode.title,
-            description = episode.description,
-            author = episode.author,
-            artworkUrl = episode.artworkUrl,
-            publishedAt = episode.publishedAt,
-            durationMillis = episode.duration?.inWholeMilliseconds,
-            enclosure = episode.enclosure,
-          )
-        },
-    )
-  }
+  @Update suspend fun updateShow(show: ShowEntity)
+
+  @Query("UPDATE shows SET isFollowed = 0 WHERE id = :showId") suspend fun clearFollow(showId: Long)
+
+  @Query(
+    "DELETE FROM shows WHERE id = :showId AND NOT isFollowed AND NOT EXISTS (SELECT 1 FROM episodes WHERE showId = :showId)",
+  )
+  suspend fun deleteEmptyUnfollowedShow(showId: Long)
 }

@@ -107,7 +107,7 @@ Integration-test graphs must use a new `InMemoryStorageFactory` for each graph.
 Use `SavedShowRepository` from `:podcast:public` for saved podcasts.
 The repository uses `:database:public`. The database implementation owns one Room database per user scope.
 `Storage.databasePath(name)` supplies its location; `null` selects an in-memory database.
-Follow saves show metadata and episodes. Unfollow removes them.
+Follow saves show metadata and episodes. Unfollow retains queued episodes and their show metadata.
 
 ### Icons
 

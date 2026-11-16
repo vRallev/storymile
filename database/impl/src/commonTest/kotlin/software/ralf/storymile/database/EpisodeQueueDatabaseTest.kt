@@ -30,6 +30,7 @@ class EpisodeQueueDatabaseTest {
         queue.enqueue(first.copy(podcastTitle = "Duplicate"))
         queue.enqueue(other)
         assertThat(awaitItem()).isEqualTo(listOf(first, second, other))
+        assertThat(database.podcasts.first()).isEmpty()
 
         database.insert(podcast)
         database.delete(podcast.feedUrl)
@@ -40,6 +41,56 @@ class EpisodeQueueDatabaseTest {
 
         queue.enqueue(first)
         assertThat(awaitItem()).isEqualTo(listOf(second, other, first))
+      }
+    }
+  }
+
+  @Test
+  fun `queued episodes share feed metadata and survive leaving the current feed`() = runTest {
+    DatabaseFixture().use { database ->
+      val podcast = DatabaseFixture.podcast()
+      val episode = podcast.episodes.first()
+      val original = DatabaseFixture.queuedEpisode(podcast = podcast, episode = episode)
+      queue.enqueue(original)
+
+      queue.queuedEpisodes.test {
+        assertThat(awaitItem()).isEqualTo(listOf(original))
+
+        val updatedEpisode =
+          episode.copy(
+            title = "Updated episode",
+            enclosure = episode.enclosure.copy(url = "https://media.test/updated.mp3"),
+          )
+        val followed =
+          podcast.copy(
+            title = "Updated show",
+            episodes = listOf(updatedEpisode) + podcast.episodes.drop(1),
+          )
+        database.insert(followed)
+        val updated = DatabaseFixture.queuedEpisode(podcast = followed, episode = updatedEpisode)
+        assertThat(awaitItem()).isEqualTo(listOf(updated))
+        assertThat(database.podcasts.first()).isEqualTo(listOf(followed))
+
+        val withoutQueuedEpisode = followed.copy(episodes = followed.episodes.drop(1))
+        database.insert(withoutQueuedEpisode)
+        assertThat(database.podcasts.first()).isEqualTo(listOf(withoutQueuedEpisode))
+        assertThat(queue.queuedEpisodes.first()).isEqualTo(listOf(updated))
+
+        database.delete(followed.feedUrl)
+        assertThat(database.podcasts.first()).isEmpty()
+        assertThat(queue.queuedEpisodes.first()).isEqualTo(listOf(updated))
+
+        val returnedEpisode =
+          updatedEpisode.copy(id = "updated-source-id", title = "Episode listed again")
+        val followedAgain = followed.copy(episodes = listOf(returnedEpisode))
+        database.insert(followedAgain)
+        assertThat(awaitItem())
+          .isEqualTo(
+            listOf(
+              DatabaseFixture.queuedEpisode(podcast = followedAgain, episode = returnedEpisode),
+            ),
+          )
+        assertThat(database.podcasts.first()).isEqualTo(listOf(followedAgain))
       }
     }
   }
