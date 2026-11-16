@@ -1,6 +1,7 @@
 # Test episodes
 
-Fake mode seeds the `Storymile test episodes` playlist with `test-episode-1`,
+Fake mode adds these recordings to **Library → Queue**:
+`test-episode-1`,
 `test-episode-2`, and `test-episode-3`, in that order. Each ID matches an MP3 filename in
 [`player` resources](../../player/impl/src/commonMain/composeResources/files/test-episodes).
 The recordings use the ttsMP3 Coral AI voice. Playback starts paused at 1×, advances through all

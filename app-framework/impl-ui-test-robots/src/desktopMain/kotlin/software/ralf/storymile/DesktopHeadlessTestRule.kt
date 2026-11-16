@@ -43,7 +43,7 @@ class DesktopHeadlessTestRule {
       }
       try {
         application.awaitReady()
-        TestPlaylists.clear(application.rootScope)
+        TestQueue.clear(application.rootScope)
         val graph = application.rootScope.metroDependencyGraph<Graph>()
         graph.screenSizeProvider.update(ScreenSize.from(windowSize.width, windowSize.height))
         val templateProvider = graph.templateProviderInternalFactory.create(composePresenterScope())

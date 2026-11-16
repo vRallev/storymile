@@ -4,8 +4,8 @@ import kotlin.time.Duration.Companion.seconds
 import org.junit.Rule
 import org.junit.Test
 import software.ralf.app.platform.robot.composeRobot
+import software.ralf.app.platform.robot.robot
 import software.ralf.app.platform.robot.waitUntilCatching
-import software.ralf.storymile.playlist.PlaylistRobot
 import software.ralf.storymile.tabs.TabsPresenter
 
 class StorymileAndroidUiTest {
@@ -20,7 +20,7 @@ class StorymileAndroidUiTest {
 
   @Test
   fun playback_swipes_preserve_the_selected_tab() = uiTestRule.runRobotTest {
-    composeRobot<PlaylistRobot> { addPlayablePlaylist() }
+    robot<PlayerRobot> { showPreview() }
     waitUntilCatching("playback available", timeout = 5.seconds) {
       composeRobot<AppShellRobot> { seeAppLayers() }
     }

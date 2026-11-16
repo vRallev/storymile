@@ -50,7 +50,7 @@ class AndroidUiTestRule : TestRule {
     runBlocking {
       withTimeout(10_000) {
         kmpApplication.awaitReady()
-        TestPlaylists.clear(kmpApplication.rootScope)
+        TestQueue.clear(kmpApplication.rootScope)
       }
     }
     composeTestRule.waitForIdle()
