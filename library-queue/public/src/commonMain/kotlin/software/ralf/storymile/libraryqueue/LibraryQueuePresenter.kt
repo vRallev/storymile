@@ -18,5 +18,17 @@ interface LibraryQueuePresenter : ComposePresenter<Unit, LibraryQueuePresenter.M
 
     /** Closes the opened episode and returns to the queue. */
     val onCloseEpisode: () -> Unit
+
+    /** The latest removal that can still be undone, or null when there is none. */
+    val removal: Removal?
+  }
+
+  /** A temporary Undo offer for an episode removed from the queue list. */
+  interface Removal {
+    /** Restores the removed episode if this offer is still current. */
+    fun undo()
+
+    /** Clears this offer if it is still current. */
+    fun dismiss()
   }
 }

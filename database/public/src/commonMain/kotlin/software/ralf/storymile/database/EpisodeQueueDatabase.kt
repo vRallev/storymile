@@ -8,11 +8,14 @@ interface EpisodeQueueDatabase {
   /** Episodes in queue order with their saved metadata. Emits an empty list when empty. */
   val queuedEpisodes: Flow<List<QueuedEpisode>>
 
-  /** Appends an episode if its feed URL and episode ID are not already in the queue. */
-  suspend fun enqueue(episode: QueuedEpisode)
+  /**
+   * Enqueues an episode if it is not already queued. Uses [preferredPosition] if it is free and
+   * appends otherwise.
+   */
+  suspend fun enqueue(episode: QueuedEpisode, preferredPosition: Long? = null)
 
-  /** Removes the episode identified by [feedUrl] and [episodeId], if present. */
-  suspend fun removeFromQueue(feedUrl: String, episodeId: String)
+  /** Removes the episode and returns its sort position, or null if the episode was absent. */
+  suspend fun removeFromQueue(feedUrl: String, episodeId: String): Long?
 
   /**
    * Moves the entry with [feedUrl] and [episodeId] to the index of the entry with [targetFeedUrl]

@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
 import software.ralf.app.platform.presenter.backstack.nav3.backstack
@@ -27,6 +28,8 @@ class LibraryQueuePresenterImpl(
 ) : LibraryQueuePresenter {
   @Composable
   override fun present(input: Unit): Model {
+    val removals = remember { MutableStateFlow<LibraryQueuePresenter.Removal?>(null) }
+    val removal by removals.collectAsState()
     val listPresenter = remember {
       ComposePresenter<Unit, ListModel> {
         val backstack = LocalBackstackScope.requireNotNull()
@@ -60,7 +63,20 @@ class LibraryQueuePresenterImpl(
             queue.move(episode = episode.toQueuedEpisode(), target = target.toQueuedEpisode())
           },
           onRemove = { episode ->
-            queue.remove(episode.toQueuedEpisode())
+            queue.removeWithUndo(episode.toQueuedEpisode()) { undo ->
+              removals.value =
+                object : LibraryQueuePresenter.Removal {
+                  override fun undo() {
+                    if (removals.compareAndSet(expect = this, update = null)) {
+                      undo.invoke()
+                    }
+                  }
+
+                  override fun dismiss() {
+                    removals.compareAndSet(expect = this, update = null)
+                  }
+                }
+            }
           },
         )
       }
@@ -85,6 +101,7 @@ class LibraryQueuePresenterImpl(
         list = list.copy(selection = details),
         openedEpisode = opened?.content,
         onCloseEpisode = { pop() },
+        removal = removal,
       )
     }
   }
@@ -103,6 +120,7 @@ class LibraryQueuePresenterImpl(
     override val list: ListModel,
     override val openedEpisode: BaseModel?,
     override val onCloseEpisode: () -> Unit,
+    override val removal: LibraryQueuePresenter.Removal?,
   ) : LibraryQueuePresenter.Model
 
   /** Renderer-only rows and actions, with the opened episode or first queue entry selected. */

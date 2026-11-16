@@ -20,6 +20,13 @@ interface QueueRepository {
   fun remove(episode: QueuedEpisode)
 
   /**
+   * Removes [episode] if queued. After a successful removal, calls [onRemoved] on the writer's
+   * coroutine with an action that restores the previous sort position if it is free, or appends
+   * otherwise. Undo does nothing if the episode is already queued again.
+   */
+  fun removeWithUndo(episode: QueuedEpisode, onRemoved: (undo: () -> Unit) -> Unit)
+
+  /**
    * Moves [episode] to the current index of [target]. Matches entries by feed URL and episode ID.
    * Does nothing if either entry is missing.
    */

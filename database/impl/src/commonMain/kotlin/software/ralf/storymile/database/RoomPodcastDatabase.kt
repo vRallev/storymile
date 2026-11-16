@@ -56,7 +56,7 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
     pruneUnretained(showId)
   }
 
-  internal suspend fun enqueue(queued: QueuedEpisode) = withWriteTransaction {
+  internal suspend fun enqueue(queued: QueuedEpisode, position: Long?) = withWriteTransaction {
     val episodeId =
       ensureEpisode(
         feedUrl = queued.feedUrl,
@@ -64,15 +64,20 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
         artworkUrl = queued.artworkUrl,
         episode = queued.episode,
       )
-    queue().append(episodeId)
+    queue().insert(episodeId = episodeId, preferredPosition = position)
   }
 
-  internal suspend fun removeFromQueue(feedUrl: String, episodeId: String) = withWriteTransaction {
-    val showId = podcasts().findShowId(feedUrl) ?: return@withWriteTransaction
-    if (queue().delete(showId = showId, sourceEpisodeId = episodeId) > 0) {
+  internal suspend fun removeFromQueue(feedUrl: String, episodeId: String): Long? =
+    withWriteTransaction {
+      val showId = podcasts().findShowId(feedUrl) ?: return@withWriteTransaction null
+      val queue = queue()
+      val position =
+        queue.findPosition(feedUrl = feedUrl, sourceEpisodeId = episodeId)
+          ?: return@withWriteTransaction null
+      queue.delete(showId = showId, sourceEpisodeId = episodeId)
       pruneUnretained(showId)
+      position
     }
-  }
 
   internal suspend fun moveInQueue(
     feedUrl: String,
