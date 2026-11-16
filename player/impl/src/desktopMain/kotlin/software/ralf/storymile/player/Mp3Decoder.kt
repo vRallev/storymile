@@ -1,24 +1,53 @@
 package software.ralf.storymile.player
 
-import java.io.ByteArrayOutputStream
 import java.net.URI
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.channels.FileChannel
+import java.nio.file.Files
+import java.nio.file.StandardOpenOption.DELETE_ON_CLOSE
+import java.nio.file.StandardOpenOption.READ
+import java.nio.file.StandardOpenOption.WRITE
 import javazoom.jl.decoder.Bitstream
 import javazoom.jl.decoder.Decoder
+import javazoom.jl.decoder.Obuffer
 import javazoom.jl.decoder.SampleBuffer
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 
 internal object Mp3Decoder {
   suspend fun decode(source: String): PcmAudio {
-    URI(source).toURL().openStream().buffered().use { input ->
+    val path = Files.createTempFile("storymile-audio", ".pcm")
+    val file =
+      try {
+        FileChannel.open(path, READ, WRITE, DELETE_ON_CLOSE)
+      } catch (exception: Exception) {
+        Files.deleteIfExists(path)
+        throw exception
+      }
+    try {
+      return decodeToFile(source = source, file = file)
+    } catch (failure: Throwable) {
+      file.close()
+      throw failure
+    }
+  }
+
+  private suspend fun decodeToFile(source: String, file: FileChannel): PcmAudio {
+    val coroutineContext = currentCoroutineContext()
+    val connection = URI(source).toURL().openConnection()
+    connection.connectTimeout = 10_000
+    connection.readTimeout = 10_000
+    connection.getInputStream().buffered().use { input ->
       val stream = Bitstream(input)
       try {
         val decoder = Decoder()
-        val samples = ByteArrayOutputStream()
+        val samples =
+          ByteBuffer.allocate(Obuffer.OBUFFERSIZE * Short.SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN)
         var sampleRate = 0
         var channels = 0
         while (true) {
-          currentCoroutineContext().ensureActive()
+          coroutineContext.ensureActive()
           val header = stream.readFrame() ?: break
           val decoded = decoder.decodeFrame(header, stream) as SampleBuffer
           if (sampleRate == 0) {
@@ -28,27 +57,52 @@ internal object Mp3Decoder {
           check(sampleRate == decoded.sampleFrequency && channels == decoded.channelCount) {
             "The audio format changed within the episode."
           }
+          samples.clear()
           for (index in 0 until decoded.bufferLength) {
-            val sample = decoded.buffer[index].toInt()
-            samples.write(sample and 0xff)
-            samples.write((sample ushr 8) and 0xff)
+            samples.putShort(decoded.buffer[index])
+          }
+          samples.flip()
+          while (samples.hasRemaining()) {
+            file.write(samples)
           }
           stream.closeFrame()
         }
-        check(sampleRate > 0 && samples.size() > 0) { "The episode contains no MP3 audio." }
-        val bytes = samples.toByteArray()
-        return PcmAudio(
-          samples =
-            ShortArray(bytes.size / 2) { index ->
-              ((bytes[index * 2].toInt() and 0xff) or (bytes[index * 2 + 1].toInt() shl 8))
-                .toShort()
-            },
+        check(sampleRate > 0 && file.position() > 0) { "The episode contains no MP3 audio." }
+        return FilePcmAudio(
           sampleRate = sampleRate,
           channels = channels,
+          frameCount = Math.toIntExact(file.position() / Short.SIZE_BYTES / channels),
+          file = file,
         )
       } finally {
         stream.close()
       }
+    }
+  }
+
+  private class FilePcmAudio(
+    sampleRate: Int,
+    channels: Int,
+    frameCount: Int,
+    private val file: FileChannel,
+  ) : PcmAudio(sampleRate = sampleRate, channels = channels, frameCount = frameCount) {
+    override fun readSamples(startFrame: Int, endFrame: Int): ShortArray {
+      val samples = ShortArray((endFrame - startFrame) * channels)
+      val bytes =
+        ByteBuffer.allocate(samples.size * Short.SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN)
+      val offset = startFrame.toLong() * channels * Short.SIZE_BYTES
+      while (bytes.hasRemaining()) {
+        check(file.read(bytes, offset + bytes.position()) > 0) {
+          "Could not read the decoded audio."
+        }
+      }
+      bytes.flip()
+      bytes.asShortBuffer().get(samples)
+      return samples
+    }
+
+    override fun close() {
+      file.close()
     }
   }
 }
