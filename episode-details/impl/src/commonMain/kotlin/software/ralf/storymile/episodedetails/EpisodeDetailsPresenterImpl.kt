@@ -8,10 +8,13 @@ import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
 import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.storymile.podcast.QueueRepository
 import software.ralf.storymile.podcast.QueuedEpisode
+import software.ralf.storymile.podcast.SavedEpisode
+import software.ralf.storymile.podcast.SavedEpisodeRepository
 
 class EpisodeDetailsPresenterImpl(
   private val details: EpisodeDetails,
   private val queue: QueueRepository,
+  private val savedEpisodes: SavedEpisodeRepository,
 ) : EpisodeDetailsPresenter<EpisodeDetailsPresenterImpl.Model> {
   @Composable
   override fun present(input: Unit): Model {
@@ -19,6 +22,11 @@ class EpisodeDetailsPresenterImpl(
     val queued by queue.episodes.collectAsState()
     val queueEnabled = queued != null
     val queuedEpisode = queued?.firstOrNull {
+      it.feedUrl == details.feedUrl && it.episode.id == details.episode.id
+    }
+    val saved by savedEpisodes.episodes.collectAsState()
+    val saveEnabled = saved != null
+    val savedEpisode = saved?.firstOrNull {
       it.feedUrl == details.feedUrl && it.episode.id == details.episode.id
     }
     return Model(
@@ -39,12 +47,28 @@ class EpisodeDetailsPresenterImpl(
             )
         }
       },
-      onSave = {},
+      onToggleSave = {
+        when {
+          !saveEnabled -> Unit
+          savedEpisode != null -> savedEpisodes.remove(savedEpisode)
+          else ->
+            savedEpisodes.save(
+              SavedEpisode(
+                feedUrl = details.feedUrl,
+                podcastTitle = details.podcastTitle,
+                artworkUrl = details.artworkUrl,
+                episode = details.episode,
+              ),
+            )
+        }
+      },
       onDownload = {},
       onMore = {},
       onBack = { backstack.pop() },
       isQueued = queuedEpisode != null,
       queueEnabled = queueEnabled,
+      isSaved = savedEpisode != null,
+      saveEnabled = saveEnabled,
     )
   }
 
@@ -53,11 +77,13 @@ class EpisodeDetailsPresenterImpl(
     val details: EpisodeDetails,
     val onPlayNow: () -> Unit,
     val onToggleQueue: () -> Unit,
-    val onSave: () -> Unit,
+    val onToggleSave: () -> Unit,
     val onDownload: () -> Unit,
     val onMore: () -> Unit,
     val onBack: () -> Unit,
     val isQueued: Boolean = false,
     val queueEnabled: Boolean = true,
+    val isSaved: Boolean = false,
+    val saveEnabled: Boolean = true,
   ) : BaseModel
 }

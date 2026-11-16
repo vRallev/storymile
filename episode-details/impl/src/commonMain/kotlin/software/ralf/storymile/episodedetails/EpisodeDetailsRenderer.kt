@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.BookmarkBorder
@@ -65,7 +66,9 @@ import software.ralf.storymile.episode.details.impl.generated.resources.episode_
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_play_now
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_published
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_remove_from_queue
+import software.ralf.storymile.episode.details.impl.generated.resources.episode_remove_from_saved
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_save
+import software.ralf.storymile.episode.details.impl.generated.resources.episode_saved
 import software.ralf.storymile.episode.details.impl.generated.resources.episode_show_notes
 import software.ralf.storymile.templates.LocalAnimatedVisibilityScope
 import software.ralf.storymile.theme.AppTheme
@@ -211,12 +214,17 @@ class EpisodeDetailsRenderer : ComposeRenderer<EpisodeDetailsPresenterImpl.Model
         }
       }
       Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+        val saveLabel =
+          stringResource(if (model.isSaved) Res.string.episode_saved else Res.string.episode_save)
         SecondaryAction(
-          label = stringResource(Res.string.episode_save),
-          icon = Icons.Outlined.BookmarkBorder,
+          label = saveLabel,
+          icon = if (model.isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
           tag = "episode-details-save",
-          onClick = model.onSave,
+          onClick = model.onToggleSave,
           modifier = Modifier.weight(1f),
+          enabled = model.saveEnabled,
+          contentDescription =
+            if (model.isSaved) stringResource(Res.string.episode_remove_from_saved) else saveLabel,
         )
         SecondaryAction(
           label = stringResource(Res.string.episode_download),
@@ -243,16 +251,19 @@ class EpisodeDetailsRenderer : ComposeRenderer<EpisodeDetailsPresenterImpl.Model
     tag: String,
     onClick: () -> Unit,
     modifier: Modifier,
+    enabled: Boolean = true,
+    contentDescription: String = label,
   ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
       OutlinedIconButton(
         onClick = onClick,
+        enabled = enabled,
         modifier = Modifier.testTag(tag),
         border = BorderStroke(1.dp, AppTheme.colorScheme.outlineVariant),
         colors =
           IconButtonDefaults.outlinedIconButtonColors(contentColor = AppTheme.colorScheme.primary),
       ) {
-        Icon(imageVector = icon, contentDescription = label)
+        Icon(imageVector = icon, contentDescription = contentDescription)
       }
       Text(
         text = label,

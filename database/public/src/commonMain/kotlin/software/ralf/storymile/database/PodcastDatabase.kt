@@ -18,6 +18,6 @@ interface PodcastDatabase {
    */
   suspend fun insert(podcast: PodcastFeed)
 
-  /** Unfollows the show at [feedUrl]. Episodes in the queue remain available. */
+  /** Unfollows the show at [feedUrl]. Queued and saved episodes remain available. */
   suspend fun delete(feedUrl: String)
 }
