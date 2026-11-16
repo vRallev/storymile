@@ -1,6 +1,5 @@
 package software.ralf.storymile.database
 
-import androidx.room3.withWriteTransaction
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.ForScope
@@ -77,25 +76,14 @@ class UserPodcastDatabase(
     }
   }
 
-  override suspend fun insert(podcast: PodcastFeed) = operation { it.podcasts().insert(podcast) }
+  override suspend fun insert(podcast: PodcastFeed) = operation { it.follow(podcast) }
 
-  override suspend fun delete(feedUrl: String) = operation { it.podcasts().delete(feedUrl) }
+  override suspend fun delete(feedUrl: String) = operation { it.unfollow(feedUrl) }
 
-  override suspend fun enqueue(episode: QueuedEpisode) = operation { database ->
-    database.withWriteTransaction {
-      val episodeId = database.podcasts().ensureEpisode(episode)
-      database.queue().append(episodeId)
-    }
-  }
+  override suspend fun enqueue(episode: QueuedEpisode) = operation { it.enqueue(episode) }
 
-  override suspend fun removeFromQueue(feedUrl: String, episodeId: String) = operation { database ->
-    database.withWriteTransaction {
-      val podcasts = database.podcasts()
-      val showId = podcasts.findShowId(feedUrl) ?: return@withWriteTransaction
-      if (database.queue().delete(showId = showId, sourceEpisodeId = episodeId) > 0) {
-        podcasts.pruneUnretained(showId)
-      }
-    }
+  override suspend fun removeFromQueue(feedUrl: String, episodeId: String) = operation {
+    it.removeFromQueue(feedUrl = feedUrl, episodeId = episodeId)
   }
 
   private suspend fun awaitPreviousOwner(path: String?) {
