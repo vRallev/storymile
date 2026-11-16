@@ -13,11 +13,11 @@ interface PodcastDatabase {
   val podcasts: Flow<List<PodcastFeed>>
 
   /**
-   * Inserts a podcast or replaces its metadata and episodes atomically, keyed by feed URL. Episode
+   * Follows a podcast by feed URL and saves its current metadata and feed episodes atomically. Feed
    * order is preserved. If episode IDs repeat, the first occurrence is stored.
    */
   suspend fun insert(podcast: PodcastFeed)
 
-  /** Removes the show and its episodes. Does nothing if [feedUrl] is not saved. */
+  /** Unfollows the show at [feedUrl]. Episodes in the queue remain available. */
   suspend fun delete(feedUrl: String)
 }

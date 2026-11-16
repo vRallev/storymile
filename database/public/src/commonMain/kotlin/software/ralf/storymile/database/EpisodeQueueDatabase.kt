@@ -5,7 +5,7 @@ import software.ralf.storymile.podcast.QueuedEpisode
 
 /** Stores the queue in the current user's podcast database. */
 interface EpisodeQueueDatabase {
-  /** Episodes in queue order. Emits an empty list when the queue is empty. */
+  /** Episodes in queue order with their saved metadata. Emits an empty list when empty. */
   val queuedEpisodes: Flow<List<QueuedEpisode>>
 
   /** Appends an episode if its feed URL and episode ID are not already in the queue. */

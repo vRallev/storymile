@@ -2,12 +2,18 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "c99c4292151c06c29e0a819cf01ce036",
+    "identityHash": "62b9847fb2fbcaf9a76ef9e03f4936fc",
     "entities": [
       {
         "tableName": "shows",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`feedUrl` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `author` TEXT, `artworkUrl` TEXT, `link` TEXT, PRIMARY KEY(`feedUrl`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `feedUrl` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `author` TEXT, `artworkUrl` TEXT, `link` TEXT, `isFollowed` INTEGER NOT NULL DEFAULT 0)",
         "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "feedUrl",
             "columnName": "feedUrl",
@@ -39,149 +45,59 @@
             "fieldPath": "link",
             "columnName": "link",
             "affinity": "TEXT"
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "feedUrl"
-          ]
-        }
-      },
-      {
-        "tableName": "episodes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`feedUrl` TEXT NOT NULL, `id` TEXT NOT NULL, `position` INTEGER NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `author` TEXT, `artworkUrl` TEXT, `publishedAt` TEXT, `durationMillis` INTEGER, `url` TEXT NOT NULL, `type` TEXT, `length` INTEGER, PRIMARY KEY(`feedUrl`, `id`), FOREIGN KEY(`feedUrl`) REFERENCES `shows`(`feedUrl`) ON UPDATE NO ACTION ON DELETE CASCADE )",
-        "fields": [
-          {
-            "fieldPath": "feedUrl",
-            "columnName": "feedUrl",
-            "affinity": "TEXT",
-            "notNull": true
           },
           {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "position",
-            "columnName": "position",
+            "fieldPath": "isFollowed",
+            "columnName": "isFollowed",
             "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "title",
-            "columnName": "title",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "description",
-            "columnName": "description",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "author",
-            "columnName": "author",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "artworkUrl",
-            "columnName": "artworkUrl",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "publishedAt",
-            "columnName": "publishedAt",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "durationMillis",
-            "columnName": "durationMillis",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "enclosure.url",
-            "columnName": "url",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "enclosure.type",
-            "columnName": "type",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "enclosure.length",
-            "columnName": "length",
-            "affinity": "INTEGER"
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
-            "feedUrl",
             "id"
           ]
         },
         "indices": [
           {
-            "name": "index_episodes_feedUrl",
-            "unique": false,
+            "name": "index_shows_feedUrl",
+            "unique": true,
             "columnNames": [
               "feedUrl"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_episodes_feedUrl` ON `${TABLE_NAME}` (`feedUrl`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "shows",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "feedUrl"
-            ],
-            "referencedColumns": [
-              "feedUrl"
-            ]
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_shows_feedUrl` ON `${TABLE_NAME}` (`feedUrl`)"
           }
         ]
       },
       {
-        "tableName": "queued_episodes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`position` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `feedUrl` TEXT NOT NULL, `podcastTitle` TEXT NOT NULL, `artworkUrl` TEXT, `episodeId` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `author` TEXT, `episodeArtworkUrl` TEXT, `publishedAt` TEXT, `durationMillis` INTEGER, `url` TEXT NOT NULL, `type` TEXT, `length` INTEGER)",
+        "tableName": "episodes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `showId` INTEGER NOT NULL, `sourceEpisodeId` TEXT NOT NULL, `feedPosition` INTEGER, `title` TEXT NOT NULL, `description` TEXT, `author` TEXT, `artworkUrl` TEXT, `publishedAt` TEXT, `durationMillis` INTEGER, `url` TEXT NOT NULL, `type` TEXT, `length` INTEGER, FOREIGN KEY(`showId`) REFERENCES `shows`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
-            "fieldPath": "position",
-            "columnName": "position",
+            "fieldPath": "id",
+            "columnName": "id",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "feedUrl",
-            "columnName": "feedUrl",
+            "fieldPath": "showId",
+            "columnName": "showId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceEpisodeId",
+            "columnName": "sourceEpisodeId",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "podcastTitle",
-            "columnName": "podcastTitle",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "artworkUrl",
-            "columnName": "artworkUrl",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "episodeId",
-            "columnName": "episodeId",
-            "affinity": "TEXT",
-            "notNull": true
+            "fieldPath": "feedPosition",
+            "columnName": "feedPosition",
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "title",
@@ -200,8 +116,8 @@
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "episodeArtworkUrl",
-            "columnName": "episodeArtworkUrl",
+            "fieldPath": "artworkUrl",
+            "columnName": "artworkUrl",
             "affinity": "TEXT"
           },
           {
@@ -234,26 +150,102 @@
         "primaryKey": {
           "autoGenerate": true,
           "columnNames": [
-            "position"
+            "id"
           ]
         },
         "indices": [
           {
-            "name": "index_queued_episodes_feedUrl_episodeId",
+            "name": "index_episodes_showId_sourceEpisodeId",
+            "unique": false,
+            "columnNames": [
+              "showId",
+              "sourceEpisodeId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_episodes_showId_sourceEpisodeId` ON `${TABLE_NAME}` (`showId`, `sourceEpisodeId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "shows",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "showId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "queued_episodes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `episodeId` INTEGER NOT NULL, `position` INTEGER NOT NULL, FOREIGN KEY(`episodeId`) REFERENCES `episodes`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "episodeId",
+            "columnName": "episodeId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_queued_episodes_episodeId",
             "unique": true,
             "columnNames": [
-              "feedUrl",
               "episodeId"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_queued_episodes_feedUrl_episodeId` ON `${TABLE_NAME}` (`feedUrl`, `episodeId`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_queued_episodes_episodeId` ON `${TABLE_NAME}` (`episodeId`)"
+          },
+          {
+            "name": "index_queued_episodes_position",
+            "unique": false,
+            "columnNames": [
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_queued_episodes_position` ON `${TABLE_NAME}` (`position`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "episodes",
+            "onDelete": "RESTRICT",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "episodeId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
           }
         ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c99c4292151c06c29e0a819cf01ce036')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '62b9847fb2fbcaf9a76ef9e03f4936fc')"
     ]
   }
 }
