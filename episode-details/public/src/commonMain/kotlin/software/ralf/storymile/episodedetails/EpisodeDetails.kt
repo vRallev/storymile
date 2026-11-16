@@ -18,7 +18,7 @@ data class EpisodeDetails(
   val key: String = "$feedUrl#${episode.id}"
 
   /** Plain text for both the list preview and full description. Empty when absent. */
-  val description: String = HtmlDescription.plainText(episode.description).orEmpty()
+  val description: String by lazy { HtmlDescription.plainText(episode.description).orEmpty() }
 
   /** Duration in minutes and seconds, with hours when needed. Null when absent. */
   val duration: String? =
