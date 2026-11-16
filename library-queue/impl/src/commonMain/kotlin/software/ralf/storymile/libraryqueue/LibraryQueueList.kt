@@ -1,6 +1,7 @@
 package software.ralf.storymile.libraryqueue
 
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -90,7 +92,7 @@ internal fun LibraryQueueList(
   BoxWithConstraints(modifier) {
     val compact = maxWidth / LocalDensity.current.fontScale < 400.dp
     LazyColumn(
-      modifier = Modifier.fillMaxWidth().testTag("library-queue-list"),
+      modifier = Modifier.fillMaxSize().testTag("library-queue-list"),
       state = state,
       contentPadding = PaddingValues(vertical = 16.dp),
     ) {
@@ -102,7 +104,7 @@ internal fun LibraryQueueList(
           Modifier.animateItem(
               fadeInSpec = null,
               placementSpec = if (isDragging) null else spring(),
-              fadeOutSpec = null,
+              fadeOutSpec = tween(durationMillis = 150),
             )
             .zIndex(if (isDragging) 1f else 0f)
             .graphicsLayer { translationY = drag.offset(details.key) },

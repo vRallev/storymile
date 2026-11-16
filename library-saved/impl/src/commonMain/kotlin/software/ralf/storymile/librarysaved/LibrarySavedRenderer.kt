@@ -48,11 +48,13 @@ class LibrarySavedRenderer : ComposeRenderer<LibrarySavedPresenterImpl.ListModel
               state = listState,
               modifier = Modifier.weight(1.25f).fillMaxHeight().padding(horizontal = sidePadding),
             )
-            if (selection != null) {
+            if (wide) {
               PaneDivider()
               Box(Modifier.weight(1f).fillMaxHeight()) {
-                CompositionLocalProvider(LocalEpisodeDetailsPane provides true) {
-                  Render(selection.content)
+                if (selection != null) {
+                  CompositionLocalProvider(LocalEpisodeDetailsPane provides true) {
+                    Render(selection.content)
+                  }
                 }
               }
             }

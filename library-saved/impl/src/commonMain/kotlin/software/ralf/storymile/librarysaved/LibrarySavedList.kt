@@ -1,10 +1,12 @@
 package software.ralf.storymile.librarysaved
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -51,14 +53,14 @@ internal fun LibrarySavedList(
   BoxWithConstraints(modifier) {
     val compact = maxWidth / LocalDensity.current.fontScale < 400.dp
     LazyColumn(
-      modifier = Modifier.fillMaxWidth().testTag("library-saved-list"),
+      modifier = Modifier.fillMaxSize().testTag("library-saved-list"),
       state = state,
       contentPadding = PaddingValues(vertical = 16.dp),
     ) {
       itemsIndexed(episodes, key = { _, details -> details.key }) { index, details ->
         val isSelected = details.key == selectedEpisodeKey
         val rowModifier = Modifier.testTag("library-saved-episode-$index")
-        Column(Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null)) {
+        Column(Modifier.animateItem(fadeInSpec = null, fadeOutSpec = tween(durationMillis = 150))) {
           if (index > 0) {
             ListDivider(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
           }
