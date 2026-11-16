@@ -5,7 +5,7 @@ import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.discovery.DiscoveryTopic
 import software.ralf.storymile.podcast.shows.generated.resources.Res
 import software.ralf.storymile.podcast.shows.generated.resources.discover_podcasts
-import software.ralf.storymile.podcast.shows.generated.resources.library
+import software.ralf.storymile.podcast.shows.generated.resources.followed_shows
 import software.ralf.storymile.podcast.shows.generated.resources.search_results
 import software.ralf.storymile.podcast.shows.generated.resources.topic_culture
 import software.ralf.storymile.podcast.shows.generated.resources.topic_nature
@@ -17,7 +17,7 @@ import software.ralf.storymile.podcast.shows.generated.resources.topic_technolog
 fun ShowSource.title(): String =
   stringResource(
     when (this) {
-      ShowSource.Library -> Res.string.library
+      ShowSource.Library -> Res.string.followed_shows
       ShowSource.Browse -> Res.string.discover_podcasts
       ShowSource.Search -> Res.string.search_results
       is ShowSource.Topic ->

@@ -5,6 +5,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
@@ -52,9 +53,11 @@ class LibraryUiTest {
 
       val quietCurrent = onNodeWithTag("library-show-https://feeds.test/quiet-current")
       val fieldNotes = onNodeWithTag("library-show-https://feeds.test/field-notes")
+      onNodeWithTag("tab-title").assertTextEquals("Followed shows")
+      onAllNodes(hasText("Followed shows")).assertCountEquals(1)
       saveScreenshot("followed-phone-dark")
       runOnUiThread { quietCurrent.performClick() }
-      onNodeWithTag("title-bar-title").assertTextEquals("Library")
+      onNodeWithTag("title-bar-title").assertTextEquals("Followed shows")
       onNodeWithTag("library-tab-shows").assertDoesNotExist()
       onNodeWithTag("show-title").assertTextEquals("The Quiet Current")
       composeRobot<ShowRobot> { seeFollowing(true) }
@@ -68,6 +71,8 @@ class LibraryUiTest {
         .forEach { next ->
           runOnIdle { size.value = next }
           onNodeWithTag("library-tab-shows").assertIsSelected()
+          onNodeWithTag("tab-title").assertTextEquals("Followed shows")
+          onAllNodes(hasText("Followed shows")).assertCountEquals(1)
           onNodeWithTag("show-list").assertIsDisplayed()
           quietCurrent.assertIsSelected()
           assertThat(bounds("show-list").right).isLessThan(bounds("show-detail").left)
@@ -220,7 +225,10 @@ class LibraryUiTest {
       }
     }
     composeRobot<DiscoveryRobot> { backFromCatalog() }
-    waitUntilAtLeastOneExists(matcher = hasText("Followed shows"), timeoutMillis = 5_000)
+    waitUntilAtLeastOneExists(
+      matcher = hasTestTag("library-show-https://feeds.test/field-notes"),
+      timeoutMillis = 5_000,
+    )
   }
 
   private fun ComposeUiTest.bounds(tag: String) = onNodeWithTag(tag).getUnclippedBoundsInRoot()
@@ -252,6 +260,10 @@ class LibraryUiTest {
             composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
             onNodeWithTag("tab-library").assertIsSelected()
             onNodeWithTag("library-screen").assertIsDisplayed()
+            waitUntilAtLeastOneExists(
+              matcher = hasText("Your queue is empty"),
+              timeoutMillis = 5_000,
+            )
             onNodeWithTag("library-illustration", useUnmergedTree = true).assertIsDisplayed()
             onNodeWithTag("library-empty-message", useUnmergedTree = true).assertIsDisplayed()
             onNodeWithTag("library-discover").assertIsDisplayed()
