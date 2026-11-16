@@ -16,6 +16,7 @@ import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.storymile.episodedetails.EpisodeDetails
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
+import software.ralf.storymile.library.LibraryRemovalUndo
 import software.ralf.storymile.podcast.SavedEpisode
 import software.ralf.storymile.podcast.SavedEpisodeRepository
 import software.ralf.storymile.user.UserScope
@@ -28,7 +29,9 @@ class LibrarySavedPresenterImpl(
 ) : LibrarySavedPresenter {
   @Composable
   override fun present(input: Unit): Model {
-    val listPresenter = remember { ComposePresenter<Unit, ListModel> { presentList() } }
+    val removals = remember { LibraryRemovalUndo() }
+    val removal by removals.pending.collectAsState()
+    val listPresenter = remember { ComposePresenter<Unit, ListModel> { presentList(removals) } }
     return presenterBackstack(listPresenter) { models ->
       val list = models.first() as ListModel
       val opened = models.last() as? DetailsModel
@@ -55,12 +58,13 @@ class LibrarySavedPresenterImpl(
         list = list.copy(selection = details),
         openedEpisode = selection?.content,
         onCloseEpisode = { pop() },
+        removal = removal,
       )
     }
   }
 
   @Composable
-  private fun presentList(): ListModel {
+  private fun presentList(removals: LibraryRemovalUndo): ListModel {
     val backstack = LocalBackstackScope.requireNotNull()
     val saved by savedEpisodes.episodes.collectAsState()
     val episodes =
@@ -88,7 +92,9 @@ class LibrarySavedPresenterImpl(
           backstack.replaceTop(destination)
         }
       },
-      onRemove = { savedEpisodes.remove(it.toSavedEpisode()) },
+      onRemove = { episode ->
+        savedEpisodes.removeWithUndo(episode.toSavedEpisode()) { undo -> removals.offer(undo) }
+      },
     )
   }
 
@@ -115,5 +121,6 @@ class LibrarySavedPresenterImpl(
     override val list: BaseModel,
     override val openedEpisode: BaseModel?,
     override val onCloseEpisode: () -> Unit,
+    override val removal: LibraryRemovalUndo.Removal?,
   ) : LibrarySavedPresenter.Model
 }

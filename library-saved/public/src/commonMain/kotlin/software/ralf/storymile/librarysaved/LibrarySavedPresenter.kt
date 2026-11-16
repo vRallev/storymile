@@ -2,6 +2,7 @@ package software.ralf.storymile.librarysaved
 
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.compose.ComposePresenter
+import software.ralf.storymile.library.LibraryRemovalUndo
 
 /** Presents the current user's saved episodes in Library. */
 interface LibrarySavedPresenter : ComposePresenter<Unit, LibrarySavedPresenter.Model> {
@@ -18,5 +19,8 @@ interface LibrarySavedPresenter : ComposePresenter<Unit, LibrarySavedPresenter.M
 
     /** Returns to the saved list. */
     val onCloseEpisode: () -> Unit
+
+    /** The latest removal that can still be undone, or null when there is none. */
+    val removal: LibraryRemovalUndo.Removal?
   }
 }

@@ -7,7 +7,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
 import software.ralf.app.platform.presenter.backstack.nav3.backstack
@@ -16,6 +15,7 @@ import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.storymile.episodedetails.EpisodeDetails
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
+import software.ralf.storymile.library.LibraryRemovalUndo
 import software.ralf.storymile.podcast.QueueRepository
 import software.ralf.storymile.podcast.QueuedEpisode
 import software.ralf.storymile.user.UserScope
@@ -28,8 +28,8 @@ class LibraryQueuePresenterImpl(
 ) : LibraryQueuePresenter {
   @Composable
   override fun present(input: Unit): Model {
-    val removals = remember { MutableStateFlow<LibraryQueuePresenter.Removal?>(null) }
-    val removal by removals.collectAsState()
+    val removals = remember { LibraryRemovalUndo() }
+    val removal by removals.pending.collectAsState()
     val listPresenter = remember {
       ComposePresenter<Unit, ListModel> {
         val backstack = LocalBackstackScope.requireNotNull()
@@ -64,18 +64,7 @@ class LibraryQueuePresenterImpl(
           },
           onRemove = { episode ->
             queue.removeWithUndo(episode.toQueuedEpisode()) { undo ->
-              removals.value =
-                object : LibraryQueuePresenter.Removal {
-                  override fun undo() {
-                    if (removals.compareAndSet(expect = this, update = null)) {
-                      undo.invoke()
-                    }
-                  }
-
-                  override fun dismiss() {
-                    removals.compareAndSet(expect = this, update = null)
-                  }
-                }
+              removals.offer(undo)
             }
           },
         )
@@ -120,7 +109,7 @@ class LibraryQueuePresenterImpl(
     override val list: ListModel,
     override val openedEpisode: BaseModel?,
     override val onCloseEpisode: () -> Unit,
-    override val removal: LibraryQueuePresenter.Removal?,
+    override val removal: LibraryRemovalUndo.Removal?,
   ) : LibraryQueuePresenter.Model
 
   /** Renderer-only rows and actions, with the opened episode or first queue entry selected. */

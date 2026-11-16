@@ -97,7 +97,7 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
     }
   }
 
-  internal suspend fun save(saved: SavedEpisode) = withWriteTransaction {
+  internal suspend fun save(saved: SavedEpisode, previousId: Long?) = withWriteTransaction {
     val episodeId =
       ensureEpisode(
         feedUrl = saved.feedUrl,
@@ -105,15 +105,19 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
         artworkUrl = saved.artworkUrl,
         episode = saved.episode,
       )
-    savedEpisodes().insert(SavedEpisodeEntity(episodeId = episodeId))
+    savedEpisodes().insert(SavedEpisodeEntity(id = previousId ?: 0, episodeId = episodeId))
   }
 
-  internal suspend fun removeSavedEpisode(feedUrl: String, episodeId: String) =
+  internal suspend fun removeSavedEpisode(feedUrl: String, episodeId: String): Long? =
     withWriteTransaction {
-      val showId = podcasts().findShowId(feedUrl) ?: return@withWriteTransaction
-      if (savedEpisodes().delete(showId = showId, sourceEpisodeId = episodeId) > 0) {
-        pruneUnretained(showId)
-      }
+      val showId = podcasts().findShowId(feedUrl) ?: return@withWriteTransaction null
+      val saved = savedEpisodes()
+      val id =
+        saved.findId(showId = showId, sourceEpisodeId = episodeId)
+          ?: return@withWriteTransaction null
+      saved.delete(id)
+      pruneUnretained(showId)
+      id
     }
 
   private suspend fun ensureEpisode(

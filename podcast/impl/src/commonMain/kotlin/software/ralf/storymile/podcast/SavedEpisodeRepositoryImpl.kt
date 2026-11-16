@@ -35,4 +35,13 @@ class SavedEpisodeRepositoryImpl(
       database.removeSavedEpisode(feedUrl = episode.feedUrl, episodeId = episode.episode.id)
     }
   }
+
+  override fun removeWithUndo(episode: SavedEpisode, onRemoved: (undo: () -> Unit) -> Unit) {
+    changes.submit {
+      val previousId =
+        database.removeSavedEpisode(feedUrl = episode.feedUrl, episodeId = episode.episode.id)
+          ?: return@submit
+      onRemoved { changes.submit { database.save(episode = episode, previousId = previousId) } }
+    }
+  }
 }

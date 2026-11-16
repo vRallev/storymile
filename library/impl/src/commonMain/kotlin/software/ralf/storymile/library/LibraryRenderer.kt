@@ -30,8 +30,8 @@ import software.ralf.app.platform.renderer.Render
 import software.ralf.storymile.library.LibraryPresenterImpl.Tab
 import software.ralf.storymile.library.impl.generated.resources.Res
 import software.ralf.storymile.library.impl.generated.resources.library_queue_removed
-import software.ralf.storymile.library.impl.generated.resources.library_queue_undo
-import software.ralf.storymile.libraryqueue.LibraryQueuePresenter
+import software.ralf.storymile.library.impl.generated.resources.library_saved_removed
+import software.ralf.storymile.library.impl.generated.resources.library_undo
 import software.ralf.storymile.libraryqueue.LocalLibraryQueueListState
 import software.ralf.storymile.librarysaved.LocalLibrarySavedListState
 import software.ralf.storymile.podcastshows.supportsShowPanes
@@ -99,8 +99,19 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
             modifier = Modifier.fillMaxSize(),
           )
         }
-        QueueRemovalSnackbar(
+        val snackbarHost = remember { SnackbarHostState() }
+        RemovalSnackbarEffect(
           removal = model.queue.removal,
+          host = snackbarHost,
+          message = stringResource(Res.string.library_queue_removed),
+        )
+        RemovalSnackbarEffect(
+          removal = model.saved.removal,
+          host = snackbarHost,
+          message = stringResource(Res.string.library_saved_removed),
+        )
+        SnackbarHost(
+          hostState = snackbarHost,
           modifier = Modifier.align(Alignment.BottomCenter).widthIn(max = 560.dp),
         )
       }
@@ -108,14 +119,17 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
   }
 
   @Composable
-  private fun QueueRemovalSnackbar(removal: LibraryQueuePresenter.Removal?, modifier: Modifier) {
-    val host = remember { SnackbarHostState() }
-    val message = stringResource(Res.string.library_queue_removed)
-    val undo = stringResource(Res.string.library_queue_undo)
+  private fun RemovalSnackbarEffect(
+    removal: LibraryRemovalUndo.Removal?,
+    host: SnackbarHostState,
+    message: String,
+  ) {
+    val undo = stringResource(Res.string.library_undo)
     LaunchedEffect(removal) {
       if (removal == null) {
         return@LaunchedEffect
       }
+      host.currentSnackbarData?.dismiss()
       try {
         val result =
           host.showSnackbar(message = message, actionLabel = undo, duration = SnackbarDuration.Long)
@@ -126,6 +140,5 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
         removal.dismiss()
       }
     }
-    SnackbarHost(hostState = host, modifier = modifier)
   }
 }
