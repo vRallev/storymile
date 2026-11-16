@@ -8,6 +8,8 @@
   <string name="episode_in_queue">In queue</string>
   <string name="episode_remove_from_queue">Remove from queue</string>
   <string name="episode_save">Save</string>
+  <string name="episode_saved">Saved</string>
+  <string name="episode_remove_from_saved">Remove from saved episodes</string>
   <string name="episode_download">Download</string>
   <string name="episode_more">More</string>
   <string name="episode_show_notes">Show notes</string>

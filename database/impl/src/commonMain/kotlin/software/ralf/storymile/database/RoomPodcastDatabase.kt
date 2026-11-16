@@ -7,9 +7,16 @@ import androidx.room3.withWriteTransaction
 import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.podcast.PodcastFeed
 import software.ralf.storymile.podcast.QueuedEpisode
+import software.ralf.storymile.podcast.SavedEpisode
 
 @Database(
-  entities = [ShowEntity::class, EpisodeEntity::class, QueuedEpisodeEntity::class],
+  entities =
+    [
+      ShowEntity::class,
+      EpisodeEntity::class,
+      QueuedEpisodeEntity::class,
+      SavedEpisodeEntity::class,
+    ],
   version = 1,
 )
 @ConstructedBy(RoomPodcastDatabaseConstructor::class)
@@ -19,6 +26,8 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
   abstract fun episodes(): EpisodeDao
 
   abstract fun queue(): EpisodeQueueDao
+
+  abstract fun savedEpisodes(): SavedEpisodeDao
 
   internal suspend fun follow(podcast: PodcastFeed) = withWriteTransaction {
     val shows = podcasts()
@@ -48,11 +57,13 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
   }
 
   internal suspend fun enqueue(queued: QueuedEpisode) = withWriteTransaction {
-    val showId = ensureShowForQueue(queued)
-    val episodes = episodes()
     val episodeId =
-      episodes.findEpisodeId(showId = showId, sourceEpisodeId = queued.episode.id)
-        ?: episodes.insertEpisode(queued.episode.toEntity(showId = showId, feedPosition = null))
+      ensureEpisode(
+        feedUrl = queued.feedUrl,
+        podcastTitle = queued.podcastTitle,
+        artworkUrl = queued.artworkUrl,
+        episode = queued.episode,
+      )
     queue().append(episodeId)
   }
 
@@ -81,24 +92,59 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
     }
   }
 
-  private suspend fun ensureShowForQueue(queued: QueuedEpisode): Long {
+  internal suspend fun save(saved: SavedEpisode) = withWriteTransaction {
+    val episodeId =
+      ensureEpisode(
+        feedUrl = saved.feedUrl,
+        podcastTitle = saved.podcastTitle,
+        artworkUrl = saved.artworkUrl,
+        episode = saved.episode,
+      )
+    savedEpisodes().insert(SavedEpisodeEntity(episodeId = episodeId))
+  }
+
+  internal suspend fun removeSavedEpisode(feedUrl: String, episodeId: String) =
+    withWriteTransaction {
+      val showId = podcasts().findShowId(feedUrl) ?: return@withWriteTransaction
+      if (savedEpisodes().delete(showId = showId, sourceEpisodeId = episodeId) > 0) {
+        pruneUnretained(showId)
+      }
+    }
+
+  private suspend fun ensureEpisode(
+    feedUrl: String,
+    podcastTitle: String,
+    artworkUrl: String?,
+    episode: PodcastEpisode,
+  ): Long {
+    val showId =
+      ensureShow(
+        feedUrl = feedUrl,
+        podcastTitle = podcastTitle,
+        artworkUrl = artworkUrl.takeIf { episode.artworkUrl == null },
+      )
+    val episodes = episodes()
+    return episodes.findEpisodeId(showId = showId, sourceEpisodeId = episode.id)
+      ?: episodes.insertEpisode(episode.toEntity(showId = showId, feedPosition = null))
+  }
+
+  private suspend fun ensureShow(feedUrl: String, podcastTitle: String, artworkUrl: String?): Long {
     val shows = podcasts()
-    val showArtwork = queued.artworkUrl.takeIf { queued.episode.artworkUrl == null }
-    val show = shows.findShow(queued.feedUrl)
+    val show = shows.findShow(feedUrl)
     if (show == null) {
       return shows.insertShow(
         ShowEntity(
-          feedUrl = queued.feedUrl,
-          title = queued.podcastTitle,
+          feedUrl = feedUrl,
+          title = podcastTitle,
           description = null,
           author = null,
-          artworkUrl = showArtwork,
+          artworkUrl = artworkUrl,
           link = null,
         ),
       )
     }
-    if (!show.isFollowed && show.artworkUrl == null && showArtwork != null) {
-      shows.updateShow(show.copy(artworkUrl = showArtwork))
+    if (!show.isFollowed && show.artworkUrl == null && artworkUrl != null) {
+      shows.updateShow(show.copy(artworkUrl = artworkUrl))
     }
     return show.id
   }

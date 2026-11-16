@@ -16,6 +16,7 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
@@ -41,6 +42,39 @@ import software.ralf.storymile.tabs.TabsPresenter
 
 class LibraryQueueUiTest {
   private val uiTestRule = DesktopUiTestRule()
+
+  @Test
+  fun `saving in Discovery and unsaving in Library keeps the episode queued`() {
+    uiTestRule.runPhoneRobotTest {
+      composeRobot<DiscoveryRobot> {
+        discover()
+        openPodcast("quiet-current")
+      }
+      val title = "The Quiet Current episode 1"
+      openEpisode(index = 0, title = title)
+      val queue = hasTestTag("episode-details-add-to-queue")
+      waitUntilAtLeastOneExists(matcher = queue and isEnabled(), timeoutMillis = 5_000)
+      runOnUiThread { onNode(queue).performScrollTo().performClick() }
+
+      val save = hasTestTag("episode-details-save")
+      waitUntilAtLeastOneExists(matcher = save and isEnabled(), timeoutMillis = 5_000)
+      runOnUiThread { onNode(save).performScrollTo().performClick() }
+      val saved = save and hasContentDescription("Remove from saved episodes")
+      waitUntilAtLeastOneExists(matcher = saved, timeoutMillis = 5_000)
+      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
+
+      val row = "library-queue-episode-0"
+      waitUntilAtLeastOneExists(matcher = hasTestTag(row), timeoutMillis = 5_000)
+      runOnUiThread { onNodeWithTag(row).performClick() }
+      waitUntilAtLeastOneExists(matcher = saved, timeoutMillis = 5_000)
+      runOnUiThread { onNode(saved).performScrollTo().performClick() }
+      waitUntilAtLeastOneExists(
+        matcher = save and hasContentDescription("Save"),
+        timeoutMillis = 5_000,
+      )
+      onNode(queue).assertTextEquals("In queue")
+    }
+  }
 
   @Test
   fun `tapping the Library tab returns from episode details to the queue`() {
@@ -377,12 +411,7 @@ class LibraryQueueUiTest {
   }
 
   private fun ComposeUiTest.queueEpisode(index: Int, title: String) {
-    waitUntilAtLeastOneExists(matcher = hasTestTag("show-detail"), timeoutMillis = 5_000)
-    runOnUiThread {
-      onNodeWithTag("show-detail").performScrollToNode(hasTestTag("episode-$index"))
-      onNodeWithTag("episode-$index").performClick()
-    }
-    onNodeWithTag("episode-details-title").assertTextEquals(title)
+    openEpisode(index = index, title = title)
     val queueButton = hasTestTag("episode-details-add-to-queue")
     waitUntilAtLeastOneExists(matcher = queueButton and isEnabled(), timeoutMillis = 5_000)
     runOnUiThread { onNode(queueButton).performScrollTo().performClick() }
@@ -391,5 +420,14 @@ class LibraryQueueUiTest {
       timeoutMillis = 5_000,
     )
     runOnUiThread { onNodeWithTag("episode-details-back").performClick() }
+  }
+
+  private fun ComposeUiTest.openEpisode(index: Int, title: String) {
+    waitUntilAtLeastOneExists(matcher = hasTestTag("show-detail"), timeoutMillis = 5_000)
+    runOnUiThread {
+      onNodeWithTag("show-detail").performScrollToNode(hasTestTag("episode-$index"))
+      onNodeWithTag("episode-$index").performClick()
+    }
+    onNodeWithTag("episode-details-title").assertTextEquals(title)
   }
 }

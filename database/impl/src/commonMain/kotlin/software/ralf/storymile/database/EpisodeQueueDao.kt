@@ -15,7 +15,7 @@ interface EpisodeQueueDao {
     ORDER BY queued_episodes.position, queued_episodes.id
     """,
   )
-  fun observe(): Flow<List<StoredQueuedEpisode>>
+  fun observe(): Flow<List<StoredEpisode>>
 
   @Query(
     """

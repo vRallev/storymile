@@ -27,6 +27,7 @@ import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.Scoped
 import software.ralf.storymile.podcast.PodcastFeed
 import software.ralf.storymile.podcast.QueuedEpisode
+import software.ralf.storymile.podcast.SavedEpisode
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.user.UserScope
 
@@ -34,12 +35,13 @@ import software.ralf.storymile.user.UserScope
 @SingleIn(UserScope::class)
 @ContributesBinding(UserScope::class, binding = binding<PodcastDatabase>())
 @ContributesBinding(UserScope::class, binding = binding<EpisodeQueueDatabase>())
+@ContributesBinding(UserScope::class, binding = binding<SavedEpisodeDatabase>())
 @ContributesIntoSet(UserScope::class, binding = binding<@ForScope(UserScope::class) Scoped>())
 class UserPodcastDatabase(
   @ForScope(UserScope::class) private val storage: Storage,
   @ForScope(UserScope::class) private val coroutineScope: CoroutineScope,
   private val platform: DatabasePlatform,
-) : PodcastDatabase, EpisodeQueueDatabase, Scoped {
+) : PodcastDatabase, EpisodeQueueDatabase, SavedEpisodeDatabase, Scoped {
   private val database = CompletableDeferred<RoomPodcastDatabase>()
 
   override val podcasts: Flow<List<PodcastFeed>> = channelFlow {
@@ -49,6 +51,13 @@ class UserPodcastDatabase(
 
   override val queuedEpisodes: Flow<List<QueuedEpisode>> = channelFlow {
     operation { it.queue().observe().collect { rows -> send(rows.map { it.toQueuedEpisode() }) } }
+  }
+    .distinctUntilChanged()
+
+  override val savedEpisodes: Flow<List<SavedEpisode>> = channelFlow {
+    operation {
+      it.savedEpisodes().observe().collect { rows -> send(rows.map { it.toSavedEpisode() }) }
+    }
   }
     .distinctUntilChanged()
 
@@ -98,6 +107,12 @@ class UserPodcastDatabase(
       targetFeedUrl = targetFeedUrl,
       targetEpisodeId = targetEpisodeId,
     )
+  }
+
+  override suspend fun save(episode: SavedEpisode) = operation { it.save(episode) }
+
+  override suspend fun removeSavedEpisode(feedUrl: String, episodeId: String) = operation {
+    it.removeSavedEpisode(feedUrl = feedUrl, episodeId = episodeId)
   }
 
   private suspend fun awaitPreviousOwner(path: String?) {

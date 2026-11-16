@@ -23,10 +23,12 @@ class DatabasePersistenceTest {
       val first = queued.first()
       val last = queued.last()
       val reordered = listOf(last) + queued.dropLast(1)
+      val savedEpisode = DatabaseFixture.savedEpisode(podcast = podcast, episode = first.episode)
       try {
         DatabaseFixture(path).use { database ->
           database.insert(podcast)
           queued.forEach { queue.enqueue(it) }
+          saved.save(savedEpisode)
           queue.moveInQueue(
             feedUrl = last.feedUrl,
             episodeId = last.episode.id,
@@ -37,20 +39,25 @@ class DatabasePersistenceTest {
         DatabaseFixture().use { memory ->
           assertThat(memory.podcasts.first()).isEmpty()
           assertThat(queue.queuedEpisodes.first()).isEmpty()
+          assertThat(saved.savedEpisodes.first()).isEmpty()
           memory.insert(podcast.copy(title = "Fake mode"))
         }
         DatabaseFixture((directory / "other-user.db").toString()).use { other ->
           assertThat(other.podcasts.first()).isEmpty()
           assertThat(queue.queuedEpisodes.first()).isEmpty()
+          assertThat(saved.savedEpisodes.first()).isEmpty()
         }
         DatabaseFixture(path).use { reopened ->
           assertThat(reopened.podcasts.first()).isEqualTo(listOf(podcast))
           assertThat(queue.queuedEpisodes.first()).isEqualTo(reordered)
+          assertThat(saved.savedEpisodes.first()).isEqualTo(listOf(savedEpisode))
           reopened.delete(podcast.feedUrl)
+          queue.removeFromQueue(feedUrl = first.feedUrl, episodeId = first.episode.id)
         }
         DatabaseFixture(path).use { reopened ->
           assertThat(reopened.podcasts.first()).isEmpty()
-          assertThat(queue.queuedEpisodes.first()).isEqualTo(reordered)
+          assertThat(queue.queuedEpisodes.first()).isEqualTo(listOf(last))
+          assertThat(saved.savedEpisodes.first()).isEqualTo(listOf(savedEpisode))
         }
       } finally {
         FileSystem.SYSTEM.deleteRecursively(directory)

@@ -13,6 +13,7 @@ import software.ralf.storymile.podcast.PodcastEnclosure
 import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.podcast.PodcastFeed
 import software.ralf.storymile.podcast.QueuedEpisode
+import software.ralf.storymile.podcast.SavedEpisode
 import software.ralf.storymile.storage.testing.FakeStorage
 
 class DatabaseFixture(path: String? = null) {
@@ -31,6 +32,7 @@ class DatabaseFixture(path: String? = null) {
 
   val database: PodcastDatabase = userDatabase
   val queue: EpisodeQueueDatabase = userDatabase
+  val saved: SavedEpisodeDatabase = userDatabase
 
   suspend fun close() {
     if (!scope.isDestroyed()) {
@@ -50,6 +52,14 @@ class DatabaseFixture(path: String? = null) {
   companion object {
     fun queuedEpisode(podcast: PodcastFeed, episode: PodcastEpisode): QueuedEpisode =
       QueuedEpisode(
+        feedUrl = podcast.feedUrl,
+        podcastTitle = podcast.title,
+        artworkUrl = episode.artworkUrl ?: podcast.artworkUrl,
+        episode = episode,
+      )
+
+    fun savedEpisode(podcast: PodcastFeed, episode: PodcastEpisode): SavedEpisode =
+      SavedEpisode(
         feedUrl = podcast.feedUrl,
         podcastTitle = podcast.title,
         artworkUrl = episode.artworkUrl ?: podcast.artworkUrl,
