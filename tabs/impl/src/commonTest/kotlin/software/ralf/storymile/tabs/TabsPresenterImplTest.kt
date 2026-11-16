@@ -227,7 +227,9 @@ class TabsPresenterImplTest {
       return Model(filter)
     }
 
-    data class Model(val filter: String) : BaseModel
+    data class Model(val filter: String) : LibraryPresenter.Model {
+      override val onLibrarySelected: () -> Unit = {}
+    }
   }
 
   private class HomeNavigation {

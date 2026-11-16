@@ -15,7 +15,6 @@ import software.ralf.app.platform.presenter.compose.saveable.rememberReturningSa
 import software.ralf.app.platform.presenter.compose.test
 import software.ralf.storymile.discovery.DiscoveryPresenter
 import software.ralf.storymile.library.LibraryPresenterImpl.Tab
-import software.ralf.storymile.presenternavigation.DefaultBackstackModel
 
 class LibraryPresenterImplTest {
   @Test
@@ -28,7 +27,7 @@ class LibraryPresenterImplTest {
           LibraryVisibilityModel(
             if (showLibrary) {
               val library = remember { createPresenter() }
-              library.present(Unit).content()
+              library.present(Unit).root()
             } else {
               null
             },
@@ -59,23 +58,23 @@ class LibraryPresenterImplTest {
     val presenter = createPresenter()
 
     presenter.test(this) {
-      var model = awaitItem().content()
+      var model = awaitItem().root()
       assertThat(model.selectedTab).isEqualTo(Tab.QUEUE)
 
       model.onSelectTab(Tab.SHOWS)
-      model = awaitItem().content()
+      model = awaitItem().root()
       assertThat(model.selectedTab).isEqualTo(Tab.SHOWS)
 
       model.onSelectTab(Tab.SAVED)
-      model = awaitItem().content()
+      model = awaitItem().root()
       assertThat(model.selectedTab).isEqualTo(Tab.SAVED)
 
       model.onSelectTab(Tab.HISTORY)
-      model = awaitItem().content()
+      model = awaitItem().root()
       assertThat(model.selectedTab).isEqualTo(Tab.HISTORY)
 
       model.onSelectTab(Tab.QUEUE)
-      model = awaitItem().content()
+      model = awaitItem().root()
       assertThat(model.selectedTab).isEqualTo(Tab.QUEUE)
     }
   }
@@ -85,23 +84,23 @@ class LibraryPresenterImplTest {
     val presenter = createPresenter()
 
     presenter.test(this) {
-      var library = awaitItem().content()
+      var library = awaitItem().root()
       Tab.entries.forEach { tab ->
         if (library.selectedTab != tab) {
           library.onSelectTab(tab)
-          library = awaitItem().content()
+          library = awaitItem().root()
         }
         library.onDiscoverPodcasts()
 
-        val discovery = awaitItem()
+        val discovery = awaitItem().content
         assertThat(discovery.backstack.size).isEqualTo(2)
         assertThat(discovery.backstack.last()).isEqualTo(DiscoveryModel(focusSearch = false))
         discovery.onBack()
 
         val returned = awaitItem()
-        library = returned.content()
+        library = returned.root()
         assertThat(library.selectedTab).isEqualTo(tab)
-        returned.onBack()
+        returned.content.onBack()
         expectNoEvents()
       }
     }
@@ -114,8 +113,8 @@ class LibraryPresenterImplTest {
       showsPresenter = EmptyLibraryShowsPresenter,
     )
 
-  private fun DefaultBackstackModel.content(): LibraryPresenterImpl.Model =
-    backstack.single() as LibraryPresenterImpl.Model
+  private fun LibraryPresenterImpl.BackstackModel.root(): LibraryPresenterImpl.Model =
+    content.backstack.single() as LibraryPresenterImpl.Model
 
   private class FakeDiscoveryFactory : DiscoveryPresenter.Factory {
     override fun create(focusSearch: Boolean): DiscoveryPresenter<*> =

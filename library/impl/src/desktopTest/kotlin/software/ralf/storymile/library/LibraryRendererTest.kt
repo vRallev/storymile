@@ -118,7 +118,7 @@ class LibraryRendererTest {
               renderer.renderCompose(
                 model =
                   LibraryPagesRenderer.Model(
-                    library = presenter.present(Unit).backstack.single() as Model,
+                    library = presenter.present(Unit).content.backstack.single() as Model,
                     showsContent = null,
                   ),
                 modifier = Modifier.fillMaxSize(),

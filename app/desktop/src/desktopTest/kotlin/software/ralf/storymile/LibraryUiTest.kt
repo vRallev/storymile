@@ -349,6 +349,24 @@ class LibraryUiTest {
       }
   }
 
+  @Test
+  fun `tapping the Library tab returns from discovery to the selected library page`() {
+    uiTestRule.runPhoneRobotTest {
+      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
+      runOnUiThread { onNodeWithTag("library-tab-history").performClick() }
+      onNodeWithTag("library-tab-history").assertIsSelected()
+      runOnUiThread { onNodeWithTag("library-discover").performClick() }
+      composeRobot<DiscoveryRobot> { openPodcast("quiet-current") }
+      composeRobot<ShowRobot> { seeShow() }
+
+      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
+      onNodeWithTag("library-tab-history").assertIsSelected()
+      onNodeWithText("No listening history yet").assertIsDisplayed()
+      onNodeWithTag("show-detail").assertDoesNotExist()
+      onNodeWithTag("discovery-screen").assertDoesNotExist()
+    }
+  }
+
   private fun ComposeUiTest.saveScreenshot(name: String) {
     runOnUiThread { onNodeWithTag("library-screen").performMouseInput { moveTo(center) } }
     val file = File("build/reports/screenshots/library-$name.png")

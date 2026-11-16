@@ -93,15 +93,13 @@ Its [renderer](../episode-details/impl/src/commonMain/kotlin/software/ralf/story
 shares artwork and episode text with the source row in narrow layouts.
 The [backstack renderer](../presenter-navigation/impl/src/commonMain/kotlin/software/ralf/storymile/presenternavigation/DefaultBackstackRenderer.kt)
 supplies navigation entry identities for these UI transitions.
-Back returns to the previous entry. Reselecting Home calls its model callback to pop to the welcome
-entry and keeps it in composition.
+Back returns to the previous entry. Selecting Home opens the welcome screen.
 [HomeRenderer](../home/impl/src/commonMain/kotlin/software/ralf/storymile/home/HomeRenderer.kt)
 renders the `DefaultBackstackModel`.
-Returning from another tab starts a new Home stack.
-The tabs presenter creates and composes only the selected screen. It retains the
-[library](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryPresenterImpl.kt)
-filter across tab changes. Library owns a backstack. Each empty tab opens Discovery.
-Back returns to the selected Library tab.
+The tabs presenter composes only the selected destination. Selecting
+[Library](../library/impl/src/commonMain/kotlin/software/ralf/storymile/library/LibraryPresenterImpl.kt)
+returns to its selected page and closes any open Discovery, show, or episode screens.
+Each empty Library page opens Discovery. Back returns to the selected Library page.
 [LibraryQueuePresenterImpl](../library-queue/impl/src/commonMain/kotlin/software/ralf/storymile/libraryqueue/LibraryQueuePresenterImpl.kt)
 reads the saved queue and uses the shared episode details presenter.
 [LibraryShowsPresenterImpl](../library-shows/impl/src/commonMain/kotlin/software/ralf/storymile/libraryshows/LibraryShowsPresenterImpl.kt)
