@@ -260,6 +260,10 @@ class LibraryUiTest {
             composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
             onNodeWithTag("tab-library").assertIsSelected()
             onNodeWithTag("library-screen").assertIsDisplayed()
+            waitUntilAtLeastOneExists(
+              matcher = hasText("Your queue is empty"),
+              timeoutMillis = 5_000,
+            )
             onNodeWithTag("library-illustration", useUnmergedTree = true).assertIsDisplayed()
             onNodeWithTag("library-empty-message", useUnmergedTree = true).assertIsDisplayed()
             onNodeWithTag("library-discover").assertIsDisplayed()
