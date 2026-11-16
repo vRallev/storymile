@@ -20,6 +20,7 @@ import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.app.platform.renderer.Render
 import software.ralf.storymile.library.LibraryPresenterImpl.Tab
 import software.ralf.storymile.libraryqueue.LocalLibraryQueueListState
+import software.ralf.storymile.librarysaved.LocalLibrarySavedListState
 import software.ralf.storymile.podcastshows.supportsShowPanes
 import software.ralf.storymile.presenternavigation.DefaultBackstackModel
 import software.ralf.storymile.theme.AppTheme
@@ -28,7 +29,10 @@ import software.ralf.storymile.theme.AppTheme
 class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
   @Composable
   override fun Compose(model: LibraryPresenterImpl.Model, modifier: Modifier) {
-    CompositionLocalProvider(LocalLibraryQueueListState provides rememberLazyListState()) {
+    CompositionLocalProvider(
+      LocalLibraryQueueListState provides rememberLazyListState(),
+      LocalLibrarySavedListState provides rememberLazyListState(),
+    ) {
       BoxWithConstraints(
         modifier
           .fillMaxSize()
@@ -65,6 +69,7 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
             when (model.selectedTab) {
               Tab.QUEUE -> model.queue.openedEpisode
               Tab.SHOWS -> selectedShow
+              Tab.SAVED -> model.saved.openedEpisode
               else -> null
             }
           Render(
@@ -72,8 +77,11 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
               DefaultBackstackModel(
                 backstack = listOfNotNull(pages, details),
                 onBack =
-                  if (model.selectedTab == Tab.QUEUE) model.queue.onCloseEpisode
-                  else shows.onCloseShow,
+                  when (model.selectedTab) {
+                    Tab.QUEUE -> model.queue.onCloseEpisode
+                    Tab.SAVED -> model.saved.onCloseEpisode
+                    else -> shows.onCloseShow
+                  },
               ),
             modifier = Modifier.fillMaxSize(),
           )

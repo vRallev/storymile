@@ -18,6 +18,7 @@ import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.storymile.discovery.DiscoveryPresenter
 import software.ralf.storymile.libraryqueue.LibraryQueuePresenter
+import software.ralf.storymile.librarysaved.LibrarySavedPresenter
 import software.ralf.storymile.libraryshows.LibraryShowsPresenter
 import software.ralf.storymile.presenternavigation.DefaultBackstackModel
 import software.ralf.storymile.user.UserScope
@@ -28,6 +29,7 @@ class LibraryPresenterImpl(
   private val discoveryPresenterFactory: DiscoveryPresenter.Factory,
   private val queuePresenter: LibraryQueuePresenter,
   private val showsPresenter: LibraryShowsPresenter,
+  private val savedPresenter: LibrarySavedPresenter,
 ) : LibraryPresenter<LibraryPresenterImpl.BackstackModel> {
   @Composable
   override fun present(input: Unit): BackstackModel {
@@ -44,6 +46,7 @@ class LibraryPresenterImpl(
           selectedTab = selectedTab,
           queue = queuePresenter.present(Unit),
           shows = showsPresenter.present(Unit),
+          saved = savedPresenter.present(Unit),
           onSelectTab = { selectedTab = it },
           onDiscoverPodcasts = { backstack.push(discoveryPresenterFactory.create()) },
         )
@@ -59,6 +62,7 @@ class LibraryPresenterImpl(
           }
           root.queue.onCloseEpisode()
           root.shows.onCloseShow()
+          root.saved.onCloseEpisode()
         },
       )
     }
@@ -85,6 +89,7 @@ class LibraryPresenterImpl(
     val selectedTab: Tab,
     val queue: LibraryQueuePresenter.Model,
     val shows: LibraryShowsPresenter.Model,
+    val saved: LibrarySavedPresenter.Model,
     val onSelectTab: (Tab) -> Unit,
     val onDiscoverPodcasts: () -> Unit,
   ) : BaseModel

@@ -280,9 +280,7 @@ class LibraryUiTest {
               .forEach { (tab, title) ->
                 runOnUiThread { onNodeWithTag("library-tab-$tab").performClick() }
                 onNodeWithTag("library-tab-$tab").assertIsSelected()
-                if (tab == "shows") {
-                  waitUntilAtLeastOneExists(matcher = hasText(title), timeoutMillis = 5_000)
-                }
+                waitUntilAtLeastOneExists(matcher = hasText(title), timeoutMillis = 5_000)
                 onNodeWithText(title).assertIsDisplayed()
                 saveScreenshot("$device-${if (darkTheme) "dark" else "light"}-$tab")
               }
@@ -336,6 +334,10 @@ class LibraryUiTest {
           listOf("queue", "shows", "saved", "history").forEach { tab ->
             runOnUiThread { onNodeWithTag("library-tab-$tab").performClick() }
             onNodeWithTag("library-tab-$tab").assertIsSelected()
+            waitUntilAtLeastOneExists(
+              matcher = hasTestTag("library-discover"),
+              timeoutMillis = 5_000,
+            )
             runOnUiThread { onNodeWithTag("library-discover").performClick() }
 
             composeRobot<DiscoveryRobot> {
