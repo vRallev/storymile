@@ -1,5 +1,6 @@
 package software.ralf.storymile.libraryqueue
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -50,8 +51,10 @@ class LibraryQueueRenderer : ComposeRenderer<LibraryQueuePresenterImpl.ListModel
             )
             if (selection != null) {
               PaneDivider()
-              CompositionLocalProvider(LocalEpisodeDetailsPane provides true) {
-                Render(model = selection.content, modifier = Modifier.weight(1f).fillMaxHeight())
+              Box(Modifier.weight(1f).fillMaxHeight()) {
+                CompositionLocalProvider(LocalEpisodeDetailsPane provides true) {
+                  Render(selection.content)
+                }
               }
             }
           }
