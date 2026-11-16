@@ -18,5 +18,4 @@ dependencies {
   implementation libs.process.phoenix
 
   androidTestImplementation project(':app-framework:impl-ui-test-robots')
-  androidTestImplementation project(':playlist:impl-robots')
 }

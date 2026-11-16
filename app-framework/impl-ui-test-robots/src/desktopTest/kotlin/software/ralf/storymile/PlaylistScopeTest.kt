@@ -3,10 +3,7 @@ package software.ralf.storymile
 import assertk.assertThat
 import assertk.assertions.doesNotContain
 import assertk.assertions.isEqualTo
-import assertk.assertions.isInstanceOf
-import assertk.assertions.isNotNull
 import assertk.assertions.isNotSameInstanceAs
-import assertk.assertions.isNull
 import assertk.assertions.isSameInstanceAs
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesTo
@@ -15,77 +12,19 @@ import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.createGraphFactory
 import kotlin.test.Test
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import software.ralf.app.platform.presenter.BaseModel
-import software.ralf.app.platform.presenter.compose.test
 import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
-import software.ralf.storymile.approot.AppRootPresenter
 import software.ralf.storymile.playlist.EpisodeId
 import software.ralf.storymile.playlist.PlaylistName
 import software.ralf.storymile.playlist.PlaylistRepository
 import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.InMemoryStorageFactory
 import software.ralf.storymile.storage.Storage
-import software.ralf.storymile.templates.AppTemplate
 import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.user.UserScope
 
 class PlaylistScopeTest {
-  @Test
-  fun `playback is available only while at least one playlist contains episodes`() = runTest {
-    withApplication { graph ->
-      val repository: PlaylistRepository = graph.playlistRepository()
-      TestPlaylists.clear(repository)
-      graph.appRootPresenter.test(this) {
-        awaitItem().assertPlayback(visible = false)
-
-        repository.create(PlaylistName("First"))
-        val first = repository.playlists.first { it.size == 1 }.first().id
-        runCurrent()
-        expectNoEvents()
-
-        val episode = EpisodeId("episode")
-        repository.addEpisode(first, episode)
-        awaitItem().assertPlayback(visible = true)
-
-        repository.create(PlaylistName("Second"))
-        val second = repository.playlists.first { it.size == 2 }.last().id
-        runCurrent()
-        expectNoEvents()
-        repository.addEpisode(second, episode)
-        repository.playlists.first { it.last().episodeIds.isNotEmpty() }
-        runCurrent()
-        expectNoEvents()
-
-        repository.removeEpisode(first, episode)
-        repository.playlists.first { it.first().episodeIds.isEmpty() }
-        runCurrent()
-        expectNoEvents()
-        repository.delete(second)
-        awaitItem().assertPlayback(visible = false)
-
-        repository.addEpisode(first, episode)
-        awaitItem().assertPlayback(visible = true)
-        repository.removeEpisode(first, episode)
-        awaitItem().assertPlayback(visible = false)
-      }
-    }
-  }
-
-  private fun BaseModel.assertPlayback(visible: Boolean) {
-    assertThat(this).isInstanceOf<AppTemplate.AdaptiveTemplate>().given {
-      if (visible) {
-        assertThat(it.playback).isNotNull()
-        assertThat(it.expandedPlayback).isNotNull()
-      } else {
-        assertThat(it.playback).isNull()
-        assertThat(it.expandedPlayback).isNull()
-      }
-    }
-  }
-
   @Test
   fun `each guest scope owns one repository with separate playlists`() = runTest {
     withApplication { firstGraph ->
@@ -162,7 +101,6 @@ class PlaylistScopeTest {
   )
   interface Graph : AppGraph {
     val userManager: UserManager
-    val appRootPresenter: AppRootPresenter
 
     @DependencyGraph.Factory
     fun interface Factory {

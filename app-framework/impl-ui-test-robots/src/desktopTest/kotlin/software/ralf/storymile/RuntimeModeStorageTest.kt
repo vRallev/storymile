@@ -17,6 +17,8 @@ import dev.zacsweers.metro.ForScope
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.createGraphFactory
 import kotlin.test.Test
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -29,7 +31,6 @@ import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.approot.AppRootPresenter
 import software.ralf.storymile.player.Player
-import software.ralf.storymile.playlist.PlaylistRepository
 import software.ralf.storymile.podcast.PodcastEnclosure
 import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.podcast.QueueRepository
@@ -101,52 +102,62 @@ class RuntimeModeStorageTest {
   }
 
   @Test
-  fun `fake playlist resets after restart without changing saved real playlists`() = runTest {
+  fun `fake demo queue is ordered editable and resets after restart`() = runTest {
     val platform = InMemoryStoragePlatform()
     seedStorage(platform)
-    val saved =
-      """{"version":1,"playlists":[{"id":"saved","name":"My saved playlist","episodeIds":["real-episode"]}]}"""
-    withRawStorage(platform, "user-guest") {
-      it.files.directory("playlists").write("playlists.json", saved.encodeToByteArray())
-    }
+    val demoIds = (1..3).map { "test-episode-$it" }
 
     withApplication(platform) { graph, _ ->
-      val repository = graph.playlistRepository()
-      val playlist = repository.playlists.first { it.isNotEmpty() }.single()
-      assertThat(playlist.name.value).isEqualTo("Storymile test episodes")
-      assertThat(playlist.episodeIds.map { it.value })
-        .isEqualTo(listOf("test-episode-1", "test-episode-2", "test-episode-3"))
-      for (episode in playlist.episodeIds) {
+      val queue =
+        graph.userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().queue
+      val entries = queue.episodes.filterNotNull()
+      val initial = entries.first()
+      assertThat(initial.map { it.episode.id }).isEqualTo(demoIds)
+      for (entry in initial) {
         val resource =
-          "composeResources/software.ralf.storymile.player.impl.generated.resources/files/test-episodes/${episode.value}.mp3"
+          "composeResources/software.ralf.storymile.player.impl.generated.resources/files/test-episodes/${entry.episode.id}.mp3"
         val recording =
           checkNotNull(javaClass.classLoader.getResourceAsStream(resource)).use { it.readBytes() }
         assertThat(recording.size > 1024).isTrue()
       }
-      val playback = graph.player().state.first { it.isReady || it.error != null }
-      assertThat(playback.error).isNull()
-      assertThat(playback.title).isEqualTo("Test episode 1")
-      assertThat(playback.isReady).isTrue()
+
+      val player = graph.player()
+      val playback = player.state.first { it.episode != null }
+      assertThat(playback.episode).isEqualTo(initial.first())
+      assertThat(playback.upcomingEpisodes).isEqualTo(initial.drop(1))
       assertThat(playback.isPlaying).isFalse()
       assertThat(playback.positionMillis).isEqualTo(0L)
       assertThat(playback.durationMillis).isGreaterThan(0L)
       assertThat(playback.speed).isEqualTo(1f)
-      repository.delete(playlist.id)
-      repository.playlists.first { it.isEmpty() }
+
+      val (first, second, third) = initial
+      queue.move(episode = third, target = first)
+      val reordered = entries.first { it.firstOrNull() == third }
+      assertThat(reordered).isEqualTo(listOf(third, first, second))
+      player.state.first { it.episode == third }
+
+      val undo = CompletableDeferred<() -> Unit>()
+      queue.removeWithUndo(third) { undo.complete(it) }
+      assertThat(entries.first { it.size == 2 }).isEqualTo(listOf(first, second))
+      player.state.first { it.episode == first }
+      undo.await()()
+      assertThat(entries.first { it.size == 3 }).isEqualTo(reordered)
+
+      queue.remove(third)
+      entries.first { it.size == 2 }
     }
 
     withApplication(platform) { graph, _ ->
-      val playlist = graph.playlistRepository().playlists.first { it.isNotEmpty() }.single()
-      assertThat(playlist.name.value).isEqualTo("Storymile test episodes")
-      assertThat(playlist.episodeIds.map { it.value })
-        .isEqualTo(listOf("test-episode-1", "test-episode-2", "test-episode-3"))
+      val queue =
+        graph.userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().queue
+      assertThat(queue.episodes.filterNotNull().first().map { it.episode.id }).isEqualTo(demoIds)
       graph.runtimeModeController.switchMode(RuntimeMode.Real)
     }
 
     withApplication(platform) { graph, _ ->
-      val playlist = graph.playlistRepository().playlists.first { it.isNotEmpty() }.single()
-      assertThat(playlist.name.value).isEqualTo("My saved playlist")
-      assertThat(playlist.episodeIds.map { it.value }).isEqualTo(listOf("real-episode"))
+      val queue =
+        graph.userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().queue
+      assertThat(queue.episodes.filterNotNull().first()).isEqualTo(emptyList())
     }
   }
 
@@ -263,9 +274,6 @@ class RuntimeModeStorageTest {
   private fun Graph.userStorage(): Storage =
     userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().storage
 
-  private fun Graph.playlistRepository(): PlaylistRepository =
-    userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().playlistRepository
-
   private fun Graph.player(): Player =
     userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().player
 
@@ -314,8 +322,6 @@ class RuntimeModeStorageTest {
   @ContributesTo(UserScope::class)
   interface UserStorageBindings {
     @ForScope(UserScope::class) val storage: Storage
-
-    val playlistRepository: PlaylistRepository
 
     val player: Player
 

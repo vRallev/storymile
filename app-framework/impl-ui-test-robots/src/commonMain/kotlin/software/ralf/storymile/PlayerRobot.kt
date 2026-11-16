@@ -10,9 +10,19 @@ import software.ralf.storymile.user.UserScope
 /** Controls playback snapshots and checks commands in application UI tests. */
 @ContributesRobot(UserScope::class)
 class PlayerRobot(private val player: TestPlayer) : Robot {
+  /** Provides a playback preview for layout tests. */
+  fun showPreview() {
+    player.showPreview()
+  }
+
+  /** Removes playback from layout tests. */
+  fun hidePreview() {
+    player.hidePreview()
+  }
+
   /** Makes [state] available to both player layouts. */
   fun publish(state: Player.State) {
-    player.publish(state)
+    player.publishAudio(state)
   }
 
   /** Checks all transport commands received since the application started. */

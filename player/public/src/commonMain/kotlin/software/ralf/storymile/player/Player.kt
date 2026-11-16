@@ -3,14 +3,12 @@ package software.ralf.storymile.player
 import kotlinx.coroutines.flow.StateFlow
 import software.ralf.storymile.podcast.QueuedEpisode
 
-/** Plays the current user's Library Queue, or the bundled episodes in Fake mode. */
+/** Plays the current user's Library Queue. */
 interface Player {
   /** Current selection and audio state. */
   val state: StateFlow<State>
 
-  /**
-   * Pauses or resumes playback. In real mode, retries failed audio or restarts a completed queue.
-   */
+  /** Pauses, resumes, retries failed audio, or restarts a completed queue. */
   fun togglePlayback()
 
   /** Starts [episode] if it is still in the Library Queue for this session. */
@@ -40,7 +38,7 @@ interface Player {
     val isReady: Boolean = false,
     /** Playback failure, or null when no failure is present. */
     val error: String? = null,
-    /** Selected Library Queue entry, or null for bundled audio or an empty queue. */
+    /** Selected Library Queue entry, or null if the queue is empty. */
     val episode: QueuedEpisode? = null,
     /** Entries still to play in the current pass, in queue order. */
     val upcomingEpisodes: List<QueuedEpisode> = emptyList(),

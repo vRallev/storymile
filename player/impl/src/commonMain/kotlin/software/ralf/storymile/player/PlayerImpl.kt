@@ -16,7 +16,6 @@ import software.ralf.app.platform.scope.Scoped
 import software.ralf.app.platform.scope.coroutine.MainCoroutineDispatcher
 import software.ralf.app.platform.scope.coroutine.launch
 import software.ralf.storymile.player.impl.generated.resources.Res
-import software.ralf.storymile.playlist.PlaylistRepository
 import software.ralf.storymile.podcast.QueueRepository
 import software.ralf.storymile.podcast.QueuedEpisode
 import software.ralf.storymile.runtimemode.RuntimeMode
@@ -29,7 +28,6 @@ class PlayerImpl
 internal constructor(
   private val audioPlayer: Lazy<AudioPlayer>,
   private val runtimeModeController: RuntimeModeController,
-  private val playlistRepository: PlaylistRepository,
   private val queueRepository: QueueRepository,
   @MainCoroutineDispatcher private val mainDispatcher: CoroutineDispatcher,
   private val sourceUri: (String) -> String,
@@ -43,7 +41,6 @@ internal constructor(
     get() = queueRepository.episodes.value.orEmpty()
 
   private var fakeMode = false
-  private var demoIndex = 0
   private var source: String? = null
   private var closed = false
   private var playRequested = false
@@ -54,13 +51,11 @@ internal constructor(
   constructor(
     audioPlayer: Lazy<AudioPlayer>,
     runtimeModeController: RuntimeModeController,
-    playlistRepository: PlaylistRepository,
     queueRepository: QueueRepository,
     @MainCoroutineDispatcher mainDispatcher: CoroutineDispatcher,
   ) : this(
     audioPlayer = audioPlayer,
     runtimeModeController = runtimeModeController,
-    playlistRepository = playlistRepository,
     queueRepository = queueRepository,
     mainDispatcher = mainDispatcher,
     sourceUri = { Res.getUri(it) },
@@ -73,20 +68,8 @@ internal constructor(
           return@launch
         }
         fakeMode = runtimeModeController.mode == RuntimeMode.Fake
-        if (fakeMode) {
-          loadDemoEpisode(autoPlay = false)
-          scope.launch(mainDispatcher) {
-            playlistRepository.playlists.collect { playlists ->
-              if (playlists.none { it.episodeIds.isNotEmpty() } && !closed) {
-                playRequested = false
-                audioPlayer.value.pause()
-              }
-            }
-          }
-        } else {
-          scope.launch(mainDispatcher) {
-            queueRepository.episodes.filterNotNull().collect { updateQueue(it) }
-          }
+        scope.launch(mainDispatcher) {
+          queueRepository.episodes.filterNotNull().collect { updateQueue(it) }
         }
         audioStarted.await().state.collect { updateAudioState(it) }
       } catch (exception: Throwable) {
@@ -113,7 +96,7 @@ internal constructor(
   }
 
   override fun togglePlayback() {
-    if (closed || !hasEpisodes()) {
+    if (closed || state.value.episode == null) {
       return
     }
     val current = state.value
@@ -136,7 +119,7 @@ internal constructor(
   }
 
   override fun play(episode: QueuedEpisode) {
-    if (closed || fakeMode) {
+    if (closed) {
       return
     }
     val selected = queue.find { it.key == episode.key } ?: return
@@ -148,7 +131,7 @@ internal constructor(
   }
 
   override fun seekTo(positionMillis: Long) {
-    if (!closed && source != null && state.value.isReady && hasEpisodes()) {
+    if (!closed && source != null && state.value.isReady && state.value.episode != null) {
       audioPlayer.value.seekTo(positionMillis.coerceIn(0, state.value.durationMillis))
     }
   }
@@ -212,14 +195,6 @@ internal constructor(
   }
 
   private fun advanceEpisode(): Boolean {
-    if (fakeMode) {
-      if (demoIndex == 2) {
-        return false
-      }
-      demoIndex++
-      loadDemoEpisode(autoPlay = playRequested && hasEpisodes())
-      return true
-    }
     val current = state.value.episode ?: return true
     val entries = queue
     if (entries.none { it.key == current.key }) {
@@ -242,16 +217,10 @@ internal constructor(
     observedPlayIntent = audio.playWhenReady || audio.isPlaying
   }
 
-  private fun loadDemoEpisode(autoPlay: Boolean) {
-    val number = demoIndex + 1
-    state.value = Player.State(title = "Test episode $number", speed = state.value.speed)
-    load(source = sourceUri("files/test-episodes/test-episode-$number.mp3"), autoPlay = autoPlay)
-  }
-
   private fun startQueuedEpisode(episode: QueuedEpisode) {
     state.value = selection(episode).copy(playWhenReady = true)
     try {
-      load(source = episode.episode.enclosure.url, autoPlay = true)
+      load(source = resolveEnclosure(episode.episode.enclosure.url), autoPlay = true)
     } catch (exception: Exception) {
       if (exception is CancellationException) {
         throw exception
@@ -301,12 +270,17 @@ internal constructor(
     }
   }
 
-  private fun hasEpisodes(): Boolean =
+  private fun resolveEnclosure(url: String): String {
     if (fakeMode) {
-      playlistRepository.playlists.value.any { it.episodeIds.isNotEmpty() }
-    } else {
-      state.value.episode != null
+      for (number in 1..3) {
+        val file = "test-episode-$number.mp3"
+        if (url == "https://storymile.invalid/test-episodes/$file") {
+          return sourceUri("files/test-episodes/$file")
+        }
+      }
     }
+    return url
+  }
 
   private val QueuedEpisode.key: Pair<String, String>
     get() = feedUrl to episode.id
