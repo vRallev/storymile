@@ -19,16 +19,21 @@ import androidx.compose.material.icons.automirrored.filled.NavigateNext
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -159,18 +164,39 @@ internal object PlaybackOptions {
     if (panel == null || !visible) {
       return
     }
-    AlertDialog(
-      onDismissRequest = onDismiss,
-      title = { Text(stringResource(panel.title)) },
-      text = {
-        Column(Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
-          Content(panel, player, onDismiss)
+    BasicAlertDialog(onDismissRequest = onDismiss) {
+      Surface(
+        shape = AlertDialogDefaults.shape,
+        color = AlertDialogDefaults.containerColor,
+        tonalElevation = AlertDialogDefaults.TonalElevation,
+      ) {
+        Column(Modifier.padding(24.dp)) {
+          Text(
+            text = stringResource(panel.title),
+            modifier = Modifier.padding(bottom = 16.dp),
+            color = AlertDialogDefaults.titleContentColor,
+            style = AppTheme.typography.headlineSmall,
+          )
+          CompositionLocalProvider(
+            LocalContentColor provides AlertDialogDefaults.textContentColor,
+          ) {
+            ProvideTextStyle(AppTheme.typography.bodyMedium) {
+              Column(
+                Modifier.weight(1f, fill = false)
+                  .padding(bottom = 24.dp)
+                  .heightIn(max = 420.dp)
+                  .verticalScroll(rememberScrollState()),
+              ) {
+                Content(panel, player, onDismiss)
+              }
+            }
+          }
+          TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
+            Text(stringResource(Res.string.close))
+          }
         }
-      },
-      confirmButton = {
-        TextButton(onClick = onDismiss) { Text(stringResource(Res.string.close)) }
-      },
-    )
+      }
+    }
   }
 
   @Composable
