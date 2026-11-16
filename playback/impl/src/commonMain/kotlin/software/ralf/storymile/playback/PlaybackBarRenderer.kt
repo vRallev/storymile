@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,10 +35,9 @@ class PlaybackBarRenderer : ComposeRenderer<PlaybackPresenterImpl.BarModel>() {
       horizontalArrangement = Arrangement.spacedBy(if (tablet) 16.dp else 12.dp),
     ) {
       PlaybackArtwork(
-        modifier = Modifier.size(if (tablet) 72.dp else 40.dp),
-        thumbnail = true,
         artworkUrl = player.artworkUrl,
         isPreview = player.isPreview,
+        thumbnailSize = if (tablet) 72.dp else 40.dp,
       )
       Column(if (wide) Modifier.weight(0.8f) else Modifier.weight(1f)) {
         PlaybackControls.Labels(player, compact = !tablet)
