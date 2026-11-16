@@ -13,6 +13,8 @@ import dev.zacsweers.metro.Inject
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.storymile.player.Player
 import software.ralf.storymile.playlist.PlaylistRepository
+import software.ralf.storymile.runtimemode.RuntimeMode
+import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.user.UserScope
 
 @Inject
@@ -20,11 +22,66 @@ import software.ralf.storymile.user.UserScope
 class PlaybackPresenterImpl(
   private val playlistRepository: PlaylistRepository,
   private val player: Player,
+  private val runtimeModeController: RuntimeModeController,
 ) : PlaybackPresenter {
   @Composable
   override fun present(input: Unit): Model {
-    val playlists by playlistRepository.playlists.collectAsState()
     val audio by player.state.collectAsState()
+    val isPreview = remember { runtimeModeController.mode == RuntimeMode.Fake }
+    return if (isPreview) {
+      presentFake(audio)
+    } else {
+      presentReal(audio)
+    }
+  }
+
+  @Composable
+  private fun presentReal(audio: Player.State): Model {
+    val current = audio.episode ?: return Model(collapsed = null, expanded = null)
+    val upcoming =
+      remember(audio.upcomingEpisodes) {
+        audio.upcomingEpisodes.map {
+          Episode(
+            title = it.episode.title,
+            showTitle = it.podcastTitle,
+            durationSeconds = it.episode.duration?.inWholeSeconds?.toInt() ?: 0,
+          )
+        }
+      }
+    val model =
+      PlayerModel(
+        title = current.episode.title,
+        showTitle = current.podcastTitle,
+        positionSeconds = (audio.positionMillis / 1000).toInt(),
+        durationSeconds = (audio.durationMillis / 1000).toInt(),
+        isPlaying = audio.playWhenReady || audio.isPlaying,
+        isBookmarked = false,
+        isDownloaded = false,
+        speed = audio.speed,
+        sleepMinutes = null,
+        chapters = emptyList(),
+        activeChapterIndex = -1,
+        queue = upcoming,
+        onPlayPause = { player.togglePlayback() },
+        onSeek = { player.seekTo(it.toLong() * 1000) },
+        onSkipBack = { player.seekTo(player.state.value.positionMillis - 15_000) },
+        onSkipForward = { player.seekTo(player.state.value.positionMillis + 30_000) },
+        onBookmark = {},
+        onDownload = {},
+        onSpeed = { player.setSpeed(it) },
+        onSleep = {},
+        onChapter = {},
+        onEpisode = { index -> audio.upcomingEpisodes.getOrNull(index)?.let { player.play(it) } },
+        error = audio.error,
+        isPreview = false,
+        artworkUrl = current.artworkUrl,
+      )
+    return Model(collapsed = BarModel(model), expanded = ScreenModel(model))
+  }
+
+  @Composable
+  private fun presentFake(audio: Player.State): Model {
+    val playlists by playlistRepository.playlists.collectAsState()
     val hasEpisodes = playlists.any { it.episodeIds.isNotEmpty() }
     var episode by remember {
       mutableStateOf(Episode("The art of slowing down", "The Quiet Current", 2538))
@@ -161,6 +218,8 @@ class PlaybackPresenterImpl(
     val onChapter: (Int) -> Unit,
     val onEpisode: (Int) -> Unit,
     val error: String? = null,
+    val isPreview: Boolean = true,
+    val artworkUrl: String? = null,
   )
 
   data class BarModel(val player: PlayerModel) : BaseModel

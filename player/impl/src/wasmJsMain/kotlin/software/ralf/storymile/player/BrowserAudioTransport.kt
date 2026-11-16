@@ -5,6 +5,8 @@ import kotlin.js.JsAny
 internal external interface BrowserAudioTransport : JsAny {
   fun load(source: String)
 
+  fun clear()
+
   fun play()
 
   fun pause()
@@ -84,11 +86,23 @@ internal external interface BrowserAudioTransport : JsAny {
       emit();
     });
     listen('error', () => {
-      if (closed || audio.src !== expectedSource || !audio.error) return;
+      if (closed || source === null || audio.src !== expectedSource || !audio.error) return;
       playing = false;
       error = audio.error.message || 'Audio playback failed (code ' + audio.error.code + ').';
       emit();
     });
+    function releaseSource() {
+      generation++;
+      playRequest++;
+      source = null;
+      expectedSource = '';
+      playing = false;
+      pendingSeek = null;
+      error = null;
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+    }
     return {
       load(value) {
         if (closed) return;
@@ -102,6 +116,11 @@ internal external interface BrowserAudioTransport : JsAny {
         audio.pause();
         audio.src = value;
         audio.load();
+        emit();
+      },
+      clear() {
+        if (closed) return;
+        releaseSource();
         emit();
       },
       play() {
@@ -141,12 +160,8 @@ internal external interface BrowserAudioTransport : JsAny {
       close() {
         if (closed) return;
         closed = true;
-        generation++;
-        playRequest++;
         for (const [name, callback] of listeners) audio.removeEventListener(name, callback);
-        audio.pause();
-        audio.removeAttribute('src');
-        audio.load();
+        releaseSource();
       }
     };
   }""",

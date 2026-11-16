@@ -12,24 +12,33 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import software.ralf.storymile.coil.PodcastArtwork
 import software.ralf.storymile.playback.impl.generated.resources.Res
 import software.ralf.storymile.playback.impl.generated.resources.preview_artwork
 import software.ralf.storymile.playback.impl.generated.resources.quiet_current_placeholder
 import software.ralf.storymile.templates.LocalPlaybackTransition
 
 @Composable
-internal fun PlaybackArtwork(modifier: Modifier = Modifier, thumbnail: Boolean = false) {
-  // Temporary cover from design-research/screens/android-phone-player-light.png.
+internal fun PlaybackArtwork(
+  modifier: Modifier = Modifier,
+  thumbnail: Boolean = false,
+  artworkUrl: String?,
+  isPreview: Boolean,
+) {
   val transition = LocalPlaybackTransition.current
   val cornerSize = if (thumbnail) CornerSize(8.dp) else CornerSize(5)
   val tag = if (thumbnail) "playback-artwork-collapsed" else "playback-artwork-expanded"
   val image: @Composable (Modifier) -> Unit = { imageModifier ->
-    Image(
-      painter = painterResource(Res.drawable.quiet_current_placeholder),
-      contentDescription = stringResource(Res.string.preview_artwork),
-      contentScale = ContentScale.Crop,
-      modifier = imageModifier.testTag(tag),
-    )
+    if (isPreview) {
+      Image(
+        painter = painterResource(Res.drawable.quiet_current_placeholder),
+        contentDescription = stringResource(Res.string.preview_artwork),
+        contentScale = ContentScale.Crop,
+        modifier = imageModifier.testTag(tag),
+      )
+    } else {
+      PodcastArtwork(artworkUrl = artworkUrl, modifier = imageModifier.testTag(tag))
+    }
   }
   if (transition == null) {
     image(modifier.clip(RoundedCornerShape(cornerSize)))

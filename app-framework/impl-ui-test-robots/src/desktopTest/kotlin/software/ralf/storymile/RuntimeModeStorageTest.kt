@@ -2,10 +2,12 @@ package software.ralf.storymile
 
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import app.cash.turbine.ReceiveTurbine
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isGreaterThan
+import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import dev.zacsweers.metro.AppScope
@@ -18,13 +20,20 @@ import kotlin.test.Test
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import software.ralf.app.platform.presenter.BaseModel
+import software.ralf.app.platform.presenter.compose.test
 import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.buildTestScope
 import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
+import software.ralf.storymile.approot.AppRootPresenter
 import software.ralf.storymile.player.Player
 import software.ralf.storymile.playlist.PlaylistRepository
+import software.ralf.storymile.podcast.PodcastEnclosure
+import software.ralf.storymile.podcast.PodcastEpisode
+import software.ralf.storymile.podcast.QueueRepository
+import software.ralf.storymile.podcast.QueuedEpisode
 import software.ralf.storymile.restart.ApplicationRestarter
 import software.ralf.storymile.restart.DefaultApplicationRestarter
 import software.ralf.storymile.restart.testing.FakeApplicationRestarter
@@ -36,10 +45,61 @@ import software.ralf.storymile.storage.DesktopStoragePlatform
 import software.ralf.storymile.storage.InMemoryStoragePlatform
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.storage.StoragePlatform
+import software.ralf.storymile.templates.AppTemplate
 import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.user.UserScope
 
 class RuntimeModeStorageTest {
+  @Test
+  fun `real playback bar follows the library queue`() = runTest {
+    withApplication(InMemoryStoragePlatform()) { graph, _ ->
+      assertThat(graph.runtimeModeController.mode).isEqualTo(RuntimeMode.Real)
+      val queue =
+        graph.userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().queue
+      val player = graph.player()
+      val episode =
+        QueuedEpisode(
+          feedUrl = "https://feeds.test/show.xml",
+          podcastTitle = "Queued show",
+          artworkUrl = null,
+          episode =
+            PodcastEpisode(
+              id = "episode-1",
+              title = "Queued episode",
+              description = null,
+              author = null,
+              artworkUrl = null,
+              publishedAt = null,
+              duration = null,
+              enclosure =
+                PodcastEnclosure(
+                  url = "https://audio.test/episode-1.mp3",
+                  type = "audio/mpeg",
+                  length = null,
+                ),
+            ),
+        )
+
+      graph.appRootPresenter.test(this) {
+        val initial = awaitItem() as AppTemplate.AdaptiveTemplate
+        assertThat(initial.playback).isNull()
+        assertThat(initial.expandedPlayback).isNull()
+
+        queue.save(episode)
+        val queued = awaitPlayback(visible = true)
+        assertThat(queued.expandedPlayback).isNotNull()
+        val selected = player.state.value
+        assertThat(selected.episode).isEqualTo(episode)
+        assertThat(selected.isPlaying).isFalse()
+
+        queue.remove(episode)
+        val empty = awaitPlayback(visible = false)
+        assertThat(empty.expandedPlayback).isNull()
+        cancelAndIgnoreRemainingEvents()
+      }
+    }
+  }
+
   @Test
   fun `fake playlist resets after restart without changing saved real playlists`() = runTest {
     val platform = InMemoryStoragePlatform()
@@ -159,6 +219,17 @@ class RuntimeModeStorageTest {
     withRawStorage(platform, "user-guest") { it.writeData("saved guest") }
   }
 
+  private suspend fun ReceiveTurbine<BaseModel>.awaitPlayback(
+    visible: Boolean,
+  ): AppTemplate.AdaptiveTemplate {
+    while (true) {
+      val model = awaitItem() as AppTemplate.AdaptiveTemplate
+      if ((model.playback != null) == visible) {
+        return model
+      }
+    }
+  }
+
   private suspend fun TestScope.withRawStorage(
     platform: StoragePlatform,
     namespace: String,
@@ -228,6 +299,8 @@ class RuntimeModeStorageTest {
 
     val userManager: UserManager
 
+    val appRootPresenter: AppRootPresenter
+
     @DependencyGraph.Factory
     fun interface Factory {
       fun create(
@@ -245,5 +318,7 @@ class RuntimeModeStorageTest {
     val playlistRepository: PlaylistRepository
 
     val player: Player
+
+    val queue: QueueRepository
   }
 }

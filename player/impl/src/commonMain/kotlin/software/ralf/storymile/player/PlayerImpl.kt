@@ -3,9 +3,11 @@ package software.ralf.storymile.player
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import software.ralf.app.platform.inject.metro.ContributesScoped
@@ -15,6 +17,8 @@ import software.ralf.app.platform.scope.coroutine.MainCoroutineDispatcher
 import software.ralf.app.platform.scope.coroutine.launch
 import software.ralf.storymile.player.impl.generated.resources.Res
 import software.ralf.storymile.playlist.PlaylistRepository
+import software.ralf.storymile.podcast.QueueRepository
+import software.ralf.storymile.podcast.QueuedEpisode
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.user.UserScope
@@ -26,13 +30,20 @@ internal constructor(
   private val audioPlayer: Lazy<AudioPlayer>,
   private val runtimeModeController: RuntimeModeController,
   private val playlistRepository: PlaylistRepository,
+  private val queueRepository: QueueRepository,
   @MainCoroutineDispatcher private val mainDispatcher: CoroutineDispatcher,
   private val sourceUri: (String) -> String,
 ) : Player, Scoped {
   override val state: StateFlow<Player.State>
     field = MutableStateFlow(Player.State())
 
-  private var episodeIndex = 0
+  private val audioStarted = CompletableDeferred<AudioPlayer>()
+  private val played = mutableSetOf<Pair<String, String>>()
+  private val queue: List<QueuedEpisode>
+    get() = queueRepository.episodes.value.orEmpty()
+
+  private var fakeMode = false
+  private var demoIndex = 0
   private var source: String? = null
   private var closed = false
   private var playRequested = false
@@ -44,37 +55,50 @@ internal constructor(
     audioPlayer: Lazy<AudioPlayer>,
     runtimeModeController: RuntimeModeController,
     playlistRepository: PlaylistRepository,
+    queueRepository: QueueRepository,
     @MainCoroutineDispatcher mainDispatcher: CoroutineDispatcher,
   ) : this(
-    audioPlayer,
-    runtimeModeController,
-    playlistRepository,
-    mainDispatcher,
-    { Res.getUri(it) },
+    audioPlayer = audioPlayer,
+    runtimeModeController = runtimeModeController,
+    playlistRepository = playlistRepository,
+    queueRepository = queueRepository,
+    mainDispatcher = mainDispatcher,
+    sourceUri = { Res.getUri(it) },
   )
 
   override fun onEnterScope(scope: Scope) {
     scope.launch(mainDispatcher) {
       try {
-        if (runtimeModeController.mode != RuntimeMode.Fake || closed) {
+        if (closed) {
           return@launch
         }
-        loadEpisode(autoPlay = false)
-        scope.launch(mainDispatcher) {
-          playlistRepository.playlists.collect { playlists ->
-            if (playlists.none { it.episodeIds.isNotEmpty() } && !closed) {
-              playRequested = false
-              audioPlayer.value.pause()
+        fakeMode = runtimeModeController.mode == RuntimeMode.Fake
+        if (fakeMode) {
+          loadDemoEpisode(autoPlay = false)
+          scope.launch(mainDispatcher) {
+            playlistRepository.playlists.collect { playlists ->
+              if (playlists.none { it.episodeIds.isNotEmpty() } && !closed) {
+                playRequested = false
+                audioPlayer.value.pause()
+              }
             }
           }
+        } else {
+          scope.launch(mainDispatcher) {
+            queueRepository.episodes.filterNotNull().collect { updateQueue(it) }
+          }
         }
-        audioPlayer.value.state.collect { updateAudioState(it) }
+        audioStarted.await().state.collect { updateAudioState(it) }
       } catch (exception: Throwable) {
         if (exception is CancellationException) {
           throw exception
         }
         state.update {
-          it.copy(isPlaying = false, error = exception.message ?: "Playback failed")
+          it.copy(
+            isPlaying = false,
+            playWhenReady = false,
+            error = exception.message ?: "Playback failed",
+          )
         }
       }
     }
@@ -85,25 +109,42 @@ internal constructor(
     if (audioPlayer.isInitialized()) {
       audioPlayer.value.close()
     }
-    state.update { it.copy(isPlaying = false) }
+    state.update { it.copy(isPlaying = false, playWhenReady = false) }
   }
 
   override fun togglePlayback() {
-    if (
-      closed ||
-        source == null ||
-        state.value.isComplete ||
-        state.value.error != null ||
-        !hasEpisodes()
-    ) {
+    if (closed || !hasEpisodes()) {
+      return
+    }
+    val current = state.value
+    val episode = current.episode
+    if (episode != null && (source == null || current.isComplete || current.error != null)) {
+      val next = if (current.isComplete) queue.firstOrNull() else episode
+      next?.let { play(it) }
+      return
+    }
+    if (source == null || current.isComplete || current.error != null) {
       return
     }
     playRequested = !playRequested
+    state.update { it.copy(playWhenReady = playRequested) }
     if (!playRequested) {
       audioPlayer.value.pause()
     } else {
       audioPlayer.value.play()
     }
+  }
+
+  override fun play(episode: QueuedEpisode) {
+    if (closed || fakeMode) {
+      return
+    }
+    val selected = queue.find { it.key == episode.key } ?: return
+    if (state.value.isComplete) {
+      played.clear()
+    }
+    played.remove(selected.key)
+    startQueuedEpisode(selected)
   }
 
   override fun seekTo(positionMillis: Long) {
@@ -113,36 +154,85 @@ internal constructor(
   }
 
   override fun setSpeed(speed: Float) {
-    if (closed || source == null || !speed.isFinite()) {
+    if (closed || !speed.isFinite() || (source == null && state.value.episode == null)) {
       return
     }
     val supportedSpeed = speed.coerceIn(0.75f, 2f)
-    audioPlayer.value.setSpeed(supportedSpeed)
+    if (source != null) {
+      audioPlayer.value.setSpeed(supportedSpeed)
+    }
     state.update { it.copy(speed = supportedSpeed) }
   }
 
+  private fun updateQueue(episodes: List<QueuedEpisode>) {
+    if (closed) {
+      return
+    }
+    played.retainAll(episodes.map { it.key }.toSet())
+    val snapshot = state.value
+    val current = episodes.find { it.key == snapshot.episode?.key }
+    val next = episodes.firstOrNull { it.key !in played }
+    when {
+      current != null && source != null && (!snapshot.isComplete || next == null) ->
+        state.update { it.copy(episode = current, upcomingEpisodes = upcoming(current, episodes)) }
+      current == null && playRequested && next != null -> startQueuedEpisode(next)
+      next != null -> selectPaused(next)
+      else -> {
+        played.clear()
+        selectPaused(episodes.firstOrNull())
+      }
+    }
+  }
+
   private fun updateAudioState(audio: AudioPlayer.State) {
-    if (audio.source != source || closed) {
+    if (closed || source == null || audio.source != source || state.value.isComplete) {
       return
     }
     updatePlayIntent(audio)
+    val ended = audio.hasEnded && audio.error == null
+    if (ended && advanceEpisode()) {
+      return
+    }
+    if (ended || audio.error != null) {
+      playRequested = false
+    }
     state.update {
       it.copy(
         positionMillis = audio.positionMillis,
-        durationMillis = audio.durationMillis,
+        durationMillis =
+          audio.durationMillis.takeIf { duration -> duration > 0 }
+            ?: (it.episode?.episode?.duration?.inWholeMilliseconds ?: 0),
         isPlaying = audio.isPlaying,
+        playWhenReady = playRequested,
         isReady = audio.isReady,
         error = audio.error,
-        isComplete = audio.hasEnded && episodeIndex == 2,
+        isComplete = ended,
       )
     }
-    if (audio.error != null || state.value.isComplete) {
-      playRequested = false
+  }
+
+  private fun advanceEpisode(): Boolean {
+    if (fakeMode) {
+      if (demoIndex == 2) {
+        return false
+      }
+      demoIndex++
+      loadDemoEpisode(autoPlay = playRequested && hasEpisodes())
+      return true
     }
-    if (audio.hasEnded && audio.error == null && episodeIndex < 2) {
-      episodeIndex++
-      loadEpisode(autoPlay = playRequested && hasEpisodes())
+    val current = state.value.episode ?: return true
+    val entries = queue
+    if (entries.none { it.key == current.key }) {
+      return true // The queue collector handles removal of the current episode.
     }
+    played += current.key
+    val next = upcoming(current, entries).firstOrNull() ?: return false
+    if (playRequested) {
+      startQueuedEpisode(next)
+    } else {
+      selectPaused(next)
+    }
+    return true
   }
 
   private fun updatePlayIntent(audio: AudioPlayer.State) {
@@ -152,19 +242,72 @@ internal constructor(
     observedPlayIntent = audio.playWhenReady || audio.isPlaying
   }
 
-  private fun loadEpisode(autoPlay: Boolean) {
-    val number = episodeIndex + 1
-    source = sourceUri("files/test-episodes/test-episode-$number.mp3")
+  private fun loadDemoEpisode(autoPlay: Boolean) {
+    val number = demoIndex + 1
     state.value = Player.State(title = "Test episode $number", speed = state.value.speed)
+    load(source = sourceUri("files/test-episodes/test-episode-$number.mp3"), autoPlay = autoPlay)
+  }
+
+  private fun startQueuedEpisode(episode: QueuedEpisode) {
+    state.value = selection(episode).copy(playWhenReady = true)
+    try {
+      load(source = episode.episode.enclosure.url, autoPlay = true)
+    } catch (exception: Exception) {
+      if (exception is CancellationException) {
+        throw exception
+      }
+      playRequested = false
+      state.update {
+        it.copy(playWhenReady = false, error = exception.message ?: "Playback failed")
+      }
+    }
+  }
+
+  private fun selectPaused(episode: QueuedEpisode?) {
+    val hadSource = source != null
+    source = null
+    playRequested = false
     observedPlayIntent = false
-    audioPlayer.value.load(checkNotNull(source))
-    audioPlayer.value.setSpeed(state.value.speed)
+    state.value = selection(episode)
+    if (hadSource && audioPlayer.isInitialized()) {
+      audioPlayer.value.clear()
+    }
+  }
+
+  private fun selection(episode: QueuedEpisode?): Player.State =
+    Player.State(
+      title = episode?.episode?.title,
+      durationMillis = episode?.episode?.duration?.inWholeMilliseconds ?: 0,
+      speed = state.value.speed,
+      episode = episode,
+      upcomingEpisodes = episode?.let { upcoming(it, queue) }.orEmpty(),
+    )
+
+  private fun upcoming(episode: QueuedEpisode, entries: List<QueuedEpisode>): List<QueuedEpisode> =
+    entries.filter {
+      it.key != episode.key && it.key !in played
+    }
+
+  private fun load(source: String, autoPlay: Boolean) {
+    this.source = source
+    observedPlayIntent = false
     playRequested = autoPlay
+    val audio = audioPlayer.value
+    audio.load(source)
+    audio.setSpeed(state.value.speed)
+    audioStarted.complete(audio)
     if (autoPlay) {
-      audioPlayer.value.play()
+      audio.play()
     }
   }
 
   private fun hasEpisodes(): Boolean =
-    playlistRepository.playlists.value.any { it.episodeIds.isNotEmpty() }
+    if (fakeMode) {
+      playlistRepository.playlists.value.any { it.episodeIds.isNotEmpty() }
+    } else {
+      state.value.episode != null
+    }
+
+  private val QueuedEpisode.key: Pair<String, String>
+    get() = feedUrl to episode.id
 }

@@ -99,6 +99,7 @@ internal object PlaybackControls {
       }
       IconToggleButton(
         checked = player.isBookmarked,
+        enabled = player.isPreview,
         onCheckedChange = { player.onBookmark() },
         modifier = Modifier.testTag("playback-bookmark"),
       ) {
@@ -110,6 +111,7 @@ internal object PlaybackControls {
       }
       IconToggleButton(
         checked = player.isDownloaded,
+        enabled = player.isPreview,
         onCheckedChange = { player.onDownload() },
         modifier = Modifier.testTag("playback-download"),
       ) {

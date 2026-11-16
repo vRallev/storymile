@@ -3,6 +3,7 @@ package software.ralf.storymile.player
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
+import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +19,10 @@ import software.ralf.storymile.playlist.Playlist
 import software.ralf.storymile.playlist.PlaylistId
 import software.ralf.storymile.playlist.PlaylistName
 import software.ralf.storymile.playlist.testing.FakePlaylistRepository
+import software.ralf.storymile.podcast.PodcastEnclosure
+import software.ralf.storymile.podcast.PodcastEpisode
+import software.ralf.storymile.podcast.QueueRepository
+import software.ralf.storymile.podcast.QueuedEpisode
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 
@@ -35,15 +40,16 @@ class PlayerImplTest {
   }
 
   @Test
-  fun `real mode does not create an audio transport`() = runTestWithScope { scope ->
-    val transport = lazy<AudioPlayer> { error("Real mode must not create a player") }
+  fun `an empty real queue does not create an audio transport`() = runTestWithScope { scope ->
+    val transport = lazy<AudioPlayer> { error("An empty queue must not create a player") }
     val player: Player =
       PlayerImpl(
-          transport,
-          FakeRuntimeModeController(RuntimeMode.Real),
-          playlists(),
-          StandardTestDispatcher(testScheduler),
-          { it },
+          audioPlayer = transport,
+          runtimeModeController = FakeRuntimeModeController(RuntimeMode.Real),
+          playlistRepository = playlists(),
+          queueRepository = TestQueue(),
+          mainDispatcher = StandardTestDispatcher(testScheduler),
+          sourceUri = { it },
         )
         .also { scope.register(it) }
     runCurrent()
@@ -53,6 +59,48 @@ class PlayerImplTest {
     assertThat(player.state.value).isEqualTo(Player.State())
     scope.destroy()
     assertThat(transport.isInitialized()).isFalse()
+  }
+
+  @Test
+  fun `real playback follows the queue when upcoming episodes move`() = runTestWithScope { scope ->
+    val audio = FakeAudioPlayer()
+    val queue = TestQueue()
+    val player: Player =
+      player(scope = scope, audio = audio, mode = RuntimeMode.Real, queue = queue)
+    val (first, second, third) = (1..3).map { episode(it) }
+
+    queue.publish(listOf(first, second, third))
+    runCurrent()
+    assertThat(player.state.value.episode).isEqualTo(first)
+    assertThat(player.state.value.isPlaying).isFalse()
+    assertThat(audio.sources.isEmpty()).isTrue()
+
+    player.togglePlayback()
+    runCurrent()
+    queue.publish(listOf(third, first, second))
+    runCurrent()
+    assertThat(player.state.value.episode).isEqualTo(first)
+    assertThat(player.state.value.upcomingEpisodes).isEqualTo(listOf(third, second))
+    audio.finish()
+    runCurrent()
+    assertThat(player.state.value.episode).isEqualTo(third)
+    assertThat(player.state.value.isPlaying).isTrue()
+    audio.finish()
+    runCurrent()
+    assertThat(player.state.value.episode).isEqualTo(second)
+    audio.finish()
+    runCurrent()
+    assertThat(player.state.value.isComplete).isTrue()
+    assertThat(audio.sources)
+      .isEqualTo(listOf(first, third, second).map { it.episode.enclosure.url })
+
+    player.togglePlayback()
+    runCurrent()
+    assertThat(player.state.value.episode).isEqualTo(third)
+    queue.publish(emptyList())
+    runCurrent()
+    assertThat(player.state.value.episode).isNull()
+    assertThat(audio.state.value.source).isNull()
   }
 
   @Test
@@ -180,11 +228,12 @@ class PlayerImplTest {
       val playlists = playlists()
       val player: Player =
         PlayerImpl(
-            lazy { audio },
-            FakeRuntimeModeController(RuntimeMode.Fake),
-            playlists,
-            StandardTestDispatcher(testScheduler),
-            { it },
+            audioPlayer = lazy { audio },
+            runtimeModeController = FakeRuntimeModeController(RuntimeMode.Fake),
+            playlistRepository = playlists,
+            queueRepository = TestQueue(),
+            mainDispatcher = StandardTestDispatcher(testScheduler),
+            sourceUri = { it },
           )
           .also { scope.register(it) }
       runCurrent()
@@ -227,13 +276,15 @@ class PlayerImplTest {
     scope: Scope,
     audio: AudioPlayer,
     mode: RuntimeMode = RuntimeMode.Fake,
+    queue: QueueRepository = TestQueue(),
   ): Player =
     PlayerImpl(
-        lazy { audio },
-        FakeRuntimeModeController(mode),
-        playlists(),
-        StandardTestDispatcher(testScheduler),
-        { it },
+        audioPlayer = lazy { audio },
+        runtimeModeController = FakeRuntimeModeController(mode),
+        playlistRepository = playlists(),
+        queueRepository = queue,
+        mainDispatcher = StandardTestDispatcher(testScheduler),
+        sourceUri = { it },
       )
       .also { scope.register(it) }
 
@@ -244,6 +295,48 @@ class PlayerImplTest {
           Playlist(PlaylistId("test"), PlaylistName("Test"), listOf(EpisodeId("test-episode-1"))),
         ),
     )
+
+  private fun episode(number: Int): QueuedEpisode =
+    QueuedEpisode(
+      feedUrl = "https://example.org/feed.xml",
+      podcastTitle = "Test show",
+      artworkUrl = null,
+      episode =
+        PodcastEpisode(
+          id = "$number",
+          title = "Episode $number",
+          description = null,
+          author = null,
+          artworkUrl = null,
+          publishedAt = null,
+          duration = null,
+          enclosure =
+            PodcastEnclosure(
+              url = "https://example.org/episode-$number.mp3",
+              type = "audio/mpeg",
+              length = null,
+            ),
+        ),
+    )
+
+  private class TestQueue : QueueRepository {
+    override val episodes: StateFlow<List<QueuedEpisode>?>
+      field = MutableStateFlow(emptyList<QueuedEpisode>())
+
+    fun publish(episodes: List<QueuedEpisode>) {
+      this.episodes.value = episodes
+    }
+
+    override fun save(episode: QueuedEpisode) = error("Playback must not change the queue")
+
+    override fun remove(episode: QueuedEpisode) = error("Playback must not change the queue")
+
+    override fun removeWithUndo(episode: QueuedEpisode, onRemoved: (undo: () -> Unit) -> Unit) =
+      error("Playback must not change the queue")
+
+    override fun move(episode: QueuedEpisode, target: QueuedEpisode) =
+      error("Playback must not change the queue")
+  }
 
   private class FakeAudioPlayer : AudioPlayer() {
     override val state: StateFlow<State>
@@ -259,6 +352,11 @@ class PlayerImplTest {
     override fun load(source: String) {
       sources += source
       state.value = State(source = source)
+    }
+
+    override fun clear() {
+      wantsPlayback = false
+      state.value = State()
     }
 
     override fun play() {
