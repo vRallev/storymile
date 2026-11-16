@@ -16,6 +16,12 @@ interface QueueRepository {
   /** Appends [episode]. If its feed URL and episode ID are already queued, does nothing. */
   fun save(episode: QueuedEpisode)
 
-  /** Removes the entry with [feedUrl] and [episodeId] if it is queued. */
-  fun remove(feedUrl: String, episodeId: String)
+  /** Removes [episode] if its feed URL and episode ID are queued. */
+  fun remove(episode: QueuedEpisode)
+
+  /**
+   * Moves [episode] to the current index of [target]. Matches entries by feed URL and episode ID.
+   * Does nothing if either entry is missing.
+   */
+  fun move(episode: QueuedEpisode, target: QueuedEpisode)
 }

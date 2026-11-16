@@ -15,6 +15,7 @@ import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.storymile.episodedetails.EpisodeDetails
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
 import software.ralf.storymile.podcast.QueueRepository
+import software.ralf.storymile.podcast.QueuedEpisode
 import software.ralf.storymile.user.UserScope
 
 @Inject
@@ -54,9 +55,11 @@ class LibraryQueuePresenterImpl(
               backstack.replaceTop(destination)
             }
           },
-          onReorder = {},
+          onReorder = { episode, target ->
+            queue.move(episode = episode.toQueuedEpisode(), target = target.toQueuedEpisode())
+          },
           onRemove = { episode ->
-            queue.remove(feedUrl = episode.feedUrl, episodeId = episode.episode.id)
+            queue.remove(episode.toQueuedEpisode())
           },
         )
       }
@@ -79,6 +82,14 @@ class LibraryQueuePresenterImpl(
     }
   }
 
+  private fun EpisodeDetails.toQueuedEpisode(): QueuedEpisode =
+    QueuedEpisode(
+      feedUrl = feedUrl,
+      podcastTitle = podcastTitle,
+      artworkUrl = artworkUrl,
+      episode = episode,
+    )
+
   data class Model(
     override val isEmpty: Boolean,
     override val list: BaseModel,
@@ -89,7 +100,7 @@ class LibraryQueuePresenterImpl(
   data class ListModel(
     val episodes: List<EpisodeDetails>?,
     val onSelect: (EpisodeDetails) -> Unit,
-    val onReorder: (EpisodeDetails) -> Unit,
+    val onReorder: (episode: EpisodeDetails, target: EpisodeDetails) -> Unit,
     val onRemove: (EpisodeDetails) -> Unit,
     val selection: DetailsModel? = null,
   ) : BaseModel

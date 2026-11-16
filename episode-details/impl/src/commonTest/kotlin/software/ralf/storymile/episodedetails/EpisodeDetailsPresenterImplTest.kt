@@ -82,11 +82,14 @@ class EpisodeDetailsPresenterImplTest {
       episodes.value = checkNotNull(episodes.value) + episode
     }
 
-    override fun remove(feedUrl: String, episodeId: String) {
+    override fun remove(episode: QueuedEpisode) {
       episodes.value =
         checkNotNull(episodes.value).filterNot {
-          it.feedUrl == feedUrl && it.episode.id == episodeId
+          it.feedUrl == episode.feedUrl && it.episode.id == episode.episode.id
         }
     }
+
+    override fun move(episode: QueuedEpisode, target: QueuedEpisode) =
+      error("Unexpected queue reorder")
   }
 }

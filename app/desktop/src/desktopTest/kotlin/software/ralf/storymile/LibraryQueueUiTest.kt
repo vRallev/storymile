@@ -1,11 +1,15 @@
 package software.ralf.storymile
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
@@ -17,12 +21,15 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
+import androidx.compose.ui.unit.dp
 import assertk.assertThat
 import assertk.assertions.isGreaterThan
 import assertk.assertions.isLessThan
@@ -69,7 +76,7 @@ class LibraryQueueUiTest {
   }
 
   @Test
-  fun `queue shows episodes in enqueue order and opens details across window sizes`() {
+  fun `queue reorders with touch and mouse while preserving episode navigation`() {
     val size = mutableStateOf(DesktopWindowSizes.phone)
     uiTestRule.runRobotTest(windowSize = DesktopWindowSizes.tablet, contentSize = size) {
       composeRobot<DiscoveryRobot> {
@@ -91,18 +98,24 @@ class LibraryQueueUiTest {
       val detailsTitle = onNodeWithTag("episode-details-title")
       onNodeWithTag("tab-title").assertTextEquals("Queued episodes")
       onAllNodes(hasText("Queued episodes")).assertCountEquals(1)
-      runOnUiThread { onNodeWithTag("library-queue-reorder-1").performTouchInput { click() } }
       detailsTitle.assertDoesNotExist()
       first.assertIsDisplayed().assertTextContains(firstTitle)
       second.assertIsDisplayed().assertTextContains(secondTitle)
+
+      val touchStart = bounds("library-queue-reorder-1").center
+      val touchTarget = bounds("library-queue-reorder-0").center
       runOnUiThread {
         onNodeWithTag("library-queue-reorder-1").performTouchInput {
-          swipe(start = center, end = center.copy(y = center.y - 50f))
+          swipe(start = center, end = center + (touchTarget - touchStart) * 1.35f)
         }
       }
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("library-queue-episode-0") and hasText(secondTitle),
+        timeoutMillis = 5_000,
+      )
       detailsTitle.assertDoesNotExist()
-      first.assertIsDisplayed().assertTextContains(firstTitle)
-      second.assertIsDisplayed().assertTextContains(secondTitle)
+      first.assertIsDisplayed().assertTextContains(secondTitle)
+      second.assertIsDisplayed().assertTextContains(firstTitle)
 
       runOnIdle { size.value = DesktopWindowSizes.tablet }
       waitUntilAtLeastOneExists(
@@ -111,7 +124,7 @@ class LibraryQueueUiTest {
       )
       first.assertIsSelected()
       second.assertIsNotSelected()
-      detailsTitle.assertIsDisplayed().assertTextEquals(firstTitle)
+      detailsTitle.assertIsDisplayed().assertTextEquals(secondTitle)
       onNodeWithTag("episode-details-back").assertDoesNotExist()
       assertThat(onNodeWithTag("library-queue-list").getUnclippedBoundsInRoot().right)
         .isLessThanOrEqualTo(
@@ -120,22 +133,51 @@ class LibraryQueueUiTest {
 
       runOnUiThread { second.performClick() }
       second.assertIsSelected()
-      detailsTitle.assertTextEquals(secondTitle)
+      detailsTitle.assertTextEquals(firstTitle)
+
+      val mouseStart = bounds("library-queue-reorder-0").center
+      val mouseTarget = bounds("library-queue-reorder-1").center
+      runOnUiThread {
+        onNodeWithTag("library-queue-reorder-0").performMouseInput {
+          moveTo(center)
+          press()
+          moveTo(center + (mouseTarget - mouseStart) * 1.35f)
+          release()
+        }
+      }
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("library-queue-episode-0") and hasText(firstTitle),
+        timeoutMillis = 5_000,
+      )
+      first.assertIsSelected().assertTextContains(firstTitle)
+      second.assertIsNotSelected().assertTextContains(secondTitle)
+      detailsTitle.assertTextEquals(firstTitle)
 
       runOnUiThread { onNodeWithTag("library-tab-shows").performClick() }
       onNodeWithText("No followed shows").assertIsDisplayed()
       runOnUiThread { onNodeWithTag("library-tab-queue").performClick() }
+      first.assertIsSelected()
+      detailsTitle.assertIsDisplayed().assertTextEquals(firstTitle)
+
+      runOnUiThread { onNodeWithTag("library-queue-reorder-0").performClick() }
+      onNodeWithText("Move up").assertIsNotEnabled()
+      val moveDown = onNodeWithText("Move down").assertIsEnabled()
+      runOnUiThread { moveDown.performClick() }
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("library-queue-episode-1") and hasText(firstTitle),
+        timeoutMillis = 5_000,
+      )
       second.assertIsSelected()
-      detailsTitle.assertIsDisplayed().assertTextEquals(secondTitle)
+      detailsTitle.assertIsDisplayed().assertTextEquals(firstTitle)
 
       runOnIdle { size.value = DesktopWindowSizes.phone }
-      detailsTitle.assertIsDisplayed().assertTextEquals(secondTitle)
+      detailsTitle.assertIsDisplayed().assertTextEquals(firstTitle)
       onNodeWithTag("library-queue-list").assertDoesNotExist()
 
       runOnUiThread { onNodeWithTag("episode-details-back").performClick() }
       first.assertIsDisplayed()
       runOnUiThread { first.performClick() }
-      detailsTitle.assertIsDisplayed().assertTextEquals(firstTitle)
+      detailsTitle.assertIsDisplayed().assertTextEquals(secondTitle)
       val queueButton = onNodeWithTag("episode-details-add-to-queue").assertTextEquals("In queue")
       runOnUiThread { queueButton.performScrollTo().performClick() }
       waitUntilAtLeastOneExists(
@@ -143,7 +185,7 @@ class LibraryQueueUiTest {
         timeoutMillis = 5_000,
       )
       runOnUiThread { onNodeWithTag("episode-details-back").performClick() }
-      first.assertIsDisplayed().assertTextContains(secondTitle)
+      first.assertIsDisplayed().assertTextContains(firstTitle)
       second.assertDoesNotExist()
     }
   }
@@ -201,6 +243,51 @@ class LibraryQueueUiTest {
       onNodeWithText("Your queue is empty").assertIsDisplayed()
       onNodeWithTag("library-queue-list").assertDoesNotExist()
       detailsTitle.assertDoesNotExist()
+    }
+  }
+
+  @Test
+  fun `dragging near the bottom scrolls to episodes outside the viewport`() {
+    val size = mutableStateOf(DesktopWindowSizes.phone)
+    uiTestRule.runRobotTest(windowSize = DesktopWindowSizes.phone, contentSize = size) {
+      composeRobot<DiscoveryRobot> {
+        discover()
+        openPodcast("quiet-current")
+      }
+      val titles = List(3) { "The Quiet Current episode ${it + 1}" }
+      titles.forEachIndexed { index, title -> queueEpisode(index = index, title = title) }
+      composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.LIBRARY) }
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("library-queue-episode-2") and hasText(titles[2]),
+        timeoutMillis = 5_000,
+      )
+      runOnIdle { size.value = DesktopWindowSizes.phone.copy(height = 400.dp) }
+      onNodeWithTag("library-queue-episode-2").assertIsNotDisplayed()
+      val start = bounds("library-queue-reorder-0").center
+      val list = bounds("library-queue-list")
+
+      mainClock.autoAdvance = false
+      try {
+        runOnUiThread {
+          onRoot().performMouseInput {
+            moveTo(start)
+            press()
+            moveTo(Offset(x = start.x, y = list.bottom - 4f))
+          }
+        }
+        mainClock.advanceTimeBy(1_500)
+        runOnUiThread { onRoot().performMouseInput { release() } }
+      } finally {
+        mainClock.autoAdvance = true
+      }
+
+      runOnIdle { size.value = DesktopWindowSizes.phone }
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("library-queue-episode-2") and hasText(titles[0]),
+        timeoutMillis = 5_000,
+      )
+      onNodeWithTag("library-queue-episode-0").assertTextContains(titles[1])
+      onNodeWithTag("library-queue-episode-1").assertTextContains(titles[2])
     }
   }
 

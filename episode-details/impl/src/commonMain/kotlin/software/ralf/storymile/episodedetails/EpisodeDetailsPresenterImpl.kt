@@ -18,15 +18,16 @@ class EpisodeDetailsPresenterImpl(
     val backstack = LocalBackstackScope.requireNotNull()
     val queued by queue.episodes.collectAsState()
     val queueEnabled = queued != null
-    val isQueued =
-      queued?.any { it.feedUrl == details.feedUrl && it.episode.id == details.episode.id } == true
+    val queuedEpisode = queued?.firstOrNull {
+      it.feedUrl == details.feedUrl && it.episode.id == details.episode.id
+    }
     return Model(
       details = details,
       onPlayNow = {},
       onToggleQueue = {
         when {
           !queueEnabled -> Unit
-          isQueued -> queue.remove(feedUrl = details.feedUrl, episodeId = details.episode.id)
+          queuedEpisode != null -> queue.remove(queuedEpisode)
           else ->
             queue.save(
               QueuedEpisode(
@@ -42,7 +43,7 @@ class EpisodeDetailsPresenterImpl(
       onDownload = {},
       onMore = {},
       onBack = { backstack.pop() },
-      isQueued = isQueued,
+      isQueued = queuedEpisode != null,
       queueEnabled = queueEnabled,
     )
   }

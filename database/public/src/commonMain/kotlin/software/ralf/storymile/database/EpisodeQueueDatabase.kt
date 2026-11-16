@@ -13,4 +13,15 @@ interface EpisodeQueueDatabase {
 
   /** Removes the episode identified by [feedUrl] and [episodeId], if present. */
   suspend fun removeFromQueue(feedUrl: String, episodeId: String)
+
+  /**
+   * Moves the entry with [feedUrl] and [episodeId] to the index of the entry with [targetFeedUrl]
+   * and [targetEpisodeId]. Does nothing if either entry is missing.
+   */
+  suspend fun moveInQueue(
+    feedUrl: String,
+    episodeId: String,
+    targetFeedUrl: String,
+    targetEpisodeId: String,
+  )
 }

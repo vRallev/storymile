@@ -20,10 +20,19 @@ class DatabasePersistenceTest {
       val podcast = DatabaseFixture.podcast()
       val queued =
         podcast.episodes.map { DatabaseFixture.queuedEpisode(podcast = podcast, episode = it) }
+      val first = queued.first()
+      val last = queued.last()
+      val reordered = listOf(last) + queued.dropLast(1)
       try {
         DatabaseFixture(path).use { database ->
           database.insert(podcast)
           queued.forEach { queue.enqueue(it) }
+          queue.moveInQueue(
+            feedUrl = last.feedUrl,
+            episodeId = last.episode.id,
+            targetFeedUrl = first.feedUrl,
+            targetEpisodeId = first.episode.id,
+          )
         }
         DatabaseFixture().use { memory ->
           assertThat(memory.podcasts.first()).isEmpty()
@@ -36,12 +45,12 @@ class DatabasePersistenceTest {
         }
         DatabaseFixture(path).use { reopened ->
           assertThat(reopened.podcasts.first()).isEqualTo(listOf(podcast))
-          assertThat(queue.queuedEpisodes.first()).isEqualTo(queued)
+          assertThat(queue.queuedEpisodes.first()).isEqualTo(reordered)
           reopened.delete(podcast.feedUrl)
         }
         DatabaseFixture(path).use { reopened ->
           assertThat(reopened.podcasts.first()).isEmpty()
-          assertThat(queue.queuedEpisodes.first()).isEqualTo(queued)
+          assertThat(queue.queuedEpisodes.first()).isEqualTo(reordered)
         }
       } finally {
         FileSystem.SYSTEM.deleteRecursively(directory)
