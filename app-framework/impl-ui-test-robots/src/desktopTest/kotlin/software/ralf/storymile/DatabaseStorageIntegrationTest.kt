@@ -10,15 +10,20 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.withContext
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
@@ -90,6 +95,10 @@ class DatabaseStorageIntegrationTest {
       original.database.insert(podcast)
 
       original.destroy()
+      platform.queryCleanupStarted.await()
+      runCurrent()
+      assertThat(platform.closeStarted.isCompleted).isFalse()
+      platform.finishQueryCleanup.complete(Unit)
       platform.closeStarted.await()
       val waiting = createFixture()
       val waitingRead = async { waiting.database.podcasts.first() }
@@ -120,6 +129,7 @@ class DatabaseStorageIntegrationTest {
       reopened.database.insert(updated)
       assertThat(reopened.database.podcasts.first()).isEqualTo(listOf(updated))
     } finally {
+      platform.finishQueryCleanup.complete(Unit)
       platform.finishClose.complete(Unit)
       fixtures.asReversed().forEach { it.close() }
       FileSystem.SYSTEM.deleteRecursively(root)
@@ -159,7 +169,10 @@ class DatabaseStorageIntegrationTest {
   private class DelayedClosePlatform : DatabasePlatform {
     private val delegate: DatabasePlatform = PlatformDatabase()
     private var closing = false
+    private var firstOpen = true
 
+    val queryCleanupStarted = CompletableDeferred<Unit>()
+    val finishQueryCleanup = CompletableDeferred<Unit>()
     val closeStarted = CompletableDeferred<Unit>()
     val finishClose = CompletableDeferred<Unit>()
     var openedWhileClosing = false
@@ -170,6 +183,19 @@ class DatabaseStorageIntegrationTest {
       coroutineContext: CoroutineContext,
     ): RoomPodcastDatabase {
       openedWhileClosing = openedWhileClosing || closing
+      if (firstOpen) {
+        firstOpen = false
+        CoroutineScope(coroutineContext).launch(start = CoroutineStart.UNDISPATCHED) {
+          try {
+            awaitCancellation()
+          } finally {
+            withContext(NonCancellable) {
+              queryCleanupStarted.complete(Unit)
+              finishQueryCleanup.await()
+            }
+          }
+        }
+      }
       // SQLite connection timeouts must use real time while filesystem work is pending.
       return delegate.open(path, coroutineContext + Dispatchers.Default)
     }

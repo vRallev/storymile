@@ -1,14 +1,18 @@
 package software.ralf.storymile.player
 
 import kotlinx.coroutines.flow.StateFlow
+import software.ralf.storymile.podcast.QueuedEpisode
 
-/** Plays the bundled fake episodes in order for the current user session. */
+/** Plays the current user's Library Queue without removing completed episodes. */
 interface Player {
-  /** Actual audio state. No episode is selected outside fake mode. */
+  /** Current selection and audio state. */
   val state: StateFlow<State>
 
-  /** Pauses or resumes the current episode. Does not restart a completed queue. */
+  /** Pauses or resumes the selection. After the last episode ends, starts the queue again. */
   fun togglePlayback()
+
+  /** Starts [episode] if it is still in the queue. */
+  fun play(episode: QueuedEpisode)
 
   /** Seeks within the current episode, clamping to its duration. */
   fun seekTo(positionMillis: Long)
@@ -18,17 +22,21 @@ interface Player {
 
   /** A snapshot shared by all playback controls. */
   data class State(
-    /** Current episode title, or null when audio playback is unavailable. */
-    val title: String? = null,
+    /** Current episode, or null when the queue is empty. */
+    val episode: QueuedEpisode? = null,
+    /** Episodes still to play, in their current queue order. */
+    val upcomingEpisodes: List<QueuedEpisode> = emptyList(),
     /** Source position in milliseconds, independent of playback speed. */
     val positionMillis: Long = 0,
     /** Source duration in milliseconds, or zero while preparing. */
     val durationMillis: Long = 0,
     /** Whether the transport is currently producing audio. */
     val isPlaying: Boolean = false,
+    /** Whether audio should play when ready, including while it is preparing. */
+    val playWhenReady: Boolean = false,
     /** Session-only playback speed, initially normal. */
     val speed: Float = 1f,
-    /** Whether all three episodes have finished. */
+    /** Whether playback reached the end of the queue. */
     val isComplete: Boolean = false,
     /** Whether the current source is ready for seeking. */
     val isReady: Boolean = false,

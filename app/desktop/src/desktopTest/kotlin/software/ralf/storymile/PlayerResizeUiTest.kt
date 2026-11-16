@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
@@ -20,6 +21,7 @@ import javax.imageio.ImageIO
 import kotlin.math.roundToInt
 import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
+import software.ralf.app.platform.robot.waitUntilCatching
 
 class PlayerResizeUiTest {
   private val uiTestRule = DesktopUiTestRule(withEpisodes = true)
@@ -32,7 +34,11 @@ class PlayerResizeUiTest {
       darkTheme = false,
       contentSize = size,
     ) {
+      runOnUiThread { onNodeWithTag("playback-bar-play-pause").performClick() }
       composeRobot<AppShellRobot> { openPlayback() }
+      waitUntilCatching("queue audio is ready") {
+        onNodeWithTag("playback-seek").assertIsEnabled()
+      }
       runOnUiThread { onNodeWithTag("playback-speed").performScrollTo() }
       onNodeWithTag("playback-bar-speed", useUnmergedTree = true).assertDoesNotExist()
       assertSpeedDrawn("initial-phone")

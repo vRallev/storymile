@@ -13,6 +13,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import software.ralf.storymile.user.UserScope
@@ -29,7 +30,7 @@ internal constructor(
   override val state: StateFlow<State>
     field = MutableStateFlow(State())
 
-  private val commands = Channel<Command>(Channel.UNLIMITED)
+  private val commands = Channel<Command>(Channel.UNLIMITED) { it.release() }
   private val lock = Any()
   private var closed = false
   private var generation = 0L
@@ -47,15 +48,14 @@ internal constructor(
             commands.receive()
           }
         synchronized(lock) {
-          ensureActive()
           if (!closed) {
             try {
               if (command != null) {
                 handle(command, this)
               }
               while (true) {
-                val next = commands.tryReceive().getOrNull() ?: break
                 ensureActive()
+                val next = commands.tryReceive().getOrNull() ?: break
                 handle(next, this)
               }
               ensureActive()
@@ -68,18 +68,18 @@ internal constructor(
               }
               fail(exception)
             }
+          } else {
+            command?.release()
           }
         }
       }
     } finally {
       synchronized(lock) {
         closed = true
-        preparation?.cancel()
-        session?.close()
-        session = null
+        releaseSource()
         state.update { it.copy(isPlaying = false, playWhenReady = false) }
       }
-      commands.close()
+      commands.cancel()
     }
   }
 
@@ -90,6 +90,10 @@ internal constructor(
 
   override fun load(source: String) {
     send(Command.Load(source))
+  }
+
+  override fun clear() {
+    send(Command.Clear)
   }
 
   override fun play() {
@@ -112,8 +116,7 @@ internal constructor(
   override fun close() {
     synchronized(lock) {
       closed = true
-      session?.close()
-      session = null
+      releaseSource()
       state.update { it.copy(isPlaying = false, playWhenReady = false) }
     }
     job.cancel()
@@ -130,6 +133,10 @@ internal constructor(
   private fun handle(command: Command, coroutineScope: CoroutineScope) {
     when (command) {
       is Command.Load -> prepare(command.source, coroutineScope)
+      Command.Clear -> {
+        releaseSource()
+        state.value = State()
+      }
       is Command.Prepared -> prepared(command)
       is Command.Failed -> {
         if (command.generation == generation) {
@@ -152,18 +159,15 @@ internal constructor(
   }
 
   private fun prepare(source: String, coroutineScope: CoroutineScope) {
-    generation++
-    preparation?.cancel()
-    session?.close()
-    session = null
-    playRequested = false
+    releaseSource()
     state.value = State(source = source)
     val requestedGeneration = generation
     preparation = coroutineScope.launch {
       try {
         val audio = decode(source)
-        ensureActive()
-        commands.send(Command.Prepared(requestedGeneration, audio))
+        if (!isActive || commands.trySend(Command.Prepared(requestedGeneration, audio)).isFailure) {
+          audio.close()
+        }
       } catch (exception: Throwable) {
         if (exception is CancellationException) {
           throw exception
@@ -173,10 +177,21 @@ internal constructor(
     }
   }
 
+  private fun releaseSource() {
+    generation++
+    preparation?.cancel()
+    preparation = null
+    session?.close()
+    session = null
+    playRequested = false
+  }
+
   private fun prepared(command: Command.Prepared) {
     if (command.generation == generation) {
       val position = state.value.positionMillis.coerceAtMost(command.audio.durationMillis)
-      session = Session(command.audio).apply { reset(position) }
+      val prepared = Session(command.audio)
+      session = prepared
+      prepared.reset(position)
       state.update {
         it.copy(
           positionMillis = position,
@@ -184,6 +199,8 @@ internal constructor(
           isReady = true,
         )
       }
+    } else {
+      command.release()
     }
   }
 
@@ -297,7 +314,7 @@ internal constructor(
       while (sonic.samplesAvailable() == 0 && !inputEnded) {
         val endFrame = min(inputFrame + 1_024, audio.frameCount)
         sonic.writeShortToStream(
-          audio.samples.copyOfRange(inputFrame * audio.channels, endFrame * audio.channels),
+          audio.readSamples(startFrame = inputFrame, endFrame = endFrame),
           endFrame - inputFrame,
         )
         inputFrame = endFrame
@@ -312,12 +329,22 @@ internal constructor(
     }
 
     fun close() {
-      output?.close()
-      output = null
+      try {
+        output?.close()
+      } finally {
+        output = null
+        audio.close()
+      }
     }
   }
 
   private sealed interface Command {
+    fun release() {
+      if (this is Prepared) {
+        audio.close()
+      }
+    }
+
     data class Load(val source: String) : Command
 
     data class Prepared(val generation: Long, val audio: PcmAudio) : Command
@@ -327,6 +354,8 @@ internal constructor(
     data class Seek(val positionMillis: Long) : Command
 
     data class Speed(val speed: Float) : Command
+
+    data object Clear : Command
 
     data object Play : Command
 

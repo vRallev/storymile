@@ -82,7 +82,9 @@ class DiscoveryUiTest {
         seeQuery("Field")
         seePodcast("field-notes")
       }
-      robot<PlayerRobot> { seeCommands(toggles = 0, seeks = emptyList(), speeds = emptyList()) }
+      robot<PlayerRobot> {
+        seeCommands(plays = 0, pauses = 0, seeks = emptyList(), speeds = emptyList())
+      }
 
       composeRobot<AppShellRobot> {
         selectTab(Tab.LIBRARY)

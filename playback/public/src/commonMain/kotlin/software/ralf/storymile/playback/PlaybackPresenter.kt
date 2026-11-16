@@ -7,7 +7,7 @@ import software.ralf.app.platform.presenter.compose.ComposePresenter
 interface PlaybackPresenter : ComposePresenter<Unit, PlaybackPresenter.Model> {
   /**
    * Playback content for the persistent bar and the full screen. Both are absent when the current
-   * user's playlists contain no episodes.
+   * user's Library Queue is empty.
    */
   interface Model : BaseModel {
     /** Playback bar whose measured height determines the sheet's collapsed height. */

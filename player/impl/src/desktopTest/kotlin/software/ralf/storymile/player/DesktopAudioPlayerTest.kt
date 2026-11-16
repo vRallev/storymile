@@ -156,6 +156,35 @@ class DesktopAudioPlayerTest {
   }
 
   @Test
+  fun `clearing releases playback and leaves the player available for the next episode`() =
+    runTest {
+      val outputs = mutableListOf<TestOutput>()
+      val player: AudioPlayer =
+        DesktopAudioPlayer(
+          coroutineScope = backgroundScope,
+          decode = { tone() },
+          createOutput = { TestOutput().also { outputs += it } },
+        )
+      player.load("episode")
+      player.play()
+      runCurrent()
+
+      player.clear()
+      runCurrent()
+
+      assertThat(player.state.value).isEqualTo(AudioPlayer.State())
+      assertThat(outputs.single().closed).isTrue()
+
+      player.load("next episode")
+      player.play()
+      runCurrent()
+
+      assertThat(player.state.value.source).isEqualTo("next episode")
+      assertThat(player.state.value.isPlaying).isTrue()
+      player.close()
+    }
+
+  @Test
   fun `speed changes duration while preserving pitch and end waits for the device`() = runTest {
     for (speed in listOf(0.75f, 1f, 1.2f, 1.5f, 2f)) {
       val output = TestOutput()
@@ -191,11 +220,14 @@ class DesktopAudioPlayerTest {
   }
 
   private fun tone(seconds: Int = 2): PcmAudio =
-    PcmAudio(
-      ShortArray(48_000 * seconds) { (sin(2 * PI * 440 * it / 48_000) * 16_000).toInt().toShort() },
-      sampleRate = 48_000,
-      channels = 1,
-    )
+    object : PcmAudio(sampleRate = 48_000, channels = 1, frameCount = 48_000 * seconds) {
+      override fun readSamples(startFrame: Int, endFrame: Int): ShortArray =
+        ShortArray(endFrame - startFrame) { index ->
+          (sin(2 * PI * 440 * (startFrame + index) / sampleRate) * 16_000).toInt().toShort()
+        }
+
+      override fun close() = Unit
+    }
 
   private class TestOutput(private val failOpening: Boolean = false) : AudioOutput {
     override var playedFrames = 0L

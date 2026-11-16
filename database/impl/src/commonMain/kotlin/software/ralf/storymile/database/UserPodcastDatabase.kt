@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.Scoped
@@ -42,7 +43,7 @@ class UserPodcastDatabase(
   @ForScope(UserScope::class) private val coroutineScope: CoroutineScope,
   private val platform: DatabasePlatform,
 ) : PodcastDatabase, EpisodeQueueDatabase, SavedEpisodeDatabase, Scoped {
-  private val database = CompletableDeferred<RoomPodcastDatabase>()
+  private val database = CompletableDeferred<Session>()
 
   override val podcasts: Flow<List<PodcastFeed>> = channelFlow {
     operation { it.podcasts().observe().collect { rows -> send(rows.map { it.toPodcast() }) } }
@@ -67,13 +68,13 @@ class UserPodcastDatabase(
       try {
         val path = storage.databasePath("podcasts")
         awaitPreviousOwner(path)
-        opened =
-          platform.open(
-            path = path,
-            coroutineContext = coroutineScope.coroutineContext,
-          )
-        database.complete(opened)
-        awaitCancellation()
+        // Let canceled Room operations finish rolling back before closing the database.
+        supervisorScope {
+          val room = platform.open(path = path, coroutineContext = coroutineContext)
+          opened = room
+          database.complete(Session(database = room, scope = this))
+          awaitCancellation()
+        }
       } catch (exception: Throwable) {
         database.completeExceptionally(exception)
         if (exception is CancellationException) {
@@ -140,10 +141,11 @@ class UserPodcastDatabase(
     coroutineScope.coroutineContext.ensureActive()
     val callerContext = currentCoroutineContext()
     callerContext.ensureActive()
+    val session = database.await()
     val operation =
-      coroutineScope.async(callerContext.minusKey(Job)) {
+      session.scope.async(callerContext.minusKey(Job)) {
         try {
-          Result.success(block(database.await()))
+          Result.success(block(session.database))
         } catch (exception: Throwable) {
           Result.failure(exception)
         }
@@ -158,4 +160,6 @@ class UserPodcastDatabase(
   private companion object {
     val owners = MutableStateFlow<Map<String, List<Job>>>(emptyMap())
   }
+
+  private data class Session(val database: RoomPodcastDatabase, val scope: CoroutineScope)
 }

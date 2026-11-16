@@ -20,7 +20,6 @@ import kotlin.time.Duration.Companion.seconds
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.app.platform.robot.robot
 import software.ralf.app.platform.robot.waitUntilCatching
-import software.ralf.storymile.player.Player
 
 class PlayerAudioUiTest {
   private val uiTestRule = DesktopUiTestRule(withEpisodes = true)
@@ -28,47 +27,44 @@ class PlayerAudioUiTest {
   @Test
   fun `both layouts follow audio snapshots and forward transport commands`() {
     uiTestRule.runRobotTest(windowSize = DpSize(1440.dp, 900.dp)) {
-      val initial =
-        Player.State(
-          title = "Test episode 1",
-          positionMillis = 22_500,
-          durationMillis = 125_000,
-          isReady = true,
-        )
-      robot<PlayerRobot> { publish(initial) }
-      seeAudioState(expanded = false, positionSeconds = 22, playing = false, speed = 1f)
-
+      robot<PlayerRobot> { setDuration(125_000) }
       runOnUiThread { onNodeWithTag("playback-bar-play-pause").performClick() }
+      seeAudioState(expanded = false, positionSeconds = 0, playing = true, speed = 1f)
+      robot<PlayerRobot> { advanceTo(22_500) }
+      seeAudioState(expanded = false, positionSeconds = 22, playing = true, speed = 1f)
       onNodeWithTag("playback-bar-seek").performSemanticsAction(SemanticsActions.SetProgress) {
         it(50f)
       }
       runOnUiThread { onNodeWithTag("playback-bar-speed").performClick() }
       runOnUiThread { onNodeWithTag("playback-option-speed-1.5").performClick() }
-      robot<PlayerRobot> { seeCommands(1, listOf(50_000), listOf(1.5f)) }
-      seeAudioState(expanded = false, positionSeconds = 22, playing = false, speed = 1f)
-
-      val playing = initial.copy(positionMillis = 30_000, isPlaying = true, speed = 1.5f)
-      robot<PlayerRobot> { publish(playing) }
-      seeAudioState(expanded = false, positionSeconds = 30, playing = true, speed = 1.5f)
+      runOnUiThread { onNodeWithTag("playback-bar-play-pause").performClick() }
+      seeAudioState(expanded = false, positionSeconds = 50, playing = false, speed = 1.5f)
 
       composeRobot<AppShellRobot> { openPlayback() }
-      seeAudioState(expanded = true, positionSeconds = 30, playing = true, speed = 1.5f)
+      seeAudioState(expanded = true, positionSeconds = 50, playing = false, speed = 1.5f)
       runOnUiThread { onNodeWithTag("playback-play-pause").performClick() }
       onNodeWithTag("playback-seek").performSemanticsAction(SemanticsActions.SetProgress) {
         it(60f)
       }
+      seeAudioState(expanded = true, positionSeconds = 60, playing = true, speed = 1.5f)
       runOnUiThread { onNodeWithTag("playback-back").performClick() }
+      seeAudioState(expanded = true, positionSeconds = 45, playing = true, speed = 1.5f)
       runOnUiThread { onNodeWithTag("playback-forward").performClick() }
       runOnUiThread { onNodeWithTag("playback-speed").performScrollTo().performClick() }
       runOnUiThread { onNodeWithTag("playback-option-speed-2.0").performClick() }
+      runOnUiThread { onNodeWithTag("playback-play-pause").performClick() }
+      seeAudioState(expanded = true, positionSeconds = 75, playing = false, speed = 2f)
       robot<PlayerRobot> {
-        seeCommands(2, listOf(50_000, 60_000, 15_000, 60_000), listOf(1.5f, 2f))
-        publish(playing.copy(positionMillis = 60_000, isPlaying = false, speed = 2f))
+        seeCommands(
+          plays = 2,
+          pauses = 2,
+          seeks = listOf(50_000, 60_000, 45_000, 75_000),
+          speeds = listOf(1f, 1.5f, 2f),
+        )
       }
-      seeAudioState(expanded = true, positionSeconds = 60, playing = false, speed = 2f)
 
       composeRobot<AppShellRobot> { collapsePlayback() }
-      seeAudioState(expanded = false, positionSeconds = 60, playing = false, speed = 2f)
+      seeAudioState(expanded = false, positionSeconds = 75, playing = false, speed = 2f)
     }
   }
 
@@ -83,7 +79,7 @@ class PlayerAudioUiTest {
     val position = "${positionSeconds / 60}:${(positionSeconds % 60).toString().padStart(2, '0')}"
     waitUntilCatching("player follows the audio snapshot", timeout = 3.seconds) {
       onNodeWithTag("playback-title-$suffix", useUnmergedTree = true)
-        .assertTextEquals("Test episode 1")
+        .assertTextEquals("The art of slowing down")
       onNodeWithTag("playback-position-$suffix", useUnmergedTree = true).assertTextEquals(position)
       onNodeWithTag("playback-duration-$suffix", useUnmergedTree = true).assertTextEquals("2:05")
       onNodeWithTag("$prefix-play-pause")

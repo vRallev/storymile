@@ -2,13 +2,8 @@ package software.ralf.storymile.player
 
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.ForScope
-import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.ObjCObjectVar
-import kotlinx.cinterop.alloc
-import kotlinx.cinterop.memScoped
-import kotlinx.cinterop.ptr
-import kotlinx.cinterop.value
+import kotlinx.cinterop.readValue
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -17,8 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import platform.AVFAudio.AVAudioPlayer
-import platform.AVFAudio.AVAudioPlayerDelegateProtocol
 import platform.AVFAudio.AVAudioSession
 import platform.AVFAudio.AVAudioSessionCategoryPlayback
 import platform.AVFAudio.AVAudioSessionInterruptionNotification
@@ -29,20 +22,44 @@ import platform.AVFAudio.AVAudioSessionRouteChangeReasonKey
 import platform.AVFAudio.AVAudioSessionRouteChangeReasonOldDeviceUnavailable
 import platform.AVFAudio.AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation
 import platform.AVFAudio.setActive
+import platform.AVFoundation.AVAudioTimePitchAlgorithmTimeDomain
+import platform.AVFoundation.AVPlayer
+import platform.AVFoundation.AVPlayerItem
+import platform.AVFoundation.AVPlayerItemDidPlayToEndTimeNotification
+import platform.AVFoundation.AVPlayerItemFailedToPlayToEndTimeErrorKey
+import platform.AVFoundation.AVPlayerItemFailedToPlayToEndTimeNotification
+import platform.AVFoundation.AVPlayerItemStatusFailed
+import platform.AVFoundation.AVPlayerItemStatusReadyToPlay
+import platform.AVFoundation.AVPlayerStatusFailed
+import platform.AVFoundation.AVPlayerTimeControlStatusPlaying
+import platform.AVFoundation.audioTimePitchAlgorithm
+import platform.AVFoundation.currentItem
+import platform.AVFoundation.currentTime
+import platform.AVFoundation.defaultRate
+import platform.AVFoundation.duration
+import platform.AVFoundation.pause
+import platform.AVFoundation.play
+import platform.AVFoundation.rate
+import platform.AVFoundation.replaceCurrentItemWithPlayerItem
+import platform.AVFoundation.seekToTime
+import platform.AVFoundation.timeControlStatus
+import platform.CoreMedia.CMTimeGetSeconds
+import platform.CoreMedia.CMTimeMake
+import platform.CoreMedia.kCMTimeZero
 import platform.Foundation.NSError
+import platform.Foundation.NSNotification
 import platform.Foundation.NSNotificationCenter
 import platform.Foundation.NSNumber
 import platform.Foundation.NSOperationQueue
 import platform.Foundation.NSThread
 import platform.Foundation.NSURL
-import platform.darwin.NSObject
 import platform.darwin.NSObjectProtocol
 import platform.darwin.dispatch_get_main_queue
 import platform.darwin.dispatch_sync
 import software.ralf.app.platform.scope.coroutine.MainCoroutineDispatcher
 import software.ralf.storymile.user.UserScope
 
-@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
+@OptIn(ExperimentalForeignApi::class)
 @ContributesBinding(UserScope::class)
 class IosAudioPlayer(
   @ForScope(UserScope::class) private val coroutineScope: CoroutineScope,
@@ -51,15 +68,13 @@ class IosAudioPlayer(
   override val state: StateFlow<State>
     field = MutableStateFlow(State())
 
-  private var player: AVAudioPlayer? = null
-  private var delegate: Delegate? = null
+  private var player: AVPlayer? = null
   private var polling: Job? = null
   private var speed = 1f
   private var closed = false
   private var sessionActive = false
-  // Native playback can stop before its completion delegate runs.
   private var playWhenReady = false
-  private val pauseObservers = mutableListOf<NSObjectProtocol>()
+  private val observers = mutableListOf<NSObjectProtocol>()
 
   override fun load(source: String) {
     if (closed) {
@@ -68,58 +83,39 @@ class IosAudioPlayer(
     releasePlayer()
     state.value = State(source = source)
     try {
-      val engine = memScoped {
-        val error = alloc<ObjCObjectVar<NSError?>>()
-        error.value = null
-        val url = requireNotNull(NSURL.URLWithString(source)) { "Invalid audio URL." }
-        val loaded = AVAudioPlayer(contentsOfURL = url, error = error.ptr)
-        check(error.value == null) { error.value?.localizedDescription ?: "Could not load audio." }
-        loaded
-      }
+      val url = requireNotNull(NSURL.URLWithString(source)) { "Invalid audio URL." }
+      val item = AVPlayerItem(url)
+      item.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmTimeDomain
+      val engine = AVPlayer(item)
+      engine.defaultRate = speed
       player = engine
-      val events =
-        Delegate(
-          onEnd = { finished, success ->
-            if (player === finished) {
-              if (success) {
-                playWhenReady = false
-                deactivateSession()
-                state.value =
-                  state.value.copy(
-                    positionMillis = state.value.durationMillis,
-                    isPlaying = false,
-                    playWhenReady = false,
-                    hasEnded = true,
-                  )
-              } else {
-                fail("Could not finish audio playback.")
-              }
-            }
-          },
-          onError = { failed, error ->
-            if (player === failed) {
-              fail(error?.localizedDescription ?: "Could not decode audio.")
-            }
-          },
-        )
-      delegate = events
-      engine.delegate = events
+      observe(AVPlayerItemDidPlayToEndTimeNotification, item) {
+        if (player === engine) {
+          playWhenReady = false
+          deactivateSession()
+          state.value = state.value.copy(hasEnded = true)
+          publish(engine)
+        }
+      }
+      observe(AVPlayerItemFailedToPlayToEndTimeNotification, item) { notification ->
+        if (player === engine) {
+          val error =
+            notification?.userInfo?.get(AVPlayerItemFailedToPlayToEndTimeErrorKey) as? NSError
+          fail(error?.localizedDescription ?: "Could not finish audio playback.")
+        }
+      }
       observePause(
-        engine,
-        requireNotNull(AVAudioSessionInterruptionNotification),
-        requireNotNull(AVAudioSessionInterruptionTypeKey),
-        AVAudioSessionInterruptionTypeBegan,
+        engine = engine,
+        notificationName = AVAudioSessionInterruptionNotification,
+        reasonKey = requireNotNull(AVAudioSessionInterruptionTypeKey),
+        reason = AVAudioSessionInterruptionTypeBegan,
       )
       observePause(
-        engine,
-        requireNotNull(AVAudioSessionRouteChangeNotification),
-        requireNotNull(AVAudioSessionRouteChangeReasonKey),
-        AVAudioSessionRouteChangeReasonOldDeviceUnavailable,
+        engine = engine,
+        notificationName = AVAudioSessionRouteChangeNotification,
+        reasonKey = requireNotNull(AVAudioSessionRouteChangeReasonKey),
+        reason = AVAudioSessionRouteChangeReasonOldDeviceUnavailable,
       )
-      engine.enableRate = true
-      engine.rate = speed
-      check(engine.prepareToPlay()) { "Could not prepare audio." }
-      publish(engine)
       polling =
         coroutineScope.launch(mainDispatcher) {
           while (isActive && player === engine) {
@@ -132,10 +128,17 @@ class IosAudioPlayer(
     }
   }
 
+  override fun clear() {
+    if (!closed) {
+      releasePlayer()
+      state.value = State()
+    }
+  }
+
   override fun play() {
     command { engine ->
       if (state.value.hasEnded) {
-        engine.currentTime = 0.0
+        engine.seekToTime(kCMTimeZero.readValue())
         state.value = state.value.copy(hasEnded = false)
       }
       val session = AVAudioSession.sharedInstance()
@@ -145,7 +148,7 @@ class IosAudioPlayer(
       check(session.setActive(true, error = null)) { "Could not activate audio playback." }
       sessionActive = true
       playWhenReady = true
-      check(engine.play()) { "Could not start audio." }
+      engine.play()
     }
   }
 
@@ -159,7 +162,13 @@ class IosAudioPlayer(
 
   override fun seekTo(positionMillis: Long) {
     command { engine ->
-      engine.currentTime = positionMillis.coerceIn(0, state.value.durationMillis) / 1000.0
+      val duration = state.value.durationMillis.takeIf { it > 0 } ?: Long.MAX_VALUE
+      val position = positionMillis.coerceIn(0, duration)
+      engine.seekToTime(
+        time = CMTimeMake(value = position, timescale = 1_000),
+        toleranceBefore = kCMTimeZero.readValue(),
+        toleranceAfter = kCMTimeZero.readValue(),
+      )
       state.value = state.value.copy(hasEnded = false)
     }
   }
@@ -169,7 +178,12 @@ class IosAudioPlayer(
       return
     }
     this.speed = speed
-    command { it.rate = speed }
+    command { engine ->
+      engine.defaultRate = speed
+      if (playWhenReady) {
+        engine.rate = speed
+      }
+    }
   }
 
   override fun close() {
@@ -186,7 +200,7 @@ class IosAudioPlayer(
     state.value = state.value.copy(isPlaying = false, playWhenReady = false, isReady = false)
   }
 
-  private fun command(block: (AVAudioPlayer) -> Unit) {
+  private fun command(block: (AVPlayer) -> Unit) {
     val engine = player ?: return
     if (closed || state.value.error != null) {
       return
@@ -199,25 +213,32 @@ class IosAudioPlayer(
     }
   }
 
-  private fun publish(engine: AVAudioPlayer) {
-    val duration = engine.duration.milliseconds()
+  private fun publish(engine: AVPlayer) {
+    val item = engine.currentItem ?: return
+    if (engine.status == AVPlayerStatusFailed || item.status == AVPlayerItemStatusFailed) {
+      fail(
+        item.error?.localizedDescription
+          ?: engine.error?.localizedDescription
+          ?: "Could not play audio.",
+      )
+      return
+    }
+    val ready = item.status == AVPlayerItemStatusReadyToPlay
+    val duration = if (ready) CMTimeGetSeconds(item.duration).milliseconds() else 0
+    val ended = state.value.hasEnded
+    val position = CMTimeGetSeconds(engine.currentTime()).milliseconds()
     state.value =
       state.value.copy(
-        positionMillis =
-          if (state.value.hasEnded) {
-            duration
-          } else {
-            engine.currentTime.milliseconds().coerceAtMost(duration)
-          },
+        positionMillis = if (ended && duration > 0) duration else position,
         durationMillis = duration,
-        isPlaying = engine.playing,
+        isPlaying = !ended && engine.timeControlStatus == AVPlayerTimeControlStatusPlaying,
         playWhenReady = playWhenReady,
-        isReady = true,
+        isReady = ready,
       )
   }
 
   private fun Double.milliseconds(): Long =
-    if (isFinite() && this > 0) (this * 1000).toLong() else 0
+    if (isFinite() && this > 0) (this * 1_000).toLong() else 0
 
   private fun fail(message: String) {
     releasePlayer()
@@ -237,31 +258,35 @@ class IosAudioPlayer(
     polling = null
     val previous = player
     player = null
-    previous?.delegate = null
-    delegate = null
-    pauseObservers.forEach { NSNotificationCenter.defaultCenter.removeObserver(it) }
-    pauseObservers.clear()
-    previous?.stop()
+    observers.forEach { NSNotificationCenter.defaultCenter.removeObserver(it) }
+    observers.clear()
+    previous?.pause()
+    previous?.replaceCurrentItemWithPlayerItem(null)
     deactivateSession()
   }
 
   private fun observePause(
-    engine: AVAudioPlayer,
-    notificationName: String,
+    engine: AVPlayer,
+    notificationName: String?,
     reasonKey: String,
     reason: ULong,
   ) {
-    pauseObservers +=
-      NSNotificationCenter.defaultCenter.addObserverForName(
-        notificationName,
-        null,
-        NSOperationQueue.mainQueue,
-      ) { notification ->
-        val observedReason = notification?.userInfo?.get(reasonKey) as? NSNumber
-        if (player === engine && observedReason?.unsignedIntegerValue == reason) {
-          pause()
-        }
+    observe(notificationName, null) { notification ->
+      val observedReason = notification?.userInfo?.get(reasonKey) as? NSNumber
+      if (player === engine && observedReason?.unsignedIntegerValue == reason) {
+        pause()
       }
+    }
+  }
+
+  private fun observe(name: String?, source: Any?, callback: (NSNotification?) -> Unit) {
+    observers +=
+      NSNotificationCenter.defaultCenter.addObserverForName(
+        name = requireNotNull(name),
+        `object` = source,
+        queue = NSOperationQueue.mainQueue,
+        usingBlock = callback,
+      )
   }
 
   private fun deactivateSession() {
@@ -269,19 +294,6 @@ class IosAudioPlayer(
       sessionActive = false
       AVAudioSession.sharedInstance()
         .setActive(false, AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation, error = null)
-    }
-  }
-
-  private class Delegate(
-    private val onEnd: (AVAudioPlayer, Boolean) -> Unit,
-    private val onError: (AVAudioPlayer, NSError?) -> Unit,
-  ) : NSObject(), AVAudioPlayerDelegateProtocol {
-    override fun audioPlayerDidFinishPlaying(player: AVAudioPlayer, successfully: Boolean) {
-      onEnd(player, successfully)
-    }
-
-    override fun audioPlayerDecodeErrorDidOccur(player: AVAudioPlayer, error: NSError?) {
-      onError(player, error)
     }
   }
 }

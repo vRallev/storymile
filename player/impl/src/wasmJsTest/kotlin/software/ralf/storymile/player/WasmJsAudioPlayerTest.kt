@@ -116,6 +116,25 @@ class WasmJsAudioPlayerTest {
   }
 
   @Test
+  fun clearingIgnoresPendingPlaybackAndReusesTheAudioElement() {
+    player.load("https://example.test/one.mp3")
+    player.play()
+
+    player.clear()
+    browser.rejectPlay(0, "The source was removed")
+
+    assertThat(player.state.value).isEqualTo(AudioPlayer.State())
+
+    player.load("https://example.test/two.mp3")
+    browser.prepare(40.0)
+    player.play()
+    browser.startPlaying()
+
+    assertThat(browser.elementCount).isEqualTo(1)
+    assertThat(player.state.value.isPlaying).isTrue()
+  }
+
+  @Test
   fun onlyReportsTheCurrentEpisodesEndAndReleasesCallbacks() {
     player.load("episode-1.mp3")
     browser.prepare(30.0)

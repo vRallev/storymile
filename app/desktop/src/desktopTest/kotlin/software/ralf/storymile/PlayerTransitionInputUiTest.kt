@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
@@ -50,7 +51,16 @@ class PlayerTransitionInputUiTest {
   @Test
   fun `seek and speed ignore endpoint input during motion and resume after settling`() {
     uiTestRule.runRobotTest(windowSize = DpSize(1440.dp, 900.dp)) {
-      onNodeWithTag("playback-position-collapsed", useUnmergedTree = true).assertTextEquals("12:34")
+      runOnUiThread { onNodeWithTag("playback-bar-play-pause").performClick() }
+      val collapsedSeek = onNodeWithTag("playback-bar-seek")
+      waitUntilCatching("queue audio is ready", timeout = 3.seconds) {
+        collapsedSeek.assertIsEnabled()
+      }
+      collapsedSeek.performSemanticsAction(SemanticsActions.SetProgress) { it(754f) }
+      waitUntilCatching("player shows the starting position", timeout = 3.seconds) {
+        onNodeWithTag("playback-position-collapsed", useUnmergedTree = true)
+          .assertTextEquals("12:34")
+      }
       val collapsedTop = onNodeWithTag("playback-sheet").fetchSemanticsNode().boundsInRoot.top
       mainClock.autoAdvance = false
       try {

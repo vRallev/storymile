@@ -37,6 +37,10 @@ class WasmJsAudioPlayer : AudioPlayer() {
     transport.load(source)
   }
 
+  override fun clear() {
+    transport.clear()
+  }
+
   override fun play() {
     transport.play()
   }

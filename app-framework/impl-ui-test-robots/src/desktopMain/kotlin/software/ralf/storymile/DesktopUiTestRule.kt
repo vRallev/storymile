@@ -21,9 +21,7 @@ import dev.zacsweers.metro.createGraphFactory
 import kotlin.math.roundToInt
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
-import software.ralf.app.platform.robot.composeRobot
 import software.ralf.app.platform.robot.internal.RobotInternals
-import software.ralf.storymile.playlist.PlaylistRobot
 import software.ralf.storymile.theme.LocalDarkThemeOverride
 
 /**
@@ -31,7 +29,7 @@ import software.ralf.storymile.theme.LocalDarkThemeOverride
  *
  * A fresh application, root scope, Metro graph, and Compose presenter stream are created for each
  * test and destroyed after the Compose test scene closes. Each test starts with an empty library.
- * [withEpisodes] adds one episode and waits for playback before running the test.
+ * [withEpisodes] queues sample episodes and waits for playback before running the test.
  */
 class DesktopUiTestRule(private val withEpisodes: Boolean = false) {
   /** Runs [block] in the phone preset, optionally overriding the system theme with [darkTheme]. */
@@ -80,16 +78,13 @@ class DesktopUiTestRule(private val withEpisodes: Boolean = false) {
       runBlocking {
         withTimeout(10_000) {
           desktopApp.awaitReady()
-          TestPlaylists.clear(desktopApp.rootScope)
+          TestQueue.setUp(rootScope = desktopApp.rootScope, withEpisodes = withEpisodes)
         }
       }
       runDesktopComposeUiTest(
         width = windowSize.width.value.roundToInt(),
         height = windowSize.height.value.roundToInt(),
       ) {
-        if (withEpisodes) {
-          composeRobot<PlaylistRobot> { addPlayablePlaylist() }
-        }
         setContent {
           CompositionLocalProvider(
             LocalDarkThemeOverride provides darkTheme.value,

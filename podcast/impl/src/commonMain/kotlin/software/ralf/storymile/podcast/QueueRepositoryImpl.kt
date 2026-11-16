@@ -6,7 +6,12 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import software.ralf.storymile.database.EpisodeQueueDatabase
+import software.ralf.storymile.runtimemode.RuntimeMode
+import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.user.UserScope
 
 @Inject
@@ -14,11 +19,14 @@ import software.ralf.storymile.user.UserScope
 @ContributesBinding(UserScope::class)
 class QueueRepositoryImpl(
   private val database: EpisodeQueueDatabase,
+  private val runtimeModeController: RuntimeModeController,
   @ForScope(UserScope::class) coroutineScope: CoroutineScope,
 ) : QueueRepository {
+  private val initialization = Mutex()
+  private var initialized = false
   private val changes =
     UserDatabaseChanges(
-      data = database.queuedEpisodes,
+      data = database.queuedEpisodes.onStart { initialize() },
       coroutineScope = coroutineScope,
       readError = "Could not load the episode queue.",
       writeError = "Could not update the episode queue.",
@@ -27,23 +35,42 @@ class QueueRepositoryImpl(
   override val episodes: StateFlow<List<QueuedEpisode>?> = changes.state
 
   override fun save(episode: QueuedEpisode) {
-    changes.submit { database.enqueue(episode) }
+    submit { database.enqueue(episode) }
   }
 
   override fun remove(episode: QueuedEpisode) {
-    changes.submit {
+    submit {
       database.removeFromQueue(feedUrl = episode.feedUrl, episodeId = episode.episode.id)
     }
   }
 
   override fun move(episode: QueuedEpisode, target: QueuedEpisode) {
-    changes.submit {
+    submit {
       database.moveInQueue(
         feedUrl = episode.feedUrl,
         episodeId = episode.episode.id,
         targetFeedUrl = target.feedUrl,
         targetEpisodeId = target.episode.id,
       )
+    }
+  }
+
+  private fun submit(write: suspend () -> Unit) {
+    changes.submit {
+      initialize()
+      write()
+    }
+  }
+
+  private suspend fun initialize() {
+    initialization.withLock {
+      if (initialized) {
+        return
+      }
+      if (runtimeModeController.mode == RuntimeMode.Fake) {
+        DemoEpisodes.queue.forEach { database.enqueue(it) }
+      }
+      initialized = true
     }
   }
 }

@@ -4,7 +4,6 @@ import assertk.assertThat
 import assertk.assertions.doesNotContain
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
-import assertk.assertions.isNotNull
 import assertk.assertions.isNotSameInstanceAs
 import assertk.assertions.isNull
 import assertk.assertions.isSameInstanceAs
@@ -25,6 +24,7 @@ import software.ralf.storymile.approot.AppRootPresenter
 import software.ralf.storymile.playlist.EpisodeId
 import software.ralf.storymile.playlist.PlaylistName
 import software.ralf.storymile.playlist.PlaylistRepository
+import software.ralf.storymile.podcast.QueueRepository
 import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.InMemoryStorageFactory
 import software.ralf.storymile.storage.Storage
@@ -34,55 +34,27 @@ import software.ralf.storymile.user.UserScope
 
 class PlaylistScopeTest {
   @Test
-  fun `playback is available only while at least one playlist contains episodes`() = runTest {
+  fun `adding episodes to a playlist does not start the player`() = runTest {
     withApplication { graph ->
       val repository: PlaylistRepository = graph.playlistRepository()
-      TestPlaylists.clear(repository)
+      TestQueue.clear(graph.userManager.userScope.value.metroDependencyGraph<UserBindings>().queue)
       graph.appRootPresenter.test(this) {
-        awaitItem().assertPlayback(visible = false)
-
-        repository.create(PlaylistName("First"))
-        val first = repository.playlists.first { it.size == 1 }.first().id
+        awaitItem().assertNoPlayback()
+        val name = PlaylistName("Only in the playlist")
+        repository.create(name)
+        val playlist = repository.playlists.first { it.any { it.name == name } }.last()
+        repository.addEpisode(playlist.id, EpisodeId("episode"))
+        repository.playlists.first { it.any { it.id == playlist.id && it.episodeIds.isNotEmpty() } }
         runCurrent()
         expectNoEvents()
-
-        val episode = EpisodeId("episode")
-        repository.addEpisode(first, episode)
-        awaitItem().assertPlayback(visible = true)
-
-        repository.create(PlaylistName("Second"))
-        val second = repository.playlists.first { it.size == 2 }.last().id
-        runCurrent()
-        expectNoEvents()
-        repository.addEpisode(second, episode)
-        repository.playlists.first { it.last().episodeIds.isNotEmpty() }
-        runCurrent()
-        expectNoEvents()
-
-        repository.removeEpisode(first, episode)
-        repository.playlists.first { it.first().episodeIds.isEmpty() }
-        runCurrent()
-        expectNoEvents()
-        repository.delete(second)
-        awaitItem().assertPlayback(visible = false)
-
-        repository.addEpisode(first, episode)
-        awaitItem().assertPlayback(visible = true)
-        repository.removeEpisode(first, episode)
-        awaitItem().assertPlayback(visible = false)
       }
     }
   }
 
-  private fun BaseModel.assertPlayback(visible: Boolean) {
+  private fun BaseModel.assertNoPlayback() {
     assertThat(this).isInstanceOf<AppTemplate.AdaptiveTemplate>().given {
-      if (visible) {
-        assertThat(it.playback).isNotNull()
-        assertThat(it.expandedPlayback).isNotNull()
-      } else {
-        assertThat(it.playback).isNull()
-        assertThat(it.expandedPlayback).isNull()
-      }
+      assertThat(it.playback).isNull()
+      assertThat(it.expandedPlayback).isNull()
     }
   }
 
@@ -176,5 +148,6 @@ class PlaylistScopeTest {
   @ContributesTo(UserScope::class)
   interface UserBindings {
     val playlistRepository: PlaylistRepository
+    val queue: QueueRepository
   }
 }

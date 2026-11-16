@@ -15,6 +15,7 @@ import dev.zacsweers.metro.ForScope
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.createGraphFactory
 import kotlin.test.Test
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -25,6 +26,7 @@ import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.player.Player
 import software.ralf.storymile.playlist.PlaylistRepository
+import software.ralf.storymile.podcast.QueueRepository
 import software.ralf.storymile.restart.ApplicationRestarter
 import software.ralf.storymile.restart.DefaultApplicationRestarter
 import software.ralf.storymile.restart.testing.FakeApplicationRestarter
@@ -41,7 +43,7 @@ import software.ralf.storymile.user.UserScope
 
 class RuntimeModeStorageTest {
   @Test
-  fun `fake playlist resets after restart without changing saved real playlists`() = runTest {
+  fun `fake queue and sample audio reset after restart and stay out of real mode`() = runTest {
     val platform = InMemoryStoragePlatform()
     seedStorage(platform)
     val saved =
@@ -51,39 +53,39 @@ class RuntimeModeStorageTest {
     }
 
     withApplication(platform) { graph, _ ->
-      val repository = graph.playlistRepository()
-      val playlist = repository.playlists.first { it.isNotEmpty() }.single()
-      assertThat(playlist.name.value).isEqualTo("Storymile test episodes")
-      assertThat(playlist.episodeIds.map { it.value })
-        .isEqualTo(listOf("test-episode-1", "test-episode-2", "test-episode-3"))
-      for (episode in playlist.episodeIds) {
+      val repository = graph.queue()
+      val entries = repository.episodes.filterNotNull().first()
+      assertThat(entries.map { it.podcastTitle }.distinct())
+        .isEqualTo(listOf("Storymile test episodes"))
+      assertThat(entries.map { it.episode.id }).isEqualTo((1..3).map { "test-episode-$it" })
+      for (entry in entries) {
         val resource =
-          "composeResources/software.ralf.storymile.player.impl.generated.resources/files/test-episodes/${episode.value}.mp3"
+          "composeResources/software.ralf.storymile.player.impl.generated.resources/files/test-episodes/${entry.episode.id}.mp3"
         val recording =
           checkNotNull(javaClass.classLoader.getResourceAsStream(resource)).use { it.readBytes() }
         assertThat(recording.size > 1024).isTrue()
       }
-      val playback = graph.player().state.first { it.isReady || it.error != null }
-      assertThat(playback.error).isNull()
-      assertThat(playback.title).isEqualTo("Test episode 1")
-      assertThat(playback.isReady).isTrue()
-      assertThat(playback.isPlaying).isFalse()
-      assertThat(playback.positionMillis).isEqualTo(0L)
-      assertThat(playback.durationMillis).isGreaterThan(0L)
-      assertThat(playback.speed).isEqualTo(1f)
-      repository.delete(playlist.id)
-      repository.playlists.first { it.isEmpty() }
+      val player = graph.player()
+      val selected = player.state.first { it.episode != null }
+      assertThat(selected.episode?.episode?.title).isEqualTo("Test episode 1")
+      assertThat(selected.error).isNull()
+      assertThat(selected.isReady).isFalse()
+      assertThat(selected.isPlaying).isFalse()
+      assertThat(selected.positionMillis).isEqualTo(0L)
+      assertThat(selected.durationMillis).isGreaterThan(0L)
+      assertThat(selected.speed).isEqualTo(1f)
+      TestQueue.clear(repository)
+      player.state.first { it.episode == null }
     }
 
     withApplication(platform) { graph, _ ->
-      val playlist = graph.playlistRepository().playlists.first { it.isNotEmpty() }.single()
-      assertThat(playlist.name.value).isEqualTo("Storymile test episodes")
-      assertThat(playlist.episodeIds.map { it.value })
-        .isEqualTo(listOf("test-episode-1", "test-episode-2", "test-episode-3"))
+      val entries = graph.queue().episodes.filterNotNull().first()
+      assertThat(entries.map { it.episode.id }).isEqualTo((1..3).map { "test-episode-$it" })
       graph.runtimeModeController.switchMode(RuntimeMode.Real)
     }
 
     withApplication(platform) { graph, _ ->
+      assertThat(graph.queue().episodes.filterNotNull().first()).isEqualTo(emptyList())
       val playlist = graph.playlistRepository().playlists.first { it.isNotEmpty() }.single()
       assertThat(playlist.name.value).isEqualTo("My saved playlist")
       assertThat(playlist.episodeIds.map { it.value }).isEqualTo(listOf("real-episode"))
@@ -195,6 +197,9 @@ class RuntimeModeStorageTest {
   private fun Graph.playlistRepository(): PlaylistRepository =
     userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().playlistRepository
 
+  private fun Graph.queue(): QueueRepository =
+    userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().queue
+
   private fun Graph.player(): Player =
     userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().player
 
@@ -219,7 +224,7 @@ class RuntimeModeStorageTest {
         DesktopStoragePlatform::class,
         TestStorageBindings::class,
         TestRuntimeModeController::class,
-        TestPlayer::class,
+        TestAudioPlayer::class,
         DefaultApplicationRestarter::class,
       ],
   )
@@ -243,6 +248,8 @@ class RuntimeModeStorageTest {
     @ForScope(UserScope::class) val storage: Storage
 
     val playlistRepository: PlaylistRepository
+
+    val queue: QueueRepository
 
     val player: Player
   }

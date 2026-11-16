@@ -1,7 +1,6 @@
 package software.ralf.storymile.podcast
 
 import dev.zacsweers.metro.Inject
-import kotlin.time.Duration.Companion.minutes
 import software.ralf.storymile.http.HttpResponse
 
 @Inject
@@ -43,6 +42,7 @@ class FakePodcastFeedService : PodcastFeedService {
       link = "https://example.invalid/podcasts/$id",
       episodes =
         (1..2).map { number ->
+          val recording = if (id == "science") number else number + 1
           PodcastEpisode(
             id = "sample-$id-$number",
             title = "$title: Episode $number",
@@ -50,13 +50,8 @@ class FakePodcastFeedService : PodcastFeedService {
             author = author,
             artworkUrl = null,
             publishedAt = "Tue, 01 Sep 2026 12:00:00 GMT",
-            duration = (number * 10).minutes,
-            enclosure =
-              PodcastEnclosure(
-                url = "https://example.invalid/podcasts/$id-$number.mp3",
-                type = "audio/mpeg",
-                length = null,
-              ),
+            duration = DemoEpisodes.duration(recording),
+            enclosure = DemoEpisodes.enclosure(recording),
           )
         },
     )

@@ -5,7 +5,6 @@ import org.junit.Rule
 import org.junit.Test
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.app.platform.robot.waitUntilCatching
-import software.ralf.storymile.playlist.PlaylistRobot
 import software.ralf.storymile.tabs.TabsPresenter
 
 class StorymileAndroidUiTest {
@@ -19,21 +18,21 @@ class StorymileAndroidUiTest {
   }
 
   @Test
-  fun playback_swipes_preserve_the_selected_tab() = uiTestRule.runRobotTest {
-    composeRobot<PlaylistRobot> { addPlayablePlaylist() }
-    waitUntilCatching("playback available", timeout = 5.seconds) {
-      composeRobot<AppShellRobot> { seeAppLayers() }
+  fun playback_swipes_preserve_the_selected_tab() =
+    uiTestRule.runRobotTest(withEpisodes = true) {
+      waitUntilCatching("playback available", timeout = 5.seconds) {
+        composeRobot<AppShellRobot> { seeAppLayers() }
+      }
+      composeRobot<AppShellRobot> {
+        selectTab(TabsPresenter.Tab.LIBRARY)
+        dragPlaybackUp()
+      }
+      waitUntilCatching("playback expanded", timeout = 5.seconds) {
+        composeRobot<AppShellRobot> { seePlaybackScreen(phone = true) }
+      }
+      composeRobot<AppShellRobot> { dragPlaybackDown() }
+      waitUntilCatching("selected tab restored", timeout = 5.seconds) {
+        composeRobot<AppShellRobot> { seeSelectedTab(TabsPresenter.Tab.LIBRARY) }
+      }
     }
-    composeRobot<AppShellRobot> {
-      selectTab(TabsPresenter.Tab.LIBRARY)
-      dragPlaybackUp()
-    }
-    waitUntilCatching("playback expanded", timeout = 5.seconds) {
-      composeRobot<AppShellRobot> { seePlaybackScreen(phone = true) }
-    }
-    composeRobot<AppShellRobot> { dragPlaybackDown() }
-    waitUntilCatching("selected tab restored", timeout = 5.seconds) {
-      composeRobot<AppShellRobot> { seeSelectedTab(TabsPresenter.Tab.LIBRARY) }
-    }
-  }
 }

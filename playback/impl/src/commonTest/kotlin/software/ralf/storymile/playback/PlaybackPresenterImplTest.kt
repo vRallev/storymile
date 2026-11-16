@@ -7,211 +7,108 @@ import assertk.assertions.isFalse
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.isSameInstanceAs
-import assertk.assertions.isTrue
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.app.platform.presenter.compose.test
+import software.ralf.storymile.player.Player
 import software.ralf.storymile.player.testing.FakePlayer
-import software.ralf.storymile.playlist.EpisodeId
-import software.ralf.storymile.playlist.Playlist
-import software.ralf.storymile.playlist.PlaylistId
-import software.ralf.storymile.playlist.PlaylistName
-import software.ralf.storymile.playlist.testing.FakePlaylistRepository
+import software.ralf.storymile.podcast.PodcastEnclosure
+import software.ralf.storymile.podcast.PodcastEpisode
+import software.ralf.storymile.podcast.QueuedEpisode
 
 class PlaybackPresenterImplTest {
-  private val PlaybackPresenterImpl.Model.player: PlaybackPresenterImpl.PlayerModel
-    get() = requireNotNull(expanded).player
-
   @Test
-  fun `playback is absent until a playlist contains episodes`() = runTest {
-    val repository = FakePlaylistRepository(emptyList())
-    val presenter: PlaybackPresenter = PlaybackPresenterImpl(repository, FakePlayer())
+  fun `playback slots follow the selected episode`() = runTest {
+    val fake = FakePlayer()
+    val presenter: PlaybackPresenter = PlaybackPresenterImpl(fake)
 
     presenter.test(this) {
       awaitItem().assertPlayback(visible = false)
 
-      val empty = playlist().copy(episodeIds = emptyList())
-      repository.update(listOf(empty))
-      runCurrent()
-      expectNoEvents()
-
-      val populated = playlist().copy(id = PlaylistId("second"))
-      repository.update(listOf(empty, populated))
+      fake.publish(Player.State(episode = episode("First episode")))
       awaitItem().assertPlayback(visible = true)
 
-      repository.update(listOf(empty))
+      fake.publish(Player.State())
       awaitItem().assertPlayback(visible = false)
     }
   }
 
   @Test
-  fun `playback state survives unavailable content`() = runTest {
-    val repository = FakePlaylistRepository(listOf(playlist()))
-    val presenter = PlaybackPresenterImpl(repository, FakePlayer())
+  fun `both layouts share episode metadata and live playback controls`() = runTest {
+    val first = episode("First episode")
+    val second = episode("Second episode")
+    val third = episode("Third episode")
+    val fake = FakePlayer()
+    fake.publish(
+      Player.State(
+        episode = first,
+        upcomingEpisodes = listOf(third, second),
+        durationMillis = 120_000,
+      ),
+    )
+    val presenter = PlaybackPresenterImpl(fake)
 
     presenter.testPlayer(this) {
-      awaitItem().player.onSeek(123)
-      awaitItem().player.onSpeed(1.5f)
-      awaitItem().player.onPlayPause()
-      assertThat(awaitItem().player.isPlaying).isFalse()
+      val initial = awaitItem()
+      val bar = requireNotNull(initial.collapsed).player
+      val expanded = requireNotNull(initial.expanded).player
+      assertThat(bar).isSameInstanceAs(expanded)
+      assertThat(expanded.title).isEqualTo(first.episode.title)
+      assertThat(expanded.showTitle).isEqualTo(first.podcastTitle)
+      assertThat(expanded.artworkUrl).isEqualTo(first.artworkUrl)
+      assertThat(expanded.description).isEqualTo("Episode notes")
+      assertThat(expanded.durationSeconds).isEqualTo(120)
+      assertThat(expanded.canSeek).isFalse()
+      assertThat(expanded.isPlaying).isFalse()
+      assertThat(expanded.queue).isEqualTo(listOf(third, second))
 
-      repository.update(emptyList())
-      awaitItem().assertPlayback(visible = false)
+      bar.onPlayPause()
+      assertThat(fake.toggleCount).isEqualTo(1)
+      fake.publish(
+        fake.state.value.copy(
+          positionMillis = 45_000,
+          durationMillis = 110_000,
+          isPlaying = true,
+          isReady = true,
+        ),
+      )
+      val playing = requireNotNull(awaitItem().expanded).player
+      assertThat(playing.positionSeconds).isEqualTo(45)
+      assertThat(playing.durationSeconds).isEqualTo(110)
+      playing.onSkipBack()
+      playing.onSkipForward()
+      assertThat(fake.seekRequests).isEqualTo(listOf(30_000L, 75_000L))
 
-      repository.update(listOf(playlist()))
-      val model = awaitItem()
-      model.assertPlayback(visible = true)
-      assertThat(model.player.positionSeconds).isEqualTo(123)
-      assertThat(model.player.speed).isEqualTo(1.5f)
-      assertThat(model.player.isPlaying).isFalse()
+      playing.onEpisode(playing.queue.first())
+      assertThat(fake.playRequests).isEqualTo(listOf(third))
     }
   }
 
-  @Test
-  fun `collapsed and expanded controls share playback state`() = runTest {
-    val presenter = PlaybackPresenterImpl(FakePlaylistRepository(listOf(playlist())), FakePlayer())
-
-    presenter.testPlayer(this) {
-      var model = awaitItem()
-      assertThat(requireNotNull(model.collapsed).player).isSameInstanceAs(model.player)
-      assertThat(model.player.activeChapterIndex).isEqualTo(2)
-
-      requireNotNull(model.collapsed).player.onPlayPause()
-      model = awaitItem()
-      assertThat(model.player.isPlaying).isFalse()
-
-      model.player.onBookmark()
-      model = awaitItem()
-      assertThat(requireNotNull(model.collapsed).player.isBookmarked).isTrue()
-
-      model.player.onDownload()
-      model = awaitItem()
-      assertThat(requireNotNull(model.collapsed).player.isDownloaded).isTrue()
-
-      model.player.onSpeed(1.5f)
-      model = awaitItem()
-      model.player.onSleep(30)
-      model = awaitItem()
-      requireNotNull(model.collapsed).player.onPlayPause()
-      model = awaitItem()
-      assertThat(model.player.isPlaying).isTrue()
-      assertThat(model.player.isBookmarked).isTrue()
-      assertThat(model.player.isDownloaded).isTrue()
-      assertThat(model.player.speed).isEqualTo(1.5f)
-      assertThat(model.player.sleepMinutes).isEqualTo(30)
-      assertThat(requireNotNull(model.collapsed).player).isSameInstanceAs(model.player)
-    }
-  }
-
-  @Test
-  fun `seeking and skips stay within the current episode`() = runTest {
-    val presenter = PlaybackPresenterImpl(FakePlaylistRepository(listOf(playlist())), FakePlayer())
-
-    presenter.testPlayer(this) {
-      var player = awaitItem().player
-      player.onSkipBack()
-      player = awaitItem().player
-      assertThat(player.positionSeconds).isEqualTo(739)
-
-      player.onSkipForward()
-      player = awaitItem().player
-      assertThat(player.positionSeconds).isEqualTo(769)
-
-      player.onSeek(5)
-      player = awaitItem().player
-      player.onSkipBack()
-      player = awaitItem().player
-      assertThat(player.positionSeconds).isEqualTo(0)
-      assertThat(player.activeChapterIndex).isEqualTo(0)
-
-      player.onSeek(player.durationSeconds - 5)
-      player = awaitItem().player
-      player.onSkipForward()
-      player = awaitItem().player
-      assertThat(player.positionSeconds).isEqualTo(player.durationSeconds)
-      assertThat(player.activeChapterIndex).isEqualTo(player.chapters.lastIndex)
-
-      player.onSeek(-100)
-      player = awaitItem().player
-      assertThat(player.positionSeconds).isEqualTo(0)
-
-      player.onSeek(Int.MAX_VALUE)
-      player = awaitItem().player
-      assertThat(player.positionSeconds).isEqualTo(player.durationSeconds)
-    }
-  }
-
-  @Test
-  fun `chapter selection and seeking keep the active chapter in sync`() = runTest {
-    val presenter = PlaybackPresenterImpl(FakePlaylistRepository(listOf(playlist())), FakePlayer())
-
-    presenter.testPlayer(this) {
-      var player = awaitItem().player
-      player.onChapter(4)
-      player = awaitItem().player
-      assertThat(player.positionSeconds).isEqualTo(player.chapters[4].startSeconds)
-      assertThat(player.activeChapterIndex).isEqualTo(4)
-
-      player.onSeek(player.chapters[4].startSeconds - 1)
-      player = awaitItem().player
-      assertThat(player.activeChapterIndex).isEqualTo(3)
-
-      player.onChapter(-1)
-      player.onChapter(player.chapters.size)
-      expectNoEvents()
-    }
-  }
-
-  @Test
-  fun `queue selection loads the episode and preserves listening preferences`() = runTest {
-    val presenter = PlaybackPresenterImpl(FakePlaylistRepository(listOf(playlist())), FakePlayer())
-
-    presenter.testPlayer(this) {
-      var player = awaitItem().player
-      val nextEpisode = player.queue[1]
-      player.onBookmark()
-      player = awaitItem().player
-      player.onDownload()
-      player = awaitItem().player
-      player.onPlayPause()
-      player = awaitItem().player
-      player.onSpeed(1.5f)
-      player = awaitItem().player
-      player.onSleep(30)
-      player = awaitItem().player
-
-      player.onEpisode(1)
-      val model = awaitItem()
-      player = model.player
-      assertThat(player.title).isEqualTo(nextEpisode.title)
-      assertThat(player.showTitle).isEqualTo(nextEpisode.showTitle)
-      assertThat(player.durationSeconds).isEqualTo(nextEpisode.durationSeconds)
-      assertThat(player.positionSeconds).isEqualTo(0)
-      assertThat(player.activeChapterIndex).isEqualTo(0)
-      assertThat(player.queue.size).isEqualTo(2)
-      assertThat(player.queue.contains(nextEpisode)).isFalse()
-      assertThat(player.isPlaying).isTrue()
-      assertThat(player.isBookmarked).isFalse()
-      assertThat(player.isDownloaded).isFalse()
-      assertThat(player.speed).isEqualTo(1.5f)
-      assertThat(player.sleepMinutes).isEqualTo(30)
-      assertThat(requireNotNull(model.collapsed).player).isSameInstanceAs(player)
-
-      player.onSleep(null)
-      player = awaitItem().player
-      assertThat(player.sleepMinutes).isNull()
-
-      player.onEpisode(-1)
-      player.onEpisode(player.queue.size)
-      expectNoEvents()
-    }
-  }
-
-  private fun playlist(): Playlist =
-    Playlist(PlaylistId("playlist"), PlaylistName("Favorites"), listOf(EpisodeId("episode")))
+  private fun episode(title: String) =
+    QueuedEpisode(
+      feedUrl = "https://example.com/feed",
+      podcastTitle = "Podcast",
+      artworkUrl = "https://example.com/cover.jpg",
+      episode =
+        PodcastEpisode(
+          id = title,
+          title = title,
+          description = "<p>Episode notes</p>",
+          author = null,
+          artworkUrl = null,
+          publishedAt = null,
+          duration = 2.minutes,
+          enclosure =
+            PodcastEnclosure(
+              url = "https://example.com/audio.mp3",
+              type = "audio/mpeg",
+              length = null,
+            ),
+        ),
+    )
 
   private fun PlaybackPresenter.Model.assertPlayback(visible: Boolean) {
     if (visible) {

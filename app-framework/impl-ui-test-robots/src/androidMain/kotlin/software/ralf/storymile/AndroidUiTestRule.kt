@@ -44,13 +44,13 @@ class AndroidUiTestRule : TestRule {
     return composeTestRule.apply(wrappedBase, description)
   }
 
-  /** Clears the library and runs [block] after the activity reaches an idle Compose state. */
-  fun runRobotTest(block: ComposeTestRule.() -> Unit) {
+  /** Sets up the queue and runs [block] after the activity reaches an idle Compose state. */
+  fun runRobotTest(withEpisodes: Boolean = false, block: ComposeTestRule.() -> Unit) {
     val kmpApplication = kmpApplication()
     runBlocking {
       withTimeout(10_000) {
         kmpApplication.awaitReady()
-        TestPlaylists.clear(kmpApplication.rootScope)
+        TestQueue.setUp(rootScope = kmpApplication.rootScope, withEpisodes = withEpisodes)
       }
     }
     composeTestRule.waitForIdle()
