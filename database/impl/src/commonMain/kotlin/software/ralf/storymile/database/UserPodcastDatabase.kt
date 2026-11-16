@@ -86,6 +86,20 @@ class UserPodcastDatabase(
     it.removeFromQueue(feedUrl = feedUrl, episodeId = episodeId)
   }
 
+  override suspend fun moveInQueue(
+    feedUrl: String,
+    episodeId: String,
+    targetFeedUrl: String,
+    targetEpisodeId: String,
+  ) = operation {
+    it.moveInQueue(
+      feedUrl = feedUrl,
+      episodeId = episodeId,
+      targetFeedUrl = targetFeedUrl,
+      targetEpisodeId = targetEpisodeId,
+    )
+  }
+
   private suspend fun awaitPreviousOwner(path: String?) {
     if (path == null) {
       return

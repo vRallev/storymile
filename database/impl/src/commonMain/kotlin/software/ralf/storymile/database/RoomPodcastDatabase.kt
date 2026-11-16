@@ -63,6 +63,24 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
     }
   }
 
+  internal suspend fun moveInQueue(
+    feedUrl: String,
+    episodeId: String,
+    targetFeedUrl: String,
+    targetEpisodeId: String,
+  ) = withWriteTransaction {
+    val queue = queue()
+    val source =
+      queue.findPosition(feedUrl = feedUrl, sourceEpisodeId = episodeId)
+        ?: return@withWriteTransaction
+    val target =
+      queue.findPosition(feedUrl = targetFeedUrl, sourceEpisodeId = targetEpisodeId)
+        ?: return@withWriteTransaction
+    if (source != target) {
+      queue.move(sourcePosition = source, targetPosition = target)
+    }
+  }
+
   private suspend fun ensureShowForQueue(queued: QueuedEpisode): Long {
     val shows = podcasts()
     val showArtwork = queued.artworkUrl.takeIf { queued.episode.artworkUrl == null }

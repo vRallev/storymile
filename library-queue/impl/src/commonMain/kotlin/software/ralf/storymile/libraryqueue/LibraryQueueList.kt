@@ -1,7 +1,9 @@
 package software.ralf.storymile.libraryqueue
 
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,17 +18,25 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.DensityMedium
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -36,6 +46,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextMotion
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.coil.PodcastArtwork
 import software.ralf.storymile.design.ListDivider
@@ -43,6 +56,8 @@ import software.ralf.storymile.episodedetails.EpisodeDetails
 import software.ralf.storymile.episodedetails.EpisodeSharedElement
 import software.ralf.storymile.episodedetails.episodeSharedElement
 import software.ralf.storymile.library.queue.impl.generated.resources.Res
+import software.ralf.storymile.library.queue.impl.generated.resources.library_queue_move_down
+import software.ralf.storymile.library.queue.impl.generated.resources.library_queue_move_up
 import software.ralf.storymile.library.queue.impl.generated.resources.library_queue_remove
 import software.ralf.storymile.library.queue.impl.generated.resources.library_queue_reorder
 import software.ralf.storymile.theme.AppTheme
@@ -52,11 +67,26 @@ internal fun LibraryQueueList(
   episodes: List<EpisodeDetails>,
   selectedEpisodeKey: String?,
   onSelect: (EpisodeDetails) -> Unit,
-  onReorder: (EpisodeDetails) -> Unit,
+  onReorder: (EpisodeDetails, EpisodeDetails) -> Unit,
   onRemove: (EpisodeDetails) -> Unit,
   state: LazyListState,
   modifier: Modifier = Modifier,
 ) {
+  val drag = remember(state, episodes) { LibraryQueueDrag(state) }
+  val edge = with(LocalDensity.current) { 56.dp.toPx() }
+  val preview = drag.preview(episodes)
+  LaunchedEffect(drag, drag.key, edge) {
+    if (drag.key != null) {
+      drag.scrollNearEdges(edge)
+    }
+  }
+  LaunchedEffect(drag, drag.awaitingSave) {
+    if (drag.awaitingSave) {
+      // Keep the preview until the saved order arrives or the wait expires.
+      delay(1.seconds)
+      drag.restoreSavedOrder()
+    }
+  }
   BoxWithConstraints(modifier) {
     val compact = maxWidth / LocalDensity.current.fontScale < 400.dp
     LazyColumn(
@@ -64,10 +94,19 @@ internal fun LibraryQueueList(
       state = state,
       contentPadding = PaddingValues(vertical = 16.dp),
     ) {
-      itemsIndexed(episodes, key = { _, details -> details.key }) { index, details ->
+      itemsIndexed(preview, key = { _, details -> details.key }) { index, details ->
         val isSelected = details.key == selectedEpisodeKey
+        val isDragging = details.key == drag.key
         val rowModifier = Modifier.testTag("library-queue-episode-$index")
-        Column {
+        Column(
+          Modifier.animateItem(
+              fadeInSpec = null,
+              placementSpec = if (isDragging) null else spring(),
+              fadeOutSpec = null,
+            )
+            .zIndex(if (isDragging) 1f else 0f)
+            .graphicsLayer { translationY = drag.offset(details.key) },
+        ) {
           if (index > 0) {
             ListDivider(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
           }
@@ -77,7 +116,18 @@ internal fun LibraryQueueList(
             compact = compact,
             isSelected = isSelected,
             onSelect = { onSelect(details) },
-            onReorder = { onReorder(details) },
+            drag = drag,
+            onDrop = {
+              drag.drop(episodeKey = details.key, episodes = episodes, onReorder = onReorder)
+            },
+            onMoveUp =
+              preview.getOrNull(index - 1)?.let { target ->
+                { onReorder(details, target) }
+              },
+            onMoveDown =
+              preview.getOrNull(index + 1)?.let { target ->
+                { onReorder(details, target) }
+              },
             onRemove = { onRemove(details) },
             modifier =
               if (selectedEpisodeKey != null) {
@@ -99,11 +149,13 @@ private fun QueueEpisodeRow(
   compact: Boolean,
   isSelected: Boolean,
   onSelect: () -> Unit,
-  onReorder: () -> Unit,
+  drag: LibraryQueueDrag,
+  onDrop: () -> Unit,
+  onMoveUp: (() -> Unit)?,
+  onMoveDown: (() -> Unit)?,
   onRemove: () -> Unit,
   modifier: Modifier,
 ) {
-  val currentOnReorder by rememberUpdatedState(onReorder)
   val titleStyle = if (compact) AppTheme.typography.titleSmall else AppTheme.typography.titleMedium
   val metadataStyle = if (compact) AppTheme.typography.bodySmall else AppTheme.typography.bodyMedium
   val metadataColor =
@@ -166,23 +218,15 @@ private fun QueueEpisodeRow(
         }
       }
       Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(
-          onClick = onReorder,
-          modifier =
-            Modifier.testTag("library-queue-reorder-$index").pointerInput(details.key) {
-              detectVerticalDragGestures(
-                onDragEnd = { currentOnReorder() },
-                onVerticalDrag = { _, _ -> },
-              )
-            },
-        ) {
-          Icon(
-            imageVector = Icons.Rounded.DensityMedium,
-            contentDescription =
-              stringResource(Res.string.library_queue_reorder, details.episode.title),
-            tint = metadataColor,
-          )
-        }
+        QueueReorderHandle(
+          details = details,
+          index = index,
+          tint = metadataColor,
+          drag = drag,
+          onDrop = onDrop,
+          onMoveUp = onMoveUp,
+          onMoveDown = onMoveDown,
+        )
         if (!compact) {
           VerticalDivider(
             modifier = Modifier.height(32.dp),
@@ -201,6 +245,67 @@ private fun QueueEpisodeRow(
           )
         }
       }
+    }
+  }
+}
+
+@Composable
+private fun QueueReorderHandle(
+  details: EpisodeDetails,
+  index: Int,
+  tint: Color,
+  drag: LibraryQueueDrag,
+  onDrop: () -> Unit,
+  onMoveUp: (() -> Unit)?,
+  onMoveDown: (() -> Unit)?,
+) {
+  val currentOnDrop by rememberUpdatedState(onDrop)
+  var menuOpen by remember { mutableStateOf(false) }
+  val canReorder = onMoveUp != null || onMoveDown != null
+  Box {
+    IconButton(
+      onClick = {
+        if (!drag.awaitingSave) {
+          menuOpen = true
+        }
+      },
+      enabled = canReorder,
+      modifier =
+        Modifier.testTag("library-queue-reorder-$index").pointerInput(drag, canReorder) {
+          if (canReorder) {
+            detectVerticalDragGestures(
+              onDragStart = { drag.start(details.key) },
+              onDragEnd = { currentOnDrop() },
+              onDragCancel = { drag.cancel(details.key) },
+              onVerticalDrag = { _, delta -> drag.dragBy(episodeKey = details.key, delta = delta) },
+            )
+          }
+        },
+    ) {
+      Icon(
+        imageVector = Icons.Rounded.DensityMedium,
+        contentDescription =
+          stringResource(Res.string.library_queue_reorder, details.episode.title),
+        tint = if (canReorder) tint else LocalContentColor.current,
+      )
+    }
+    DropdownMenu(expanded = menuOpen && canReorder, onDismissRequest = { menuOpen = false }) {
+      DropdownMenuItem(
+        text = { Text(stringResource(Res.string.library_queue_move_up)) },
+        enabled = onMoveUp != null,
+        onClick = {
+          menuOpen = false
+          onMoveUp?.invoke()
+        },
+      )
+      DropdownMenuItem(
+        text = { Text(stringResource(Res.string.library_queue_move_down)) },
+        enabled = onMoveDown != null,
+        onClick = {
+          menuOpen = false
+          onMoveDown?.invoke()
+        },
+      )
     }
   }
 }

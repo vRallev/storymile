@@ -30,7 +30,20 @@ class QueueRepositoryImpl(
     changes.submit { database.enqueue(episode) }
   }
 
-  override fun remove(feedUrl: String, episodeId: String) {
-    changes.submit { database.removeFromQueue(feedUrl = feedUrl, episodeId = episodeId) }
+  override fun remove(episode: QueuedEpisode) {
+    changes.submit {
+      database.removeFromQueue(feedUrl = episode.feedUrl, episodeId = episode.episode.id)
+    }
+  }
+
+  override fun move(episode: QueuedEpisode, target: QueuedEpisode) {
+    changes.submit {
+      database.moveInQueue(
+        feedUrl = episode.feedUrl,
+        episodeId = episode.episode.id,
+        targetFeedUrl = target.feedUrl,
+        targetEpisodeId = target.episode.id,
+      )
+    }
   }
 }

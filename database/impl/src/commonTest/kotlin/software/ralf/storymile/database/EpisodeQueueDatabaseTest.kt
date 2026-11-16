@@ -94,4 +94,50 @@ class EpisodeQueueDatabaseTest {
       }
     }
   }
+
+  @Test
+  fun `a move uses both entry identities and shifts only the intervening episodes`() = runTest {
+    DatabaseFixture().use {
+      val podcast = DatabaseFixture.podcast()
+      val first =
+        DatabaseFixture.queuedEpisode(podcast = podcast, episode = podcast.episodes.first())
+      val removed =
+        DatabaseFixture.queuedEpisode(podcast = podcast, episode = podcast.episodes.last())
+      val middle = first.copy(feedUrl = "https://feeds.test/middle.xml")
+      val last = first.copy(feedUrl = "https://feeds.test/last.xml")
+      listOf(first, removed, middle, last).forEach { queue.enqueue(it) }
+      queue.removeFromQueue(feedUrl = removed.feedUrl, episodeId = removed.episode.id)
+
+      queue.queuedEpisodes.test {
+        assertThat(awaitItem()).isEqualTo(listOf(first, middle, last))
+
+        queue.moveInQueue(
+          feedUrl = last.feedUrl,
+          episodeId = last.episode.id,
+          targetFeedUrl = first.feedUrl,
+          targetEpisodeId = first.episode.id,
+        )
+        assertThat(awaitItem()).isEqualTo(listOf(last, first, middle))
+
+        queue.moveInQueue(
+          feedUrl = last.feedUrl,
+          episodeId = last.episode.id,
+          targetFeedUrl = first.feedUrl,
+          targetEpisodeId = first.episode.id,
+        )
+        assertThat(awaitItem()).isEqualTo(listOf(first, last, middle))
+
+        queue.moveInQueue(
+          feedUrl = first.feedUrl,
+          episodeId = first.episode.id,
+          targetFeedUrl = removed.feedUrl,
+          targetEpisodeId = removed.episode.id,
+        )
+        assertThat(queue.queuedEpisodes.first()).isEqualTo(listOf(first, last, middle))
+
+        queue.enqueue(removed)
+        assertThat(awaitItem()).isEqualTo(listOf(first, last, middle, removed))
+      }
+    }
+  }
 }
