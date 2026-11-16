@@ -8,7 +8,7 @@ interface Player {
   /** Current selection and audio state. */
   val state: StateFlow<State>
 
-  /** Pauses or resumes the selection. After the last episode ends, starts the queue again. */
+  /** Pauses or resumes playback, retries a failure, or restarts a completed queue. */
   fun togglePlayback()
 
   /** Starts [episode] if it is still in the queue. */
@@ -28,7 +28,7 @@ interface Player {
     val upcomingEpisodes: List<QueuedEpisode> = emptyList(),
     /** Source position in milliseconds, independent of playback speed. */
     val positionMillis: Long = 0,
-    /** Source duration in milliseconds, or zero while preparing. */
+    /** Duration in milliseconds. Uses the feed's duration until the source reports one. */
     val durationMillis: Long = 0,
     /** Whether the transport is currently producing audio. */
     val isPlaying: Boolean = false,
