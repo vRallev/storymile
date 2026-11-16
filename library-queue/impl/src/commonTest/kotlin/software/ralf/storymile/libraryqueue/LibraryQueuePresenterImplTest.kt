@@ -145,6 +145,14 @@ class LibraryQueuePresenterImplTest {
         }
     }
 
+    override fun removeWithUndo(episode: QueuedEpisode, onRemoved: (undo: () -> Unit) -> Unit) {
+      val before = episodes.value
+      remove(episode)
+      if (episodes.value != before) {
+        onRemoved { error("Unexpected Undo") }
+      }
+    }
+
     override fun move(episode: QueuedEpisode, target: QueuedEpisode) = Unit
   }
 

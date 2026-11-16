@@ -6,3 +6,7 @@ storymile {
   enableComposeUi true
   enableComposePresenters true
 }
+
+dependencies {
+  commonMainApi project(':library:public')
+}

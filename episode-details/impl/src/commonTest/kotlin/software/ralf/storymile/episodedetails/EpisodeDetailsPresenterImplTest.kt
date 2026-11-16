@@ -134,6 +134,9 @@ class EpisodeDetailsPresenterImplTest {
         }
     }
 
+    override fun removeWithUndo(episode: QueuedEpisode, onRemoved: (undo: () -> Unit) -> Unit) =
+      error("Unexpected queue removal with undo")
+
     override fun move(episode: QueuedEpisode, target: QueuedEpisode) =
       error("Unexpected queue reorder")
   }
@@ -153,5 +156,8 @@ class EpisodeDetailsPresenterImplTest {
     override fun remove(episode: SavedEpisode) {
       episodes.value = checkNotNull(episodes.value) - episode
     }
+
+    override fun removeWithUndo(episode: SavedEpisode, onRemoved: (undo: () -> Unit) -> Unit) =
+      error("Unexpected saved episode removal with undo")
   }
 }

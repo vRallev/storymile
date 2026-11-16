@@ -14,5 +14,6 @@ internal object EmptyLibraryQueuePresenter : LibraryQueuePresenter {
 
     override val openedEpisode: BaseModel? = null
     override val onCloseEpisode: () -> Unit = {}
+    override val removal: LibraryRemovalUndo.Removal? = null
   }
 }

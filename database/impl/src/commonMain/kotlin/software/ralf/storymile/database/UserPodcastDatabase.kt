@@ -89,7 +89,9 @@ class UserPodcastDatabase(
 
   override suspend fun delete(feedUrl: String) = operation { it.unfollow(feedUrl) }
 
-  override suspend fun enqueue(episode: QueuedEpisode) = operation { it.enqueue(episode) }
+  override suspend fun enqueue(episode: QueuedEpisode, preferredPosition: Long?) = operation {
+    it.enqueue(queued = episode, position = preferredPosition)
+  }
 
   override suspend fun removeFromQueue(feedUrl: String, episodeId: String) = operation {
     it.removeFromQueue(feedUrl = feedUrl, episodeId = episodeId)
@@ -109,7 +111,9 @@ class UserPodcastDatabase(
     )
   }
 
-  override suspend fun save(episode: SavedEpisode) = operation { it.save(episode) }
+  override suspend fun save(episode: SavedEpisode, previousId: Long?) = operation {
+    it.save(saved = episode, previousId = previousId)
+  }
 
   override suspend fun removeSavedEpisode(feedUrl: String, episodeId: String) = operation {
     it.removeSavedEpisode(feedUrl = feedUrl, episodeId = episodeId)

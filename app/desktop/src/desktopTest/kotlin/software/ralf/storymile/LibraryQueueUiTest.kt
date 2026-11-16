@@ -225,7 +225,7 @@ class LibraryQueueUiTest {
   }
 
   @Test
-  fun `removing queued episodes updates selection and shows the empty state after the last one`() {
+  fun `removing the selected queue episode updates selection and offers undo`() {
     val size = mutableStateOf(DesktopWindowSizes.phone)
     uiTestRule.runRobotTest(windowSize = DesktopWindowSizes.tablet, contentSize = size) {
       composeRobot<DiscoveryRobot> {
@@ -253,12 +253,21 @@ class LibraryQueueUiTest {
       )
       val first = onNodeWithTag("library-queue-episode-0")
       val second = onNodeWithTag("library-queue-episode-1")
+      val third = onNodeWithTag("library-queue-episode-2")
       val detailsTitle = onNodeWithTag("episode-details-title")
       first.assertIsDisplayed().assertTextContains(firstTitle)
       second.assertIsDisplayed().assertTextContains(thirdTitle)
-      onNodeWithTag("library-queue-episode-2").assertDoesNotExist()
+      third.assertDoesNotExist()
       onNodeWithText(secondTitle).assertDoesNotExist()
       detailsTitle.assertDoesNotExist()
+
+      undoQueueRemoval()
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("library-queue-episode-1") and hasText(secondTitle),
+        timeoutMillis = 5_000,
+      )
+      first.assertTextContains(firstTitle)
+      third.assertTextContains(thirdTitle)
 
       runOnIdle { size.value = DesktopWindowSizes.tablet }
       waitUntilAtLeastOneExists(
@@ -266,17 +275,23 @@ class LibraryQueueUiTest {
         timeoutMillis = 5_000,
       )
       first.assertIsSelected()
-      runOnUiThread { second.performClick() }
-      second.assertIsSelected()
+      runOnUiThread { third.performClick() }
+      third.assertIsSelected()
       detailsTitle.assertIsDisplayed().assertTextEquals(thirdTitle)
 
-      runOnUiThread { onNodeWithTag("library-queue-remove-1").performTouchInput { click() } }
+      runOnUiThread { onNodeWithTag("library-queue-remove-2").performTouchInput { click() } }
       waitUntilAtLeastOneExists(
         matcher = hasTestTag("episode-details-title") and hasText(firstTitle),
         timeoutMillis = 5_000,
       )
       first.assertIsDisplayed().assertIsSelected().assertTextContains(firstTitle)
-      second.assertDoesNotExist()
+      third.assertDoesNotExist()
+      waitUntilAtLeastOneExists(matcher = hasText("Undo"), timeoutMillis = 5_000)
+
+      runOnUiThread { onNodeWithTag("library-queue-remove-1").performTouchInput { click() } }
+      waitUntil(timeoutMillis = 5_000) {
+        onAllNodes(hasTestTag("library-queue-episode-1")).fetchSemanticsNodes().isEmpty()
+      }
 
       runOnUiThread { first.performClick() }
       detailsTitle.assertIsDisplayed().assertTextEquals(firstTitle)
@@ -286,6 +301,15 @@ class LibraryQueueUiTest {
       onNodeWithText("Your queue is empty").assertIsDisplayed()
       onNodeWithTag("library-queue-list").assertDoesNotExist()
       detailsTitle.assertDoesNotExist()
+
+      undoQueueRemoval()
+      waitUntilAtLeastOneExists(
+        matcher = hasTestTag("library-queue-episode-0") and hasText(firstTitle),
+        timeoutMillis = 5_000,
+      )
+      first.assertIsDisplayed().assertIsSelected()
+      second.assertDoesNotExist()
+      detailsTitle.assertTextEquals(firstTitle)
     }
   }
 
@@ -394,6 +418,13 @@ class LibraryQueueUiTest {
         mainClock.autoAdvance = true
       }
     }
+  }
+
+  private fun ComposeUiTest.undoQueueRemoval() {
+    waitUntilAtLeastOneExists(matcher = hasText("Undo"), timeoutMillis = 5_000)
+    onNodeWithText("Removed from queue").assertIsDisplayed()
+    val undo = onNodeWithText("Undo").assertIsDisplayed()
+    runOnUiThread { undo.performClick() }
   }
 
   private fun ComposeUiTest.awaitEntry(tag: String) {

@@ -331,6 +331,9 @@ class PlayerImplTest {
 
     override fun remove(episode: QueuedEpisode) = error("Playback must not change the queue")
 
+    override fun removeWithUndo(episode: QueuedEpisode, onRemoved: (undo: () -> Unit) -> Unit) =
+      error("Playback must not change the queue")
+
     override fun move(episode: QueuedEpisode, target: QueuedEpisode) =
       error("Playback must not change the queue")
   }

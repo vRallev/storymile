@@ -36,6 +36,17 @@ class QueueRepositoryImpl(
     }
   }
 
+  override fun removeWithUndo(episode: QueuedEpisode, onRemoved: (undo: () -> Unit) -> Unit) {
+    changes.submit {
+      val position =
+        database.removeFromQueue(feedUrl = episode.feedUrl, episodeId = episode.episode.id)
+          ?: return@submit
+      onRemoved {
+        changes.submit { database.enqueue(episode = episode, preferredPosition = position) }
+      }
+    }
+  }
+
   override fun move(episode: QueuedEpisode, target: QueuedEpisode) {
     changes.submit {
       database.moveInQueue(

@@ -16,6 +16,7 @@ class SavedEpisodeDatabaseTest {
       val episode = podcast.episodes.last()
       val first = DatabaseFixture.savedEpisode(podcast = podcast, episode = episode)
       val second = first.copy(feedUrl = "https://feeds.test/other.xml")
+      val third = first.copy(feedUrl = "https://feeds.test/third.xml")
 
       saved.savedEpisodes.test {
         assertThat(awaitItem()).isEmpty()
@@ -26,15 +27,27 @@ class SavedEpisodeDatabaseTest {
         saved.save(second)
         assertThat(awaitItem()).isEqualTo(listOf(second, first))
 
-        saved.save(first)
-        assertThat(saved.savedEpisodes.first()).isEqualTo(listOf(second, first))
+        saved.save(third)
+        assertThat(awaitItem()).isEqualTo(listOf(third, second, first))
         assertThat(database.podcasts.first()).isEmpty()
 
-        saved.removeSavedEpisode(feedUrl = first.feedUrl, episodeId = first.episode.id)
-        assertThat(awaitItem()).isEqualTo(listOf(second))
+        val previousId =
+          checkNotNull(
+            saved.removeSavedEpisode(feedUrl = second.feedUrl, episodeId = second.episode.id),
+          )
+        assertThat(awaitItem()).isEqualTo(listOf(third, first))
 
-        saved.save(first)
-        assertThat(awaitItem()).isEqualTo(listOf(first, second))
+        saved.save(episode = second, previousId = previousId)
+        assertThat(awaitItem()).isEqualTo(listOf(third, second, first))
+
+        saved.removeSavedEpisode(feedUrl = second.feedUrl, episodeId = second.episode.id)
+        assertThat(awaitItem()).isEqualTo(listOf(third, first))
+
+        saved.save(second)
+        assertThat(awaitItem()).isEqualTo(listOf(second, third, first))
+
+        saved.save(episode = second, previousId = previousId)
+        assertThat(saved.savedEpisodes.first()).isEqualTo(listOf(second, third, first))
       }
     }
   }

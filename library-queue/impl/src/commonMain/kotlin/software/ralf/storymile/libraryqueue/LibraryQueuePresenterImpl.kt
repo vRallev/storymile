@@ -15,6 +15,7 @@ import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.storymile.episodedetails.EpisodeDetails
 import software.ralf.storymile.episodedetails.EpisodeDetailsPresenter
+import software.ralf.storymile.library.LibraryRemovalUndo
 import software.ralf.storymile.podcast.QueueRepository
 import software.ralf.storymile.podcast.QueuedEpisode
 import software.ralf.storymile.user.UserScope
@@ -27,6 +28,8 @@ class LibraryQueuePresenterImpl(
 ) : LibraryQueuePresenter {
   @Composable
   override fun present(input: Unit): Model {
+    val removals = remember { LibraryRemovalUndo() }
+    val removal by removals.pending.collectAsState()
     val listPresenter = remember {
       ComposePresenter<Unit, ListModel> {
         val backstack = LocalBackstackScope.requireNotNull()
@@ -60,7 +63,9 @@ class LibraryQueuePresenterImpl(
             queue.move(episode = episode.toQueuedEpisode(), target = target.toQueuedEpisode())
           },
           onRemove = { episode ->
-            queue.remove(episode.toQueuedEpisode())
+            queue.removeWithUndo(episode.toQueuedEpisode()) { undo ->
+              removals.offer(undo)
+            }
           },
         )
       }
@@ -85,6 +90,7 @@ class LibraryQueuePresenterImpl(
         list = list.copy(selection = details),
         openedEpisode = opened?.content,
         onCloseEpisode = { pop() },
+        removal = removal,
       )
     }
   }
@@ -103,6 +109,7 @@ class LibraryQueuePresenterImpl(
     override val list: ListModel,
     override val openedEpisode: BaseModel?,
     override val onCloseEpisode: () -> Unit,
+    override val removal: LibraryRemovalUndo.Removal?,
   ) : LibraryQueuePresenter.Model
 
   /** Renderer-only rows and actions, with the opened episode or first queue entry selected. */
