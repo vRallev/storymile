@@ -5,10 +5,15 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.PixelMap
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.layout.findRootCoordinates
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -23,6 +28,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
+import software.ralf.app.platform.robot.waitUntilCatching
 
 class PlayerSecondaryTransitionUiTest {
   private val uiTestRule = DesktopUiTestRule(withEpisodes = true)
@@ -31,6 +37,7 @@ class PlayerSecondaryTransitionUiTest {
   fun `seek time skip and speed controls move from the first click frame in both directions`() {
     listOf(DpSize(900.dp, 760.dp), DpSize(1440.dp, 900.dp)).forEach { size ->
       uiTestRule.runRobotTest(windowSize = size, darkTheme = false) {
+        startPlaybackAndSeek()
         val parts = sharedParts(size)
         val collapsed = snapshot(parts, expanded = false)
         val collapsedTop = sheetTop()
@@ -66,6 +73,7 @@ class PlayerSecondaryTransitionUiTest {
   fun `shared secondary controls follow drag reversal without changing slider thickness`() {
     listOf(DpSize(900.dp, 760.dp), DpSize(1440.dp, 900.dp)).forEach { size ->
       uiTestRule.runRobotTest(windowSize = size, darkTheme = false) {
+        startPlaybackAndSeek()
         val parts = sharedParts(size)
         val collapsed = snapshot(parts, expanded = false)
         val collapsedTop = sheetTop()
@@ -98,6 +106,7 @@ class PlayerSecondaryTransitionUiTest {
   fun `controls absent from the collapsed phone and tablet fade into the expanded player`() {
     listOf(DpSize(480.dp, 1200.dp), DpSize(900.dp, 760.dp)).forEach { size ->
       uiTestRule.runRobotTest(windowSize = size, darkTheme = false) {
+        runOnUiThread { onNodeWithTag("playback-bar-play-pause").performClick() }
         val phone = size.width < 600.dp
         val parts = buildList {
           add("back-icon")
@@ -112,6 +121,9 @@ class PlayerSecondaryTransitionUiTest {
         }
         val collapsedTop = sheetTop()
         composeRobot<AppShellRobot> { openPlayback() }
+        waitUntilCatching("queue audio is ready") {
+          onNodeWithTag("playback-seek").assertIsEnabled()
+        }
         val expanded = snapshot(parts, expanded = true)
         composeRobot<AppShellRobot> { collapsePlayback() }
         waitForIdle()
@@ -145,6 +157,16 @@ class PlayerSecondaryTransitionUiTest {
           mainClock.autoAdvance = true
         }
       }
+    }
+  }
+
+  private fun ComposeUiTest.startPlaybackAndSeek() {
+    runOnUiThread { onNodeWithTag("playback-bar-play-pause").performClick() }
+    val slider = onNodeWithTag("playback-bar-seek")
+    waitUntilCatching("queue audio is ready") { slider.assertIsEnabled() }
+    slider.performSemanticsAction(SemanticsActions.SetProgress) { it(754f) }
+    waitUntilCatching("player shows the starting position") {
+      onNodeWithTag("playback-position-collapsed", useUnmergedTree = true).assertTextEquals("12:34")
     }
   }
 

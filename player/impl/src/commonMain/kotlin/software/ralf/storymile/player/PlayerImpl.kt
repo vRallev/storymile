@@ -174,30 +174,12 @@ internal constructor(
     if (closed || source == null || audio.source != source || snapshot.isComplete) {
       return
     }
-    if (observedPlayIntent && !audio.isPlaying && !audio.playWhenReady && !audio.hasEnded) {
-      playRequested = false
+    updatePlayIntent(audio)
+    val ended = audio.hasEnded && audio.error == null
+    if (ended && advanceAfterCompletion(current)) {
+      return
     }
-    observedPlayIntent = audio.playWhenReady || audio.isPlaying
-    if (audio.hasEnded && audio.error == null) {
-      // The repository can publish a reorder before its collector has run.
-      val latest = queueRepository.episodes.value ?: return
-      if (latest.none { it.key == current.key }) {
-        return
-      }
-      queue = latest
-      played += current.key
-      val next = upcoming(current).firstOrNull()
-      if (next != null) {
-        if (playRequested) {
-          start(next)
-        } else {
-          selectPaused(next)
-        }
-        return
-      }
-      playRequested = false
-    }
-    if (audio.error != null) {
+    if (ended || audio.error != null) {
       playRequested = false
     }
     state.update {
@@ -210,9 +192,33 @@ internal constructor(
         playWhenReady = playRequested,
         isReady = audio.isReady,
         error = audio.error,
-        isComplete = audio.hasEnded && audio.error == null,
+        isComplete = ended,
       )
     }
+  }
+
+  private fun updatePlayIntent(audio: AudioPlayer.State) {
+    if (observedPlayIntent && !audio.isPlaying && !audio.playWhenReady && !audio.hasEnded) {
+      playRequested = false
+    }
+    observedPlayIntent = audio.playWhenReady || audio.isPlaying
+  }
+
+  private fun advanceAfterCompletion(current: QueuedEpisode): Boolean {
+    // A reorder can reach the repository before the queue collector receives it.
+    val latest = queueRepository.episodes.value ?: return true
+    if (latest.none { it.key == current.key }) {
+      return true
+    }
+    queue = latest
+    played += current.key
+    val next = upcoming(current).firstOrNull() ?: return false
+    if (playRequested) {
+      start(next)
+    } else {
+      selectPaused(next)
+    }
+    return true
   }
 
   private fun selectPaused(episode: QueuedEpisode?) {
