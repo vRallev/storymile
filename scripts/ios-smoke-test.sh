@@ -43,19 +43,26 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-xcrun simctl bootstatus "$SIMULATOR_ID" -b
 export GRADLE_ARGS="${GRADLE_ARGS:-} --console=plain"
-xcodebuild \
-  -project app/ios/iosApp.xcodeproj \
-  -scheme iosApp \
-  -configuration Release \
-  -destination "platform=iOS Simulator,id=$SIMULATOR_ID" \
-  -derivedDataPath "$ROOT_DIR/build/ios-smoke-test/DerivedData" \
+xcode_args=(
+  -project app/ios/iosApp.xcodeproj
+  -scheme iosApp
+  -configuration Release
+  -destination "platform=iOS Simulator,id=$SIMULATOR_ID"
+  -derivedDataPath "$ROOT_DIR/build/ios-smoke-test/DerivedData"
+  ARCHS=arm64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO
+)
+
+# Leave the simulator shut down while Kotlin/Native links the framework.
+xcodebuild "${xcode_args[@]}" \
+  -showBuildTimingSummary build-for-testing 2>&1 | tee "$RESULTS_DIR/xcodebuild.log"
+
+xcrun simctl bootstatus "$SIMULATOR_ID" -b
+xcodebuild "${xcode_args[@]}" \
   -resultBundlePath "$RESULTS_DIR/LaunchTests.xcresult" \
   -collect-test-diagnostics never \
   -parallel-testing-enabled NO \
   -test-timeouts-enabled YES \
   -maximum-test-execution-time-allowance 120 \
   -only-testing:iosAppUITests/LaunchTests \
-  ARCHS=arm64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO \
-  test 2>&1 | tee "$RESULTS_DIR/xcodebuild.log"
+  test-without-building 2>&1 | tee -a "$RESULTS_DIR/xcodebuild.log"

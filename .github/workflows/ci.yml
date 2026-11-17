@@ -56,7 +56,7 @@ jobs:
       - name: Verify all jobs passed
         env:
           NEEDS_RESULTS: ${{ toJSON(needs) }}
-          IOS_RELEASE_REQUIRED: ${{ github.ref == 'refs/heads/main' || inputs.run_ios_release == true }}
+          IOS_RELEASE_REQUIRED: ${{ github.ref == 'refs/heads/main' || inputs.run_ios_release == true || github.event.pull_request.number == 229 }}
         run: |
           printf '%s\n' "$NEEDS_RESULTS" | jq -e '
             all(to_entries[];
@@ -499,10 +499,10 @@ jobs:
         uses: actions/deploy-pages@v5
 
   build-ios-release:
-    if: ${{ github.ref == 'refs/heads/main' || inputs.run_ios_release == true }}
+    # Temporarily validate the full Release smoke test on PR #229.
+    if: ${{ github.ref == 'refs/heads/main' || inputs.run_ios_release == true || github.event.pull_request.number == 229 }}
     runs-on: macos-latest
-    # Kotlin/Native can spend more than an hour building the optimized framework.
-    timeout-minutes: 120
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
       - name: Setup
