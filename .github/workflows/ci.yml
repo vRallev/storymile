@@ -56,7 +56,7 @@ jobs:
       - name: Verify all jobs passed
         env:
           NEEDS_RESULTS: ${{ toJSON(needs) }}
-          IOS_RELEASE_REQUIRED: ${{ github.ref == 'refs/heads/main' || inputs.run_ios_release == true || github.event.pull_request.number == 229 }}
+          IOS_RELEASE_REQUIRED: ${{ github.ref == 'refs/heads/main' || inputs.run_ios_release == true }}
         run: |
           printf '%s\n' "$NEEDS_RESULTS" | jq -e '
             all(to_entries[];
@@ -499,8 +499,7 @@ jobs:
         uses: actions/deploy-pages@v5
 
   build-ios-release:
-    # Temporarily validate the full Release smoke test on PR #229.
-    if: ${{ github.ref == 'refs/heads/main' || inputs.run_ios_release == true || github.event.pull_request.number == 229 }}
+    if: ${{ github.ref == 'refs/heads/main' || inputs.run_ios_release == true }}
     runs-on: macos-latest
     timeout-minutes: 60
     steps:
