@@ -12,7 +12,7 @@ internal class BaseAndroidPlugin : Plugin<Project> {
 
   private fun Project.configureAndroid() {
     val android = extensions.getByType(ApplicationExtension::class.java)
-    android.compileSdk = androidCompileSdk
+    android.compileSdk { configureAndroidCompileSdk(this) }
     android.defaultConfig {
       applicationId = "software.ralf.storymile"
       minSdk = androidMinSdk

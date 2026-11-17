@@ -95,7 +95,8 @@ class EpisodeDetailsUiTest {
           moveTo(Offset(x = 2f + distance * 0.7f, y = root.height / 2))
         }
         onNodeWithTag("show-screen").assertExists()
-        val preview = bounds("episode-details-artwork")
+        // The incoming row renders the shared artwork during a back preview.
+        val preview = bounds("episode-artwork-0")
         assertThat((preview.center - destination.getValue("artwork").center).getDistance())
           .isGreaterThan(1f)
         // The shared bounds resize; the parent navigation transition only slides and fades.
@@ -106,7 +107,7 @@ class EpisodeDetailsUiTest {
         assertThat(playPreview.width).isLessThan(destination.getValue("play").width)
 
         mouse { moveTo(Offset(x = 2f + distance * 0.2f, y = root.height / 2)) }
-        val reversed = bounds("episode-details-artwork")
+        val reversed = bounds("episode-artwork-0")
         assertThat((reversed.center - destination.getValue("artwork").center).getDistance())
           .isLessThan((preview.center - destination.getValue("artwork").center).getDistance())
         assertThat(reversed.width).isGreaterThan(preview.width)

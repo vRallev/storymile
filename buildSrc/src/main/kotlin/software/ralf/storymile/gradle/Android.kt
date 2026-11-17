@@ -1,11 +1,18 @@
 package software.ralf.storymile.gradle
 
+import com.android.build.api.dsl.CompileSdkSpec
 import com.android.build.api.dsl.Lint
 import com.android.build.api.dsl.Packaging
 import com.android.build.api.dsl.TestOptions
 import kotlin.collections.plusAssign
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
+
+internal fun Project.configureAndroidCompileSdk(compileSdk: CompileSdkSpec) {
+  val (major, minor) =
+    libs.findVersion("android-compileSdk").get().requiredVersion.split('.').map(String::toInt)
+  compileSdk.version = compileSdk.release(major) { minorApiLevel = minor }
+}
 
 internal fun configureAndroidLint(lint: Lint) {
   lint.warningsAsErrors = true
