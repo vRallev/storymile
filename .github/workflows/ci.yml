@@ -8,6 +8,11 @@ on:
       - "**"
   pull_request:
   workflow_dispatch:
+    inputs:
+      run_ios_release:
+        description: Run the iOS Release smoke test
+        type: boolean
+        default: false
 
 concurrency:
   # Replace older PR runs; give every main push its own group so none are dropped.
@@ -51,11 +56,12 @@ jobs:
       - name: Verify all jobs passed
         env:
           NEEDS_RESULTS: ${{ toJSON(needs) }}
+          IOS_RELEASE_REQUIRED: ${{ github.ref == 'refs/heads/main' || inputs.run_ios_release == true }}
         run: |
           printf '%s\n' "$NEEDS_RESULTS" | jq -e '
             all(to_entries[];
               .value.result == "success" or
-              (.key == "build-ios-release" and .value.result == "skipped" and env.GITHUB_REF != "refs/heads/main")
+              (.key == "build-ios-release" and .value.result == "skipped" and env.IOS_RELEASE_REQUIRED == "false")
             )'
 
   check-build-src:
@@ -493,9 +499,10 @@ jobs:
         uses: actions/deploy-pages@v5
 
   build-ios-release:
-    if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref == 'refs/heads/main' || inputs.run_ios_release == true }}
     runs-on: macos-latest
-    timeout-minutes: 60
+    # Kotlin/Native can spend more than an hour building the optimized framework.
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v7
       - name: Setup
