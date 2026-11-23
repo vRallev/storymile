@@ -72,17 +72,14 @@ class PlayerImpl(
   }
 
   override fun togglePlayback() {
-    if (closed || state.value.episode == null) {
+    if (closed) {
       return
     }
     val current = state.value
-    val episode = current.episode
-    if (episode != null && (source == null || current.isComplete || current.error != null)) {
+    val episode = current.episode ?: return
+    if (source == null || current.isComplete || current.error != null) {
       val next = if (current.isComplete) queue.firstOrNull() else episode
       next?.let { play(it) }
-      return
-    }
-    if (source == null || current.isComplete || current.error != null) {
       return
     }
     playRequested = !playRequested
@@ -98,7 +95,7 @@ class PlayerImpl(
     if (closed) {
       return
     }
-    val selected = queue.find { it.key == episode.key } ?: return
+    val selected = queue.find { it.matches(episode) } ?: return
     if (state.value.isComplete) {
       played.clear()
     }
@@ -127,10 +124,12 @@ class PlayerImpl(
     if (closed) {
       return
     }
-    played.retainAll(episodes.map { it.key }.toSet())
+    if (played.isNotEmpty()) {
+      played.retainAll(episodes.mapTo(mutableSetOf()) { it.key })
+    }
     val snapshot = state.value
-    val current = episodes.find { it.key == snapshot.episode?.key }
-    val next = episodes.firstOrNull { it.key !in played }
+    val current = snapshot.episode?.let { previous -> episodes.find { it.matches(previous) } }
+    val next = episodes.firstOrNull { !it.wasPlayed() }
     when {
       current != null && source != null && (!snapshot.isComplete || next == null) ->
         state.update { it.copy(episode = current, upcomingEpisodes = upcoming(current, episodes)) }
@@ -173,11 +172,11 @@ class PlayerImpl(
   private fun advanceEpisode(): Boolean {
     val current = state.value.episode ?: return true
     val entries = queue
-    if (entries.none { it.key == current.key }) {
+    if (entries.none { it.matches(current) }) {
       return true // The queue collector handles removal of the current episode.
     }
     played += current.key
-    val next = upcoming(current, entries).firstOrNull() ?: return false
+    val next = entries.firstOrNull { !it.wasPlayed() } ?: return false
     if (playRequested) {
       startQueuedEpisode(next)
     } else {
@@ -230,7 +229,7 @@ class PlayerImpl(
 
   private fun upcoming(episode: QueuedEpisode, entries: List<QueuedEpisode>): List<QueuedEpisode> =
     entries.filter {
-      it.key != episode.key && it.key !in played
+      !it.matches(episode) && !it.wasPlayed()
     }
 
   private fun load(source: String, autoPlay: Boolean) {
@@ -245,6 +244,11 @@ class PlayerImpl(
       audio.play()
     }
   }
+
+  private fun QueuedEpisode.matches(other: QueuedEpisode): Boolean =
+    feedUrl == other.feedUrl && episode.id == other.episode.id
+
+  private fun QueuedEpisode.wasPlayed(): Boolean = played.isNotEmpty() && key in played
 
   private val QueuedEpisode.key: Pair<String, String>
     get() = feedUrl to episode.id
