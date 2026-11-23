@@ -1,13 +1,16 @@
 package software.ralf.storymile
 
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject
-import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.ContributesTo
 import kotlinx.coroutines.flow.StateFlow
 import software.ralf.app.platform.presenter.compose.ComposePresenterScope
 import software.ralf.app.platform.presenter.compose.ComposePresenterScopeFactory
 import software.ralf.app.platform.presenter.compose.launchComposePresenter
+import software.ralf.app.platform.scope.Scope
+import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.approot.AppRootPresenter
 import software.ralf.storymile.templates.AppTemplate
 import software.ralf.storymile.templates.AppTemplatePresenter
@@ -34,24 +37,24 @@ class TemplateProvider(
     composePresenterScope.cancel()
   }
 
-  /** Metro-assisted factory that accepts the platform-owned Compose presenter scope. */
+  companion object {
+    /** Creates a host's template stream with a fresh presenter scope. Call [cancel] on release. */
+    fun create(scope: Scope): TemplateProvider {
+      val graph = scope.metroDependencyGraph<Graph>()
+      return graph.templateProviderFactory.create(
+        graph.presenterScopeFactory.createComposePresenterScope(),
+      )
+    }
+  }
+
   @AssistedFactory
-  interface InternalFactory {
-    /** Creates a provider whose work is owned by [composePresenterScope]. */
+  interface Factory {
     fun create(composePresenterScope: ComposePresenterScope): TemplateProvider
   }
 
-  /** Public factory that creates each provider with its own Compose presenter scope. */
-  @Inject
-  class Factory(
-    private val composePresenterScopeFactory: ComposePresenterScopeFactory,
-    private val templateProviderFactory: InternalFactory,
-  ) {
-    /** Creates a provider with a fresh Compose presenter scope that it can cancel independently. */
-    fun createTemplateProvider(): TemplateProvider {
-      return templateProviderFactory.create(
-        composePresenterScopeFactory.createComposePresenterScope(),
-      )
-    }
+  @ContributesTo(AppScope::class)
+  interface Graph {
+    val templateProviderFactory: Factory
+    val presenterScopeFactory: ComposePresenterScopeFactory
   }
 }
