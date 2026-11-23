@@ -49,11 +49,12 @@ internal class RssFeedParser {
 
   private fun XmlReader.readChannel(feedUrl: String): PodcastFeed {
     val metadata = Metadata()
-    val episodes = mutableListOf<Episode>()
+    val episodes = mutableMapOf<String, PodcastEpisode>()
     var link: String? = null
     readChildren {
       when {
-        matches("item") -> readEpisode(feedUrl)?.let { episodes += it }
+        matches("item") ->
+          readEpisode(feedUrl)?.let { episode -> episodes.getOrPut(episode.id) { episode } }
         matches("link") -> {
           val value = RssUrl.resolve(feedUrl, readText())
           link = link ?: value
@@ -61,8 +62,8 @@ internal class RssFeedParser {
         !readMetadata(metadata, feedUrl) -> skipElement()
       }
     }
-    val author = metadata.author ?: metadata.rssAuthor
-    val artworkUrl = metadata.artworkUrl ?: metadata.rssArtworkUrl
+    val author = metadata.author
+    val artworkUrl = metadata.artworkUrl
     return PodcastFeed(
       feedUrl = feedUrl,
       title = requireNotNull(metadata.title) { "The RSS channel title is missing." },
@@ -71,25 +72,23 @@ internal class RssFeedParser {
       artworkUrl = artworkUrl,
       link = link,
       episodes =
-        episodes
-          .distinctBy { it.id }
-          .map { episode ->
-            PodcastEpisode(
-              id = episode.id,
-              title = checkNotNull(episode.metadata.title),
-              description = episode.metadata.description(),
-              author = episode.metadata.author ?: episode.metadata.rssAuthor ?: author,
-              artworkUrl =
-                episode.metadata.artworkUrl ?: episode.metadata.rssArtworkUrl ?: artworkUrl,
-              publishedAt = episode.publishedAt,
-              duration = episode.duration,
-              enclosure = episode.enclosure,
+        episodes.values.map { episode ->
+          if (
+            (episode.author == null && author != null) ||
+              (episode.artworkUrl == null && artworkUrl != null)
+          ) {
+            episode.copy(
+              author = episode.author ?: author,
+              artworkUrl = episode.artworkUrl ?: artworkUrl,
             )
-          },
+          } else {
+            episode
+          }
+        },
     )
   }
 
-  private fun XmlReader.readEpisode(feedUrl: String): Episode? {
+  private fun XmlReader.readEpisode(feedUrl: String): PodcastEpisode? {
     val metadata = Metadata()
     var id: String? = null
     var publishedAt: String? = null
@@ -108,10 +107,16 @@ internal class RssFeedParser {
       }
     }
     val media = enclosure ?: return null
-    if (metadata.title == null) {
-      return null
-    }
-    return Episode(id ?: media.url, metadata, publishedAt, duration, media)
+    return PodcastEpisode(
+      id = id ?: media.url,
+      title = metadata.title ?: return null,
+      description = metadata.description(),
+      author = metadata.author,
+      artworkUrl = metadata.artworkUrl,
+      publishedAt = publishedAt,
+      duration = duration,
+      enclosure = media,
+    )
   }
 
   private fun XmlReader.readEnclosure(feedUrl: String): PodcastEnclosure? {
@@ -131,7 +136,7 @@ internal class RssFeedParser {
     when {
       matches("title") -> metadata.title = readText().nonBlank() ?: metadata.title
       matches("author", ITUNES_NAMESPACE) ->
-        metadata.author = readText().nonBlank() ?: metadata.author
+        metadata.itunesAuthor = readText().nonBlank() ?: metadata.itunesAuthor
       matches("author") || matches("managingEditor") ->
         metadata.rssAuthor = readText().nonBlank() ?: metadata.rssAuthor
       else -> return readDescription(metadata) || readArtwork(metadata, feedUrl)
@@ -154,9 +159,9 @@ internal class RssFeedParser {
   private fun XmlReader.readArtwork(metadata: Metadata, feedUrl: String): Boolean {
     when {
       matches("image", ITUNES_NAMESPACE) -> {
-        metadata.artworkUrl =
+        metadata.itunesArtworkUrl =
           getAttributeValue(null, "href")?.let { RssUrl.resolve(feedUrl, it) }
-            ?: metadata.artworkUrl
+            ?: metadata.itunesArtworkUrl
         skipElement()
       }
       matches("image") -> {
@@ -296,19 +301,17 @@ internal class RssFeedParser {
     var description: String? = null
     var content: String? = null
     var summary: String? = null
-    var author: String? = null
+    var itunesAuthor: String? = null
     var rssAuthor: String? = null
-    var artworkUrl: String? = null
+    var itunesArtworkUrl: String? = null
     var rssArtworkUrl: String? = null
+
+    val author: String?
+      get() = itunesAuthor ?: rssAuthor
+
+    val artworkUrl: String?
+      get() = itunesArtworkUrl ?: rssArtworkUrl
 
     fun description(): String? = description ?: content ?: summary
   }
-
-  private data class Episode(
-    val id: String,
-    val metadata: Metadata,
-    val publishedAt: String?,
-    val duration: Duration?,
-    val enclosure: PodcastEnclosure,
-  )
 }
