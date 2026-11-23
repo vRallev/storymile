@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.NavigateNext
@@ -186,13 +188,13 @@ internal object PlaybackOptions {
             LocalContentColor provides AlertDialogDefaults.textContentColor,
           ) {
             ProvideTextStyle(AppTheme.typography.bodyMedium) {
-              Column(
+              LazyColumn(
                 Modifier.weight(1f, fill = false)
                   .padding(bottom = 24.dp)
                   .heightIn(max = 420.dp)
-                  .verticalScroll(rememberScrollState()),
+                  .testTag("playback-options"),
               ) {
-                Content(panel, player, onDismiss)
+                options(panel = panel, player = player, onDismiss = onDismiss)
               }
             }
           }
@@ -204,18 +206,17 @@ internal object PlaybackOptions {
     }
   }
 
-  @Composable
-  private fun Content(panel: Panel, player: PlayerModel, onDismiss: () -> Unit) {
+  private fun LazyListScope.options(panel: Panel, player: PlayerModel, onDismiss: () -> Unit) {
     when (panel) {
       Panel.SPEED ->
-        listOf(0.75f, 1f, 1.2f, 1.5f, 2f).forEach { speed ->
+        items(listOf(0.75f, 1f, 1.2f, 1.5f, 2f)) { speed ->
           Choice("${speed}x", "speed-$speed", selected = player.speed == speed) {
             player.onSpeed(speed)
             onDismiss()
           }
         }
       Panel.SLEEP ->
-        listOf(null, 15, 30, 45, 60).forEach { minutes ->
+        items(listOf(null, 15, 30, 45, 60)) { minutes ->
           Choice(
             if (minutes == null) stringResource(Res.string.sleep_off)
             else stringResource(Res.string.sleep_minutes, minutes),
@@ -227,7 +228,7 @@ internal object PlaybackOptions {
           }
         }
       Panel.CHAPTERS ->
-        player.chapters.forEachIndexed { index, chapter ->
+        itemsIndexed(player.chapters) { index, chapter ->
           Choice(
             chapter.title,
             "chapter-$index",
@@ -240,20 +241,23 @@ internal object PlaybackOptions {
         }
       Panel.QUEUE -> {
         if (player.queue.isEmpty()) {
-          Text(stringResource(Res.string.queue_empty))
+          item { Text(stringResource(Res.string.queue_empty)) }
         }
-        player.queue.forEachIndexed { index, episode ->
+        itemsIndexed(player.queue) { index, episode ->
           Choice(episode.title, "episode-$index", supporting = episode.showTitle) {
             player.onEpisode(index)
             onDismiss()
           }
         }
       }
-      Panel.INFO -> {
-        Text(player.title, style = AppTheme.typography.titleMedium)
-        Text(player.showTitle, modifier = Modifier.padding(vertical = 8.dp))
-        player.description?.let { Text(it) }
-      }
+      Panel.INFO ->
+        item {
+          Column {
+            Text(player.title, style = AppTheme.typography.titleMedium)
+            Text(player.showTitle, modifier = Modifier.padding(vertical = 8.dp))
+            player.description?.let { Text(it) }
+          }
+        }
     }
   }
 

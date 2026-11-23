@@ -18,6 +18,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
@@ -54,7 +55,9 @@ class PlaybackControlsRendererTest {
     for (width in listOf(360, 900)) {
       renderPlayback(width = width, height = 480) {
         onNodeWithTag("playback-current-chapter").performScrollTo().performClick()
-        onNodeWithTag("playback-option-chapter-7").performScrollTo().performClick()
+        onNodeWithTag("playback-option-chapter-7").assertDoesNotExist()
+        onNodeWithTag("playback-options").performScrollToIndex(7)
+        onNodeWithTag("playback-option-chapter-7").performClick()
         onNode(
             hasText("Chapter 8 of 8") and hasAnyAncestor(hasTestTag("playback-current-chapter")),
             useUnmergedTree = true,
