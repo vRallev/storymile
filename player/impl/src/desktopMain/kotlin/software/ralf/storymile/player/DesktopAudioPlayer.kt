@@ -284,10 +284,7 @@ internal constructor(
       device.start()
       for (attempt in 0 until 8) {
         val available = device.availableBytes / frameBytes * frameBytes
-        if (available == 0) {
-          break
-        }
-        if (pendingOffset == pendingSize) {
+        if (available > 0 && pendingOffset == pendingSize) {
           pendingSize = nextSamples()
           pendingOffset = 0
         }
