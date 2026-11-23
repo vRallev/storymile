@@ -8,6 +8,7 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.storymile.player.Player
+import software.ralf.storymile.user.LocalOpenSettings
 import software.ralf.storymile.user.UserScope
 import software.ralf.storymile.util.HtmlDescription
 
@@ -54,7 +55,10 @@ class PlaybackPresenterImpl(private val player: Player) : PlaybackPresenter {
         description = description,
         artworkUrl = current.artworkUrl,
       )
-    return Model(collapsed = BarModel(model), expanded = ScreenModel(model))
+    return Model(
+      collapsed = BarModel(model),
+      expanded = ScreenModel(player = model, onOpenSettings = LocalOpenSettings.current),
+    )
   }
 
   data class Chapter(val title: String, val startSeconds: Int)
@@ -91,7 +95,8 @@ class PlaybackPresenterImpl(private val player: Player) : PlaybackPresenter {
 
   data class BarModel(val player: PlayerModel) : BaseModel
 
-  data class ScreenModel(val player: PlayerModel) : BaseModel
+  data class ScreenModel(val player: PlayerModel, val onOpenSettings: (() -> Unit)? = null) :
+    BaseModel
 
   /** Renderer-only state and actions stay shared while the playback layer expands or collapses. */
   data class Model(override val collapsed: BarModel?, override val expanded: ScreenModel?) :

@@ -50,6 +50,7 @@ class ShowRenderer : ComposeRenderer<ShowPresenterImpl.Model>() {
           TitleBar(
             title = model.content.source.title(),
             onBack = model.onBack,
+            onOpenSettings = model.content.onOpenSettings,
             backButtonModifier = Modifier.testTag("show-back"),
           )
         }

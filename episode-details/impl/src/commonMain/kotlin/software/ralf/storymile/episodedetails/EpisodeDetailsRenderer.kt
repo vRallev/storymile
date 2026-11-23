@@ -93,6 +93,7 @@ class EpisodeDetailsRenderer : ComposeRenderer<EpisodeDetailsPresenterImpl.Model
           TitleBar(
             title = stringResource(Res.string.episode_details),
             onBack = model.onBack,
+            onOpenSettings = model.onOpenSettings,
             backButtonModifier = Modifier.testTag("episode-details-back"),
           )
         }

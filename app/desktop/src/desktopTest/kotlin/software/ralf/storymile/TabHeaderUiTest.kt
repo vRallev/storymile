@@ -9,7 +9,6 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.text.TextLayoutResult
@@ -53,7 +52,6 @@ class TabHeaderUiTest {
               assertThat(header.titleStyle, tab.name).isEqualTo(home.titleStyle)
 
               onNodeWithTag("tab-profile").assertHasClickAction()
-              runOnUiThread { onNodeWithTag("tab-profile").performClick() }
               onNodeWithTag("tab-${tab.name.lowercase()}").assertIsSelected()
               val dimensions = "${size.width.value.toInt()}-${size.height.value.toInt()}"
               saveScreenshot(

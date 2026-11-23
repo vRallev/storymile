@@ -53,6 +53,7 @@ fun TabHeader(
   profileIconModifier: Modifier = Modifier,
   onBack: (() -> Unit)? = null,
   backButtonModifier: Modifier = Modifier,
+  onOpenSettings: (() -> Unit)? = null,
 ) {
   BoxWithConstraints(modifier.fillMaxWidth().testTag("tab-header")) {
     val fontScale = LocalDensity.current.fontScale
@@ -90,7 +91,7 @@ fun TabHeader(
             overflow = TextOverflow.Ellipsis,
           )
           ProfileButton(
-            onClick = {},
+            onClick = onOpenSettings,
             modifier = Modifier.testTag("tab-profile"),
             iconModifier = profileIconModifier,
           )
@@ -118,7 +119,7 @@ fun TabHeader(
         if (!showBrand) {
           Spacer(Modifier.width(16.dp))
           ProfileButton(
-            onClick = {},
+            onClick = onOpenSettings,
             modifier = Modifier.testTag("tab-profile"),
             iconModifier = profileIconModifier,
           )

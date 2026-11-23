@@ -10,6 +10,7 @@ import software.ralf.storymile.podcast.QueueRepository
 import software.ralf.storymile.podcast.QueuedEpisode
 import software.ralf.storymile.podcast.SavedEpisode
 import software.ralf.storymile.podcast.SavedEpisodeRepository
+import software.ralf.storymile.user.LocalOpenSettings
 
 class EpisodeDetailsPresenterImpl(
   private val details: EpisodeDetails,
@@ -65,6 +66,7 @@ class EpisodeDetailsPresenterImpl(
       onDownload = {},
       onMore = {},
       onBack = { backstack.pop() },
+      onOpenSettings = LocalOpenSettings.current,
       isQueued = queuedEpisode != null,
       queueEnabled = queueEnabled,
       isSaved = savedEpisode != null,
@@ -85,5 +87,6 @@ class EpisodeDetailsPresenterImpl(
     val queueEnabled: Boolean = true,
     val isSaved: Boolean = false,
     val saveEnabled: Boolean = true,
+    val onOpenSettings: (() -> Unit)? = null,
   ) : BaseModel
 }

@@ -5,12 +5,14 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import software.ralf.app.platform.presenter.BaseModel
+import software.ralf.storymile.user.LocalOpenSettings
 import software.ralf.storymile.user.UserScope
 
 @Inject
 @ContributesBinding(UserScope::class, binding = binding<DownloadsPresenter<*>>())
 class DownloadsPresenterImpl : DownloadsPresenter<DownloadsPresenterImpl.Model> {
-  @Composable override fun present(input: Unit): Model = Model
+  @Composable
+  override fun present(input: Unit): Model = Model(onOpenSettings = LocalOpenSettings.current)
 
-  data object Model : BaseModel
+  data class Model(val onOpenSettings: (() -> Unit)?) : BaseModel
 }

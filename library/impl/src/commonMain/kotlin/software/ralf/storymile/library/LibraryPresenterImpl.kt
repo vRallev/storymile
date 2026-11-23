@@ -21,6 +21,7 @@ import software.ralf.storymile.libraryqueue.LibraryQueuePresenter
 import software.ralf.storymile.librarysaved.LibrarySavedPresenter
 import software.ralf.storymile.libraryshows.LibraryShowsPresenter
 import software.ralf.storymile.presenternavigation.DefaultBackstackModel
+import software.ralf.storymile.user.LocalOpenSettings
 import software.ralf.storymile.user.UserScope
 
 @Inject
@@ -48,6 +49,7 @@ class LibraryPresenterImpl(
           shows = showsPresenter.present(Unit),
           saved = savedPresenter.present(Unit),
           onSelectTab = { selectedTab = it },
+          onOpenSettings = LocalOpenSettings.current,
           onDiscoverPodcasts = { backstack.push(discoveryPresenterFactory.create()) },
         )
       }
@@ -92,5 +94,6 @@ class LibraryPresenterImpl(
     val saved: LibrarySavedPresenter.Model,
     val onSelectTab: (Tab) -> Unit,
     val onDiscoverPodcasts: () -> Unit,
+    val onOpenSettings: (() -> Unit)? = null,
   ) : BaseModel
 }

@@ -56,7 +56,11 @@ class DownloadsRenderer : ComposeRenderer<DownloadsPresenterImpl.Model>() {
       val horizontal = short && maxWidth >= 560.dp
       val sidePadding = if (maxWidth < 600.dp) 20.dp else 32.dp
       Column(Modifier.fillMaxSize()) {
-        TabHeader(title = stringResource(Res.string.downloads), windowWidth = window.width)
+        TabHeader(
+          title = stringResource(Res.string.downloads),
+          windowWidth = window.width,
+          onOpenSettings = model.onOpenSettings,
+        )
         Column(
           Modifier.weight(1f)
             .padding(horizontal = sidePadding)

@@ -13,15 +13,15 @@ import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.generated.resources.Res
 import software.ralf.storymile.theme.generated.resources.profile
 
-/** Shows the shared profile placeholder with a localized accessibility label. */
+/** Shows the shared profile icon with a localized accessibility label. */
 @Composable
 fun ProfileButton(
-  onClick: () -> Unit,
+  onClick: (() -> Unit)?,
   modifier: Modifier = Modifier,
-  enabled: Boolean = true,
+  enabled: Boolean = onClick != null,
   iconModifier: Modifier = Modifier,
 ) {
-  IconButton(onClick = onClick, modifier = modifier.size(48.dp), enabled = enabled) {
+  IconButton(onClick = onClick ?: {}, modifier = modifier.size(48.dp), enabled = enabled) {
     Icon(
       imageVector = Icons.Filled.AccountCircle,
       contentDescription = stringResource(Res.string.profile),

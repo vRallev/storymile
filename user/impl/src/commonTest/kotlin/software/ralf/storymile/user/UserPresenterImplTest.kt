@@ -11,6 +11,7 @@ import app.cash.turbine.ReceiveTurbine
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
+import assertk.assertions.isInstanceOf
 import assertk.assertions.isTrue
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +23,8 @@ import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.buildTestScope
 import software.ralf.app.platform.scope.di.metro.addMetroDependencyGraph
 import software.ralf.storymile.playback.PlaybackPresenter
+import software.ralf.storymile.presenternavigation.DefaultBackstackModel
+import software.ralf.storymile.settings.SettingsPresenter
 import software.ralf.storymile.tabs.TabsPresenter
 import software.ralf.storymile.templates.AppTemplate
 
@@ -37,7 +40,8 @@ class UserPresenterImplTest {
 
     presenter.test(this) {
       var template = awaitTemplate()
-      assertThat(template.content).isEqualTo(Content("first"))
+      assertThat((template.content as DefaultBackstackModel).backstack)
+        .isEqualTo(listOf(Content("first")))
       assertThat(first.tabsPresenter.isActive).isTrue()
       assertThat(first.playbackPresenter.isActive).isTrue()
 
@@ -56,9 +60,16 @@ class UserPresenterImplTest {
       template = awaitTemplate()
       assertThat((template.playback as PlaybackContent).count).isEqualTo(1)
 
+      checkNotNull((template.playback as PlaybackContent).onOpenSettings).invoke()
+      template = awaitTemplate()
+      val settingsBackstack = (template.content as DefaultBackstackModel).backstack
+      assertThat(settingsBackstack.first()).isEqualTo(Content("first"))
+      assertThat(settingsBackstack.last()).isInstanceOf<SettingsPresenter.Model>()
+
       userManager.switchUser(secondScope)
       template = awaitTemplate()
-      assertThat(template.content).isEqualTo(Content("second"))
+      assertThat((template.content as DefaultBackstackModel).backstack)
+        .isEqualTo(listOf(Content("second")))
       assertThat((template.tabs as TabsPresenter.Model).selectedTab)
         .isEqualTo(TabsPresenter.Tab.HOME)
       assertThat((template.playback as PlaybackContent).count).isEqualTo(0)
@@ -83,8 +94,20 @@ class UserPresenterImplTest {
   }
 
   private class FakeGraph(user: String) : UserPresenterImpl.Graph {
+    override val user: User = GuestUser()
     override val tabsPresenter = FakeTabsPresenter(user)
     override val playbackPresenter = FakePlaybackPresenter()
+    override val settingsPresenter =
+      object : SettingsPresenter {
+        @Composable
+        override fun present(input: Unit): SettingsPresenter.Model =
+          SettingsPresenter.Model(
+            account = SettingsPresenter.Account.Guest,
+            selectedSection = SettingsPresenter.Section.PLAYBACK,
+            onSelectSection = {},
+            onBack = {},
+          )
+      }
   }
 
   private class FakeTabsPresenter(private val user: String) : TabsPresenter {
@@ -113,7 +136,7 @@ class UserPresenterImplTest {
         isActive = true
         onDispose { isActive = false }
       }
-      val content = PlaybackContent(count) { count++ }
+      val content = PlaybackContent(count, LocalOpenSettings.current) { count++ }
       return Model(content, content)
     }
 
@@ -125,5 +148,9 @@ class UserPresenterImplTest {
 
   private data class Content(val user: String) : BaseModel
 
-  private data class PlaybackContent(val count: Int, val onIncrement: () -> Unit) : BaseModel
+  private data class PlaybackContent(
+    val count: Int,
+    val onOpenSettings: (() -> Unit)?,
+    val onIncrement: () -> Unit,
+  ) : BaseModel
 }

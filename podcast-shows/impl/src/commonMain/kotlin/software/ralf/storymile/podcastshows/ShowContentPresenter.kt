@@ -21,6 +21,7 @@ import software.ralf.storymile.podcast.PodcastFeed
 import software.ralf.storymile.podcast.PodcastFeedRepository
 import software.ralf.storymile.podcast.PodcastFeedRepository.State as FeedState
 import software.ralf.storymile.podcast.SavedShowRepository
+import software.ralf.storymile.user.LocalOpenSettings
 import software.ralf.storymile.util.HtmlDescription
 
 class ShowContentPresenter(
@@ -203,6 +204,7 @@ class ShowContentPresenter(
       },
       onToggleDescription = { descriptionExpanded = !descriptionExpanded },
       onBack = onBack,
+      onOpenSettings = LocalOpenSettings.current,
     )
   }
 
@@ -217,5 +219,6 @@ class ShowContentPresenter(
     val onToggleFollow: () -> Unit,
     val onToggleDescription: () -> Unit,
     val onBack: () -> Unit,
+    val onOpenSettings: (() -> Unit)? = null,
   ) : BaseModel
 }

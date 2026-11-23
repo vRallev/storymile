@@ -17,7 +17,6 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.DpRect
@@ -75,10 +74,6 @@ class HomeUiTest {
     listOf(DpSize(412.dp, 916.dp), DpSize(1280.dp, 800.dp), DpSize(1600.dp, 900.dp)).forEach { size
       ->
       uiTestRule.runRobotTest(windowSize = size, darkTheme = false) {
-        onNodeWithTag("tab-profile").assertIsDisplayed()
-        runOnUiThread { onNodeWithTag("tab-profile").performClick() }
-        assertHomeFitsWithoutScrolling()
-
         listOf<DiscoveryRobot.() -> Unit>({ openSearch() }, { discover() }).forEach { openCatalog ->
           composeRobot<DiscoveryRobot> { openCatalog() }
           onNodeWithTag("discovery-screen").assertIsDisplayed()

@@ -26,6 +26,7 @@ import software.ralf.storymile.podcast.PodcastFeedRepository
 import software.ralf.storymile.podcastshows.EpisodesModel
 import software.ralf.storymile.podcastshows.ShowPresenter
 import software.ralf.storymile.podcastshows.ShowSource
+import software.ralf.storymile.user.LocalOpenSettings
 
 class DiscoveryPresenterImpl(
   private val repository: PodcastDiscoveryRepository,
@@ -63,6 +64,7 @@ class DiscoveryPresenterImpl(
       }
 
     return Model(
+      onOpenSettings = LocalOpenSettings.current,
       topic = topic,
       query = query,
       state = state,
@@ -157,5 +159,6 @@ class DiscoveryPresenterImpl(
     val onPodcastSelected: (DiscoveredPodcast) -> Unit,
     val onRetry: () -> Unit,
     val onBack: () -> Unit,
+    val onOpenSettings: (() -> Unit)? = null,
   ) : BaseModel
 }
