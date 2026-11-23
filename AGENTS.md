@@ -169,8 +169,8 @@ Build the production web app. Then build and preview the site:
 ```
 
 Open `http://127.0.0.1:4174/storymile/`. Rebuild the site after changing its source files.
-The build copies the web distribution, APK, app icons, and design gallery into generated
-directories under `docs/`. Do not edit those copies. Edit `design-research/` to update the gallery.
+The build stages the web distribution, APK, and app icons under `docs/`.
+It copies the gallery from `design-research/` directly into the site.
 
 ## Verify
 

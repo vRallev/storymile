@@ -37,7 +37,9 @@ def on_pre_build(config):
         assets / "android-download.svg", scale=5, light="white"
     )
 
-    gallery = Path(config["docs_dir"]) / "design-research/gallery"
+
+def on_post_build(config):
+    gallery = Path(config["site_dir"]) / "design-research/gallery"
     if gallery.exists():
         shutil.rmtree(gallery)
     gallery.mkdir(parents=True)

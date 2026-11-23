@@ -47,6 +47,11 @@ plugins:
 hooks:
   - scripts/docs/hooks.py
 
+# Older builds staged these gallery files in docs/. The hook publishes from source.
+exclude_docs: |
+  /design-research/gallery/
+  /design-research/images/
+
 extra_css:
   - stylesheets/site.css
 
