@@ -7,6 +7,8 @@ import assertk.assertions.isLessThan
 import assertk.assertions.isNotNull
 import assertk.assertions.isTrue
 import java.io.ByteArrayOutputStream
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sin
@@ -93,6 +95,25 @@ class DesktopAudioPlayerTest {
     advanceTimeBy(10)
     runCurrent()
     assertThat(player.state.value.positionMillis).isEqualTo(1_100L)
+    player.close()
+  }
+
+  @Test
+  fun `seeking to the last millisecond writes only the remaining samples`() = runTest {
+    val audio = tone(seconds = 2)
+    val output = TestOutput()
+    val player: AudioPlayer = DesktopAudioPlayer(backgroundScope, { audio }, { output })
+    player.load("episode")
+    player.play()
+    runCurrent()
+    output.written.reset()
+
+    player.seekTo(1_999)
+    runCurrent()
+
+    val lastMillisecond = ByteBuffer.allocate(48 * Short.SIZE_BYTES)
+    audio.readFrames(startFrame = audio.frameCount - 48, destination = lastMillisecond)
+    assertThat(output.written.toByteArray().toList()).isEqualTo(lastMillisecond.array().toList())
     player.close()
   }
 
@@ -231,10 +252,13 @@ class DesktopAudioPlayerTest {
     var closed = false
       private set
 
-    override fun readSamples(startFrame: Int, endFrame: Int): ShortArray =
-      ShortArray(endFrame - startFrame) { index ->
-        (sin(2 * PI * 440 * (startFrame + index) / sampleRate) * 16_000).toInt().toShort()
+    override fun readFrames(startFrame: Int, destination: ByteBuffer) {
+      destination.order(ByteOrder.LITTLE_ENDIAN)
+      repeat(destination.remaining() / Short.SIZE_BYTES) { index ->
+        val sample = sin(2 * PI * 440 * (startFrame + index) / sampleRate) * 16_000
+        destination.putShort(sample.toInt().toShort())
       }
+    }
 
     override fun close() {
       closed = true
