@@ -292,11 +292,22 @@ class PlaylistRepositoryImplTest {
     }
 
   @Test
+  fun `repeated keys in existing documents use the last value`() = runTestWithScope { scope ->
+    val document =
+      """{"version":"1","playlists":[{"id":"saved","name":null,"name":"Saved","episodeIds":[]}]}"""
+    val repository: PlaylistRepository = scope.repository(storage(document))
+    runCurrent()
+
+    assertThat(repository.playlists.value.single().name).isEqualTo(PlaylistName("Saved"))
+  }
+
+  @Test
   fun `corrupt and unsupported saved documents are never overwritten by commands`() =
     runTestWithScope { scope ->
       for (document in
         listOf(
           "{broken",
+          """{"version":1,"playlists":[],"extra":{"unfinished":}}""",
           """{"version":2,"playlists":[]}""",
           SAVED_PLAYLISTS.replace("\"Saved\"", "\"  \""),
           SAVED_PLAYLISTS.replace("\"one\"", "7"),
