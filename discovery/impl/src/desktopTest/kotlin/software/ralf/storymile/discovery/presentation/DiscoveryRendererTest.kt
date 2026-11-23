@@ -28,6 +28,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
@@ -54,6 +55,22 @@ import software.ralf.storymile.theme.testing.FakeThemeEnvironment
 
 class DiscoveryRendererTest {
   private val themeEnvironment = FakeThemeEnvironment()
+
+  @Test
+  fun `last unpaired featured podcast opens from its lazy row`() =
+    runDesktopComposeUiTest(width = 412, height = 916) {
+      val podcasts = List(9) { podcast("item-$it") }
+      var selected: DiscoveredPodcast? = null
+      val renderer = DiscoveryRenderer()
+      val model =
+        model(query = PresenterTextFieldState(), state = CatalogState.Ready(podcasts))
+          .copy(onPodcastSelected = { selected = it })
+      setContent { ThemedContent { renderer.renderCompose(model, Modifier) } }
+      val last = hasTestTag("discovery-podcast-${podcasts.last().id}")
+      onNodeWithTag("discovery-list").performScrollToNode(last)
+      onNode(last).performClick()
+      assertThat(selected).isEqualTo(podcasts.last())
+    }
 
   @Test
   fun `search collapses topics and their spacing while clearing restores them`() {
