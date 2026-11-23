@@ -10,7 +10,6 @@ import java.nio.file.StandardOpenOption.READ
 import java.nio.file.StandardOpenOption.WRITE
 import javazoom.jl.decoder.Bitstream
 import javazoom.jl.decoder.Decoder
-import javazoom.jl.decoder.Obuffer
 import javazoom.jl.decoder.SampleBuffer
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -42,8 +41,16 @@ internal object Mp3Decoder {
       val stream = Bitstream(input)
       try {
         val decoder = Decoder()
-        val samples =
-          ByteBuffer.allocate(Obuffer.OBUFFERSIZE * Short.SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN)
+        val bytes = ByteBuffer.allocateDirect(64 * 1024).order(ByteOrder.LITTLE_ENDIAN)
+        val samples = bytes.asShortBuffer()
+        fun writeSamples() {
+          bytes.limit(samples.position() * Short.SIZE_BYTES)
+          while (bytes.hasRemaining()) {
+            file.write(bytes)
+          }
+          bytes.clear()
+          samples.clear()
+        }
         var sampleRate = 0
         var channels = 0
         while (true) {
@@ -57,16 +64,13 @@ internal object Mp3Decoder {
           check(sampleRate == decoded.sampleFrequency && channels == decoded.channelCount) {
             "The audio format changed within the episode."
           }
-          samples.clear()
-          for (index in 0 until decoded.bufferLength) {
-            samples.putShort(decoded.buffer[index])
+          if (samples.remaining() < decoded.bufferLength) {
+            writeSamples()
           }
-          samples.flip()
-          while (samples.hasRemaining()) {
-            file.write(samples)
-          }
+          samples.put(decoded.buffer, 0, decoded.bufferLength)
           stream.closeFrame()
         }
+        writeSamples()
         check(sampleRate > 0 && file.position() > 0) { "The episode contains no MP3 audio." }
         return FilePcmAudio(
           sampleRate = sampleRate,
