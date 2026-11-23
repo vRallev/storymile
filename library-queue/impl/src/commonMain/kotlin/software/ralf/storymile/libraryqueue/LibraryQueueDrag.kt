@@ -52,7 +52,7 @@ internal class LibraryQueueDrag(private val list: LazyListState) {
     if (sourceIndex == targetIndex) {
       return episodes
     }
-    return episodes.toMutableList().apply { add(targetIndex, removeAt(sourceIndex)) }
+    return QueueDragPreview(episodes = episodes, source = sourceIndex, target = targetIndex)
   }
 
   fun drop(
