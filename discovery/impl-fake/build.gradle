@@ -3,6 +3,8 @@ plugins {
 }
 
 storymile {
+  // Package Skiko for the Wasm browser tests.
+  enableComposeUi true
   enableMetro true
 }
 
