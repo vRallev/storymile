@@ -37,7 +37,6 @@ class PlaylistRepositoryImpl(
     field = MutableStateFlow(emptyList())
 
   private val files = storage.files.directory("playlists")
-  private val document = PlaylistDocument()
   private val commands = Channel<(List<Playlist>) -> List<Playlist>>(Channel.UNLIMITED)
   private var loaded = false
 
@@ -51,7 +50,7 @@ class PlaylistRepositoryImpl(
             val current = playlists.value
             val updated = command(current)
             if (updated != current) {
-              files.write(fileName, document.encode(updated))
+              files.write(fileName, PlaylistDocument.encode(updated))
               currentCoroutineContext().ensureActive()
               playlists.value = updated
             }
@@ -136,7 +135,7 @@ class PlaylistRepositoryImpl(
 
   private suspend fun load() {
     if (!loaded) {
-      val saved = files.read(fileName)?.let { document.decode(it) } ?: defaultPlaylists()
+      val saved = files.read(fileName)?.let { PlaylistDocument.decode(it) } ?: defaultPlaylists()
       currentCoroutineContext().ensureActive()
       playlists.value = saved
       loaded = true
@@ -146,7 +145,7 @@ class PlaylistRepositoryImpl(
   private suspend fun defaultPlaylists(): List<Playlist> {
     val defaults = initialPlaylists.get()
     if (defaults.isNotEmpty()) {
-      files.write(fileName, document.encode(defaults))
+      files.write(fileName, PlaylistDocument.encode(defaults))
     }
     return defaults
   }

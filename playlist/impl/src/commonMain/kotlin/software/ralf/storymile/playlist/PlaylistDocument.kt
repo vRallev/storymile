@@ -1,36 +1,30 @@
 package software.ralf.storymile.playlist
 
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.add
-import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.put
-import kotlinx.serialization.json.putJsonArray
 
-internal class PlaylistDocument {
-  fun encode(playlists: List<Playlist>): ByteArray = buildJsonObject {
-    put("version", 1)
-    putJsonArray("playlists") {
-      playlists.forEach { playlist ->
-        add(
-          buildJsonObject {
-            put("id", playlist.id.value)
-            put("name", playlist.name.value)
-            putJsonArray("episodeIds") {
-              playlist.episodeIds.forEach { add(it.value) }
-            }
-          },
-        )
-      }
-    }
-  }
-    .toString()
-    .encodeToByteArray()
+internal object PlaylistDocument {
+  fun encode(playlists: List<Playlist>): ByteArray =
+    Json.encodeToString(
+        Document(
+          version = 1,
+          playlists =
+            playlists.map { playlist ->
+              Entry(
+                id = playlist.id.value,
+                name = playlist.name.value,
+                episodeIds = playlist.episodeIds.map { it.value },
+              )
+            },
+        ),
+      )
+      .encodeToByteArray()
 
   fun decode(content: ByteArray): List<Playlist> {
     val document =
@@ -59,4 +53,9 @@ internal class PlaylistDocument {
     require(this is JsonPrimitive && isString) { "Expected a JSON string." }
     return content
   }
+
+  @Serializable private data class Document(val version: Int, val playlists: List<Entry>)
+
+  @Serializable
+  private data class Entry(val id: String, val name: String, val episodeIds: List<String>)
 }
