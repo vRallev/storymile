@@ -30,9 +30,13 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.withTimeout
 import okio.ByteString.Companion.encodeUtf8
+import okio.FileMetadata
+import okio.FileNotFoundException
 import okio.FileSystem
+import okio.ForwardingFileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+import okio.Source
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.coroutine.CoroutineScopeScoped
 import software.ralf.app.platform.scope.coroutine.addCoroutineScopeScoped
@@ -341,6 +345,40 @@ class PersistentStorageTest {
     }
 
   @Test
+  fun `read returns null when a cache file disappears after its metadata lookup`() {
+    val evictingFileSystem =
+      object : ForwardingFileSystem(FileSystem.SYSTEM) {
+        override fun metadataOrNull(path: Path): FileMetadata? {
+          val metadata = super.metadataOrNull(path)
+          if (metadata?.isRegularFile == true) {
+            delegate.delete(path)
+          }
+          return metadata
+        }
+      }
+    storageTest(evictingFileSystem) { scope, platform, _ ->
+      val cache = scope.storage("app", platform).cache
+      cache.write("artwork", byteArrayOf(1))
+      assertThat(cache.read("artwork")).isNull()
+    }
+  }
+
+  @Test
+  fun `read propagates open failures for existing files`() {
+    val fileSystem =
+      object : ForwardingFileSystem(FileSystem.SYSTEM) {
+        override fun source(file: Path): Source = throw FileNotFoundException("Access denied")
+      }
+    storageTest(fileSystem) { scope, platform, _ ->
+      val files = scope.storage("app", platform).files
+      files.write("recording", byteArrayOf(1))
+      assertFailure { files.read("recording") }
+        .isInstanceOf<FileNotFoundException>()
+        .hasMessage("Access denied")
+    }
+  }
+
+  @Test
   fun `cache folders keep files separate from durable data and other scopes`() =
     storageTest { scope, platform, _ ->
       val app: Storage = scope.storage("app", platform)
@@ -544,11 +582,12 @@ class PersistentStorageTest {
   }
 
   private fun storageTest(
+    fileSystem: FileSystem = FileSystem.SYSTEM,
     block: suspend TestScope.(Scope, StoragePlatform, Path) -> Unit,
   ): TestResult = runTestWithScope { scope ->
     val root = Files.createTempDirectory("storymile-storage").toString().toPath()
     val platform =
-      object : OkioStoragePlatform(FileSystem.SYSTEM, StandardTestDispatcher(testScheduler)) {
+      object : OkioStoragePlatform(fileSystem, StandardTestDispatcher(testScheduler)) {
         override fun rootDirectory(): Path = root
 
         override fun cacheDirectory(): Path = root / "cache"

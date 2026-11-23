@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
 import okio.buffer
@@ -71,10 +72,16 @@ abstract class OkioStoragePlatform(
   ): ByteArray? {
     return withContext(ioDispatcher) {
       val path = storageFile(namespace, area, name, create = false) ?: return@withContext null
-      if (fileSystem.metadataOrNull(path) == null) {
-        return@withContext null
-      }
-      fileSystem.read(path) { readByteArray() }
+      val source =
+        try {
+          fileSystem.source(path)
+        } catch (exception: FileNotFoundException) {
+          if (fileSystem.metadataOrNull(path) == null) {
+            return@withContext null
+          }
+          throw exception
+        }
+      source.buffer().use { it.readByteArray() }
     }
   }
 
@@ -160,7 +167,10 @@ abstract class OkioStoragePlatform(
       storageDirectory(namespace, area, segments.dropLast(1), create, root) ?: return null
     val path = directory / segments.last()
     val metadata = fileSystem.metadataOrNull(path)
-    check(metadata == null || (metadata.symlinkTarget == null && metadata.isRegularFile)) {
+    if (metadata == null) {
+      return if (create) path else null
+    }
+    check(metadata.symlinkTarget == null && metadata.isRegularFile) {
       "Storage path must be a regular file: $path"
     }
     return path
