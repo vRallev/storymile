@@ -35,8 +35,6 @@ dependencies {
   commonMainImplementation project(':podcast-shows:impl')
   commonMainImplementation project(':podcast:impl')
   commonMainImplementation project(':presenter-navigation:impl')
-  commonMainImplementation project(':restart:impl')
-  commonMainImplementation project(':runtime-mode:impl')
   commonMainImplementation project(':storage:impl')
   commonMainImplementation project(':tabs:impl')
   commonMainImplementation project(':templates:impl')
@@ -46,4 +44,15 @@ dependencies {
   commonMainImplementation project(':user:public')
   commonMainImplementation project(':util:impl')
   commonMainImplementation libs.navigation.event.compose
+
+  if (providers.gradleProperty('storymile.enableFakeMode').map { it.toBoolean() }.getOrElse(true)) {
+    commonMainImplementation project(':discovery:impl-fake')
+    commonMainImplementation project(':player:impl-fake')
+    commonMainImplementation project(':playlist:impl-fake')
+    commonMainImplementation project(':podcast:impl-fake')
+    commonMainImplementation project(':restart:impl')
+    commonMainImplementation project(':runtime-mode:impl')
+    commonMainImplementation project(':storage:impl-fake')
+    commonMainImplementation project(':templates:impl-fake')
+  }
 }

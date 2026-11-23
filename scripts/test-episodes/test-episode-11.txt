@@ -1,0 +1,1 @@
+Test episode eleven. This is Design Notes. A transit map can draw a river and a rail line while leaving out almost every street. It shows you the order of the stops and where lines meet. When you step off the train and start walking, you need those streets again. The best map depends on which part of the trip you are making.

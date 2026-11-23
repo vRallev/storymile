@@ -117,7 +117,7 @@ The user presenter places these models in the content, navigation, and playback 
 [AppTemplate](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/AppTemplate.kt).
 The playback presenter supplies its slots when the user-scoped
 [player](../player/public/src/commonMain/kotlin/software/ralf/storymile/player/Player.kt)
-selects an episode from the Library Queue. Fake mode starts with three sample episodes in that queue.
+selects an episode from the Library Queue. Fake mode queues samples from three podcasts.
 
 ## Adaptive rendering
 

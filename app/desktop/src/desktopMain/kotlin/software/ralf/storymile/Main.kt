@@ -24,7 +24,6 @@ import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import software.ralf.storymile.restart.DesktopProcessRestarter
 import software.ralf.storymile.theme.LocalThemeController
 import software.ralf.storymile.util.Platform
 import software.ralf.storymile.util.PlatformBindings
@@ -35,8 +34,6 @@ import software.ralf.storymile.util.PlatformBindings
  * app.
  */
 fun main(args: Array<String>) {
-  DesktopProcessRestarter.configure("software.ralf.storymile.MainKt", args)
-
   val initialSize =
     when (val size = args.firstOrNull { it.startsWith("--window-size=") }?.substringAfter('=')) {
       null,
@@ -46,7 +43,14 @@ fun main(args: Array<String>) {
       else -> error("Unknown window size '$size'. Use phone, tablet, or desktop.")
     }
 
-  val desktopApp = DesktopApp { createGraphFactory<DesktopAppGraph.Factory>().create(it) }
+  val desktopApp = DesktopApp {
+    createGraphFactory<DesktopAppGraph.Factory>()
+      .create(
+        rootScopeProvider = it,
+        mainClassName = "software.ralf.storymile.MainKt",
+        arguments = args,
+      )
+  }
 
   application {
     var windowIcon by remember { mutableStateOf<BitmapPainter?>(null) }
@@ -86,11 +90,7 @@ fun main(args: Array<String>) {
               themeController.toggle(systemDarkTheme)
               true
             }
-            Key.F -> {
-              desktopApp.toggleRuntimeMode()
-              true
-            }
-            else -> false
+            else -> desktopApp.handleShortcut(keyEvent.key)
           }
         } else {
           false

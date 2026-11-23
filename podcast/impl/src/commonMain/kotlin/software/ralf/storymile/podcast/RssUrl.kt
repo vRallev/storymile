@@ -5,7 +5,7 @@ import io.ktor.http.URLParserException
 import io.ktor.http.URLProtocol
 import io.ktor.http.takeFrom
 
-internal object RssUrl {
+object RssUrl {
   fun normalize(url: String): String? {
     if (
       (!url.startsWith("http://", ignoreCase = true) &&

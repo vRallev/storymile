@@ -8,4 +8,5 @@ storymile {
 
 dependencies {
   commonMainImplementation project(':http:public')
+  commonMainImplementation project(':podcast:impl-fake')
 }

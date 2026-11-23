@@ -34,7 +34,7 @@ export async function verifyFakePlayback(page, path) {
     ready: true,
     duration: true,
     error: null,
-    path: new URL('composeResources/software.ralf.storymile.player.impl.generated.resources/files/test-episodes/test-episode-1.mp3', page.url()).pathname,
+    path: new URL('composeResources/software.ralf.storymile.podcast.impl.fake.generated.resources/files/test-episodes/test-episode-1.mp3', page.url()).pathname,
   });
 
   await expect.poll(() => page.evaluate(() => window.storymileTestAudio.currentTime)).toBeGreaterThan(0);

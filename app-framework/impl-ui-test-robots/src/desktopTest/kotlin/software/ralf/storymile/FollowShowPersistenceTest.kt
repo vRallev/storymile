@@ -37,6 +37,7 @@ import software.ralf.storymile.podcastshows.ShowSelection
 import software.ralf.storymile.podcastshows.ShowSource
 import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.OkioStoragePlatform
+import software.ralf.storymile.storage.RuntimeModeStorageFactory
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.user.UserScope
@@ -142,7 +143,8 @@ class FollowShowPersistenceTest {
 
   @DependencyGraph(
     AppScope::class,
-    excludes = [DefaultStorage.Factory::class, TestStorageBindings::class],
+    excludes =
+      [DefaultStorage.Factory::class, RuntimeModeStorageFactory::class, TestStorageBindings::class],
   )
   interface Graph : AppGraph {
     val userManager: UserManager

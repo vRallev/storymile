@@ -2,7 +2,6 @@
   <string name="now_playing">Now playing</string>
   <string name="collapse_player">Collapse player</string>
   <string name="more_options">More options</string>
-  <string name="preview_artwork">The Quiet Current cover</string>
   <string name="bookmark">Bookmark episode</string>
   <string name="download">Download episode</string>
   <string name="playback_position">Playback position</string>
@@ -24,5 +23,4 @@
   <string name="close">Close</string>
   <string name="queue_empty">Your queue is empty</string>
   <string name="episode_info">Episode details</string>
-  <string name="sample_description">A quiet conversation about making room for the moments that matter. Explore small rituals, thoughtful pauses, and a slower rhythm.</string>
 </resources>

@@ -10,9 +10,6 @@ import kotlin.test.Test
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import software.ralf.storymile.http.HttpResponse
-import software.ralf.storymile.runtimemode.RuntimeMode
-import software.ralf.storymile.runtimemode.RuntimeModeController
-import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 
 class PodcastFeedServiceTest {
   @Test
@@ -233,44 +230,5 @@ class PodcastFeedServiceTest {
 
       assertFailure { service.load("https://feeds.test/show.xml") }.isSameInstanceAs(failure)
     }
-  }
-
-  @Test
-  fun `fake feeds match discovery samples and stay deterministic`() = runTest {
-    val service: PodcastFeedService = FakePodcastFeedService()
-
-    listOf("science" to "Small Science", "history" to "History on Foot", "design" to "Design Notes")
-      .forEach { (id, title) ->
-        val feedUrl = "https://example.invalid/podcasts/$id.xml"
-        val first = service.load(feedUrl)
-        assertThat(first)
-          .isInstanceOf<HttpResponse.Success<PodcastFeed>>()
-          .transform { it.data.title }
-          .isEqualTo(title)
-        assertThat(first)
-          .isInstanceOf<HttpResponse.Success<PodcastFeed>>()
-          .transform { it.data.episodes.size }
-          .isEqualTo(2)
-        assertThat(service.load(" $feedUrl ")).isEqualTo(first)
-      }
-    assertThat(service.load("https://example.invalid/podcasts/missing.xml"))
-      .isEqualTo(HttpResponse.Error.Client(404))
-  }
-
-  @Test
-  fun `fake feeds never construct the real service`() = runTest {
-    val controller: RuntimeModeController = FakeRuntimeModeController(RuntimeMode.Fake)
-    val fake = lazy { FakePodcastFeedService() }
-    val service: PodcastFeedService =
-      PodcastFeedServiceImpl(
-        controller,
-        lazy { error("Real service constructed") },
-        fake,
-      )
-
-    assertThat(service.load("https://example.invalid/podcasts/science.xml"))
-      .isInstanceOf<HttpResponse.Success<PodcastFeed>>()
-      .transform { it.data.title }
-      .isEqualTo("Small Science")
   }
 }

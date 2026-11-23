@@ -20,6 +20,7 @@ import software.ralf.storymile.playlist.PlaylistName
 import software.ralf.storymile.playlist.PlaylistRepository
 import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.InMemoryStorageFactory
+import software.ralf.storymile.storage.RuntimeModeStorageFactory
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.user.UserScope
@@ -97,7 +98,8 @@ class PlaylistScopeTest {
 
   @DependencyGraph(
     AppScope::class,
-    excludes = [DefaultStorage.Factory::class, TestStorageBindings::class],
+    excludes =
+      [DefaultStorage.Factory::class, RuntimeModeStorageFactory::class, TestStorageBindings::class],
   )
   interface Graph : AppGraph {
     val userManager: UserManager

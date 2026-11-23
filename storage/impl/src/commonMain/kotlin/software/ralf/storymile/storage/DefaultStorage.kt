@@ -20,8 +20,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.ByteString.Companion.encodeUtf8
 import okio.Path
-import software.ralf.storymile.runtimemode.RuntimeMode
-import software.ralf.storymile.runtimemode.RuntimeModeController
 
 /**
  * Scope-owned implementation used by [Storage.Factory].
@@ -120,25 +118,13 @@ class DefaultStorage(
   @ContributesBinding(AppScope::class, binding = binding<Storage.Factory>())
   class Factory(
     private val platform: StoragePlatform,
-    private val controller: Lazy<RuntimeModeController>,
   ) : Storage.Factory {
-    private val inMemoryPlatform = InMemoryStoragePlatform()
-
     override fun create(
       namespace: String,
       coroutineScope: CoroutineScope,
       mustBePersistent: Boolean,
     ): Storage =
-      DefaultStorage(
-        namespace = namespace,
-        coroutineScope = coroutineScope,
-        platform =
-          if (mustBePersistent || controller.value.mode == RuntimeMode.Real) {
-            platform
-          } else {
-            inMemoryPlatform
-          },
-      )
+      DefaultStorage(namespace = namespace, coroutineScope = coroutineScope, platform = platform)
   }
 
   private inner class DirectoryFileStorage(

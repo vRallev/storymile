@@ -3,17 +3,15 @@ plugins {
 }
 
 storymile {
-  enableComposeUi true
   enableMetro true
 }
 
 dependencies {
   androidMainImplementation libs.androidx.media3.exoplayer
 
-  commonMainImplementation project(':runtime-mode:public')
   commonMainImplementation project(':user:public')
 
-  commonTestImplementation project(':runtime-mode:testing')
-
   desktopMainImplementation libs.jlayer
+
+  desktopTestImplementation project(':podcast:impl-robots')
 }

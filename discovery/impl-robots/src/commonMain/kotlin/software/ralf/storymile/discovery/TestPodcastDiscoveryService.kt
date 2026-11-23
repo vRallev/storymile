@@ -7,7 +7,7 @@ import software.ralf.storymile.http.HttpResponse
 
 /** Supplies a local catalog without fetching feeds, artwork, or network responses. */
 @SingleIn(AppScope::class)
-@ContributesBinding(AppScope::class, replaces = [PodcastDiscoveryServiceImpl::class])
+@ContributesBinding(AppScope::class, replaces = [ApplePodcastDiscoveryService::class])
 class TestPodcastDiscoveryService : PodcastDiscoveryService {
   private val podcasts =
     listOf(

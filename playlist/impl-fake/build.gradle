@@ -1,0 +1,17 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  // Sample catalog tests need the Skiko runtime on Wasm.
+  enableComposeUi true
+  enableMetro true
+}
+
+dependencies {
+  commonMainImplementation project(':playlist:impl')
+  commonMainImplementation project(':runtime-mode:public')
+
+  commonTestImplementation project(':podcast:impl-robots')
+  commonTestImplementation project(':runtime-mode:testing')
+}
