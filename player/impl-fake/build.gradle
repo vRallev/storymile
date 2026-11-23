@@ -10,6 +10,5 @@ dependencies {
   commonMainImplementation project(':player:impl')
   commonMainImplementation project(':runtime-mode:public')
 
-  desktopTestImplementation project(':podcast:impl-robots')
   desktopTestImplementation project(':runtime-mode:testing')
 }

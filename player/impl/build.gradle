@@ -12,6 +12,4 @@ dependencies {
   commonMainImplementation project(':user:public')
 
   desktopMainImplementation libs.jlayer
-
-  desktopTestImplementation project(':podcast:impl-robots')
 }

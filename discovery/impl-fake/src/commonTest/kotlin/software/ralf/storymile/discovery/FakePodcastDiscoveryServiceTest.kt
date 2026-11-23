@@ -6,7 +6,6 @@ import assertk.assertions.isInstanceOf
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import software.ralf.storymile.http.HttpResponse
-import software.ralf.storymile.podcast.BundledPodcastFixtures
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
@@ -14,7 +13,8 @@ import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 class FakePodcastDiscoveryServiceTest {
   @Test
   fun `fake popular returns all sample podcasts in a stable order`() = runTest {
-    val service: PodcastDiscoveryService = FakePodcastDiscoveryService(BundledPodcastFixtures.feeds)
+    val service: PodcastDiscoveryService =
+      FakePodcastDiscoveryService(DiscoveryPodcastFixtures.feeds)
 
     val first = service.popular()
     assertThat(first)
@@ -26,7 +26,8 @@ class FakePodcastDiscoveryServiceTest {
 
   @Test
   fun `fake search matches titles and authors without case or surrounding whitespace`() = runTest {
-    val service: PodcastDiscoveryService = FakePodcastDiscoveryService(BundledPodcastFixtures.feeds)
+    val service: PodcastDiscoveryService =
+      FakePodcastDiscoveryService(DiscoveryPodcastFixtures.feeds)
 
     assertThat(service.search(" SCIENCE "))
       .isInstanceOf<HttpResponse.Success<List<DiscoveredPodcast>>>()
@@ -44,7 +45,7 @@ class FakePodcastDiscoveryServiceTest {
   @Test
   fun `fake search never constructs the real service`() = runTest {
     val controller: RuntimeModeController = FakeRuntimeModeController(RuntimeMode.Fake)
-    val fake = lazy { FakePodcastDiscoveryService(BundledPodcastFixtures.feeds) }
+    val fake = lazy { FakePodcastDiscoveryService(DiscoveryPodcastFixtures.feeds) }
     val service: PodcastDiscoveryService =
       PodcastDiscoveryServiceImpl(controller, lazy { error("Real service constructed") }, fake)
 
@@ -57,7 +58,7 @@ class FakePodcastDiscoveryServiceTest {
   @Test
   fun `fake popular never constructs the real service`() = runTest {
     val controller: RuntimeModeController = FakeRuntimeModeController(RuntimeMode.Fake)
-    val fake = lazy { FakePodcastDiscoveryService(BundledPodcastFixtures.feeds) }
+    val fake = lazy { FakePodcastDiscoveryService(DiscoveryPodcastFixtures.feeds) }
     val service: PodcastDiscoveryService =
       PodcastDiscoveryServiceImpl(controller, lazy { error("Real service constructed") }, fake)
 

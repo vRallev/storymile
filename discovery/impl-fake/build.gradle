@@ -3,7 +3,7 @@ plugins {
 }
 
 storymile {
-  // Package the Skiko runtime for Wasm tests that use the sample catalog.
+  // Package Skiko for the Wasm browser tests.
   enableComposeUi true
   enableMetro true
 }
@@ -14,7 +14,6 @@ dependencies {
   commonMainImplementation project(':podcast:public')
   commonMainImplementation project(':runtime-mode:public')
 
-  commonTestImplementation project(':podcast:impl-robots')
   commonTestImplementation project(':runtime-mode:testing')
 
   desktopTestImplementation project(':util:testing')
