@@ -272,6 +272,26 @@ class PlaylistRepositoryImplTest {
     }
 
   @Test
+  fun `version one documents support extra fields and escaped episode IDs`() =
+    runTestWithScope { scope ->
+      val document =
+        """{"extra":{},"playlists":[{"episodeIds":["a\"b"],"id":"saved","extra":42,"name":" Saved "}],"version":1}"""
+      val storage = storage(document)
+      val repository: PlaylistRepository = scope.repository(storage)
+      runCurrent()
+
+      val playlist = repository.playlists.value.single()
+      assertThat(playlist.name).isEqualTo(PlaylistName("Saved"))
+      assertThat(playlist.episodeIds).isEqualTo(listOf(EpisodeId("a\"b")))
+      repository.rename(playlist.id, PlaylistName("Edited"))
+      runCurrent()
+      val reopened: PlaylistRepository = scope.repository(storage)
+      runCurrent()
+      assertThat(reopened.playlists.value)
+        .isEqualTo(listOf(playlist.copy(name = PlaylistName("Edited"))))
+    }
+
+  @Test
   fun `corrupt and unsupported saved documents are never overwritten by commands`() =
     runTestWithScope { scope ->
       for (document in
@@ -279,6 +299,8 @@ class PlaylistRepositoryImplTest {
           "{broken",
           """{"version":2,"playlists":[]}""",
           SAVED_PLAYLISTS.replace("\"Saved\"", "\"  \""),
+          SAVED_PLAYLISTS.replace("\"one\"", "7"),
+          SAVED_PLAYLISTS.replace("\"one\"", "\"one\",\"one\""),
         )) {
         val storage = storage(document)
         val repository: PlaylistRepository = scope.repository(storage)
