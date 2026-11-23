@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
 import okio.buffer
@@ -71,7 +72,16 @@ abstract class OkioStoragePlatform(
   ): ByteArray? {
     return withContext(ioDispatcher) {
       val path = storageFile(namespace, area, name, create = false) ?: return@withContext null
-      fileSystem.read(path) { readByteArray() }
+      val source =
+        try {
+          fileSystem.source(path)
+        } catch (exception: FileNotFoundException) {
+          if (fileSystem.metadataOrNull(path) == null) {
+            return@withContext null
+          }
+          throw exception
+        }
+      source.buffer().use { it.readByteArray() }
     }
   }
 
