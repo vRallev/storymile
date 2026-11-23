@@ -49,11 +49,12 @@ internal class RssFeedParser {
 
   private fun XmlReader.readChannel(feedUrl: String): PodcastFeed {
     val metadata = Metadata()
-    val episodes = mutableListOf<Episode>()
+    val episodes = mutableMapOf<String, PodcastEpisode>()
     var link: String? = null
     readChildren {
       when {
-        matches("item") -> readEpisode(feedUrl)?.let { episodes += it }
+        matches("item") ->
+          readEpisode(feedUrl)?.let { episode -> episodes.getOrPut(episode.id) { episode } }
         matches("link") -> {
           val value = RssUrl.resolve(feedUrl, readText())
           link = link ?: value
@@ -71,25 +72,23 @@ internal class RssFeedParser {
       artworkUrl = artworkUrl,
       link = link,
       episodes =
-        episodes
-          .distinctBy { it.id }
-          .map { episode ->
-            PodcastEpisode(
-              id = episode.id,
-              title = checkNotNull(episode.metadata.title),
-              description = episode.metadata.description(),
-              author = episode.metadata.author ?: episode.metadata.rssAuthor ?: author,
-              artworkUrl =
-                episode.metadata.artworkUrl ?: episode.metadata.rssArtworkUrl ?: artworkUrl,
-              publishedAt = episode.publishedAt,
-              duration = episode.duration,
-              enclosure = episode.enclosure,
+        episodes.values.map { episode ->
+          if (
+            (episode.author == null && author != null) ||
+              (episode.artworkUrl == null && artworkUrl != null)
+          ) {
+            episode.copy(
+              author = episode.author ?: author,
+              artworkUrl = episode.artworkUrl ?: artworkUrl,
             )
-          },
+          } else {
+            episode
+          }
+        },
     )
   }
 
-  private fun XmlReader.readEpisode(feedUrl: String): Episode? {
+  private fun XmlReader.readEpisode(feedUrl: String): PodcastEpisode? {
     val metadata = Metadata()
     var id: String? = null
     var publishedAt: String? = null
@@ -108,10 +107,16 @@ internal class RssFeedParser {
       }
     }
     val media = enclosure ?: return null
-    if (metadata.title == null) {
-      return null
-    }
-    return Episode(id ?: media.url, metadata, publishedAt, duration, media)
+    return PodcastEpisode(
+      id = id ?: media.url,
+      title = metadata.title ?: return null,
+      description = metadata.description(),
+      author = metadata.author ?: metadata.rssAuthor,
+      artworkUrl = metadata.artworkUrl ?: metadata.rssArtworkUrl,
+      publishedAt = publishedAt,
+      duration = duration,
+      enclosure = media,
+    )
   }
 
   private fun XmlReader.readEnclosure(feedUrl: String): PodcastEnclosure? {
@@ -303,12 +308,4 @@ internal class RssFeedParser {
 
     fun description(): String? = description ?: content ?: summary
   }
-
-  private data class Episode(
-    val id: String,
-    val metadata: Metadata,
-    val publishedAt: String?,
-    val duration: Duration?,
-    val enclosure: PodcastEnclosure,
-  )
 }
