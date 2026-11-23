@@ -64,6 +64,7 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
         showProfile = screenSize.category != ScreenSize.Category.PHONE,
         landscape = screenSize.width > screenSize.height,
         onMore = { panel = PlaybackOptions.Panel.INFO },
+        onOpenSettings = model.onOpenSettings,
       )
       Spacer(Modifier.height(if (screenSize.height < 600.dp) 8.dp else 24.dp))
       BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
@@ -160,8 +161,13 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
     showProfile: Boolean,
     landscape: Boolean,
     onMore: () -> Unit,
+    onOpenSettings: (() -> Unit)?,
   ) {
     val onCollapse = LocalCollapsePlayback.current
+    val onProfile: () -> Unit = {
+      onCollapse()
+      onOpenSettings?.invoke()
+    }
     val transition = LocalPlaybackTransition.current
     val fade =
       with(transition) {
@@ -186,7 +192,7 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
       },
       actions = {
         if (showProfile && landscape) {
-          ProfileButton(onClick = {}, enabled = false)
+          ProfileButton(onClick = onProfile, enabled = onOpenSettings != null)
         }
         IconButton(
           onClick = onMore,
@@ -199,7 +205,7 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
           )
         }
         if (showProfile && !landscape) {
-          ProfileButton(onClick = {}, enabled = false)
+          ProfileButton(onClick = onProfile, enabled = onOpenSettings != null)
         }
       },
       modifier = fade.padding(horizontal = if (tablet) 16.dp else 0.dp).testTag("playback-header"),

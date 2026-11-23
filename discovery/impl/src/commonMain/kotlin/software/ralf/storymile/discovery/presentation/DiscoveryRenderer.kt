@@ -166,6 +166,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
           TitleBar(
             title = ShowSource.Topic(requireNotNull(model.topic)).title(),
             onBack = model.onBack,
+            onOpenSettings = model.onOpenSettings,
             backButtonModifier = Modifier.testTag("discovery-back"),
           )
         }
@@ -203,6 +204,7 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
             TitleBar(
               title = ShowSource.Browse.title(),
               onBack = model.onBack,
+              onOpenSettings = model.onOpenSettings,
               backButtonModifier = Modifier.testTag("discovery-back"),
               titleModifier =
                 Modifier.sharedNavigationBounds(SharedNavigationElement.APP_BAR_TITLE),

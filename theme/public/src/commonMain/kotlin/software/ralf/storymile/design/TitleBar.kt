@@ -25,8 +25,8 @@ import software.ralf.storymile.theme.generated.resources.Res
 import software.ralf.storymile.theme.generated.resources.back
 
 /**
- * Shows a localized [title], back action, and profile placeholder. Owns the bar's content padding;
- * place it above the screen's scrollable content.
+ * Shows a localized [title], back action, and profile icon. Owns the bar's content padding. Place
+ * it above the screen's scrollable content.
  */
 @Composable
 fun TitleBar(
@@ -36,6 +36,7 @@ fun TitleBar(
   backButtonModifier: Modifier = Modifier,
   titleModifier: Modifier = Modifier,
   profileIconModifier: Modifier = Modifier,
+  onOpenSettings: (() -> Unit)? = null,
 ) {
   BoxWithConstraints(modifier.fillMaxWidth().testTag("title-bar")) {
     Row(
@@ -59,7 +60,7 @@ fun TitleBar(
         color = AppTheme.colorScheme.onSurface,
       )
       ProfileButton(
-        onClick = {},
+        onClick = onOpenSettings,
         modifier = Modifier.testTag("tab-profile"),
         iconModifier = profileIconModifier,
       )

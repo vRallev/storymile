@@ -47,6 +47,7 @@ dependencies {
   commonMainImplementation project(':restart:impl')
   commonMainImplementation project(':runtime-mode:impl-robots')
   commonMainImplementation project(':runtime-mode:public')
+  commonMainImplementation project(':settings:impl')
   commonMainImplementation project(':storage:impl')
   commonMainImplementation project(':tabs:impl')
   commonMainImplementation project(':templates:impl')

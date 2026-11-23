@@ -97,6 +97,7 @@ class LibraryPagesRenderer : ComposeRenderer<LibraryPagesRenderer.Model>() {
         TabHeader(
           title = Tab.entries[pagerState.currentPage].title(),
           windowWidth = LocalScreenSize.current.width,
+          onOpenSettings = model.library.onOpenSettings,
           onBack = model.onCloseShowEpisode.takeIf { model.library.selectedTab == Tab.SHOWS },
           backButtonModifier = Modifier.testTag("show-back"),
         )

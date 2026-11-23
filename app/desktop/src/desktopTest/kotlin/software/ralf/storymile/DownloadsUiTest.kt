@@ -56,7 +56,6 @@ class DownloadsUiTest {
             file.parentFile.mkdirs()
             ImageIO.write(onNodeWithTag("app-shell").captureToImage().toAwtImage(), "png", file)
             runOnUiThread { onNodeWithTag("downloads-discover").performClick() }
-            runOnUiThread { onNodeWithTag("tab-profile").performClick() }
             onNodeWithTag("tab-downloads").assertIsSelected()
           }
         }

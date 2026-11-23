@@ -1,11 +1,13 @@
 package software.ralf.storymile
 
 import assertk.assertThat
+import assertk.assertions.containsExactly
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import kotlin.test.Test
+import software.ralf.app.platform.presenter.backstack.nav3.PresenterBackstackModel
 import software.ralf.storymile.tabs.TabsPresenter
 import software.ralf.storymile.templates.AppTemplate
 
@@ -22,7 +24,7 @@ class StorymileDesktopHeadlessTest {
       assertThat(initial.tabs).isNotNull().isInstanceOf<TabsPresenter.Model>().given { initialTabs
         ->
         var tabs = initialTabs
-        assertThat(initial.content).isEqualTo(tabs.content)
+        initial.assertTabContent(tabs)
         assertThat(tabs.selectedTab).isEqualTo(TabsPresenter.Tab.HOME)
 
         listOf(TabsPresenter.Tab.DOWNLOADS, TabsPresenter.Tab.LIBRARY, TabsPresenter.Tab.HOME)
@@ -32,7 +34,7 @@ class StorymileDesktopHeadlessTest {
               assertThat(template.tabs).isNotNull().isInstanceOf<TabsPresenter.Model>().given {
                 updatedTabs ->
                 tabs = updatedTabs
-                assertThat(template.content).isEqualTo(tabs.content)
+                template.assertTabContent(tabs)
                 assertThat(tabs.selectedTab).isEqualTo(tab)
               }
               assertThat(template.playback).isEqualTo(playback)
@@ -40,6 +42,12 @@ class StorymileDesktopHeadlessTest {
             }
           }
       }
+    }
+  }
+
+  private fun AppTemplate.AdaptiveTemplate.assertTabContent(tabs: TabsPresenter.Model) {
+    assertThat(content).isInstanceOf<PresenterBackstackModel>().given { shell ->
+      assertThat(shell.backstack).containsExactly(tabs.content)
     }
   }
 }

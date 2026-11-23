@@ -3,13 +3,14 @@ plugins {
 }
 
 storymile {
-  enableComposeUi true
+  enableComposePresenterBackstack true
   enableMetro true
-  enableComposePresenters true
 }
 
 dependencies {
   commonMainImplementation project(':playback:public')
+  commonMainImplementation project(':presenter-navigation:public')
+  commonMainImplementation project(':settings:public')
   commonMainImplementation project(':storage:public')
   commonMainImplementation project(':tabs:public')
   commonMainImplementation project(':templates:public')

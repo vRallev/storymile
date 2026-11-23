@@ -27,6 +27,7 @@ flowchart TD
   LibrarySavedPresenter["LibrarySavedPresenterImpl\nSaved backstack"]
   FollowedShows["Followed shows list"]
   PlaybackPresenter["PlaybackPresenterImpl\ncollapsed and expanded playback"]
+  SettingsPresenter["SettingsPresenterImpl"]
 
   TemplateProvider -->|launches| AppTemplatePresenter
   AppTemplatePresenter --> AppRootPresenter
@@ -54,6 +55,7 @@ flowchart TD
   LibraryPresenter -->|pushed entry| EpisodeDetailsPresenter
   TabsPresenter -->|Downloads| DownloadsPresenter
   UserPresenter --> PlaybackPresenter
+  UserPresenter -->|profile icon| SettingsPresenter
 ```
 
 ## Composition
@@ -115,6 +117,10 @@ provides the empty Downloads screen, rendered by
 [DownloadsRenderer](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsRenderer.kt).
 The user presenter places these models in the content, navigation, and playback slots of
 [AppTemplate](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/AppTemplate.kt).
+For guests, the profile icon opens
+[SettingsPresenterImpl](../settings/impl/src/commonMain/kotlin/software/ralf/storymile/settings/SettingsPresenterImpl.kt)
+in the content backstack. Back restores the previous screen. The navigation and playback slots stay
+available.
 The playback presenter supplies its slots when the user-scoped
 [player](../player/public/src/commonMain/kotlin/software/ralf/storymile/player/Player.kt)
 selects an episode from the Library Queue. Fake mode queues samples from three podcasts.
@@ -125,6 +131,9 @@ selects an episode from the Library Queue. Fake mode queues samples from three p
 places the template slots for the available window. It adapts navigation placement and playback
 presentation while keeping the shared presenter tree. Use the linked source files for model details
 and layout rules.
+
+[SettingsRenderer](../settings/impl/src/commonMain/kotlin/software/ralf/storymile/settings/SettingsRenderer.kt)
+shows the account and preferences in narrow panes. Wide panes show the selected section beside the list.
 
 [KmpApplication](../app-framework/impl/src/commonMain/kotlin/software/ralf/storymile/KmpApplication.kt)
 shows the [boat](../launch-animation/public/src/commonMain/kotlin/software/ralf/storymile/launchanimation/LaunchAnimation.kt)

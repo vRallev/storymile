@@ -70,6 +70,7 @@ class HomeContentRenderer : ComposeRenderer<HomeContentPresenter.Model>() {
           TabHeader(
             title = stringResource(Res.string.welcome_to_storymile),
             windowWidth = LocalScreenSize.current.width,
+            onOpenSettings = model.onOpenSettings,
             appBarTitleModifier =
               Modifier.sharedNavigationBounds(SharedNavigationElement.APP_BAR_TITLE),
             profileIconModifier =

@@ -7,6 +7,7 @@ import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
 import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.storymile.discovery.DiscoveryPresenter
+import software.ralf.storymile.user.LocalOpenSettings
 
 @Inject
 class HomeContentPresenter(private val discoveryPresenterFactory: DiscoveryPresenter.Factory) :
@@ -15,11 +16,15 @@ class HomeContentPresenter(private val discoveryPresenterFactory: DiscoveryPrese
   override fun present(input: Unit): Model {
     val backstack = LocalBackstackScope.requireNotNull()
     return Model(
+      onOpenSettings = LocalOpenSettings.current,
       onDiscover = { backstack.push(discoveryPresenterFactory.create()) },
       onSearch = { backstack.push(discoveryPresenterFactory.create(focusSearch = true)) },
     )
   }
 
-  /** Actions open catalog browsing or focus its search field. */
-  data class Model(val onDiscover: () -> Unit, val onSearch: () -> Unit) : BaseModel
+  data class Model(
+    val onDiscover: () -> Unit,
+    val onSearch: () -> Unit,
+    val onOpenSettings: (() -> Unit)?,
+  ) : BaseModel
 }
