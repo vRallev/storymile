@@ -259,10 +259,6 @@ internal class RssFeedParser {
   }
 
   private fun rejectDocumentTypes(xml: String) {
-    val documentType = "<!DOCTYPE"
-    if (documentType !in xml) {
-      return
-    }
     var offset = 0
     while (offset < xml.length) {
       val start = xml.indexOf('<', offset)
@@ -276,7 +272,7 @@ internal class RssFeedParser {
           xml.startsWith("<?", start) -> "?>"
           else -> null
         }
-      require(!xml.startsWith(documentType, start)) { "RSS document types are not supported." }
+      require(!xml.startsWith("<!DOCTYPE", start)) { "RSS document types are not supported." }
       offset =
         if (terminator == null) {
           start + 1

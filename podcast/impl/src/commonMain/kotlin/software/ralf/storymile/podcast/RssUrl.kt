@@ -6,7 +6,9 @@ import io.ktor.http.URLProtocol
 import io.ktor.http.takeFrom
 
 object RssUrl {
-  fun normalize(url: String): String? {
+  fun normalize(url: String): String? = normalize(url, parsed = null)
+
+  private fun normalize(url: String, parsed: URLBuilder?): String? {
     if (
       (!url.startsWith("http://", ignoreCase = true) &&
         !url.startsWith("https://", ignoreCase = true)) ||
@@ -16,7 +18,7 @@ object RssUrl {
       return null
     }
     return parse {
-      val builder = URLBuilder().takeFrom(url)
+      val builder = parsed ?: URLBuilder().takeFrom(url)
       if (
         builder.host.isBlank() ||
           builder.user != null ||
@@ -49,7 +51,7 @@ object RssUrl {
       }
       builder.fragment = ""
       builder.takeFrom(target)
-      normalize(builder.buildString())
+      normalize(url = builder.buildString(), parsed = builder)
     }
   }
 
