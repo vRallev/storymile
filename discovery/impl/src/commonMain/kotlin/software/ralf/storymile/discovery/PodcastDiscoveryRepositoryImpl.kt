@@ -59,7 +59,16 @@ class PodcastDiscoveryRepositoryImpl(
     lookups.updateAndGet { if (id in it) it else it + (id to LookupEntry(id)) }.getValue(id)
 
   private fun rememberPodcasts(podcasts: List<DiscoveredPodcast>) {
-    podcasts.forEach { lookupEntry(it.id).remember(it) }
+    val entries = lookups.updateAndGet { cached ->
+      if (podcasts.all { it.id in cached }) {
+        cached
+      } else {
+        cached.toMutableMap().apply {
+          podcasts.forEach { podcast -> getOrPut(podcast.id) { LookupEntry(podcast.id) } }
+        }
+      }
+    }
+    podcasts.forEach { entries.getValue(it.id).remember(it) }
   }
 
   private suspend fun load(request: suspend () -> HttpResponse<List<DiscoveredPodcast>>): State {
