@@ -8,19 +8,23 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.storymile.player.Player
+import software.ralf.storymile.podcast.QueuedEpisode
 import software.ralf.storymile.user.LocalOpenSettings
 import software.ralf.storymile.user.UserScope
 import software.ralf.storymile.util.HtmlDescription
+import software.ralf.storymile.util.mapStateFlow
 
 @Inject
 @ContributesBinding(UserScope::class)
 class PlaybackPresenterImpl(private val player: Player) : PlaybackPresenter {
   @Composable
   override fun present(input: Unit): Model {
-    val audio by player.state.collectAsState()
+    val audio by
+      remember(player) {
+          player.state.mapStateFlow { DisplayState(it) }
+        }
+        .collectAsState()
     val current = audio.episode ?: return Model(collapsed = null, expanded = null)
-    val duration = (audio.durationMillis / 1000).toInt()
-    val position = (audio.positionMillis / 1000).toInt()
     val description =
       remember(current.episode.description) {
         HtmlDescription.plainText(current.episode.description)
@@ -40,9 +44,9 @@ class PlaybackPresenterImpl(private val player: Player) : PlaybackPresenter {
       PlayerModel(
         title = current.episode.title,
         showTitle = current.podcastTitle,
-        positionSeconds = position,
-        durationSeconds = duration,
-        isPlaying = audio.playWhenReady || audio.isPlaying,
+        positionSeconds = audio.positionSeconds,
+        durationSeconds = audio.durationSeconds,
+        isPlaying = audio.isPlaying,
         speed = audio.speed,
         queue = upcoming,
         onPlayPause = { player.togglePlayback() },
@@ -58,6 +62,28 @@ class PlaybackPresenterImpl(private val player: Player) : PlaybackPresenter {
     return Model(
       collapsed = BarModel(model),
       expanded = ScreenModel(player = model, onOpenSettings = LocalOpenSettings.current),
+    )
+  }
+
+  private data class DisplayState(
+    val episode: QueuedEpisode?,
+    val upcomingEpisodes: List<QueuedEpisode>,
+    val positionSeconds: Int,
+    val durationSeconds: Int,
+    val isPlaying: Boolean,
+    val speed: Float,
+    val error: String?,
+  ) {
+    constructor(
+      state: Player.State,
+    ) : this(
+      episode = state.episode,
+      upcomingEpisodes = state.upcomingEpisodes,
+      positionSeconds = (state.positionMillis / 1_000).toInt(),
+      durationSeconds = (state.durationMillis / 1_000).toInt(),
+      isPlaying = state.playWhenReady || state.isPlaying,
+      speed = state.speed,
+      error = state.error,
     )
   }
 
