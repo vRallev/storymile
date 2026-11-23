@@ -79,7 +79,9 @@ class ShowContentPresenter(
     val episodes =
       EpisodesModel(
         episodes =
-          feed?.episodeRows(feedUrl = requireNotNull(feedUrl), onSelect = openEpisode).orEmpty(),
+          remember(feed, feedUrl, openEpisode) {
+            feed?.episodeRows(feedUrl = requireNotNull(feedUrl), onSelect = openEpisode).orEmpty()
+          },
         loading =
           if (feedUrl == null) lookup == CatalogState.Loading else feedState == FeedState.Loading,
         failed =
@@ -155,7 +157,7 @@ class ShowContentPresenter(
         ),
       episodes =
         EpisodesModel(
-          episodes = show.episodeRows(onSelect = openEpisode),
+          episodes = remember(show, openEpisode) { show.episodeRows(onSelect = openEpisode) },
           loading = false,
           failed = false,
           onRetry = {},

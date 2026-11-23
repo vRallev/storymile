@@ -4,7 +4,9 @@ import app.cash.turbine.ReceiveTurbine
 import assertk.assertThat
 import assertk.assertions.containsExactly
 import assertk.assertions.isEmpty
+import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
+import assertk.assertions.isSameInstanceAs
 import assertk.assertions.isTrue
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
@@ -20,6 +22,25 @@ import software.ralf.storymile.podcast.PodcastFeed
 import software.ralf.storymile.podcast.PodcastFeedRepository.State as FeedState
 
 class ShowFollowPresenterTest {
+  @Test
+  fun `follow updates reuse episode rows until the feed changes`() = runTest {
+    val feed = feed("one")
+    val feeds = TestPodcastFeeds().apply { update("one", FeedState.Success(feed)) }
+    presenter(savedShows = TestSavedShowRepository(), feeds = feeds).test(this) {
+      val initial = awaitModel { it.followEnabled }
+      initial.onToggleFollow()
+      val followed = awaitModel { it.followed }
+      assertThat(followed.episodes.episodes).isSameInstanceAs(initial.episodes.episodes)
+
+      val revised = feed.episodes.single().copy(title = "New title")
+      feeds.update("one", FeedState.Success(feed.copy(episodes = listOf(revised))))
+      val updated = awaitModel {
+        it.episodes.episodes.single().details.episode.title == revised.title
+      }
+      assertThat(updated.episodes.episodes.single().details.episode).isEqualTo(revised)
+    }
+  }
+
   @Test
   fun `following and unfollowing update the stored shows`() = runTest {
     val savedShows = TestSavedShowRepository()

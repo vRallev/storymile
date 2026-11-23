@@ -34,13 +34,17 @@ fun PodcastFeed.episodeRows(
   limit: Int = Int.MAX_VALUE,
   onSelect: (EpisodeDetails) -> Unit,
 ): List<EpisodesModel.Episode> =
-  episodes.take(limit).map { episode ->
-    val details =
-      EpisodeDetails(
-        feedUrl = feedUrl,
-        podcastTitle = title,
-        artworkUrl = episode.artworkUrl ?: artworkUrl,
-        episode = episode,
-      )
-    EpisodesModel.Episode(details = details, onClick = { onSelect(details) })
-  }
+  episodes
+    .asSequence()
+    .take(limit)
+    .map { episode ->
+      val details =
+        EpisodeDetails(
+          feedUrl = feedUrl,
+          podcastTitle = title,
+          artworkUrl = episode.artworkUrl ?: artworkUrl,
+          episode = episode,
+        )
+      EpisodesModel.Episode(details = details, onClick = { onSelect(details) })
+    }
+    .toList()
