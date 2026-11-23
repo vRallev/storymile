@@ -1,15 +1,7 @@
 package software.ralf.storymile.podcastshows
 
-import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.Easing
-import androidx.compose.animation.core.PathEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,11 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
@@ -38,6 +25,7 @@ import software.ralf.storymile.episodedetails.LocalEpisodeDetailsPane
 import software.ralf.storymile.templates.LocalAnimatedVisibilityScope
 import software.ralf.storymile.templates.LocalNavigationEntryIdentity
 import software.ralf.storymile.templates.NavigationEntryIdentity
+import software.ralf.storymile.templates.SharedAxisTransition
 
 internal class ShowBackstackRenderer : PresenterBackstackRenderer<ShowPresenterImpl.Model>() {
   @Composable
@@ -81,9 +69,7 @@ internal class ShowBackstackRenderer : PresenterBackstackRenderer<ShowPresenterI
           }
         }
       }
-    val distance = with(LocalDensity.current) { 30.dp.roundToPx() }
-    val forwardOffset =
-      if (LocalLayoutDirection.current == LayoutDirection.Ltr) distance else -distance
+    val forwardOffset = SharedAxisTransition.forwardOffset()
     NavDisplay(
       backStack = backstack,
       onBack = onBack,
@@ -111,12 +97,14 @@ internal class ShowBackstackRenderer : PresenterBackstackRenderer<ShowPresenterI
       },
       sceneStrategies = listOf(strategy),
       modifier = modifier.clipToBounds(),
-      transitionSpec = { if (wide) paneTransition() else sharedAxisTransition(forwardOffset) },
+      transitionSpec = {
+        if (wide) paneTransition() else SharedAxisTransition.transition(forwardOffset)
+      },
       popTransitionSpec = {
-        if (wide) paneTransition() else sharedAxisTransition(-forwardOffset)
+        if (wide) paneTransition() else SharedAxisTransition.transition(-forwardOffset)
       },
       predictivePopTransitionSpec = {
-        if (wide) paneTransition() else sharedAxisTransition(-forwardOffset)
+        if (wide) paneTransition() else SharedAxisTransition.transition(-forwardOffset)
       },
     )
   }
@@ -138,25 +126,8 @@ internal class ShowBackstackRenderer : PresenterBackstackRenderer<ShowPresenterI
 
   private fun paneTransition() = EnterTransition.None togetherWith ExitTransition.None
 
-  private fun sharedAxisTransition(offset: Int): ContentTransform {
-    return (slideInHorizontally(tween(450, easing = emphasized)) { offset } +
-      fadeIn(tween(450, easing = fadeInEasing))) togetherWith
-      (slideOutHorizontally(tween(450, easing = emphasized)) { -offset } +
-        fadeOut(tween(450, easing = fadeOutEasing)))
-  }
-
   private companion object {
     val LocalCatalog = compositionLocalOf<Catalog?> { null }
-    val emphasized =
-      PathEasing(
-        Path().apply {
-          moveTo(0f, 0f)
-          cubicTo(0.05f, 0f, 0.133333f, 0.06f, 0.166666f, 0.4f)
-          cubicTo(0.208333f, 0.82f, 0.25f, 1f, 1f, 1f)
-        },
-      )
-    val fadeInEasing = Easing { ((emphasized.transform(it) - 0.35f) / 0.65f).coerceIn(0f, 1f) }
-    val fadeOutEasing = Easing { (emphasized.transform(it) / 0.35f).coerceIn(0f, 1f) }
   }
 
   private data class Catalog(val model: ShowContentPresenter.Model, val state: LazyListState)
