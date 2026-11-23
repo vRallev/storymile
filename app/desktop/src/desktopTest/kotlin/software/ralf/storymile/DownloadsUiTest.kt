@@ -1,7 +1,6 @@
 package software.ralf.storymile
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.SemanticsMatcher
@@ -27,8 +26,6 @@ import assertk.assertions.isGreaterThan
 import assertk.assertions.isGreaterThanOrEqualTo
 import assertk.assertions.isLessThan
 import assertk.assertions.isLessThanOrEqualTo
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.storymile.tabs.TabsPresenter
@@ -49,12 +46,11 @@ class DownloadsUiTest {
           uiTestRule.runRobotTest(windowSize = size, darkTheme = darkTheme) {
             composeRobot<AppShellRobot> { selectTab(TabsPresenter.Tab.DOWNLOADS) }
             assertDownloadsFits()
-            val file =
-              File(
-                "build/reports/screenshots/downloads-${size.width.value.toInt()}-${if (darkTheme) "dark" else "light"}.png",
+            onNodeWithTag("app-shell")
+              .captureToImage()
+              .saveScreenshot(
+                "downloads-${size.width.value.toInt()}-${if (darkTheme) "dark" else "light"}",
               )
-            file.parentFile.mkdirs()
-            ImageIO.write(onNodeWithTag("app-shell").captureToImage().toAwtImage(), "png", file)
             runOnUiThread { onNodeWithTag("downloads-discover").performClick() }
             onNodeWithTag("tab-downloads").assertIsSelected()
           }

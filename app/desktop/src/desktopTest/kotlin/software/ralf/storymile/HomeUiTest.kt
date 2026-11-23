@@ -1,7 +1,6 @@
 package software.ralf.storymile
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
@@ -31,8 +30,6 @@ import assertk.assertions.isGreaterThan
 import assertk.assertions.isGreaterThanOrEqualTo
 import assertk.assertions.isLessThan
 import assertk.assertions.isLessThanOrEqualTo
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.storymile.discovery.DiscoveryRobot
@@ -198,9 +195,7 @@ class HomeUiTest {
     onNodeWithTag("home-illustration", useUnmergedTree = true).getUnclippedBoundsInRoot()
 
   private fun ComposeUiTest.saveScreenshot(name: String) {
-    val file = File("build/reports/screenshots/home-$name.png")
-    file.parentFile.mkdirs()
-    ImageIO.write(onRoot().captureToImage().toAwtImage(), "png", file)
+    onRoot().captureToImage().saveScreenshot("home-$name")
   }
 
   private fun DpSize.label(): String = "${width.value.toInt()}x${height.value.toInt()}"

@@ -1,6 +1,5 @@
 package software.ralf.storymile
 
-import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertHasClickAction
@@ -20,8 +19,6 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThanOrEqualTo
 import assertk.assertions.isLessThanOrEqualTo
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.storymile.tabs.TabsPresenter
@@ -97,9 +94,7 @@ class TabHeaderUiTest {
 
   private fun ComposeUiTest.saveScreenshot(name: String) {
     runOnUiThread { onNodeWithTag("tab-header").performMouseInput { moveTo(center) } }
-    val file = File("build/reports/screenshots/tab-header-$name.png")
-    file.parentFile.mkdirs()
-    ImageIO.write(onNodeWithTag("app-shell").captureToImage().toAwtImage(), "png", file)
+    onNodeWithTag("app-shell").captureToImage().saveScreenshot("tab-header-$name")
   }
 
   private data class HeaderSnapshot(

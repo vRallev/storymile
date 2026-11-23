@@ -1,7 +1,6 @@
 package software.ralf.storymile
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
@@ -18,8 +17,6 @@ import androidx.compose.ui.unit.dp
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isLessThanOrEqualTo
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.app.platform.robot.robot
@@ -206,9 +203,7 @@ class DiscoveryUiTest {
   }
 
   private fun ComposeUiTest.saveScreenshot(name: String) {
-    val file = File("build/reports/screenshots/discovery-$name.png")
-    file.parentFile.mkdirs()
-    ImageIO.write(onNodeWithTag("app-shell").captureToImage().toAwtImage(), "png", file)
+    onNodeWithTag("app-shell").captureToImage().saveScreenshot("discovery-$name")
   }
 
   private fun ComposeUiTest.headerBounds(backTag: String): List<DpRect> = runOnUiThread {

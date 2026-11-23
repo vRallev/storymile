@@ -2,7 +2,6 @@ package software.ralf.storymile
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertCountEquals
@@ -30,8 +29,6 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
 import assertk.assertions.isLessThan
 import assertk.assertions.isTrue
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.storymile.discovery.DiscoveryRobot
@@ -383,8 +380,6 @@ class LibraryUiTest {
 
   private fun ComposeUiTest.saveScreenshot(name: String) {
     runOnUiThread { onNodeWithTag("library-screen").performMouseInput { moveTo(center) } }
-    val file = File("build/reports/screenshots/library-$name.png")
-    file.parentFile.mkdirs()
-    ImageIO.write(onNodeWithTag("app-shell").captureToImage().toAwtImage(), "png", file)
+    onNodeWithTag("app-shell").captureToImage().saveScreenshot("library-$name")
   }
 }

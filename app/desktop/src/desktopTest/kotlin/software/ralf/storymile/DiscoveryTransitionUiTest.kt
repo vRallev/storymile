@@ -2,7 +2,6 @@ package software.ralf.storymile
 
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.test.ComposeUiTest
@@ -18,8 +17,6 @@ import assertk.assertThat
 import assertk.assertions.isGreaterThan
 import assertk.assertions.isLessThan
 import assertk.assertions.isStrictlyBetween
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.storymile.discovery.DiscoveryRobot
@@ -148,8 +145,6 @@ class DiscoveryTransitionUiTest {
         }
       }
     assertThat(ink, "$name artwork remains visible").isGreaterThan(100)
-    val file = File("build/reports/screenshots/discovery-transition-$name.png")
-    file.parentFile.mkdirs()
-    ImageIO.write(image.toAwtImage(), "png", file)
+    image.saveScreenshot("discovery-transition-$name")
   }
 }

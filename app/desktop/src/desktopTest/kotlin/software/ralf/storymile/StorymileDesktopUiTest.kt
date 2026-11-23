@@ -3,7 +3,6 @@ package software.ralf.storymile
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
@@ -39,8 +38,6 @@ import assertk.assertions.isGreaterThanOrEqualTo
 import assertk.assertions.isLessThan
 import assertk.assertions.isLessThanOrEqualTo
 import assertk.assertions.isNotEqualTo
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.math.roundToInt
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
@@ -636,9 +633,7 @@ class StorymileDesktopUiTest {
   }
 
   private fun ComposeUiTest.saveScreenshot(name: String) {
-    val file = File("build/reports/screenshots/empty-shell-$name.png")
-    file.parentFile.mkdirs()
     val appRoot = onNode(isRoot() and hasAnyDescendant(hasTestTag("tabs")))
-    ImageIO.write(appRoot.captureToImage().toAwtImage(), "png", file)
+    appRoot.captureToImage().saveScreenshot("empty-shell-$name")
   }
 }
