@@ -3,9 +3,7 @@ package software.ralf.storymile.database
 import androidx.room3.ConstructedBy
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
-import androidx.room3.migration.Migration
 import androidx.room3.withWriteTransaction
-import androidx.sqlite.execSQL
 import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.podcast.PodcastFeed
 import software.ralf.storymile.podcast.QueuedEpisode
@@ -19,7 +17,7 @@ import software.ralf.storymile.podcast.SavedEpisode
       QueuedEpisodeEntity::class,
       SavedEpisodeEntity::class,
     ],
-  version = 2,
+  version = 1,
 )
 @ConstructedBy(RoomPodcastDatabaseConstructor::class)
 abstract class RoomPodcastDatabase : RoomDatabase() {
@@ -229,13 +227,4 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
       durationMillis = duration?.inWholeMilliseconds,
       enclosure = enclosure,
     )
-
-  companion object {
-    internal val migration1To2 =
-      Migration(startVersion = 1, endVersion = 2) { connection ->
-        connection.execSQL(
-          "CREATE INDEX index_episodes_feedPosition_showId ON episodes (feedPosition, showId)",
-        )
-      }
-  }
 }

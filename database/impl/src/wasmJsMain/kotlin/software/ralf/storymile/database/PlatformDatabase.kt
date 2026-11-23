@@ -39,7 +39,6 @@ class PlatformDatabase : DatabasePlatform {
       }
     val databaseWorker = createDatabaseWorker().also { worker = it }
     return builder
-      .addMigrations(RoomPodcastDatabase.migration1To2)
       .setDriver(WebWorkerSQLiteDriver(databaseWorker))
       .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
       .setSingleConnectionPool()

@@ -6,10 +6,40 @@ import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import kotlin.test.Test
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 
 class EpisodeQueueDatabaseTest {
+  @Test
+  fun `removing the last queue entry clears stale metadata for its entire show`() = runTest {
+    val platform: DatabasePlatform = PlatformDatabase()
+    val room = platform.open(path = null, coroutineContext = Dispatchers.Default)
+    try {
+      val podcast = DatabaseFixture.podcast()
+      val queued =
+        DatabaseFixture.queuedEpisode(podcast = podcast, episode = podcast.episodes.first())
+      val stale =
+        DatabaseFixture.queuedEpisode(podcast = podcast, episode = podcast.episodes.last())
+      room.enqueue(queued = queued, position = null)
+      room.enqueue(queued = stale, position = null)
+      // Leave an episode row that no longer has a feed position, queue entry, or save.
+      val showId = checkNotNull(room.podcasts().findShowId(podcast.feedUrl))
+      room.queue().delete(showId = showId, sourceEpisodeId = stale.episode.id)
+
+      room.removeFromQueue(feedUrl = queued.feedUrl, episodeId = queued.episode.id)
+      val updated =
+        stale.copy(
+          podcastTitle = "New show title",
+          episode = stale.episode.copy(title = "New episode title"),
+        )
+      room.enqueue(queued = updated, position = null)
+      assertThat(room.queue().observe().first().single().toQueuedEpisode()).isEqualTo(updated)
+    } finally {
+      platform.close(room)
+    }
+  }
+
   @Test
   fun `the queue keeps insertion order independently of followed shows`() = runTest {
     DatabaseFixture().use { database ->
