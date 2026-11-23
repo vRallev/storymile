@@ -2,14 +2,11 @@ package software.ralf.storymile.discovery
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import software.ralf.storymile.util.HtmlDescription
 
-internal class ApplePodcastChartResponse {
-  private val json = Json { ignoreUnknownKeys = true }
-
+internal object ApplePodcastChartResponse {
   fun decode(body: String): List<DiscoveredPodcast> =
-    json.decodeFromString<Response>(body).feed.entry.map { it.toPodcast() }
+    applePodcastJson.decodeFromString<Response>(body).feed.entry.map { it.toPodcast() }
 
   @Serializable private data class Response(val feed: Feed)
 
@@ -43,8 +40,6 @@ internal class ApplePodcastChartResponse {
         description = HtmlDescription.plainText(summary?.label),
       )
     }
-
-    private fun String?.nonBlank(): String? = this?.takeIf { it.isNotBlank() }
   }
 
   @Serializable private data class Label(val label: String)

@@ -2,13 +2,10 @@ package software.ralf.storymile.discovery
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 
-internal class ApplePodcastSearchResponse {
-  private val json = Json { ignoreUnknownKeys = true }
-
+internal object ApplePodcastSearchResponse {
   fun decode(body: String): List<DiscoveredPodcast> =
-    json.decodeFromString<Response>(body).results.map { it.toPodcast() }
+    applePodcastJson.decodeFromString<Response>(body).results.map { it.toPodcast() }
 
   @Serializable private data class Response(val results: List<Podcast>)
 
@@ -37,7 +34,5 @@ internal class ApplePodcastSearchResponse {
         catalogUrl = catalogUrl.nonBlank(),
       )
     }
-
-    private fun String?.nonBlank(): String? = this?.takeIf { it.isNotBlank() }
   }
 }

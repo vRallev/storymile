@@ -21,7 +21,7 @@ class ApplePodcastSearchResponseTest {
       """
         .trimIndent()
 
-    assertThat(ApplePodcastSearchResponse().decode(body).map { it.artworkUrl })
+    assertThat(ApplePodcastSearchResponse.decode(body).map { it.artworkUrl })
       .isEqualTo(
         listOf(
           "https://is1-ssl.mzstatic.com/image/thumb/large.jpg/1200x1200bb.jpg",
@@ -44,7 +44,7 @@ class ApplePodcastSearchResponseTest {
       """
         .trimIndent()
 
-    assertThat(ApplePodcastSearchResponse().decode(body))
+    assertThat(ApplePodcastSearchResponse.decode(body))
       .isEqualTo(
         listOf(
           DiscoveredPodcast(
@@ -71,14 +71,14 @@ class ApplePodcastSearchResponseTest {
       """
         .trimIndent()
 
-    assertThat(ApplePodcastSearchResponse().decode(body))
+    assertThat(ApplePodcastSearchResponse.decode(body))
       .isEqualTo(
         listOf(
           DiscoveredPodcast("1", "Minimal", null, null, null, null),
           DiscoveredPodcast("2", "Fallback", null, null, "https://example.invalid/small.jpg", null),
         ),
       )
-    assertThat(ApplePodcastSearchResponse().decode("""{"results":[]}""")).isEqualTo(emptyList())
+    assertThat(ApplePodcastSearchResponse.decode("""{"results":[]}""")).isEqualTo(emptyList())
   }
 
   @Test
@@ -100,7 +100,7 @@ class ApplePodcastSearchResponseTest {
       )
 
     bodies.forEach { body ->
-      assertFailure { ApplePodcastSearchResponse().decode(body) }
+      assertFailure { ApplePodcastSearchResponse.decode(body) }
         .isInstanceOf<IllegalArgumentException>()
     }
   }

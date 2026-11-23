@@ -28,7 +28,7 @@ class ApplePodcastDiscoveryService(private val client: HttpClient, private val d
           "country" to (device.countryCode ?: "US"),
           "limit" to "200",
         ),
-      decode = { ApplePodcastSearchResponse().decode(it) },
+      decode = { ApplePodcastSearchResponse.decode(it) },
     )
   }
 
@@ -36,13 +36,13 @@ class ApplePodcastDiscoveryService(private val client: HttpClient, private val d
     client.get(
       url = "https://itunes.apple.com/lookup",
       parameters = mapOf("id" to id, "entity" to "podcast", "country" to "US"),
-      decode = { body -> ApplePodcastSearchResponse().decode(body).filter { it.id == id } },
+      decode = { body -> ApplePodcastSearchResponse.decode(body).filter { it.id == id } },
     )
 
   override suspend fun popular(): HttpResponse<List<DiscoveredPodcast>> =
     client.get(
       // The Marketing Tools chart feed has no CORS headers; this feed supports browser requests.
       url = "https://itunes.apple.com/us/rss/toppodcasts/limit=200/json",
-      decode = { ApplePodcastChartResponse().decode(it) },
+      decode = { ApplePodcastChartResponse.decode(it) },
     )
 }
