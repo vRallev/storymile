@@ -135,6 +135,24 @@ class EpisodeQueueDatabaseTest {
   }
 
   @Test
+  fun `a shared media URL does not transfer a queue entry to a new episode ID`() = runTest {
+    DatabaseFixture().use { database ->
+      val podcast = DatabaseFixture.podcast()
+      val first = podcast.episodes.first()
+      val second = first.copy(id = "second-id", title = "Another episode")
+      val queued = DatabaseFixture.queuedEpisode(podcast = podcast, episode = first)
+      database.insert(podcast.copy(episodes = listOf(first, second)))
+      queue.enqueue(queued)
+
+      val replacement = podcast.copy(episodes = listOf(first.copy(id = "new-id")))
+      database.insert(replacement)
+
+      assertThat(database.podcasts.first()).isEqualTo(listOf(replacement))
+      assertThat(queue.queuedEpisodes.first()).isEqualTo(listOf(queued))
+    }
+  }
+
+  @Test
   fun `a move uses both entry identities and shifts only the intervening episodes`() = runTest {
     DatabaseFixture().use {
       val podcast = DatabaseFixture.podcast()
