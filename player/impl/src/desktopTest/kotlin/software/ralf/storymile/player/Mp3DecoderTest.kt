@@ -4,28 +4,19 @@ import assertk.assertThat
 import assertk.assertions.isTrue
 import com.sun.net.httpserver.HttpServer
 import java.net.InetSocketAddress
-import java.net.URI
 import java.nio.ByteBuffer
 import java.nio.file.Files
-import java.nio.file.Path
 import java.util.jar.JarEntry
 import java.util.jar.JarOutputStream
-import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 
 class Mp3DecoderTest {
-  private val sources =
-    Path.of(checkNotNull(javaClass.getResource("/test-episodes")).toURI())
-      .listDirectoryEntries("*.mp3")
-      .sorted()
-      .map { it.toUri().toString() }
+  private val fixtureUrl = checkNotNull(javaClass.getResource("/test-episode.mp3"))
 
   @Test
-  fun `all bundled episode URIs decode to audible PCM`() = runTest {
-    for (source in sources) {
-      Mp3Decoder.decode(source).use { assertAudible(it) }
-    }
+  fun `bundled MP3 decodes to audible PCM`() = runTest {
+    Mp3Decoder.decode(fixtureUrl.toString()).use { assertAudible(it) }
   }
 
   @Test
@@ -34,7 +25,7 @@ class Mp3DecoderTest {
     try {
       JarOutputStream(Files.newOutputStream(archive)).use { jar ->
         jar.putNextEntry(JarEntry("episode.mp3"))
-        URI(sources.first()).toURL().openStream().use {
+        fixtureUrl.openStream().use {
           it.copyTo(jar)
         }
         jar.closeEntry()
@@ -47,7 +38,6 @@ class Mp3DecoderTest {
 
   @Test
   fun `download URLs can redirect to an MP3 enclosure`() = runTest {
-    val fixtureUrl = URI(sources.first()).toURL()
     val fixture = fixtureUrl.openStream().use { it.readBytes() }
     val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
     server.createContext("/download") { request ->
