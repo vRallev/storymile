@@ -10,7 +10,6 @@
       this.maxAttempts = Math.max(1,Math.floor(maxAttempts));
       this.jobs = new Map();
       this.active = 0;
-      this.sequence = 0;
       this.pumping = false;
       this.batchDepth = 0;
     }
@@ -25,7 +24,7 @@
         job.priority = priority;
         job.onState = onState;
       } else {
-        job = {img,src,priority,onState,state:'queued',order:this.sequence++,attempts:0,token:0,waiting:false};
+        job = {img,src,priority,onState,state:'queued',attempts:0,token:0,waiting:false};
         this.jobs.set(img,job);
       }
       this.notify(job);
@@ -92,9 +91,13 @@
       this.pumping = true;
       try {
         while (this.active < this.concurrency) {
-          const next = [...this.jobs.values()]
-            .filter(job => job.state === 'queued' && !job.waiting)
-            .sort((a,b) => b.priority - a.priority || a.order - b.order)[0];
+          let next;
+          // Map iteration keeps the oldest request first when priorities match.
+          for (const job of this.jobs.values()) {
+            if (job.state === 'queued' && !job.waiting && (!next || job.priority > next.priority)) {
+              next = job;
+            }
+          }
           if (!next) break;
           this.start(next);
         }
