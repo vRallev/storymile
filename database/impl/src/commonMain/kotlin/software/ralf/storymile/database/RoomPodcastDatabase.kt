@@ -166,9 +166,11 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
     val episodes = episodes()
     val stored = episodes.findEpisodes(showId)
     val storedBySourceId = stored.associateBy { it.sourceEpisodeId }
-    val storedByMediaUrl = stored.groupBy { it.enclosure.url }
-    val incomingSourceIds = feedEpisodes.mapTo(mutableSetOf()) { it.id }
-    val incomingMediaCounts = feedEpisodes.groupingBy { it.enclosure.url }.eachCount()
+    val storedByMediaUrl by lazy(LazyThreadSafetyMode.NONE) { stored.groupBy { it.enclosure.url } }
+    val incomingSourceIds by
+      lazy(LazyThreadSafetyMode.NONE) { feedEpisodes.mapTo(mutableSetOf()) { it.id } }
+    val incomingMediaCounts by
+      lazy(LazyThreadSafetyMode.NONE) { feedEpisodes.groupingBy { it.enclosure.url }.eachCount() }
     val missing =
       stored.mapNotNullTo(mutableSetOf()) { if (it.feedPosition != null) it.id else null }
     val added = mutableListOf<EpisodeEntity>()
