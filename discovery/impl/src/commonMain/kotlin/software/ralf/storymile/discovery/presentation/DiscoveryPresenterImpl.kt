@@ -57,8 +57,10 @@ class DiscoveryPresenterImpl(
         (state as? CatalogState.Ready)
           ?.podcasts
           .orEmpty()
+          .asSequence()
           .distinctBy { it.feedUrl?.trim()?.takeIf { url -> url.isNotEmpty() } ?: it.id }
           .take(2)
+          .toList()
       } else {
         emptyList()
       }

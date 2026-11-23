@@ -321,10 +321,13 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
         )
       }
     }
+    val remaining = podcasts.subList(fromIndex = minOf(2, podcasts.size), toIndex = podcasts.size)
+    val rowSize = if (featured) 2 else 1
     items(
-      podcasts.drop(2).chunked(if (featured) 2 else 1),
-      key = { "${if (featured) "featured" else "results"}-${it.first().id}" },
-    ) { remaining ->
+      count = (remaining.size + rowSize - 1) / rowSize,
+      key = { row -> "${if (featured) "featured" else "results"}-${remaining[row * rowSize].id}" },
+    ) { row ->
+      val start = row * rowSize
       val resultModifier =
         if (wide && showEpisodes) {
           Modifier.fadeItem(this).fillMaxWidth(0.52f)
@@ -332,7 +335,12 @@ class DiscoveryRenderer : ComposeRenderer<DiscoveryPresenterImpl.Model>() {
           Modifier.fadeItem(this).fillMaxWidth()
         }
       Column(resultModifier.padding(horizontal = if (edgeToEdgeEpisodes) 16.dp else 0.dp)) {
-        FirstPodcasts(remaining, featured, model)
+        FirstPodcasts(
+          podcasts =
+            remaining.subList(fromIndex = start, toIndex = minOf(start + rowSize, remaining.size)),
+          featured = featured,
+          model = model,
+        )
       }
     }
   }
