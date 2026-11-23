@@ -7,9 +7,6 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +17,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.ByteString.Companion.encodeUtf8
 import okio.Path
+import software.ralf.storymile.util.runChildOperation
 
 /**
  * Scope-owned implementation used by [Storage.Factory].
@@ -32,14 +30,9 @@ import okio.Path
  * files use separate roots. One mutex serializes file operations across handles and both areas, so
  * an earlier write cannot finish after a directory is cleared.
  *
- * Named DataStores are cached. Their guards route updates and collection through the owned
- * [coroutineScope], so retained handles stop working after exit. Each operation preserves the
- * caller's context except its [Job], which keeps DataStore's transaction context intact. Caller
- * cancellation cancels that operation.
- *
- * Child coroutines return [Result] so failures reach the caller without canceling the injected
- * scope's regular [Job]. The caller cancels the scope to stop actors and operations while
- * preserving saved data.
+ * Named DataStores are cached. Operations retain the caller's transaction context. Canceling the
+ * caller or [coroutineScope] cancels the operation. Failures reach the caller. Scope cancellation
+ * preserves saved data.
  */
 class DefaultStorage(
   namespace: String,
@@ -54,7 +47,10 @@ class DefaultStorage(
 
   private val encodedNamespace = namespace.encodeUtf8().hex()
   private val previousOwners =
-    platform.claimNamespace(encodedNamespace, coroutineScope.coroutineContext.job)
+    platform.namespaceOwners.claim(
+      key = encodedNamespace,
+      owner = coroutineScope.coroutineContext.job,
+    )
   private val filesMutex = Mutex()
   private val stores = MutableStateFlow<Map<String, DataStore<Preferences>>>(emptyMap())
 
@@ -81,24 +77,9 @@ class DefaultStorage(
     return platform.databasePath(namespace = encodedNamespace, name = name.encodeUtf8().hex())
   }
 
-  private suspend fun <T> operation(block: suspend () -> T): T {
-    val callerContext = currentCoroutineContext()
-    // The operation belongs to storage, so an already canceled caller must be checked separately.
-    callerContext.ensureActive()
-    val operation =
-      coroutineScope.async(callerContext.minusKey(Job)) {
-        try {
-          previousOwners.forEach { it.join() }
-          Result.success(block())
-        } catch (exception: Throwable) {
-          Result.failure(exception)
-        }
-      }
-    return try {
-      operation.await().getOrThrow()
-    } finally {
-      operation.cancel()
-    }
+  private suspend fun <T> operation(block: suspend () -> T): T = coroutineScope.runChildOperation {
+    previousOwners.forEach { it.join() }
+    block()
   }
 
   private fun requireFileName(name: String) {
