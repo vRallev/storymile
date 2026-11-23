@@ -25,6 +25,7 @@ class PlatformDatabase : DatabasePlatform {
         }
       }
     return builder
+      .addMigrations(RoomPodcastDatabase.migration1To2)
       .setDriver(BundledSQLiteDriver())
       .setQueryCoroutineContext(coroutineContext)
       .build()

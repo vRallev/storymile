@@ -20,7 +20,8 @@ import software.ralf.storymile.podcast.PodcastEpisode
         onDelete = ForeignKey.CASCADE,
       ),
     ],
-  indices = [Index(value = ["showId", "sourceEpisodeId"])],
+  indices =
+    [Index(value = ["showId", "sourceEpisodeId"]), Index(value = ["feedPosition", "showId"])],
 )
 data class EpisodeEntity(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,

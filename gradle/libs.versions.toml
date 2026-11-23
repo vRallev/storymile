@@ -62,6 +62,7 @@ androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", versi
 androidx-room-compiler = { module = "androidx.room3:room3-compiler", version.ref = "androidx-room" }
 androidx-room-gradle-plugin = { module = "androidx.room3:room3-gradle-plugin", version.ref = "androidx-room" }
 androidx-room-runtime = { module = "androidx.room3:room3-runtime", version.ref = "androidx-room" }
+androidx-room-testing = { module = "androidx.room3:room3-testing", version.ref = "androidx-room" }
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "androidx-sqlite" }
 androidx-sqlite-web = { module = "androidx.sqlite:sqlite-web", version.ref = "androidx-sqlite" }
 androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-test-junit" }

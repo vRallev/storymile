@@ -3,7 +3,9 @@ package software.ralf.storymile.database
 import androidx.room3.ConstructedBy
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
+import androidx.room3.migration.Migration
 import androidx.room3.withWriteTransaction
+import androidx.sqlite.execSQL
 import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.podcast.PodcastFeed
 import software.ralf.storymile.podcast.QueuedEpisode
@@ -17,7 +19,7 @@ import software.ralf.storymile.podcast.SavedEpisode
       QueuedEpisodeEntity::class,
       SavedEpisodeEntity::class,
     ],
-  version = 1,
+  version = 2,
 )
 @ConstructedBy(RoomPodcastDatabaseConstructor::class)
 abstract class RoomPodcastDatabase : RoomDatabase() {
@@ -57,8 +59,7 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
     val showId = shows.findShowId(feedUrl) ?: return@withWriteTransaction
     shows.clearFollow(showId)
     episodes().clearFeedPositions(showId)
-    episodes().deleteUnretainedEpisodes(showId)
-    shows.deleteEmptyUnfollowedShow(showId)
+    pruneUnretained(showId)
   }
 
   internal suspend fun enqueue(queued: QueuedEpisode, position: Long?) = withWriteTransaction {
@@ -80,7 +81,7 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
         queue.findPosition(feedUrl = feedUrl, sourceEpisodeId = episodeId)
           ?: return@withWriteTransaction null
       queue.delete(showId = showId, sourceEpisodeId = episodeId)
-      pruneRemovedEpisode(showId = showId, sourceEpisodeId = episodeId)
+      pruneUnretained(showId)
       position
     }
 
@@ -121,7 +122,7 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
         saved.findId(showId = showId, sourceEpisodeId = episodeId)
           ?: return@withWriteTransaction null
       saved.delete(id)
-      pruneRemovedEpisode(showId = showId, sourceEpisodeId = episodeId)
+      pruneUnretained(showId)
       id
     }
 
@@ -205,8 +206,8 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
     }
   }
 
-  private suspend fun pruneRemovedEpisode(showId: Long, sourceEpisodeId: String) {
-    episodes().deleteUnretainedEpisode(showId = showId, sourceEpisodeId = sourceEpisodeId)
+  private suspend fun pruneUnretained(showId: Long) {
+    episodes().deleteUnretainedEpisodes(showId)
     podcasts().deleteEmptyUnfollowedShow(showId)
   }
 
@@ -228,4 +229,13 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
       durationMillis = duration?.inWholeMilliseconds,
       enclosure = enclosure,
     )
+
+  companion object {
+    internal val migration1To2 =
+      Migration(startVersion = 1, endVersion = 2) { connection ->
+        connection.execSQL(
+          "CREATE INDEX index_episodes_feedPosition_showId ON episodes (feedPosition, showId)",
+        )
+      }
+  }
 }
