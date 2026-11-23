@@ -2,11 +2,13 @@ package software.ralf.storymile.episodedetails
 
 import assertk.assertThat
 import assertk.assertions.containsExactly
+import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isTrue
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.presenter.backstack.nav3.FakePresenterBackstackScope
 import software.ralf.app.platform.presenter.backstack.nav3.withPresenterBackstackScope
@@ -114,6 +116,52 @@ class EpisodeDetailsPresenterImplTest {
         assertThat(checkNotNull(savedEpisodes.episodes.value)).containsExactly(otherFeedEpisode)
       }
     }
+
+  @Test
+  fun `unrelated queue changes preserve the current details model`() = runTest {
+    val queued =
+      QueuedEpisode(
+        feedUrl = details.feedUrl,
+        podcastTitle = details.podcastTitle,
+        artworkUrl = null,
+        episode = details.episode,
+      )
+    val queue = RecordingQueue().apply { load(listOf(queued)) }
+    var savedReads = 0
+    val saved =
+      SavedEpisode(
+        feedUrl = details.feedUrl,
+        podcastTitle = details.podcastTitle,
+        artworkUrl = null,
+        episode = details.episode,
+      )
+    val savedEpisodes =
+      FakeSavedEpisodes().apply {
+        load(
+          object : AbstractList<SavedEpisode>() {
+            override val size = 1
+
+            override fun get(index: Int): SavedEpisode {
+              require(index == 0)
+              savedReads++
+              return saved
+            }
+          },
+        )
+      }
+    val presenter =
+      EpisodeDetailsPresenterImpl(details = details, queue = queue, savedEpisodes = savedEpisodes)
+    presenter.withPresenterBackstackScope(FakePresenterBackstackScope()).test(this) {
+      assertThat(awaitItem().isQueued).isTrue()
+      val initialSavedReads = savedReads
+      queue.load(listOf(queued.copy(feedUrl = "another-feed"), queued))
+      runCurrent()
+      expectNoEvents()
+      queue.load(emptyList())
+      assertThat(awaitItem().isQueued).isFalse()
+      assertThat(savedReads).isEqualTo(initialSavedReads)
+    }
+  }
 
   private class RecordingQueue : QueueRepository {
     override val episodes: StateFlow<List<QueuedEpisode>?>

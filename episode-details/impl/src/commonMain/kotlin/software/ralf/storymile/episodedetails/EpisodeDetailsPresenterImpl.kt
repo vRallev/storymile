@@ -2,7 +2,10 @@ package software.ralf.storymile.episodedetails
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.structuralEqualityPolicy
+import kotlinx.coroutines.flow.StateFlow
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.backstack.nav3.LocalBackstackScope
 import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
@@ -20,23 +23,21 @@ class EpisodeDetailsPresenterImpl(
   @Composable
   override fun present(input: Unit): Model {
     val backstack = LocalBackstackScope.requireNotNull()
-    val queued by queue.episodes.collectAsState()
-    val queueEnabled = queued != null
-    val queuedEpisode = queued?.firstOrNull {
-      it.feedUrl == details.feedUrl && it.episode.id == details.episode.id
-    }
-    val saved by savedEpisodes.episodes.collectAsState()
-    val saveEnabled = saved != null
-    val savedEpisode = saved?.firstOrNull {
-      it.feedUrl == details.feedUrl && it.episode.id == details.episode.id
-    }
+    val queued =
+      queue.episodes.membership {
+        it.feedUrl == details.feedUrl && it.episode.id == details.episode.id
+      }
+    val saved =
+      savedEpisodes.episodes.membership {
+        it.feedUrl == details.feedUrl && it.episode.id == details.episode.id
+      }
     return Model(
       details = details,
       onPlayNow = {},
       onToggleQueue = {
         when {
-          !queueEnabled -> Unit
-          queuedEpisode != null -> queue.remove(queuedEpisode)
+          !queued.loaded -> Unit
+          queued.episode != null -> queue.remove(queued.episode)
           else ->
             queue.save(
               QueuedEpisode(
@@ -50,8 +51,8 @@ class EpisodeDetailsPresenterImpl(
       },
       onToggleSave = {
         when {
-          !saveEnabled -> Unit
-          savedEpisode != null -> savedEpisodes.remove(savedEpisode)
+          !saved.loaded -> Unit
+          saved.episode != null -> savedEpisodes.remove(saved.episode)
           else ->
             savedEpisodes.save(
               SavedEpisode(
@@ -67,12 +68,26 @@ class EpisodeDetailsPresenterImpl(
       onMore = {},
       onBack = { backstack.pop() },
       onOpenSettings = LocalOpenSettings.current,
-      isQueued = queuedEpisode != null,
-      queueEnabled = queueEnabled,
-      isSaved = savedEpisode != null,
-      saveEnabled = saveEnabled,
+      isQueued = queued.episode != null,
+      queueEnabled = queued.loaded,
+      isSaved = saved.episode != null,
+      saveEnabled = saved.loaded,
     )
   }
+
+  @Composable
+  private fun <T> StateFlow<List<T>?>.membership(matches: (T) -> Boolean): Membership<T> {
+    val episodes = collectAsState()
+    return remember(episodes, matches) {
+        derivedStateOf(structuralEqualityPolicy()) {
+          val entries = episodes.value
+          Membership(loaded = entries != null, episode = entries?.firstOrNull(matches))
+        }
+      }
+      .value
+  }
+
+  private data class Membership<T>(val loaded: Boolean, val episode: T?)
 
   /** Renderer state retains the selected episode snapshot. */
   data class Model(
