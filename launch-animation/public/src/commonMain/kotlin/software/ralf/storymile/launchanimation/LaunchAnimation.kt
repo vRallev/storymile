@@ -65,45 +65,56 @@ fun LaunchAnimation(
     withFrameNanos {}
     currentOnFirstFrame()
   }
-  LaunchedEffect(progress, contentReady) {
-    if (progress.value < 0.32f) {
-      progress.animateTo(
-        targetValue = 0.32f,
-        animationSpec = tween(((0.32f - progress.value) * 1200).toInt(), easing = LinearEasing),
-      )
-    }
-    snapshotFlow { contentDrawn }.first { it }
-    // Cross a full frame so layout-driven state changes can recompose and draw under the cover.
-    withFrameNanos {}
-    withFrameNanos {}
-    if (progress.value < 1f) {
-      progress.animateTo(
-        targetValue = 1f,
-        animationSpec = tween(((1f - progress.value) * 1200).toInt(), easing = LinearEasing),
-      )
+  if (running) {
+    LaunchedEffect(progress, contentReady) {
+      if (progress.value < 0.32f) {
+        progress.animateTo(
+          targetValue = 0.32f,
+          animationSpec = tween(((0.32f - progress.value) * 1200).toInt(), easing = LinearEasing),
+        )
+      }
+      snapshotFlow { contentDrawn }.first { it }
+      // Cross a full frame so layout-driven state changes can recompose and draw under the cover.
+      withFrameNanos {}
+      withFrameNanos {}
+      if (progress.value < 1f) {
+        progress.animateTo(
+          targetValue = 1f,
+          animationSpec = tween(((1f - progress.value) * 1200).toInt(), easing = LinearEasing),
+        )
+      }
     }
   }
 
-  Box(
-    modifier
-      .onPreviewKeyEvent { running }
-      .drawWithContent {
+  val firstFrame =
+    if (firstFrameDrawn) {
+      Modifier
+    } else {
+      Modifier.drawWithContent {
         drawContent()
-        if (!firstFrameDrawn) {
-          firstFrameDrawn = true
+        firstFrameDrawn = true
+      }
+    }
+  val contentFrame =
+    if (running && contentReady && !contentDrawn) {
+      Modifier.drawWithContent {
+        drawContent()
+        if (size.width > 0 && size.height > 0) {
+          contentDrawn = true
         }
-      },
+      }
+    } else {
+      Modifier
+    }
+
+  Box(
+    modifier.then(if (running) Modifier.onPreviewKeyEvent { true } else Modifier).then(firstFrame),
   ) {
     Box(
       modifier =
         Modifier.fillMaxSize()
           .then(if (running) Modifier.clearAndSetSemantics {} else Modifier)
-          .drawWithContent {
-            drawContent()
-            if (contentReady && !contentDrawn && size.width > 0 && size.height > 0) {
-              contentDrawn = true
-            }
-          },
+          .then(contentFrame),
       propagateMinConstraints = true,
     ) {
       content()
