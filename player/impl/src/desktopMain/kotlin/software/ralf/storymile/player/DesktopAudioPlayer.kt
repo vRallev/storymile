@@ -4,6 +4,7 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.ForScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import java.nio.ByteBuffer
 import kotlin.math.min
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -244,7 +245,10 @@ internal constructor(
     private var inputFrame = 0
     private var writtenFrames = 0L
     private var inputEnded = false
-    private var pending = ByteArray(0)
+    private val frameBytes = audio.channels * Short.SIZE_BYTES
+    private val input = ByteBuffer.allocate(1_024 * frameBytes)
+    private val pending = ByteArray(2_048 * frameBytes)
+    private var pendingSize = 0
     private var pendingOffset = 0
 
     fun positionMillis(): Long {
@@ -262,7 +266,7 @@ internal constructor(
         (positionMillis * audio.sampleRate / 1_000).toInt().coerceAtMost(audio.frameCount)
       writtenFrames = 0
       inputEnded = false
-      pending = ByteArray(0)
+      pendingSize = 0
       pendingOffset = 0
       sonic =
         Sonic(audio.sampleRate, audio.channels).apply { setSpeed(this@DesktopAudioPlayer.speed) }
@@ -278,26 +282,26 @@ internal constructor(
             segmentOutputFrame = it.playedFrames
           }
       device.start()
-      val frameBytes = audio.channels * 2
-      repeat(8) {
+      for (attempt in 0 until 8) {
         val available = device.availableBytes / frameBytes * frameBytes
         if (available == 0) {
-          return@repeat
+          break
         }
-        if (pendingOffset == pending.size) {
-          pending = nextSamples()
+        if (pendingOffset == pendingSize) {
+          pendingSize = nextSamples()
           pendingOffset = 0
         }
-        val count = min(available, pending.size - pendingOffset)
-        if (count > 0) {
-          val written = device.write(pending, pendingOffset, count)
-          pendingOffset += written
-          writtenFrames += written / frameBytes
+        val count = min(available, pendingSize - pendingOffset)
+        if (count == 0) {
+          break
         }
+        val written = device.write(pending, pendingOffset, count)
+        pendingOffset += written
+        writtenFrames += written / frameBytes
       }
       val hasEnded =
         inputEnded &&
-          pendingOffset == pending.size &&
+          pendingOffset == pendingSize &&
           sonic.samplesAvailable() == 0 &&
           device.playedFrames - segmentOutputFrame >= writtenFrames
       if (hasEnded) {
@@ -314,22 +318,19 @@ internal constructor(
       }
     }
 
-    private fun nextSamples(): ByteArray {
+    private fun nextSamples(): Int {
       while (sonic.samplesAvailable() == 0 && !inputEnded) {
-        val endFrame = inputFrame + min(1_024, audio.frameCount - inputFrame)
-        sonic.writeShortToStream(
-          audio.readSamples(startFrame = inputFrame, endFrame = endFrame),
-          endFrame - inputFrame,
-        )
-        inputFrame = endFrame
+        val frames = min(input.capacity() / frameBytes, audio.frameCount - inputFrame)
+        input.clear().limit(frames * frameBytes)
+        audio.readFrames(startFrame = inputFrame, destination = input)
+        sonic.writeBytesToStream(input.array(), input.position())
+        inputFrame += frames
         if (inputFrame == audio.frameCount) {
           sonic.flushStream()
           inputEnded = true
         }
       }
-      val bytes = ByteArray(min(sonic.samplesAvailable(), 2_048) * audio.channels * 2)
-      sonic.readBytesFromStream(bytes, bytes.size)
-      return bytes
+      return sonic.readBytesFromStream(pending, pending.size)
     }
 
     fun close() {

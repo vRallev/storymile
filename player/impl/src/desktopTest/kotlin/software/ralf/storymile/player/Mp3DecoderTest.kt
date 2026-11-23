@@ -5,6 +5,7 @@ import assertk.assertions.isTrue
 import com.sun.net.httpserver.HttpServer
 import java.net.InetSocketAddress
 import java.net.URI
+import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.util.jar.JarEntry
 import java.util.jar.JarOutputStream
@@ -73,9 +74,8 @@ class Mp3DecoderTest {
   private fun assertAudible(audio: PcmAudio) {
     assertThat(audio.durationMillis > 1_000).isTrue()
     assertThat(audio.channels in 1..2).isTrue()
-    assertThat(
-        audio.readSamples(startFrame = 0, endFrame = audio.sampleRate).any { it != 0.toShort() },
-      )
-      .isTrue()
+    val samples = ByteBuffer.allocate(audio.sampleRate * audio.channels * Short.SIZE_BYTES)
+    audio.readFrames(startFrame = 0, destination = samples)
+    assertThat(samples.array().any { it != 0.toByte() }).isTrue()
   }
 }

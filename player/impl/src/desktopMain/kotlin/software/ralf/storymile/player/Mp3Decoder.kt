@@ -86,19 +86,13 @@ internal object Mp3Decoder {
     frameCount: Int,
     private val file: FileChannel,
   ) : PcmAudio(sampleRate = sampleRate, channels = channels, frameCount = frameCount) {
-    override fun readSamples(startFrame: Int, endFrame: Int): ShortArray {
-      val samples = ShortArray((endFrame - startFrame) * channels)
-      val bytes =
-        ByteBuffer.allocate(samples.size * Short.SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN)
-      val offset = startFrame.toLong() * channels * Short.SIZE_BYTES
-      while (bytes.hasRemaining()) {
-        check(file.read(bytes, offset + bytes.position()) > 0) {
-          "Could not read the decoded audio."
-        }
+    override fun readFrames(startFrame: Int, destination: ByteBuffer) {
+      var offset = startFrame.toLong() * channels * Short.SIZE_BYTES
+      while (destination.hasRemaining()) {
+        val count = file.read(destination, offset)
+        check(count > 0) { "Could not read the decoded audio." }
+        offset += count
       }
-      bytes.flip()
-      bytes.asShortBuffer().get(samples)
-      return samples
     }
 
     override fun close() {
