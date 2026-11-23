@@ -57,7 +57,8 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
     val showId = shows.findShowId(feedUrl) ?: return@withWriteTransaction
     shows.clearFollow(showId)
     episodes().clearFeedPositions(showId)
-    pruneUnretained(showId)
+    episodes().deleteUnretainedEpisodes(showId)
+    shows.deleteEmptyUnfollowedShow(showId)
   }
 
   internal suspend fun enqueue(queued: QueuedEpisode, position: Long?) = withWriteTransaction {
@@ -79,7 +80,7 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
         queue.findPosition(feedUrl = feedUrl, sourceEpisodeId = episodeId)
           ?: return@withWriteTransaction null
       queue.delete(showId = showId, sourceEpisodeId = episodeId)
-      pruneUnretained(showId)
+      pruneRemovedEpisode(showId = showId, sourceEpisodeId = episodeId)
       position
     }
 
@@ -120,7 +121,7 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
         saved.findId(showId = showId, sourceEpisodeId = episodeId)
           ?: return@withWriteTransaction null
       saved.delete(id)
-      pruneUnretained(showId)
+      pruneRemovedEpisode(showId = showId, sourceEpisodeId = episodeId)
       id
     }
 
@@ -204,8 +205,8 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
     }
   }
 
-  private suspend fun pruneUnretained(showId: Long) {
-    episodes().deleteUnretainedEpisodes(showId)
+  private suspend fun pruneRemovedEpisode(showId: Long, sourceEpisodeId: String) {
+    episodes().deleteUnretainedEpisode(showId = showId, sourceEpisodeId = sourceEpisodeId)
     podcasts().deleteEmptyUnfollowedShow(showId)
   }
 
