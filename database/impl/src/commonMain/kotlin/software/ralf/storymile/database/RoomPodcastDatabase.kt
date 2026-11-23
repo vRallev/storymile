@@ -31,10 +31,10 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
 
   internal suspend fun follow(podcast: PodcastFeed) = withWriteTransaction {
     val shows = podcasts()
-    val storedId = shows.findShowId(podcast.feedUrl)
+    val stored = shows.findShow(podcast.feedUrl)
     val show =
       ShowEntity(
-        id = storedId ?: 0,
+        id = stored?.id ?: 0,
         feedUrl = podcast.feedUrl,
         title = podcast.title,
         description = podcast.description,
@@ -44,7 +44,11 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
         isFollowed = true,
       )
     val showId =
-      if (storedId == null) shows.insertShow(show) else storedId.also { shows.updateShow(show) }
+      when {
+        stored == null -> shows.insertShow(show)
+        stored == show -> stored.id
+        else -> stored.id.also { shows.updateShow(show) }
+      }
     refreshEpisodes(showId = showId, feedEpisodes = podcast.episodes.distinctBy { it.id })
   }
 
@@ -163,23 +167,41 @@ abstract class RoomPodcastDatabase : RoomDatabase() {
     val stored = episodes.findEpisodes(showId)
     val storedBySourceId = stored.associateBy { it.sourceEpisodeId }
     val storedByMediaUrl = stored.groupBy { it.enclosure.url }
-    val incomingSourceIds = feedEpisodes.map { it.id }.toSet()
+    val incomingSourceIds = feedEpisodes.mapTo(mutableSetOf()) { it.id }
     val incomingMediaCounts = feedEpisodes.groupingBy { it.enclosure.url }.eachCount()
-    val refreshed = feedEpisodes.mapIndexed { position, episode ->
+    val missing =
+      stored.mapNotNullTo(mutableSetOf()) { if (it.feedPosition != null) it.id else null }
+    val added = mutableListOf<EpisodeEntity>()
+    val updated = mutableListOf<EpisodeEntity>()
+    feedEpisodes.forEachIndexed { position, episode ->
       val mediaUrl = episode.enclosure.url
       val match =
         storedBySourceId[episode.id]
           ?: storedByMediaUrl[mediaUrl]?.singleOrNull()?.takeIf {
             it.sourceEpisodeId !in incomingSourceIds && incomingMediaCounts[mediaUrl] == 1
           }
-      episode.toEntity(id = match?.id ?: 0, showId = showId, feedPosition = position)
+      val row = episode.toEntity(id = match?.id ?: 0, showId = showId, feedPosition = position)
+      if (match == null) {
+        added += row
+      } else {
+        missing.remove(match.id)
+        if (row != match) {
+          updated += row
+        }
+      }
     }
 
-    episodes.clearFeedPositions(showId)
-    val (updated, added) = refreshed.partition { it.id != 0L }
-    episodes.updateEpisodes(updated)
-    episodes.insertEpisodes(added)
-    episodes.deleteUnretainedEpisodes(showId)
+    if (updated.isNotEmpty()) {
+      episodes.updateEpisodes(updated)
+    }
+    if (added.isNotEmpty()) {
+      episodes.insertEpisodes(added)
+    }
+    if (missing.isNotEmpty()) {
+      // Stay within SQLite's bind parameter limit on every platform.
+      missing.chunked(999).forEach { episodes.clearFeedPositions(it) }
+      episodes.deleteUnretainedEpisodes(showId)
+    }
   }
 
   private suspend fun pruneUnretained(showId: Long) {
