@@ -19,6 +19,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -86,35 +87,22 @@ fun LaunchAnimation(
     }
   }
 
-  val firstFrame =
-    if (firstFrameDrawn) {
-      Modifier
-    } else {
-      Modifier.drawWithContent {
-        drawContent()
-        firstFrameDrawn = true
-      }
-    }
-  val contentFrame =
-    if (running && contentReady && !contentDrawn) {
-      Modifier.drawWithContent {
-        drawContent()
-        if (size.width > 0 && size.height > 0) {
-          contentDrawn = true
-        }
-      }
-    } else {
-      Modifier
-    }
-
   Box(
-    modifier.then(if (running) Modifier.onPreviewKeyEvent { true } else Modifier).then(firstFrame),
+    modifier.then(if (running) Modifier.onPreviewKeyEvent { true } else Modifier).afterDrawIf(
+      !firstFrameDrawn,
+    ) {
+      firstFrameDrawn = true
+    },
   ) {
     Box(
       modifier =
         Modifier.fillMaxSize()
           .then(if (running) Modifier.clearAndSetSemantics {} else Modifier)
-          .then(contentFrame),
+          .afterDrawIf(running && contentReady && !contentDrawn) {
+            if (!size.isEmpty()) {
+              contentDrawn = true
+            }
+          },
       propagateMinConstraints = true,
     ) {
       content()
@@ -149,5 +137,15 @@ fun LaunchAnimation(
         with(drawing) { draw(progress.value) }
       }
     }
+  }
+}
+
+private fun Modifier.afterDrawIf(enabled: Boolean, action: DrawScope.() -> Unit): Modifier {
+  if (!enabled) {
+    return this
+  }
+  return drawWithContent {
+    drawContent()
+    action()
   }
 }
