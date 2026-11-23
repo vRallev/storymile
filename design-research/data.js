@@ -129,40 +129,40 @@ window.STORYMILE_DESIGN = {
       "thumbnail": "previews/android-phone-player-dark-small.webp"
     },
     {
-      "id": "android-phone-profile-light",
-      "title": "Profile",
+      "id": "android-phone-account-details-light",
+      "title": "Account details",
       "device": "phone-portrait",
       "platform": "android",
       "theme": "light",
-      "file": "screens/android-phone-profile-light.png",
+      "file": "screens/android-phone-account-details-light.png",
       "viewport": [
         412,
         916
       ],
       "width": 841,
       "height": 1870,
-      "preview": "previews/android-phone-profile-light.webp",
-      "thumbnail": "previews/android-phone-profile-light-small.webp"
+      "preview": "previews/android-phone-account-details-light.webp",
+      "thumbnail": "previews/android-phone-account-details-light-small.webp"
     },
     {
-      "id": "android-phone-profile-dark",
-      "title": "Profile",
+      "id": "android-phone-account-details-dark",
+      "title": "Account details",
       "device": "phone-portrait",
       "platform": "android",
       "theme": "dark",
-      "file": "screens/android-phone-profile-dark.png",
+      "file": "screens/android-phone-account-details-dark.png",
       "viewport": [
         412,
         916
       ],
       "width": 841,
       "height": 1870,
-      "preview": "previews/android-phone-profile-dark.webp",
-      "thumbnail": "previews/android-phone-profile-dark-small.webp"
+      "preview": "previews/android-phone-account-details-dark.webp",
+      "thumbnail": "previews/android-phone-account-details-dark-small.webp"
     },
     {
       "id": "android-phone-settings-light",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "phone-portrait",
       "platform": "android",
       "theme": "light",
@@ -178,7 +178,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "android-phone-settings-dark",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "phone-portrait",
       "platform": "android",
       "theme": "dark",
@@ -322,7 +322,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "desktop-settings-light",
-      "title": "Settings · Desktop",
+      "title": "Settings · Signed in",
       "device": "desktop",
       "platform": "desktop",
       "theme": "light",
@@ -338,7 +338,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "desktop-settings-dark",
-      "title": "Settings · Desktop",
+      "title": "Settings · Signed in",
       "device": "desktop",
       "platform": "desktop",
       "theme": "dark",
@@ -513,36 +513,36 @@ window.STORYMILE_DESIGN = {
       "thumbnail": "previews/android-phone-chapters-dark-small.webp"
     },
     {
-      "id": "android-phone-guest-light",
-      "title": "Guest profile",
+      "id": "android-phone-settings-guest-light",
+      "title": "Settings · Guest",
       "device": "phone-portrait",
       "platform": "android",
       "theme": "light",
-      "file": "screens/android-phone-guest-light.png",
+      "file": "screens/android-phone-settings-guest-light.png",
       "viewport": [
         412,
         916
       ],
       "width": 841,
       "height": 1870,
-      "preview": "previews/android-phone-guest-light.webp",
-      "thumbnail": "previews/android-phone-guest-light-small.webp"
+      "preview": "previews/android-phone-settings-guest-light.webp",
+      "thumbnail": "previews/android-phone-settings-guest-light-small.webp"
     },
     {
-      "id": "android-phone-guest-dark",
-      "title": "Guest profile",
+      "id": "android-phone-settings-guest-dark",
+      "title": "Settings · Guest",
       "device": "phone-portrait",
       "platform": "android",
       "theme": "dark",
-      "file": "screens/android-phone-guest-dark.png",
+      "file": "screens/android-phone-settings-guest-dark.png",
       "viewport": [
         412,
         916
       ],
       "width": 841,
       "height": 1870,
-      "preview": "previews/android-phone-guest-dark.webp",
-      "thumbnail": "previews/android-phone-guest-dark-small.webp"
+      "preview": "previews/android-phone-settings-guest-dark.webp",
+      "thumbnail": "previews/android-phone-settings-guest-dark-small.webp"
     },
     {
       "id": "android-phone-signin-light",
@@ -610,7 +610,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "android-phone-playback-light",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "phone-portrait",
       "platform": "android",
       "theme": "light",
@@ -626,7 +626,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "android-phone-playback-dark",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "phone-portrait",
       "platform": "android",
       "theme": "dark",
@@ -721,24 +721,24 @@ window.STORYMILE_DESIGN = {
       "thumbnail": "previews/ios-phone-player-light-small.webp"
     },
     {
-      "id": "ios-phone-profile-light",
-      "title": "Profile",
+      "id": "ios-phone-settings-guest-light",
+      "title": "Settings · Guest",
       "device": "phone-portrait",
       "platform": "ios",
       "theme": "light",
-      "file": "screens/ios-phone-profile-light.png",
+      "file": "screens/ios-phone-settings-guest-light.png",
       "viewport": [
         393,
         852
       ],
       "width": 853,
       "height": 1844,
-      "preview": "previews/ios-phone-profile-light.webp",
-      "thumbnail": "previews/ios-phone-profile-light-small.webp"
+      "preview": "previews/ios-phone-settings-guest-light.webp",
+      "thumbnail": "previews/ios-phone-settings-guest-light-small.webp"
     },
     {
       "id": "ios-phone-settings-light",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "phone-portrait",
       "platform": "ios",
       "theme": "light",
@@ -1329,168 +1329,168 @@ window.STORYMILE_DESIGN = {
       "thumbnail": "previews/desktop-player-dark-small.webp"
     },
     {
-      "id": "android-phone-landscape-profile-light",
-      "title": "Profile",
+      "id": "android-phone-landscape-account-details-light",
+      "title": "Account details",
       "device": "phone-landscape",
       "platform": "android",
       "theme": "light",
-      "file": "screens/android-phone-landscape-profile-light.png",
+      "file": "screens/android-phone-landscape-account-details-light.png",
       "viewport": [
         916,
         412
       ],
       "width": 1870,
       "height": 841,
-      "preview": "previews/android-phone-landscape-profile-light.webp",
-      "thumbnail": "previews/android-phone-landscape-profile-light-small.webp"
+      "preview": "previews/android-phone-landscape-account-details-light.webp",
+      "thumbnail": "previews/android-phone-landscape-account-details-light-small.webp"
     },
     {
-      "id": "android-phone-landscape-profile-dark",
-      "title": "Profile",
+      "id": "android-phone-landscape-account-details-dark",
+      "title": "Account details",
       "device": "phone-landscape",
       "platform": "android",
       "theme": "dark",
-      "file": "screens/android-phone-landscape-profile-dark.png",
+      "file": "screens/android-phone-landscape-account-details-dark.png",
       "viewport": [
         916,
         412
       ],
       "width": 1870,
       "height": 841,
-      "preview": "previews/android-phone-landscape-profile-dark.webp",
-      "thumbnail": "previews/android-phone-landscape-profile-dark-small.webp"
+      "preview": "previews/android-phone-landscape-account-details-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-account-details-dark-small.webp"
     },
     {
-      "id": "android-tablet-portrait-profile-light",
-      "title": "Profile",
+      "id": "android-tablet-portrait-account-details-light",
+      "title": "Account details",
       "device": "tablet-portrait",
       "platform": "android",
       "theme": "light",
-      "file": "screens/android-tablet-portrait-profile-light.png",
+      "file": "screens/android-tablet-portrait-account-details-light.png",
       "viewport": [
         800,
         1280
       ],
       "width": 992,
       "height": 1586,
-      "preview": "previews/android-tablet-portrait-profile-light.webp",
-      "thumbnail": "previews/android-tablet-portrait-profile-light-small.webp"
+      "preview": "previews/android-tablet-portrait-account-details-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-account-details-light-small.webp"
     },
     {
-      "id": "android-tablet-portrait-profile-dark",
-      "title": "Profile",
+      "id": "android-tablet-portrait-account-details-dark",
+      "title": "Account details",
       "device": "tablet-portrait",
       "platform": "android",
       "theme": "dark",
-      "file": "screens/android-tablet-portrait-profile-dark.png",
+      "file": "screens/android-tablet-portrait-account-details-dark.png",
       "viewport": [
         800,
         1280
       ],
-      "width": 993,
-      "height": 1584,
-      "preview": "previews/android-tablet-portrait-profile-dark.webp",
-      "thumbnail": "previews/android-tablet-portrait-profile-dark-small.webp"
+      "width": 992,
+      "height": 1585,
+      "preview": "previews/android-tablet-portrait-account-details-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-account-details-dark-small.webp"
     },
     {
-      "id": "android-tablet-landscape-profile-light",
-      "title": "Profile",
+      "id": "android-tablet-landscape-account-details-light",
+      "title": "Account details",
       "device": "tablet-landscape",
       "platform": "android",
       "theme": "light",
-      "file": "screens/android-tablet-landscape-profile-light.png",
-      "viewport": [
-        1280,
-        800
-      ],
-      "width": 1586,
-      "height": 992,
-      "preview": "previews/android-tablet-landscape-profile-light.webp",
-      "thumbnail": "previews/android-tablet-landscape-profile-light-small.webp"
-    },
-    {
-      "id": "android-tablet-landscape-profile-dark",
-      "title": "Profile",
-      "device": "tablet-landscape",
-      "platform": "android",
-      "theme": "dark",
-      "file": "screens/android-tablet-landscape-profile-dark.png",
+      "file": "screens/android-tablet-landscape-account-details-light.png",
       "viewport": [
         1280,
         800
       ],
       "width": 1584,
       "height": 993,
-      "preview": "previews/android-tablet-landscape-profile-dark.webp",
-      "thumbnail": "previews/android-tablet-landscape-profile-dark-small.webp"
+      "preview": "previews/android-tablet-landscape-account-details-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-account-details-light-small.webp"
     },
     {
-      "id": "android-foldable-profile-light",
-      "title": "Profile",
+      "id": "android-tablet-landscape-account-details-dark",
+      "title": "Account details",
+      "device": "tablet-landscape",
+      "platform": "android",
+      "theme": "dark",
+      "file": "screens/android-tablet-landscape-account-details-dark.png",
+      "viewport": [
+        1280,
+        800
+      ],
+      "width": 1584,
+      "height": 993,
+      "preview": "previews/android-tablet-landscape-account-details-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-account-details-dark-small.webp"
+    },
+    {
+      "id": "android-foldable-account-details-light",
+      "title": "Account details",
       "device": "foldable",
       "platform": "android",
       "theme": "light",
-      "file": "screens/android-foldable-profile-light.png",
+      "file": "screens/android-foldable-account-details-light.png",
       "viewport": [
         841,
         701
       ],
-      "width": 1374,
+      "width": 1373,
       "height": 1145,
-      "preview": "previews/android-foldable-profile-light.webp",
-      "thumbnail": "previews/android-foldable-profile-light-small.webp"
+      "preview": "previews/android-foldable-account-details-light.webp",
+      "thumbnail": "previews/android-foldable-account-details-light-small.webp"
     },
     {
-      "id": "android-foldable-profile-dark",
-      "title": "Profile",
+      "id": "android-foldable-account-details-dark",
+      "title": "Account details",
       "device": "foldable",
       "platform": "android",
       "theme": "dark",
-      "file": "screens/android-foldable-profile-dark.png",
+      "file": "screens/android-foldable-account-details-dark.png",
       "viewport": [
         841,
         701
       ],
-      "width": 1374,
+      "width": 1373,
       "height": 1145,
-      "preview": "previews/android-foldable-profile-dark.webp",
-      "thumbnail": "previews/android-foldable-profile-dark-small.webp"
+      "preview": "previews/android-foldable-account-details-dark.webp",
+      "thumbnail": "previews/android-foldable-account-details-dark-small.webp"
     },
     {
-      "id": "desktop-profile-light",
-      "title": "Profile",
+      "id": "desktop-account-details-light",
+      "title": "Account details",
       "device": "desktop",
       "platform": "desktop",
       "theme": "light",
-      "file": "screens/desktop-profile-light.png",
+      "file": "screens/desktop-account-details-light.png",
       "viewport": [
         1600,
         900
       ],
       "width": 1672,
       "height": 941,
-      "preview": "previews/desktop-profile-light.webp",
-      "thumbnail": "previews/desktop-profile-light-small.webp"
+      "preview": "previews/desktop-account-details-light.webp",
+      "thumbnail": "previews/desktop-account-details-light-small.webp"
     },
     {
-      "id": "desktop-profile-dark",
-      "title": "Profile",
+      "id": "desktop-account-details-dark",
+      "title": "Account details",
       "device": "desktop",
       "platform": "desktop",
       "theme": "dark",
-      "file": "screens/desktop-profile-dark.png",
+      "file": "screens/desktop-account-details-dark.png",
       "viewport": [
         1600,
         900
       ],
       "width": 1672,
       "height": 941,
-      "preview": "previews/desktop-profile-dark.webp",
-      "thumbnail": "previews/desktop-profile-dark-small.webp"
+      "preview": "previews/desktop-account-details-dark.webp",
+      "thumbnail": "previews/desktop-account-details-dark-small.webp"
     },
     {
       "id": "android-phone-landscape-settings-light",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "phone-landscape",
       "platform": "android",
       "theme": "light",
@@ -1506,7 +1506,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "android-phone-landscape-settings-dark",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "phone-landscape",
       "platform": "android",
       "theme": "dark",
@@ -1522,7 +1522,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "android-tablet-portrait-settings-light",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "tablet-portrait",
       "platform": "android",
       "theme": "light",
@@ -1532,13 +1532,13 @@ window.STORYMILE_DESIGN = {
         1280
       ],
       "width": 992,
-      "height": 1586,
+      "height": 1585,
       "preview": "previews/android-tablet-portrait-settings-light.webp",
       "thumbnail": "previews/android-tablet-portrait-settings-light-small.webp"
     },
     {
       "id": "android-tablet-portrait-settings-dark",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "tablet-portrait",
       "platform": "android",
       "theme": "dark",
@@ -1554,7 +1554,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "android-tablet-landscape-settings-light",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "tablet-landscape",
       "platform": "android",
       "theme": "light",
@@ -1570,7 +1570,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "android-tablet-landscape-settings-dark",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "tablet-landscape",
       "platform": "android",
       "theme": "dark",
@@ -1586,7 +1586,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "android-foldable-settings-light",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "foldable",
       "platform": "android",
       "theme": "light",
@@ -1602,7 +1602,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "android-foldable-settings-dark",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "foldable",
       "platform": "android",
       "theme": "dark",
@@ -2353,164 +2353,164 @@ window.STORYMILE_DESIGN = {
       "thumbnail": "previews/desktop-chapters-dark-small.webp"
     },
     {
-      "id": "android-phone-landscape-guest-light",
-      "title": "Guest profile",
+      "id": "android-phone-landscape-settings-guest-light",
+      "title": "Settings · Guest",
       "device": "phone-landscape",
       "platform": "android",
       "theme": "light",
-      "file": "screens/android-phone-landscape-guest-light.png",
+      "file": "screens/android-phone-landscape-settings-guest-light.png",
       "viewport": [
         916,
         412
       ],
       "width": 1870,
       "height": 841,
-      "preview": "previews/android-phone-landscape-guest-light.webp",
-      "thumbnail": "previews/android-phone-landscape-guest-light-small.webp"
+      "preview": "previews/android-phone-landscape-settings-guest-light.webp",
+      "thumbnail": "previews/android-phone-landscape-settings-guest-light-small.webp"
     },
     {
-      "id": "android-phone-landscape-guest-dark",
-      "title": "Guest profile",
+      "id": "android-phone-landscape-settings-guest-dark",
+      "title": "Settings · Guest",
       "device": "phone-landscape",
       "platform": "android",
       "theme": "dark",
-      "file": "screens/android-phone-landscape-guest-dark.png",
+      "file": "screens/android-phone-landscape-settings-guest-dark.png",
       "viewport": [
         916,
         412
       ],
       "width": 1870,
       "height": 841,
-      "preview": "previews/android-phone-landscape-guest-dark.webp",
-      "thumbnail": "previews/android-phone-landscape-guest-dark-small.webp"
+      "preview": "previews/android-phone-landscape-settings-guest-dark.webp",
+      "thumbnail": "previews/android-phone-landscape-settings-guest-dark-small.webp"
     },
     {
-      "id": "android-tablet-portrait-guest-light",
-      "title": "Guest profile",
+      "id": "android-tablet-portrait-settings-guest-light",
+      "title": "Settings · Guest",
       "device": "tablet-portrait",
       "platform": "android",
       "theme": "light",
-      "file": "screens/android-tablet-portrait-guest-light.png",
+      "file": "screens/android-tablet-portrait-settings-guest-light.png",
       "viewport": [
         800,
         1280
       ],
       "width": 992,
       "height": 1586,
-      "preview": "previews/android-tablet-portrait-guest-light.webp",
-      "thumbnail": "previews/android-tablet-portrait-guest-light-small.webp"
+      "preview": "previews/android-tablet-portrait-settings-guest-light.webp",
+      "thumbnail": "previews/android-tablet-portrait-settings-guest-light-small.webp"
     },
     {
-      "id": "android-tablet-portrait-guest-dark",
-      "title": "Guest profile",
+      "id": "android-tablet-portrait-settings-guest-dark",
+      "title": "Settings · Guest",
       "device": "tablet-portrait",
       "platform": "android",
       "theme": "dark",
-      "file": "screens/android-tablet-portrait-guest-dark.png",
+      "file": "screens/android-tablet-portrait-settings-guest-dark.png",
       "viewport": [
         800,
         1280
       ],
       "width": 993,
       "height": 1584,
-      "preview": "previews/android-tablet-portrait-guest-dark.webp",
-      "thumbnail": "previews/android-tablet-portrait-guest-dark-small.webp"
+      "preview": "previews/android-tablet-portrait-settings-guest-dark.webp",
+      "thumbnail": "previews/android-tablet-portrait-settings-guest-dark-small.webp"
     },
     {
-      "id": "android-tablet-landscape-guest-light",
-      "title": "Guest profile",
+      "id": "android-tablet-landscape-settings-guest-light",
+      "title": "Settings · Guest",
       "device": "tablet-landscape",
       "platform": "android",
       "theme": "light",
-      "file": "screens/android-tablet-landscape-guest-light.png",
+      "file": "screens/android-tablet-landscape-settings-guest-light.png",
       "viewport": [
         1280,
         800
       ],
-      "width": 1585,
-      "height": 992,
-      "preview": "previews/android-tablet-landscape-guest-light.webp",
-      "thumbnail": "previews/android-tablet-landscape-guest-light-small.webp"
+      "width": 1584,
+      "height": 993,
+      "preview": "previews/android-tablet-landscape-settings-guest-light.webp",
+      "thumbnail": "previews/android-tablet-landscape-settings-guest-light-small.webp"
     },
     {
-      "id": "android-tablet-landscape-guest-dark",
-      "title": "Guest profile",
+      "id": "android-tablet-landscape-settings-guest-dark",
+      "title": "Settings · Guest",
       "device": "tablet-landscape",
       "platform": "android",
       "theme": "dark",
-      "file": "screens/android-tablet-landscape-guest-dark.png",
+      "file": "screens/android-tablet-landscape-settings-guest-dark.png",
       "viewport": [
         1280,
         800
       ],
-      "width": 1586,
-      "height": 992,
-      "preview": "previews/android-tablet-landscape-guest-dark.webp",
-      "thumbnail": "previews/android-tablet-landscape-guest-dark-small.webp"
+      "width": 1584,
+      "height": 993,
+      "preview": "previews/android-tablet-landscape-settings-guest-dark.webp",
+      "thumbnail": "previews/android-tablet-landscape-settings-guest-dark-small.webp"
     },
     {
-      "id": "android-foldable-guest-light",
-      "title": "Guest profile",
+      "id": "android-foldable-settings-guest-light",
+      "title": "Settings · Guest",
       "device": "foldable",
       "platform": "android",
       "theme": "light",
-      "file": "screens/android-foldable-guest-light.png",
+      "file": "screens/android-foldable-settings-guest-light.png",
       "viewport": [
         841,
         701
       ],
       "width": 1373,
       "height": 1145,
-      "preview": "previews/android-foldable-guest-light.webp",
-      "thumbnail": "previews/android-foldable-guest-light-small.webp"
+      "preview": "previews/android-foldable-settings-guest-light.webp",
+      "thumbnail": "previews/android-foldable-settings-guest-light-small.webp"
     },
     {
-      "id": "android-foldable-guest-dark",
-      "title": "Guest profile",
+      "id": "android-foldable-settings-guest-dark",
+      "title": "Settings · Guest",
       "device": "foldable",
       "platform": "android",
       "theme": "dark",
-      "file": "screens/android-foldable-guest-dark.png",
+      "file": "screens/android-foldable-settings-guest-dark.png",
       "viewport": [
         841,
         701
       ],
       "width": 1373,
       "height": 1145,
-      "preview": "previews/android-foldable-guest-dark.webp",
-      "thumbnail": "previews/android-foldable-guest-dark-small.webp"
+      "preview": "previews/android-foldable-settings-guest-dark.webp",
+      "thumbnail": "previews/android-foldable-settings-guest-dark-small.webp"
     },
     {
-      "id": "desktop-guest-light",
-      "title": "Guest profile",
+      "id": "desktop-settings-guest-light",
+      "title": "Settings · Guest",
       "device": "desktop",
       "platform": "desktop",
       "theme": "light",
-      "file": "screens/desktop-guest-light.png",
+      "file": "screens/desktop-settings-guest-light.png",
       "viewport": [
         1600,
         900
       ],
       "width": 1672,
       "height": 941,
-      "preview": "previews/desktop-guest-light.webp",
-      "thumbnail": "previews/desktop-guest-light-small.webp"
+      "preview": "previews/desktop-settings-guest-light.webp",
+      "thumbnail": "previews/desktop-settings-guest-light-small.webp"
     },
     {
-      "id": "desktop-guest-dark",
-      "title": "Guest profile",
+      "id": "desktop-settings-guest-dark",
+      "title": "Settings · Guest",
       "device": "desktop",
       "platform": "desktop",
       "theme": "dark",
-      "file": "screens/desktop-guest-dark.png",
+      "file": "screens/desktop-settings-guest-dark.png",
       "viewport": [
         1600,
         900
       ],
       "width": 1672,
       "height": 941,
-      "preview": "previews/desktop-guest-dark.webp",
-      "thumbnail": "previews/desktop-guest-dark-small.webp"
+      "preview": "previews/desktop-settings-guest-dark.webp",
+      "thumbnail": "previews/desktop-settings-guest-dark-small.webp"
     },
     {
       "id": "android-phone-landscape-signin-light",
@@ -2556,7 +2556,7 @@ window.STORYMILE_DESIGN = {
         1280
       ],
       "width": 992,
-      "height": 1586,
+      "height": 1585,
       "preview": "previews/android-tablet-portrait-signin-light.webp",
       "thumbnail": "previews/android-tablet-portrait-signin-light-small.webp"
     },
@@ -2587,7 +2587,7 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1586,
+      "width": 1585,
       "height": 992,
       "preview": "previews/android-tablet-landscape-signin-light.webp",
       "thumbnail": "previews/android-tablet-landscape-signin-light-small.webp"
@@ -2651,7 +2651,7 @@ window.STORYMILE_DESIGN = {
         1600,
         900
       ],
-      "width": 1672,
+      "width": 1671,
       "height": 941,
       "preview": "previews/desktop-signin-light.webp",
       "thumbnail": "previews/desktop-signin-light-small.webp"
@@ -2834,7 +2834,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "android-phone-landscape-playback-light",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "phone-landscape",
       "platform": "android",
       "theme": "light",
@@ -2843,14 +2843,14 @@ window.STORYMILE_DESIGN = {
         916,
         412
       ],
-      "width": 1869,
-      "height": 842,
+      "width": 1870,
+      "height": 841,
       "preview": "previews/android-phone-landscape-playback-light.webp",
       "thumbnail": "previews/android-phone-landscape-playback-light-small.webp"
     },
     {
       "id": "android-phone-landscape-playback-dark",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "phone-landscape",
       "platform": "android",
       "theme": "dark",
@@ -2859,14 +2859,14 @@ window.STORYMILE_DESIGN = {
         916,
         412
       ],
-      "width": 1869,
-      "height": 842,
+      "width": 1870,
+      "height": 841,
       "preview": "previews/android-phone-landscape-playback-dark.webp",
       "thumbnail": "previews/android-phone-landscape-playback-dark-small.webp"
     },
     {
       "id": "android-tablet-portrait-playback-light",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "tablet-portrait",
       "platform": "android",
       "theme": "light",
@@ -2876,13 +2876,13 @@ window.STORYMILE_DESIGN = {
         1280
       ],
       "width": 992,
-      "height": 1586,
+      "height": 1585,
       "preview": "previews/android-tablet-portrait-playback-light.webp",
       "thumbnail": "previews/android-tablet-portrait-playback-light-small.webp"
     },
     {
       "id": "android-tablet-portrait-playback-dark",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "tablet-portrait",
       "platform": "android",
       "theme": "dark",
@@ -2898,7 +2898,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "android-tablet-landscape-playback-light",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "tablet-landscape",
       "platform": "android",
       "theme": "light",
@@ -2907,14 +2907,14 @@ window.STORYMILE_DESIGN = {
         1280,
         800
       ],
-      "width": 1586,
+      "width": 1585,
       "height": 992,
       "preview": "previews/android-tablet-landscape-playback-light.webp",
       "thumbnail": "previews/android-tablet-landscape-playback-light-small.webp"
     },
     {
       "id": "android-tablet-landscape-playback-dark",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "tablet-landscape",
       "platform": "android",
       "theme": "dark",
@@ -2930,7 +2930,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "android-foldable-playback-light",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "foldable",
       "platform": "android",
       "theme": "light",
@@ -2946,7 +2946,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "android-foldable-playback-dark",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "foldable",
       "platform": "android",
       "theme": "dark",
@@ -2962,7 +2962,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "desktop-playback-light",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "desktop",
       "platform": "desktop",
       "theme": "light",
@@ -2978,7 +2978,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "desktop-playback-dark",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "desktop",
       "platform": "desktop",
       "theme": "dark",
@@ -3201,24 +3201,24 @@ window.STORYMILE_DESIGN = {
       "thumbnail": "previews/ios-phone-player-dark-small.webp"
     },
     {
-      "id": "ios-phone-profile-dark",
-      "title": "Profile",
+      "id": "ios-phone-settings-guest-dark",
+      "title": "Settings · Guest",
       "device": "phone-portrait",
       "platform": "ios",
       "theme": "dark",
-      "file": "screens/ios-phone-profile-dark.png",
+      "file": "screens/ios-phone-settings-guest-dark.png",
       "viewport": [
         393,
         852
       ],
       "width": 853,
       "height": 1844,
-      "preview": "previews/ios-phone-profile-dark.webp",
-      "thumbnail": "previews/ios-phone-profile-dark-small.webp"
+      "preview": "previews/ios-phone-settings-guest-dark.webp",
+      "thumbnail": "previews/ios-phone-settings-guest-dark-small.webp"
     },
     {
       "id": "ios-phone-settings-dark",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "phone-portrait",
       "platform": "ios",
       "theme": "dark",
@@ -3329,40 +3329,40 @@ window.STORYMILE_DESIGN = {
       "thumbnail": "previews/ios-tablet-landscape-player-dark-small.webp"
     },
     {
-      "id": "ios-tablet-landscape-profile-light",
-      "title": "Profile",
+      "id": "ios-tablet-landscape-settings-guest-light",
+      "title": "Settings · Guest",
       "device": "tablet-landscape",
       "platform": "ios",
       "theme": "light",
-      "file": "screens/ios-tablet-landscape-profile-light.png",
+      "file": "screens/ios-tablet-landscape-settings-guest-light.png",
       "viewport": [
         1366,
         1024
       ],
       "width": 1448,
       "height": 1086,
-      "preview": "previews/ios-tablet-landscape-profile-light.webp",
-      "thumbnail": "previews/ios-tablet-landscape-profile-light-small.webp"
+      "preview": "previews/ios-tablet-landscape-settings-guest-light.webp",
+      "thumbnail": "previews/ios-tablet-landscape-settings-guest-light-small.webp"
     },
     {
-      "id": "ios-tablet-landscape-profile-dark",
-      "title": "Profile",
+      "id": "ios-tablet-landscape-settings-guest-dark",
+      "title": "Settings · Guest",
       "device": "tablet-landscape",
       "platform": "ios",
       "theme": "dark",
-      "file": "screens/ios-tablet-landscape-profile-dark.png",
+      "file": "screens/ios-tablet-landscape-settings-guest-dark.png",
       "viewport": [
         1366,
         1024
       ],
       "width": 1448,
       "height": 1086,
-      "preview": "previews/ios-tablet-landscape-profile-dark.webp",
-      "thumbnail": "previews/ios-tablet-landscape-profile-dark-small.webp"
+      "preview": "previews/ios-tablet-landscape-settings-guest-dark.webp",
+      "thumbnail": "previews/ios-tablet-landscape-settings-guest-dark-small.webp"
     },
     {
       "id": "ios-tablet-landscape-settings-light",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "tablet-landscape",
       "platform": "ios",
       "theme": "light",
@@ -3378,7 +3378,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "ios-tablet-landscape-settings-dark",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "tablet-landscape",
       "platform": "ios",
       "theme": "dark",
@@ -5948,18 +5948,25 @@ window.STORYMILE_DESIGN = {
       "dark": "android-phone-player-dark"
     },
     {
-      "id": "android-phone-profile",
-      "title": "Profile",
-      "device": "phone-portrait",
-      "light": "android-phone-profile-light",
-      "dark": "android-phone-profile-dark"
-    },
-    {
       "id": "android-phone-settings",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "phone-portrait",
       "light": "android-phone-settings-light",
       "dark": "android-phone-settings-dark"
+    },
+    {
+      "id": "android-phone-settings-guest",
+      "title": "Settings · Guest",
+      "device": "phone-portrait",
+      "light": "android-phone-settings-guest-light",
+      "dark": "android-phone-settings-guest-dark"
+    },
+    {
+      "id": "android-phone-account-details",
+      "title": "Account details",
+      "device": "phone-portrait",
+      "light": "android-phone-account-details-light",
+      "dark": "android-phone-account-details-dark"
     },
     {
       "id": "android-phone-landscape-player",
@@ -5981,13 +5988,6 @@ window.STORYMILE_DESIGN = {
       "device": "foldable",
       "light": "android-foldable-discovery-light",
       "dark": "android-foldable-discovery-dark"
-    },
-    {
-      "id": "desktop-settings",
-      "title": "Settings",
-      "device": "desktop",
-      "light": "desktop-settings-light",
-      "dark": "desktop-settings-dark"
     },
     {
       "id": "android-phone-search",
@@ -6025,13 +6025,6 @@ window.STORYMILE_DESIGN = {
       "dark": "android-phone-chapters-dark"
     },
     {
-      "id": "android-phone-guest",
-      "title": "Guest profile",
-      "device": "phone-portrait",
-      "light": "android-phone-guest-light",
-      "dark": "android-phone-guest-dark"
-    },
-    {
       "id": "android-phone-signin",
       "title": "Sign in",
       "device": "phone-portrait",
@@ -6047,7 +6040,7 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "android-phone-playback",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "phone-portrait",
       "light": "android-phone-playback-light",
       "dark": "android-phone-playback-dark"
@@ -6158,67 +6151,109 @@ window.STORYMILE_DESIGN = {
       "dark": "desktop-player-dark"
     },
     {
-      "id": "android-phone-landscape-profile",
-      "title": "Profile",
-      "device": "phone-landscape",
-      "light": "android-phone-landscape-profile-light",
-      "dark": "android-phone-landscape-profile-dark"
-    },
-    {
-      "id": "android-tablet-portrait-profile",
-      "title": "Profile",
-      "device": "tablet-portrait",
-      "light": "android-tablet-portrait-profile-light",
-      "dark": "android-tablet-portrait-profile-dark"
-    },
-    {
-      "id": "android-tablet-landscape-profile",
-      "title": "Profile",
-      "device": "tablet-landscape",
-      "light": "android-tablet-landscape-profile-light",
-      "dark": "android-tablet-landscape-profile-dark"
-    },
-    {
-      "id": "android-foldable-profile",
-      "title": "Profile",
-      "device": "foldable",
-      "light": "android-foldable-profile-light",
-      "dark": "android-foldable-profile-dark"
-    },
-    {
-      "id": "desktop-profile",
-      "title": "Profile",
-      "device": "desktop",
-      "light": "desktop-profile-light",
-      "dark": "desktop-profile-dark"
-    },
-    {
       "id": "android-phone-landscape-settings",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "phone-landscape",
       "light": "android-phone-landscape-settings-light",
       "dark": "android-phone-landscape-settings-dark"
     },
     {
+      "id": "android-phone-landscape-settings-guest",
+      "title": "Settings · Guest",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-settings-guest-light",
+      "dark": "android-phone-landscape-settings-guest-dark"
+    },
+    {
+      "id": "android-phone-landscape-account-details",
+      "title": "Account details",
+      "device": "phone-landscape",
+      "light": "android-phone-landscape-account-details-light",
+      "dark": "android-phone-landscape-account-details-dark"
+    },
+    {
       "id": "android-tablet-portrait-settings",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "tablet-portrait",
       "light": "android-tablet-portrait-settings-light",
       "dark": "android-tablet-portrait-settings-dark"
     },
     {
+      "id": "android-tablet-portrait-settings-guest",
+      "title": "Settings · Guest",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-settings-guest-light",
+      "dark": "android-tablet-portrait-settings-guest-dark"
+    },
+    {
+      "id": "android-tablet-portrait-account-details",
+      "title": "Account details",
+      "device": "tablet-portrait",
+      "light": "android-tablet-portrait-account-details-light",
+      "dark": "android-tablet-portrait-account-details-dark"
+    },
+    {
       "id": "android-tablet-landscape-settings",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "tablet-landscape",
       "light": "android-tablet-landscape-settings-light",
       "dark": "android-tablet-landscape-settings-dark"
     },
     {
+      "id": "android-tablet-landscape-settings-guest",
+      "title": "Settings · Guest",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-settings-guest-light",
+      "dark": "android-tablet-landscape-settings-guest-dark"
+    },
+    {
+      "id": "android-tablet-landscape-account-details",
+      "title": "Account details",
+      "device": "tablet-landscape",
+      "light": "android-tablet-landscape-account-details-light",
+      "dark": "android-tablet-landscape-account-details-dark"
+    },
+    {
       "id": "android-foldable-settings",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "foldable",
       "light": "android-foldable-settings-light",
       "dark": "android-foldable-settings-dark"
+    },
+    {
+      "id": "android-foldable-settings-guest",
+      "title": "Settings · Guest",
+      "device": "foldable",
+      "light": "android-foldable-settings-guest-light",
+      "dark": "android-foldable-settings-guest-dark"
+    },
+    {
+      "id": "android-foldable-account-details",
+      "title": "Account details",
+      "device": "foldable",
+      "light": "android-foldable-account-details-light",
+      "dark": "android-foldable-account-details-dark"
+    },
+    {
+      "id": "desktop-settings",
+      "title": "Settings · Signed in",
+      "device": "desktop",
+      "light": "desktop-settings-light",
+      "dark": "desktop-settings-dark"
+    },
+    {
+      "id": "desktop-settings-guest",
+      "title": "Settings · Guest",
+      "device": "desktop",
+      "light": "desktop-settings-guest-light",
+      "dark": "desktop-settings-guest-dark"
+    },
+    {
+      "id": "desktop-account-details",
+      "title": "Account details",
+      "device": "desktop",
+      "light": "desktop-account-details-light",
+      "dark": "desktop-account-details-dark"
     },
     {
       "id": "android-phone-landscape-show",
@@ -6382,41 +6417,6 @@ window.STORYMILE_DESIGN = {
       "dark": "desktop-chapters-dark"
     },
     {
-      "id": "android-phone-landscape-guest",
-      "title": "Guest profile",
-      "device": "phone-landscape",
-      "light": "android-phone-landscape-guest-light",
-      "dark": "android-phone-landscape-guest-dark"
-    },
-    {
-      "id": "android-tablet-portrait-guest",
-      "title": "Guest profile",
-      "device": "tablet-portrait",
-      "light": "android-tablet-portrait-guest-light",
-      "dark": "android-tablet-portrait-guest-dark"
-    },
-    {
-      "id": "android-tablet-landscape-guest",
-      "title": "Guest profile",
-      "device": "tablet-landscape",
-      "light": "android-tablet-landscape-guest-light",
-      "dark": "android-tablet-landscape-guest-dark"
-    },
-    {
-      "id": "android-foldable-guest",
-      "title": "Guest profile",
-      "device": "foldable",
-      "light": "android-foldable-guest-light",
-      "dark": "android-foldable-guest-dark"
-    },
-    {
-      "id": "desktop-guest",
-      "title": "Guest profile",
-      "device": "desktop",
-      "light": "desktop-guest-light",
-      "dark": "desktop-guest-dark"
-    },
-    {
       "id": "android-phone-landscape-signin",
       "title": "Sign in",
       "device": "phone-landscape",
@@ -6488,35 +6488,35 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "android-phone-landscape-playback",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "phone-landscape",
       "light": "android-phone-landscape-playback-light",
       "dark": "android-phone-landscape-playback-dark"
     },
     {
       "id": "android-tablet-portrait-playback",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "tablet-portrait",
       "light": "android-tablet-portrait-playback-light",
       "dark": "android-tablet-portrait-playback-dark"
     },
     {
       "id": "android-tablet-landscape-playback",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "tablet-landscape",
       "light": "android-tablet-landscape-playback-light",
       "dark": "android-tablet-landscape-playback-dark"
     },
     {
       "id": "android-foldable-playback",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "foldable",
       "light": "android-foldable-playback-light",
       "dark": "android-foldable-playback-dark"
     },
     {
       "id": "desktop-playback",
-      "title": "Playback settings",
+      "title": "Default playback speed",
       "device": "desktop",
       "light": "desktop-playback-light",
       "dark": "desktop-playback-dark"
@@ -6610,28 +6610,11 @@ window.STORYMILE_DESIGN = {
       ]
     },
     {
-      "id": "profile",
-      "title": "Profile",
-      "android": "android-phone-profile-light",
-      "ios": "ios-phone-profile-light",
-      "note": "Android’s Up arrow becomes an iOS chevron; rows use native disclosure indicators and the inset floating tab bar.",
-      "sources": [
-        {
-          "label": "Android navigation",
-          "url": "https://developer.android.com/guide/navigation/principles"
-        },
-        {
-          "label": "iOS toolbars",
-          "url": "https://developer.apple.com/design/human-interface-guidelines/toolbars"
-        }
-      ]
-    },
-    {
       "id": "settings",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "android": "android-phone-settings-light",
       "ios": "ios-phone-settings-light",
-      "note": "Android switches show Material thumbs and checks; iOS switches use white thumbs, with SF Pro text and native chevrons.",
+      "note": "Account opens details on both phones. Android uses Material switches and iOS uses native toggles.",
       "sources": [
         {
           "label": "Android switches",
@@ -6640,6 +6623,23 @@ window.STORYMILE_DESIGN = {
         {
           "label": "iOS toggles",
           "url": "https://developer.apple.com/design/human-interface-guidelines/toggles"
+        }
+      ]
+    },
+    {
+      "id": "settings-guest",
+      "title": "Settings · Guest",
+      "android": "android-phone-settings-guest-light",
+      "ios": "ios-phone-settings-guest-light",
+      "note": "Both keep guest preferences available. Android uses a back arrow and iPhone uses a back chevron.",
+      "sources": [
+        {
+          "label": "Android navigation",
+          "url": "https://developer.android.com/guide/navigation/principles"
+        },
+        {
+          "label": "iOS toolbars",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/toolbars"
         }
       ]
     },
@@ -6683,28 +6683,28 @@ window.STORYMILE_DESIGN = {
       ]
     },
     {
-      "id": "tablet-profile",
-      "title": "Profile",
-      "android": "android-tablet-landscape-profile-light",
-      "ios": "ios-tablet-landscape-profile-light",
-      "note": "The iPad layout uses a sidebar, back chevron, and disclosure rows for the same account content.",
-      "sources": [
-        {
-          "label": "iPad sidebars",
-          "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars"
-        }
-      ]
-    },
-    {
       "id": "tablet-settings",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "android": "android-tablet-landscape-settings-light",
       "ios": "ios-tablet-landscape-settings-light",
-      "note": "iPad uses grouped settings and plain white switch thumbs; Android uses Material switches with checks.",
+      "note": "Android shows categories beside Playback. iPad groups preferences in two columns beside its sidebar.",
       "sources": [
         {
           "label": "iPad toggles",
           "url": "https://developer.apple.com/design/human-interface-guidelines/toggles"
+        }
+      ]
+    },
+    {
+      "id": "tablet-settings-guest",
+      "title": "Settings · Guest",
+      "android": "android-tablet-landscape-settings-guest-light",
+      "ios": "ios-tablet-landscape-settings-guest-light",
+      "note": "Both offer sign-in under Account. Android keeps the selected category alongside its controls. iPad keeps the preference groups together.",
+      "sources": [
+        {
+          "label": "iPad sidebars",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars"
         }
       ]
     },
@@ -6810,27 +6810,29 @@ window.STORYMILE_DESIGN = {
     },
     {
       "id": "account",
-      "title": "Account",
+      "title": "Sign in to sync",
       "screens": [
-        "android-phone-guest-light",
+        "android-phone-settings-guest-light",
         "android-phone-signin-light",
         "android-phone-check-email-light",
-        "android-phone-profile-light",
-        "android-tablet-landscape-guest-light",
+        "android-phone-settings-light",
+        "android-phone-account-details-light",
+        "android-tablet-landscape-settings-guest-light",
         "android-tablet-landscape-signin-light",
         "android-tablet-landscape-check-email-light",
-        "android-tablet-landscape-profile-light"
+        "android-tablet-landscape-settings-light",
+        "android-tablet-landscape-account-details-light"
       ]
     },
     {
       "id": "settings",
-      "title": "Settings",
+      "title": "Change playback settings as a guest",
       "screens": [
-        "android-phone-profile-light",
-        "android-phone-settings-light",
+        "android-phone-home-light",
+        "android-phone-settings-guest-light",
         "android-phone-playback-light",
-        "android-tablet-landscape-profile-light",
-        "android-tablet-landscape-settings-light",
+        "android-tablet-landscape-home-light",
+        "android-tablet-landscape-settings-guest-light",
         "android-tablet-landscape-playback-light"
       ]
     }
@@ -6858,18 +6860,18 @@ window.STORYMILE_DESIGN = {
       "dark": "ios-phone-player-dark"
     },
     {
-      "id": "ios-phone-profile",
-      "title": "Profile",
-      "device": "phone-portrait",
-      "light": "ios-phone-profile-light",
-      "dark": "ios-phone-profile-dark"
-    },
-    {
       "id": "ios-phone-settings",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "phone-portrait",
       "light": "ios-phone-settings-light",
       "dark": "ios-phone-settings-dark"
+    },
+    {
+      "id": "ios-phone-settings-guest",
+      "title": "Settings · Guest",
+      "device": "phone-portrait",
+      "light": "ios-phone-settings-guest-light",
+      "dark": "ios-phone-settings-guest-dark"
     },
     {
       "id": "ios-tablet-landscape-home",
@@ -6893,18 +6895,18 @@ window.STORYMILE_DESIGN = {
       "dark": "ios-tablet-landscape-player-dark"
     },
     {
-      "id": "ios-tablet-landscape-profile",
-      "title": "Profile",
-      "device": "tablet-landscape",
-      "light": "ios-tablet-landscape-profile-light",
-      "dark": "ios-tablet-landscape-profile-dark"
-    },
-    {
       "id": "ios-tablet-landscape-settings",
-      "title": "Settings",
+      "title": "Settings · Signed in",
       "device": "tablet-landscape",
       "light": "ios-tablet-landscape-settings-light",
       "dark": "ios-tablet-landscape-settings-dark"
+    },
+    {
+      "id": "ios-tablet-landscape-settings-guest",
+      "title": "Settings · Guest",
+      "device": "tablet-landscape",
+      "light": "ios-tablet-landscape-settings-guest-light",
+      "dark": "ios-tablet-landscape-settings-guest-dark"
     },
     {
       "id": "ios-phone-library-history-empty",

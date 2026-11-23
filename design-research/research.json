@@ -164,24 +164,9 @@
       ]
     },
     {
-      "id": "profile",
-      "title": "Profile",
-      "note": "Android’s Up arrow becomes an iOS chevron; rows use native disclosure indicators and the inset floating tab bar.",
-      "sources": [
-        {
-          "label": "Android navigation",
-          "url": "https://developer.android.com/guide/navigation/principles"
-        },
-        {
-          "label": "iOS toolbars",
-          "url": "https://developer.apple.com/design/human-interface-guidelines/toolbars"
-        }
-      ]
-    },
-    {
       "id": "settings",
-      "title": "Settings",
-      "note": "Android switches show Material thumbs and checks; iOS switches use white thumbs, with SF Pro text and native chevrons.",
+      "title": "Settings · Signed in",
+      "note": "Account opens details on both phones. Android uses Material switches and iOS uses native toggles.",
       "sources": [
         {
           "label": "Android switches",
@@ -190,6 +175,21 @@
         {
           "label": "iOS toggles",
           "url": "https://developer.apple.com/design/human-interface-guidelines/toggles"
+        }
+      ]
+    },
+    {
+      "id": "settings-guest",
+      "title": "Settings · Guest",
+      "note": "Both keep guest preferences available. Android uses a back arrow and iPhone uses a back chevron.",
+      "sources": [
+        {
+          "label": "Android navigation",
+          "url": "https://developer.android.com/guide/navigation/principles"
+        },
+        {
+          "label": "iOS toolbars",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/toolbars"
         }
       ]
     },
@@ -227,24 +227,24 @@
       ]
     },
     {
-      "id": "tablet-profile",
-      "title": "Profile",
-      "note": "The iPad layout uses a sidebar, back chevron, and disclosure rows for the same account content.",
-      "sources": [
-        {
-          "label": "iPad sidebars",
-          "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars"
-        }
-      ]
-    },
-    {
       "id": "tablet-settings",
-      "title": "Settings",
-      "note": "iPad uses grouped settings and plain white switch thumbs; Android uses Material switches with checks.",
+      "title": "Settings · Signed in",
+      "note": "Android shows categories beside Playback. iPad groups preferences in two columns beside its sidebar.",
       "sources": [
         {
           "label": "iPad toggles",
           "url": "https://developer.apple.com/design/human-interface-guidelines/toggles"
+        }
+      ]
+    },
+    {
+      "id": "tablet-settings-guest",
+      "title": "Settings · Guest",
+      "note": "Both offer sign-in under Account. Android keeps the selected category alongside its controls. iPad keeps the preference groups together.",
+      "sources": [
+        {
+          "label": "iPad sidebars",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars"
         }
       ]
     }
@@ -252,7 +252,7 @@
   "notes": [
     "Android is the default. Android and iOS comparisons cover phone portrait and tablet landscape in both themes.",
     "Viewports are layout targets. PNG dimensions come from the generated images; the gallery preserves their native proportions.",
-    "The supplied blue paper boat remains the brand mark. Profile opens from the avatar; primary destinations are Home, Library, and Downloads.",
+    "The blue paper boat is the brand mark. Home, Library, and Downloads are the primary destinations. The avatar opens Settings. Account comes first, with sign-in available to guests alongside their preferences.",
     "Phone detail screens become neighboring panes in larger windows. Playback and selection persist when the window changes.",
     "Library tabs are Queue, Shows, Saved, and History. The player shortcut opens the same queue. Finished episodes remain in History after they leave the queue.",
     "Library Queue uses an episode list with manual reordering. Drag handles change upcoming playback order. Playback controls stay in the compact bottom bar.",
