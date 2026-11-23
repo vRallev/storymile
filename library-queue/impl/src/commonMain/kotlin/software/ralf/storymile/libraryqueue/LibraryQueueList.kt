@@ -3,17 +3,14 @@ package software.ralf.storymile.libraryqueue
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -25,7 +22,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -42,17 +38,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextMotion
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.coil.PodcastArtwork
+import software.ralf.storymile.design.LibraryEpisodeRow
 import software.ralf.storymile.design.ListDivider
 import software.ralf.storymile.episodedetails.EpisodeDetails
 import software.ralf.storymile.episodedetails.EpisodeSharedElement
@@ -97,9 +89,7 @@ internal fun LibraryQueueList(
       contentPadding = PaddingValues(vertical = 16.dp),
     ) {
       itemsIndexed(preview, key = { _, details -> details.key }) { index, details ->
-        val isSelected = details.key == selectedEpisodeKey
         val isDragging = details.key == drag.key
-        val rowModifier = Modifier.testTag("library-queue-episode-$index")
         Column(
           Modifier.animateItem(
               fadeInSpec = null,
@@ -116,7 +106,7 @@ internal fun LibraryQueueList(
             details = details,
             index = index,
             compact = compact,
-            isSelected = isSelected,
+            selected = selectedEpisodeKey?.let { it == details.key },
             onSelect = { onSelect(details) },
             drag = drag,
             onDrop = {
@@ -131,12 +121,7 @@ internal fun LibraryQueueList(
                 { onReorder(details, target) }
               },
             onRemove = { onRemove(details) },
-            modifier =
-              if (selectedEpisodeKey != null) {
-                rowModifier.semantics { selected = isSelected }
-              } else {
-                rowModifier
-              },
+            modifier = Modifier.testTag("library-queue-episode-$index"),
           )
         }
       }
@@ -149,7 +134,7 @@ private fun QueueEpisodeRow(
   details: EpisodeDetails,
   index: Int,
   compact: Boolean,
-  isSelected: Boolean,
+  selected: Boolean?,
   onSelect: () -> Unit,
   drag: LibraryQueueDrag,
   onDrop: () -> Unit,
@@ -158,94 +143,60 @@ private fun QueueEpisodeRow(
   onRemove: () -> Unit,
   modifier: Modifier,
 ) {
-  val titleStyle = if (compact) AppTheme.typography.titleSmall else AppTheme.typography.titleMedium
-  val metadataStyle = if (compact) AppTheme.typography.bodySmall else AppTheme.typography.bodyMedium
-  val metadataColor =
-    if (isSelected) {
-      AppTheme.colorScheme.onSecondaryContainer
-    } else {
-      AppTheme.colorScheme.onSurfaceVariant
-    }
-  Surface(
+  LibraryEpisodeRow(
+    title = details.episode.title,
+    podcastTitle = details.podcastTitle,
+    duration = details.duration,
+    compact = compact,
+    selected = selected,
     onClick = onSelect,
-    modifier = modifier.fillMaxWidth(),
-    shape = AppTheme.shapes.medium,
-    color = if (isSelected) AppTheme.colorScheme.secondaryContainer else Color.Transparent,
-  ) {
-    Row(
-      modifier = Modifier.padding(8.dp),
-      horizontalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 12.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
+    modifier = modifier,
+    titleModifier =
+      Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Title)
+        .testTag("library-queue-title-$index"),
+    subtitleModifier =
+      Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Subtitle)
+        .testTag("library-queue-subtitle-$index"),
+    durationModifier = {
+      Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Duration)
+        .testTag("library-queue-duration-$index")
+    },
+    artwork = { size ->
       PodcastArtwork(
         artworkUrl = details.artworkUrl,
         modifier =
           Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Artwork)
             .testTag("library-queue-artwork-$index")
-            .size(if (compact) 64.dp else 88.dp),
+            .then(size),
       )
-      Column(
-        modifier = Modifier.weight(1f),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-      ) {
-        Text(
-          text = details.episode.title,
-          modifier =
-            Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Title)
-              .testTag("library-queue-title-$index"),
-          style = titleStyle.copy(textMotion = TextMotion.Animated),
-          fontWeight = FontWeight.SemiBold,
-          maxLines = 2,
-          overflow = TextOverflow.Ellipsis,
+    },
+  ) { metadataColor ->
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      QueueReorderHandle(
+        details = details,
+        index = index,
+        tint = metadataColor,
+        drag = drag,
+        onDrop = onDrop,
+        onMoveUp = onMoveUp,
+        onMoveDown = onMoveDown,
+      )
+      if (!compact) {
+        VerticalDivider(
+          modifier = Modifier.height(32.dp),
+          color = AppTheme.colorScheme.outlineVariant,
         )
-        Text(
-          text = details.podcastTitle,
-          modifier =
-            Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Subtitle)
-              .testTag("library-queue-subtitle-$index"),
-          style = metadataStyle.copy(textMotion = TextMotion.Animated),
-          color = metadataColor,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-        )
-        details.duration?.let { duration ->
-          Text(
-            text = duration,
-            modifier =
-              Modifier.episodeSharedElement(details.key, EpisodeSharedElement.Duration)
-                .testTag("library-queue-duration-$index"),
-            style = metadataStyle.copy(textMotion = TextMotion.Animated),
-            color = metadataColor,
-          )
-        }
       }
-      Row(verticalAlignment = Alignment.CenterVertically) {
-        QueueReorderHandle(
-          details = details,
-          index = index,
+      IconButton(
+        onClick = onRemove,
+        modifier = Modifier.testTag("library-queue-remove-$index"),
+      ) {
+        Icon(
+          imageVector = Icons.Filled.Close,
+          contentDescription =
+            stringResource(Res.string.library_queue_remove, details.episode.title),
           tint = metadataColor,
-          drag = drag,
-          onDrop = onDrop,
-          onMoveUp = onMoveUp,
-          onMoveDown = onMoveDown,
         )
-        if (!compact) {
-          VerticalDivider(
-            modifier = Modifier.height(32.dp),
-            color = AppTheme.colorScheme.outlineVariant,
-          )
-        }
-        IconButton(
-          onClick = onRemove,
-          modifier = Modifier.testTag("library-queue-remove-$index"),
-        ) {
-          Icon(
-            imageVector = Icons.Filled.Close,
-            contentDescription =
-              stringResource(Res.string.library_queue_remove, details.episode.title),
-            tint = metadataColor,
-          )
-        }
       }
     }
   }
