@@ -165,6 +165,29 @@ class LaunchAnimationTest {
     }
 
   @Test
+  fun `a recreated host reports its first frame even when the cover already finished`() =
+    runDesktopComposeUiTest {
+      mainClock.autoAdvance = false
+      val progress = Animatable(1f)
+      var firstFrames = 0
+      setContent {
+        Theme {
+          LaunchAnimation(
+            progress = progress,
+            contentReady = false,
+            onFirstFrame = { firstFrames++ },
+          ) {
+            Destination()
+          }
+        }
+      }
+      mainClock.advanceTimeBy(100)
+      onNodeWithTag("destination").assertIsDisplayed()
+      onNodeWithTag("launch-animation").assertDoesNotExist()
+      runOnIdle { assertThat(firstFrames).isEqualTo(1) }
+    }
+
+  @Test
   fun `touches cannot activate content until the reveal ends`() = runDesktopComposeUiTest {
     mainClock.autoAdvance = false
     var clicks = 0

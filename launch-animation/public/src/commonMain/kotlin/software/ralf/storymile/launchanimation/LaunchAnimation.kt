@@ -19,6 +19,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -65,42 +66,40 @@ fun LaunchAnimation(
     withFrameNanos {}
     currentOnFirstFrame()
   }
-  LaunchedEffect(progress, contentReady) {
-    if (progress.value < 0.32f) {
-      progress.animateTo(
-        targetValue = 0.32f,
-        animationSpec = tween(((0.32f - progress.value) * 1200).toInt(), easing = LinearEasing),
-      )
-    }
-    snapshotFlow { contentDrawn }.first { it }
-    // Cross a full frame so layout-driven state changes can recompose and draw under the cover.
-    withFrameNanos {}
-    withFrameNanos {}
-    if (progress.value < 1f) {
-      progress.animateTo(
-        targetValue = 1f,
-        animationSpec = tween(((1f - progress.value) * 1200).toInt(), easing = LinearEasing),
-      )
+  if (running) {
+    LaunchedEffect(progress, contentReady) {
+      if (progress.value < 0.32f) {
+        progress.animateTo(
+          targetValue = 0.32f,
+          animationSpec = tween(((0.32f - progress.value) * 1200).toInt(), easing = LinearEasing),
+        )
+      }
+      snapshotFlow { contentDrawn }.first { it }
+      // Cross a full frame so layout-driven state changes can recompose and draw under the cover.
+      withFrameNanos {}
+      withFrameNanos {}
+      if (progress.value < 1f) {
+        progress.animateTo(
+          targetValue = 1f,
+          animationSpec = tween(((1f - progress.value) * 1200).toInt(), easing = LinearEasing),
+        )
+      }
     }
   }
 
   Box(
-    modifier
-      .onPreviewKeyEvent { running }
-      .drawWithContent {
-        drawContent()
-        if (!firstFrameDrawn) {
-          firstFrameDrawn = true
-        }
-      },
+    modifier.then(if (running) Modifier.onPreviewKeyEvent { true } else Modifier).afterDrawIf(
+      !firstFrameDrawn,
+    ) {
+      firstFrameDrawn = true
+    },
   ) {
     Box(
       modifier =
         Modifier.fillMaxSize()
           .then(if (running) Modifier.clearAndSetSemantics {} else Modifier)
-          .drawWithContent {
-            drawContent()
-            if (contentReady && !contentDrawn && size.width > 0 && size.height > 0) {
+          .afterDrawIf(running && contentReady && !contentDrawn) {
+            if (!size.isEmpty()) {
               contentDrawn = true
             }
           },
@@ -138,5 +137,15 @@ fun LaunchAnimation(
         with(drawing) { draw(progress.value) }
       }
     }
+  }
+}
+
+private fun Modifier.afterDrawIf(enabled: Boolean, action: DrawScope.() -> Unit): Modifier {
+  if (!enabled) {
+    return this
+  }
+  return drawWithContent {
+    drawContent()
+    action()
   }
 }
