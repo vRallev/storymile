@@ -48,6 +48,8 @@ class HtmlDescriptionTest {
 
   @Test
   fun `plain text paragraphs and angle comparisons are preserved`() {
+    assertThat(HtmlDescription.plainText("  First\t line\u00a0here.\r\n \r\n\r\n Second.  "))
+      .isEqualTo("First line here.\n\nSecond.")
     assertThat(HtmlDescription.plainText("One < two & three\n\nAnother paragraph."))
       .isEqualTo("One < two & three\n\nAnother paragraph.")
     assertThat(HtmlDescription.plainText("2 < 3 and 5 > 4")).isEqualTo("2 < 3 and 5 > 4")
