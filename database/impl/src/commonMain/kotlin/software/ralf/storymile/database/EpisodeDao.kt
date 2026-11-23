@@ -24,6 +24,9 @@ interface EpisodeDao {
   )
   suspend fun clearFeedPositions(showId: Long)
 
+  @Query("UPDATE episodes SET feedPosition = NULL WHERE id IN (:ids)")
+  suspend fun clearFeedPositions(ids: List<Long>)
+
   @Query(
     """
     DELETE FROM episodes

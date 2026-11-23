@@ -73,6 +73,37 @@ class PodcastDatabaseTest {
   }
 
   @Test
+  fun `replacing a large feed keeps saved and queued episodes across the removed range`() =
+    runTest {
+      DatabaseFixture().use { database ->
+        val podcast = DatabaseFixture.podcast()
+        val template = podcast.episodes.first()
+        val episodes =
+          List(1_005) { index ->
+            template.copy(
+              id = "episode-$index",
+              enclosure = template.enclosure.copy(url = "https://media.test/$index.mp3"),
+            )
+          }
+        database.insert(podcast.copy(episodes = episodes))
+        val queued = DatabaseFixture.queuedEpisode(podcast = podcast, episode = episodes.first())
+        val savedEpisode =
+          DatabaseFixture.savedEpisode(podcast = podcast, episode = episodes.last())
+        queue.enqueue(queued)
+        saved.save(savedEpisode)
+
+        val refreshed =
+          podcast.copy(episodes = listOf(episodes[2], episodes[1].copy(title = "Updated")))
+        database.insert(refreshed)
+        database.insert(refreshed)
+
+        assertThat(database.podcasts.first()).isEqualTo(listOf(refreshed))
+        assertThat(queue.queuedEpisodes.first()).isEqualTo(listOf(queued))
+        assertThat(saved.savedEpisodes.first()).isEqualTo(listOf(savedEpisode))
+      }
+    }
+
+  @Test
   fun `memory databases are isolated and start empty after scope recreation`() = runTest {
     val podcast = DatabaseFixture.podcast()
     DatabaseFixture().use { first ->
