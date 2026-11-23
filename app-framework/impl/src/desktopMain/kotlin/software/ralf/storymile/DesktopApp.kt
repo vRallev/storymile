@@ -19,9 +19,7 @@ import software.ralf.storymile.theme.SkikoThemeEnvironment
 /** Owns the Desktop root scope and renders its shared template stream. */
 class DesktopApp(graph: (RootScopeProvider) -> AppGraph) : RootScopeProvider {
   private val kmpApplication = KmpApplication { graph(it) }
-  private val templateProvider = lazy {
-    rootScope.metroDependencyGraph<Graph>().templateProviderFactory.createTemplateProvider()
-  }
+  private val templateProvider = lazy { TemplateProvider.create(rootScope) }
 
   override val rootScope: Scope
     get() = kmpApplication.rootScope
@@ -68,8 +66,5 @@ class DesktopApp(graph: (RootScopeProvider) -> AppGraph) : RootScopeProvider {
   interface Graph {
     /** App actions available for Desktop shortcuts. */
     val shortcuts: AppShortcuts
-
-    /** Factory used to create the window's independently cancellable template stream. */
-    val templateProviderFactory: TemplateProvider.Factory
   }
 }

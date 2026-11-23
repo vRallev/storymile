@@ -46,7 +46,7 @@ class DesktopHeadlessTestRule {
         TestQueue.clear(application.rootScope)
         val graph = application.rootScope.metroDependencyGraph<Graph>()
         graph.screenSizeProvider.update(ScreenSize.from(windowSize.width, windowSize.height))
-        val templateProvider = graph.templateProviderInternalFactory.create(composePresenterScope())
+        val templateProvider = graph.templateProviderFactory.create(composePresenterScope())
         try {
           templateProvider.templates.test { block() }
         } finally {
@@ -65,6 +65,6 @@ class DesktopHeadlessTestRule {
     val screenSizeProvider: DefaultScreenSizeProvider
 
     /** Factory for creating the production template provider with a deterministic test scope. */
-    val templateProviderInternalFactory: TemplateProvider.InternalFactory
+    val templateProviderFactory: TemplateProvider.Factory
   }
 }

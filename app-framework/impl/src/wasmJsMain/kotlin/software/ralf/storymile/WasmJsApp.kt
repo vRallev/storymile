@@ -4,21 +4,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.ContributesTo
 import software.ralf.app.platform.renderer.ComposeRendererFactory
 import software.ralf.app.platform.renderer.renderCompose
 import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.Scope
-import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.theme.SkikoThemeEnvironment
 
 /** Owns the Wasm root scope and renders its shared template stream. */
 class WasmJsApp(graph: (RootScopeProvider) -> AppGraph) : RootScopeProvider {
   private val kmpApplication = KmpApplication { graph(it) }
-  private val templateProvider = lazy {
-    rootScope.metroDependencyGraph<Graph>().templateProviderFactory.createTemplateProvider()
-  }
+  private val templateProvider = lazy { TemplateProvider.create(rootScope) }
 
   override val rootScope: Scope
     get() = kmpApplication.rootScope
@@ -39,12 +34,5 @@ class WasmJsApp(graph: (RootScopeProvider) -> AppGraph) : RootScopeProvider {
       templateProvider.value.cancel()
     }
     kmpApplication.destroy()
-  }
-
-  /** Graph access needed by the Wasm runtime. */
-  @ContributesTo(AppScope::class)
-  interface Graph {
-    /** Factory used to create the browser's independently cancellable template stream. */
-    val templateProviderFactory: TemplateProvider.Factory
   }
 }

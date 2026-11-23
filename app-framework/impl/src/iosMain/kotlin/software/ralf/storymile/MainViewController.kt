@@ -8,19 +8,13 @@ import androidx.compose.ui.window.ComposeUIViewController
 import platform.UIKit.UIViewController
 import software.ralf.app.platform.renderer.ComposeRendererFactory
 import software.ralf.app.platform.renderer.renderCompose
-import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.theme.SkikoThemeEnvironment
 
 /** Called from Swift to create the Compose Multiplatform view controller. */
 @Suppress("unused")
 fun mainViewController(kmpApplication: KmpApplication): UIViewController = ComposeUIViewController {
   kmpApplication.Content(themeEnvironment = remember { SkikoThemeEnvironment() }) {
-    val templateProvider = remember {
-      kmpApplication.rootScope
-        .metroDependencyGraph<IosMainViewControllerGraph>()
-        .templateProviderFactory
-        .createTemplateProvider()
-    }
+    val templateProvider = remember { TemplateProvider.create(kmpApplication.rootScope) }
 
     DisposableEffect(templateProvider) { onDispose { templateProvider.cancel() } }
 
