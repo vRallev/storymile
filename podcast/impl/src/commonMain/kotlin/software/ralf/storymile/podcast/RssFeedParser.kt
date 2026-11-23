@@ -62,8 +62,8 @@ internal class RssFeedParser {
         !readMetadata(metadata, feedUrl) -> skipElement()
       }
     }
-    val author = metadata.author ?: metadata.rssAuthor
-    val artworkUrl = metadata.artworkUrl ?: metadata.rssArtworkUrl
+    val author = metadata.author
+    val artworkUrl = metadata.artworkUrl
     return PodcastFeed(
       feedUrl = feedUrl,
       title = requireNotNull(metadata.title) { "The RSS channel title is missing." },
@@ -111,8 +111,8 @@ internal class RssFeedParser {
       id = id ?: media.url,
       title = metadata.title ?: return null,
       description = metadata.description(),
-      author = metadata.author ?: metadata.rssAuthor,
-      artworkUrl = metadata.artworkUrl ?: metadata.rssArtworkUrl,
+      author = metadata.author,
+      artworkUrl = metadata.artworkUrl,
       publishedAt = publishedAt,
       duration = duration,
       enclosure = media,
@@ -136,7 +136,7 @@ internal class RssFeedParser {
     when {
       matches("title") -> metadata.title = readText().nonBlank() ?: metadata.title
       matches("author", ITUNES_NAMESPACE) ->
-        metadata.author = readText().nonBlank() ?: metadata.author
+        metadata.itunesAuthor = readText().nonBlank() ?: metadata.itunesAuthor
       matches("author") || matches("managingEditor") ->
         metadata.rssAuthor = readText().nonBlank() ?: metadata.rssAuthor
       else -> return readDescription(metadata) || readArtwork(metadata, feedUrl)
@@ -159,9 +159,9 @@ internal class RssFeedParser {
   private fun XmlReader.readArtwork(metadata: Metadata, feedUrl: String): Boolean {
     when {
       matches("image", ITUNES_NAMESPACE) -> {
-        metadata.artworkUrl =
+        metadata.itunesArtworkUrl =
           getAttributeValue(null, "href")?.let { RssUrl.resolve(feedUrl, it) }
-            ?: metadata.artworkUrl
+            ?: metadata.itunesArtworkUrl
         skipElement()
       }
       matches("image") -> {
@@ -301,10 +301,16 @@ internal class RssFeedParser {
     var description: String? = null
     var content: String? = null
     var summary: String? = null
-    var author: String? = null
+    var itunesAuthor: String? = null
     var rssAuthor: String? = null
-    var artworkUrl: String? = null
+    var itunesArtworkUrl: String? = null
     var rssArtworkUrl: String? = null
+
+    val author: String?
+      get() = itunesAuthor ?: rssAuthor
+
+    val artworkUrl: String?
+      get() = itunesArtworkUrl ?: rssArtworkUrl
 
     fun description(): String? = description ?: content ?: summary
   }
