@@ -52,7 +52,6 @@ import software.ralf.storymile.playback.impl.generated.resources.episode_info
 import software.ralf.storymile.playback.impl.generated.resources.playback_speed
 import software.ralf.storymile.playback.impl.generated.resources.queue
 import software.ralf.storymile.playback.impl.generated.resources.queue_empty
-import software.ralf.storymile.playback.impl.generated.resources.sample_description
 import software.ralf.storymile.playback.impl.generated.resources.sleep
 import software.ralf.storymile.playback.impl.generated.resources.sleep_minutes
 import software.ralf.storymile.playback.impl.generated.resources.sleep_off
@@ -74,7 +73,12 @@ internal object PlaybackOptions {
       listOf(Panel.SLEEP, Panel.QUEUE, Panel.CHAPTERS).forEach { panel ->
         TextButton(
           onClick = { onSelect(panel) },
-          enabled = player.isPreview || panel == Panel.QUEUE,
+          enabled =
+            when (panel) {
+              Panel.SLEEP -> player.onSleep != null
+              Panel.CHAPTERS -> player.onChapter != null && player.chapters.isNotEmpty()
+              else -> true
+            },
           contentPadding = PaddingValues(horizontal = 0.dp, vertical = 8.dp),
           modifier = Modifier.weight(1f).testTag("playback-${panel.name.lowercase()}"),
         ) {
@@ -218,7 +222,7 @@ internal object PlaybackOptions {
             "sleep-${minutes ?: "off"}",
             selected = player.sleepMinutes == minutes,
           ) {
-            player.onSleep(minutes)
+            player.onSleep?.invoke(minutes)
             onDismiss()
           }
         }
@@ -230,7 +234,7 @@ internal object PlaybackOptions {
             selected = player.activeChapterIndex == index,
             supporting = PlaybackControls.time(chapter.startSeconds),
           ) {
-            player.onChapter(index)
+            player.onChapter?.invoke(index)
             onDismiss()
           }
         }
@@ -248,9 +252,7 @@ internal object PlaybackOptions {
       Panel.INFO -> {
         Text(player.title, style = AppTheme.typography.titleMedium)
         Text(player.showTitle, modifier = Modifier.padding(vertical = 8.dp))
-        if (player.isPreview) {
-          Text(stringResource(Res.string.sample_description))
-        }
+        player.description?.let { Text(it) }
       }
     }
   }

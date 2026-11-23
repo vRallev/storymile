@@ -10,15 +10,17 @@ import java.util.jar.JarEntry
 import java.util.jar.JarOutputStream
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
-import org.jetbrains.compose.resources.ExperimentalResourceApi
-import software.ralf.storymile.player.impl.generated.resources.Res
+import software.ralf.storymile.podcast.BundledPodcastFixtures
 
-@OptIn(ExperimentalResourceApi::class)
 class Mp3DecoderTest {
+  private val sources =
+    BundledPodcastFixtures.queue.map {
+      checkNotNull(BundledPodcastFixtures.audioUri(it.episode.enclosure.url))
+    }
+
   @Test
   fun `all bundled episode URIs decode to audible PCM`() = runTest {
-    for (episode in 1..3) {
-      val source = Res.getUri("files/test-episodes/test-episode-$episode.mp3")
+    for (source in sources) {
       Mp3Decoder.decode(source).use { assertAudible(it) }
     }
   }
@@ -29,7 +31,7 @@ class Mp3DecoderTest {
     try {
       JarOutputStream(Files.newOutputStream(archive)).use { jar ->
         jar.putNextEntry(JarEntry("episode.mp3"))
-        URI(Res.getUri("files/test-episodes/test-episode-1.mp3")).toURL().openStream().use {
+        URI(sources.first()).toURL().openStream().use {
           it.copyTo(jar)
         }
         jar.closeEntry()
@@ -42,7 +44,7 @@ class Mp3DecoderTest {
 
   @Test
   fun `download URLs can redirect to an MP3 enclosure`() = runTest {
-    val fixtureUrl = URI(Res.getUri("files/test-episodes/test-episode-1.mp3")).toURL()
+    val fixtureUrl = URI(sources.first()).toURL()
     val fixture = fixtureUrl.openStream().use { it.readBytes() }
     val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
     server.createContext("/download") { request ->

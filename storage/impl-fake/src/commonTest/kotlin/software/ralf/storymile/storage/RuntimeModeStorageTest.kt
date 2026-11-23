@@ -1,0 +1,131 @@
+package software.ralf.storymile.storage
+
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import assertk.assertFailure
+import assertk.assertThat
+import assertk.assertions.hasMessage
+import assertk.assertions.isEqualTo
+import assertk.assertions.isInstanceOf
+import assertk.assertions.isNotNull
+import assertk.assertions.isNull
+import kotlin.test.Test
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
+import software.ralf.app.platform.scope.Scope
+import software.ralf.app.platform.scope.coroutine.coroutineScope
+import software.ralf.app.platform.scope.runTestWithScope
+import software.ralf.storymile.runtimemode.RuntimeMode
+import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
+
+class RuntimeModeStorageTest {
+  @Test
+  fun `persistent storage bypasses runtime mode loading`() = runTestWithScope { scope ->
+    val platform = InMemoryStoragePlatform()
+    val factory: Storage.Factory =
+      RuntimeModeStorageFactory(
+        real = DefaultStorage.Factory(platform),
+        controller = lazy { error("Runtime mode must not be checked") },
+      )
+    val owner = scope.coroutineScope()
+    val storage: Storage = factory.create("runtime-mode", owner, mustBePersistent = true)
+    val key = stringPreferencesKey("runtime_mode")
+    storage.preferences("settings").edit { it[key] = "Fake" }
+    storage.files.write("state", byteArrayOf(1))
+    storage.cache.write("state", byteArrayOf(2))
+    owner.cancel()
+
+    val reopened: Storage = DefaultStorage("runtime-mode", scope.coroutineScope(), platform)
+    assertThat(reopened.preferences("settings").data.first()[key]).isEqualTo("Fake")
+    assertThat(reopened.files.read("state")).isNotNull().isEqualTo(byteArrayOf(1))
+    assertThat(reopened.cache.read("state")).isNotNull().isEqualTo(byteArrayOf(2))
+  }
+
+  @Test
+  fun `fake storage isolates all data from real storage`() = runTestWithScope { scope ->
+    val realPlatform = InMemoryStoragePlatform()
+    val real: Storage = scope.storage(realPlatform)
+    val key = stringPreferencesKey("theme")
+    real.preferences("settings").edit { it[key] = "real" }
+    real.files.directory("books").write("chapter", byteArrayOf(1))
+    real.cache.write("cover", byteArrayOf(2))
+    val mode = RuntimeMode.Fake
+    val factory: Storage.Factory =
+      RuntimeModeStorageFactory(
+        real = DefaultStorage.Factory(realPlatform),
+        controller = lazy { FakeRuntimeModeController(mode) },
+      )
+    val storage: Storage = scope.storage(factory)
+    val operations =
+      listOf(
+        async {
+          val preferences = storage.preferences("settings")
+          assertThat(preferences.data.first()[key]).isNull()
+          preferences.edit { it[key] = "fake" }
+        },
+        async {
+          val books = storage.files.directory("books")
+          assertThat(books.read("chapter")).isNull()
+          books.write("chapter", byteArrayOf(3))
+        },
+        async {
+          assertThat(storage.cache.read("cover")).isNull()
+          storage.cache.write("cover", byteArrayOf(4))
+        },
+        async { assertThat(storage.databasePath("podcasts")).isNull() },
+      )
+    operations.awaitAll()
+
+    assertThat(storage.preferences("settings").data.first()[key]).isEqualTo("fake")
+    assertThat(storage.files.directory("books").read("chapter"))
+      .isNotNull()
+      .isEqualTo(byteArrayOf(3))
+    assertThat(storage.cache.read("cover")).isNotNull().isEqualTo(byteArrayOf(4))
+    assertThat(real.preferences("settings").data.first()[key]).isEqualTo("real")
+    assertThat(real.files.directory("books").read("chapter")).isNotNull().isEqualTo(byteArrayOf(1))
+    assertThat(real.cache.read("cover")).isNotNull().isEqualTo(byteArrayOf(2))
+  }
+
+  @Test
+  fun `a mode read failure allows factory retry without falling back to real storage`() =
+    runTestWithScope { scope ->
+      val realPlatform = InMemoryStoragePlatform()
+      val real: Storage = scope.storage(realPlatform)
+      val key = stringPreferencesKey("theme")
+      real.preferences("settings").edit { it[key] = "real" }
+      real.files.write("chapter", byteArrayOf(1))
+      real.cache.write("cover", byteArrayOf(2))
+      val failure = IllegalStateException("Mode unavailable")
+      val controller = FakeRuntimeModeController(RuntimeMode.Fake).apply { modeFailure = failure }
+      val factory: Storage.Factory =
+        RuntimeModeStorageFactory(
+          real = DefaultStorage.Factory(realPlatform),
+          controller = lazy { controller },
+        )
+
+      assertFailure { scope.storage(factory) }
+        .isInstanceOf<IllegalStateException>()
+        .hasMessage("Mode unavailable")
+
+      controller.modeFailure = null
+      val storage: Storage = scope.storage(factory)
+      storage.preferences("settings").edit { it[key] = "fake" }
+      storage.files.write("chapter", byteArrayOf(3))
+      storage.cache.write("cover", byteArrayOf(4))
+
+      assertThat(storage.preferences("settings").data.first()[key]).isEqualTo("fake")
+      assertThat(storage.files.read("chapter")).isNotNull().isEqualTo(byteArrayOf(3))
+      assertThat(storage.cache.read("cover")).isNotNull().isEqualTo(byteArrayOf(4))
+      assertThat(real.preferences("settings").data.first()[key]).isEqualTo("real")
+      assertThat(real.files.read("chapter")).isNotNull().isEqualTo(byteArrayOf(1))
+      assertThat(real.cache.read("cover")).isNotNull().isEqualTo(byteArrayOf(2))
+    }
+
+  private fun Scope.storage(platform: StoragePlatform): Storage =
+    DefaultStorage("app", coroutineScope(), platform)
+
+  private fun Scope.storage(factory: Storage.Factory): Storage =
+    factory.create("app", coroutineScope())
+}

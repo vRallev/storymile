@@ -18,37 +18,47 @@ import software.ralf.storymile.podcast.PodcastEnclosure
 import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.podcast.QueueRepository
 import software.ralf.storymile.podcast.QueuedEpisode
-import software.ralf.storymile.runtimemode.RuntimeMode
-import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 
 class PlayerImplTest {
+  private val episodes = (1..3).map { episode(it) }
+
   @Test
-  fun `fake mode selects the first queue entry and loads local audio on play`() =
+  fun `the first queue entry stays paused until play loads its resolved source`() =
     runTestWithScope { scope ->
       val audio = FakeAudioPlayer()
-      val player: Player = player(scope, audio)
+      val first = episodes.first()
+      val localSource = "file:///bundled/episode.mp3"
+      val player: Player =
+        player(
+          scope = scope,
+          audio = audio,
+          audioSourceResolver =
+            AudioSourceResolver {
+              if (it == first.episode.enclosure.url) localSource else it
+            },
+        )
       runCurrent()
-      assertThat(player.state.value.title).isEqualTo("Test episode 1")
+      assertThat(player.state.value.title).isEqualTo(first.episode.title)
       assertThat(player.state.value.positionMillis).isEqualTo(0L)
       assertThat(player.state.value.isPlaying).isFalse()
       assertThat(player.state.value.speed).isEqualTo(1f)
-      assertThat(player.state.value.episode).isEqualTo(demoEpisode(1))
+      assertThat(player.state.value.episode).isEqualTo(first)
       assertThat(audio.sources).isEqualTo(emptyList())
       player.togglePlayback()
       runCurrent()
-      assertThat(audio.sources.single()).isEqualTo("files/test-episodes/test-episode-1.mp3")
+      assertThat(audio.sources.single()).isEqualTo(localSource)
     }
 
   @Test
-  fun `an empty real queue does not create an audio transport`() = runTestWithScope { scope ->
+  fun `an empty queue does not create an audio transport`() = runTestWithScope { scope ->
     val transport = lazy<AudioPlayer> { error("An empty queue must not create a player") }
     val player: Player =
       PlayerImpl(
           audioPlayer = transport,
-          runtimeModeController = FakeRuntimeModeController(RuntimeMode.Real),
           queueRepository = TestQueue(),
+          audioSourceResolver =
+            AudioSourceResolver { error("An empty queue must not resolve audio") },
           mainDispatcher = StandardTestDispatcher(testScheduler),
-          sourceUri = { it },
         )
         .also { scope.register(it) }
     runCurrent()
@@ -61,11 +71,10 @@ class PlayerImplTest {
   }
 
   @Test
-  fun `real playback follows the queue when upcoming episodes move`() = runTestWithScope { scope ->
+  fun `playback follows the queue when upcoming episodes move`() = runTestWithScope { scope ->
     val audio = FakeAudioPlayer()
     val queue = TestQueue()
-    val player: Player =
-      player(scope = scope, audio = audio, mode = RuntimeMode.Real, queue = queue)
+    val player: Player = player(scope = scope, audio = audio, queue = queue)
     val (first, second, third) = (1..3).map { episode(it) }
 
     queue.publish(listOf(first, second, third))
@@ -128,38 +137,38 @@ class PlayerImplTest {
     }
 
   @Test
-  fun `completion advances once per source and stops after episode three`() =
-    runTestWithScope { scope ->
-      val audio = FakeAudioPlayer()
-      val player: Player = player(scope, audio)
-      runCurrent()
-      player.setSpeed(1.5f)
-      player.togglePlayback()
-      runCurrent()
-      val firstSource = audio.state.value.source
-      for (number in 2..3) {
-        audio.finish()
-        runCurrent()
-        assertThat(player.state.value.title).isEqualTo("Test episode $number")
-        assertThat(player.state.value.speed).isEqualTo(1.5f)
-        assertThat(audio.playbackSpeed).isEqualTo(1.5f)
-        assertThat(player.state.value.isPlaying).isTrue()
-      }
-      val current = audio.state.value
-      audio.publish { it.copy(source = firstSource, hasEnded = true) }
-      runCurrent()
-      assertThat(player.state.value.title).isEqualTo("Test episode 3")
-      audio.publish { current }
+  fun `completion advances through the queue and stops at the end`() = runTestWithScope { scope ->
+    val audio = FakeAudioPlayer()
+    val player: Player = player(scope = scope, audio = audio)
+    runCurrent()
+    player.setSpeed(1.5f)
+    player.togglePlayback()
+    runCurrent()
+    val firstSource = audio.state.value.source
+    for (episode in episodes.drop(1)) {
       audio.finish()
       runCurrent()
-      assertThat(player.state.value.isComplete).isTrue()
-      assertThat(player.state.value.isPlaying).isFalse()
-      player.togglePlayback()
-      runCurrent()
-      assertThat(audio.sources.size).isEqualTo(4)
-      assertThat(player.state.value.title).isEqualTo("Test episode 1")
+      assertThat(player.state.value.episode).isEqualTo(episode)
+      assertThat(audio.sources.last()).isEqualTo(episode.episode.enclosure.url)
+      assertThat(player.state.value.speed).isEqualTo(1.5f)
+      assertThat(audio.playbackSpeed).isEqualTo(1.5f)
       assertThat(player.state.value.isPlaying).isTrue()
     }
+    val current = audio.state.value
+    audio.publish { it.copy(source = firstSource, hasEnded = true) }
+    runCurrent()
+    assertThat(player.state.value.episode).isEqualTo(episodes.last())
+    audio.publish { current }
+    audio.finish()
+    runCurrent()
+    assertThat(player.state.value.isComplete).isTrue()
+    assertThat(player.state.value.isPlaying).isFalse()
+    player.togglePlayback()
+    runCurrent()
+    assertThat(audio.sources.size).isEqualTo(episodes.size + 1)
+    assertThat(player.state.value.episode).isEqualTo(episodes.first())
+    assertThat(player.state.value.isPlaying).isTrue()
+  }
 
   @Test
   fun `seeks are clamped and nonfinite speeds are ignored`() = runTestWithScope { scope ->
@@ -223,25 +232,24 @@ class PlayerImplTest {
   }
 
   @Test
-  fun `removing all fake queue entries stops playback when its controls disappear`() =
-    runTestWithScope { scope ->
-      val audio = FakeAudioPlayer()
-      val queue = TestQueue(listOf(demoEpisode(1)))
-      val player: Player = player(scope = scope, audio = audio, queue = queue)
-      runCurrent()
-      player.togglePlayback()
-      runCurrent()
-      assertThat(player.state.value.isPlaying).isTrue()
-      queue.publish(emptyList())
-      runCurrent()
-      assertThat(player.state.value.isPlaying).isFalse()
-      player.togglePlayback()
-      assertThat(audio.wantsPlayback).isFalse()
-      audio.finish()
-      runCurrent()
-      assertThat(player.state.value.isPlaying).isFalse()
-      assertThat(audio.wantsPlayback).isFalse()
-    }
+  fun `removing all queue entries stops playback`() = runTestWithScope { scope ->
+    val audio = FakeAudioPlayer()
+    val queue = TestQueue(episodes.take(1))
+    val player: Player = player(scope = scope, audio = audio, queue = queue)
+    runCurrent()
+    player.togglePlayback()
+    runCurrent()
+    assertThat(player.state.value.isPlaying).isTrue()
+    queue.publish(emptyList())
+    runCurrent()
+    assertThat(player.state.value.isPlaying).isFalse()
+    player.togglePlayback()
+    assertThat(audio.wantsPlayback).isFalse()
+    audio.finish()
+    runCurrent()
+    assertThat(player.state.value.isPlaying).isFalse()
+    assertThat(audio.wantsPlayback).isFalse()
+  }
 
   @Test
   fun `scope exit releases playback and ignores later commands and events`() =
@@ -267,31 +275,16 @@ class PlayerImplTest {
   private fun TestScope.player(
     scope: Scope,
     audio: AudioPlayer,
-    mode: RuntimeMode = RuntimeMode.Fake,
-    queue: QueueRepository = TestQueue((1..3).map { demoEpisode(it) }),
+    queue: QueueRepository = TestQueue(episodes),
+    audioSourceResolver: AudioSourceResolver = AudioSourceResolver { it },
   ): Player =
     PlayerImpl(
         audioPlayer = lazy { audio },
-        runtimeModeController = FakeRuntimeModeController(mode),
         queueRepository = queue,
+        audioSourceResolver = audioSourceResolver,
         mainDispatcher = StandardTestDispatcher(testScheduler),
-        sourceUri = { it },
       )
       .also { scope.register(it) }
-
-  private fun demoEpisode(number: Int): QueuedEpisode {
-    val episode = episode(number)
-    return episode.copy(
-      episode =
-        episode.episode.copy(
-          title = "Test episode $number",
-          enclosure =
-            episode.episode.enclosure.copy(
-              url = "https://storymile.invalid/test-episodes/test-episode-$number.mp3",
-            ),
-        ),
-    )
-  }
 
   private fun episode(number: Int): QueuedEpisode =
     QueuedEpisode(

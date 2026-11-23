@@ -22,7 +22,7 @@ internal class BasePlugin : Plugin<Project> {
       appPlatform.enableModuleStructureNestingCheck(true)
       releaseTask.configure { it.dependsOn("checkModuleStructureNesting") }
     } else {
-      appPlatform.enableModuleStructure(true)
+      appPlatform.enableModuleStructure { it.allowLibraryImplToImplDependencies(true) }
       releaseTask.configure { it.dependsOn("checkModuleStructureDependencies") }
     }
   }

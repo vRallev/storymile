@@ -36,7 +36,6 @@ class PlaybackBarRenderer : ComposeRenderer<PlaybackPresenterImpl.BarModel>() {
     ) {
       PlaybackArtwork(
         artworkUrl = player.artworkUrl,
-        isPreview = player.isPreview,
         thumbnailSize = if (tablet) 72.dp else 40.dp,
       )
       Column(if (wide) Modifier.weight(0.8f) else Modifier.weight(1f)) {

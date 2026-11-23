@@ -110,13 +110,13 @@ class PlayerTransitionUiTest {
 
   @Test
   fun `collapsing a scrolled player starts at the visible control positions`() {
-    listOf(DpSize(360.dp, 480.dp), DpSize(900.dp, 480.dp)).forEach { size ->
+    listOf(DpSize(360.dp, 380.dp), DpSize(900.dp, 360.dp)).forEach { size ->
       uiTestRule.runRobotTest(windowSize = size) {
         val collapsed = controls(expanded = false)
         val collapsedSheetTop = sheetTop()
         composeRobot<AppShellRobot> { openPlayback() }
         val original = controls(expanded = true)
-        runOnUiThread { onNodeWithTag("playback-current-chapter").performScrollTo() }
+        runOnUiThread { onNodeWithTag("playback-queue").performScrollTo() }
         val scrolled = controls(expanded = true)
         assertThat(scrolled.title.bounds.top).isLessThan(original.title.bounds.top - 20f)
         assertThat(scrolled.button.top).isLessThan(original.button.top - 20f)

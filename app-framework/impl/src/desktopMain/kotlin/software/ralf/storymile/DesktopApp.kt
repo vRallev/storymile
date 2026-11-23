@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.input.key.Key
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesTo
 import software.ralf.app.platform.renderer.ComposeRendererFactory
@@ -12,8 +13,7 @@ import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.coroutine.launch
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
-import software.ralf.storymile.runtimemode.RuntimeMode
-import software.ralf.storymile.runtimemode.RuntimeModeController
+import software.ralf.storymile.templates.AppShortcuts
 import software.ralf.storymile.theme.SkikoThemeEnvironment
 
 /** Owns the Desktop root scope and renders its shared template stream. */
@@ -41,24 +41,18 @@ class DesktopApp(graph: (RootScopeProvider) -> AppGraph) : RootScopeProvider {
     }
   }
 
-  /** Saves the opposite runtime mode and restarts the application. */
-  fun toggleRuntimeMode() {
+  /** Runs the app action for an unhandled Command or Ctrl shortcut. */
+  fun handleShortcut(key: Key): Boolean {
     if (!templateProvider.isInitialized()) {
-      return
+      return false
     }
     val scope = rootScope
     if (scope.isDestroyed()) {
-      return
+      return false
     }
-    val controller = scope.metroDependencyGraph<Graph>().runtimeModeController
-    scope.launch {
-      val mode =
-        when (controller.mode) {
-          RuntimeMode.Real -> RuntimeMode.Fake
-          RuntimeMode.Fake -> RuntimeMode.Real
-        }
-      controller.switchMode(mode)
-    }
+    val action = scope.metroDependencyGraph<Graph>().shortcuts.actionForKey(key) ?: return false
+    scope.launch { action() }
+    return true
   }
 
   /** Releases presenter and application resources. */
@@ -72,8 +66,8 @@ class DesktopApp(graph: (RootScopeProvider) -> AppGraph) : RootScopeProvider {
   /** Graph access needed by the Desktop runtime. */
   @ContributesTo(AppScope::class)
   interface Graph {
-    /** Controller used to persist runtime mode changes and restart the application. */
-    val runtimeModeController: RuntimeModeController
+    /** App actions available for Desktop shortcuts. */
+    val shortcuts: AppShortcuts
 
     /** Factory used to create the window's independently cancellable template stream. */
     val templateProviderFactory: TemplateProvider.Factory

@@ -34,10 +34,13 @@ dependencies {
   commonMainImplementation project(':library:impl')
   commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':player:impl')
+  commonMainImplementation project(':player:impl-fake')
   commonMainImplementation project(':playlist:impl')
+  commonMainImplementation project(':playlist:impl-fake')
   commonMainImplementation project(':playlist:public')
   commonMainImplementation project(':podcast-shows:impl')
   commonMainImplementation project(':podcast:impl')
+  commonMainImplementation project(':podcast:impl-fake')
   commonMainImplementation project(':podcast:impl-robots')
   commonMainImplementation project(':podcast:public')
   commonMainImplementation project(':presenter-navigation:impl')
@@ -61,5 +64,6 @@ dependencies {
 
   desktopMainImplementation project(':runtime-mode:testing')
 
+  desktopTestImplementation project(':storage:impl-fake')
   desktopTestImplementation libs.okio
 }

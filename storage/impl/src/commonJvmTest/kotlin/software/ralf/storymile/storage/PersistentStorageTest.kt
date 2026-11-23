@@ -38,8 +38,6 @@ import software.ralf.app.platform.scope.coroutine.CoroutineScopeScoped
 import software.ralf.app.platform.scope.coroutine.addCoroutineScopeScoped
 import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.runTestWithScope
-import software.ralf.storymile.runtimemode.RuntimeMode
-import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 
 class PersistentStorageTest {
   @Test
@@ -100,18 +98,6 @@ class PersistentStorageTest {
     assertThat(directory.path).isSameInstanceAs(path)
     assertThat(uncached.path).isNotNull()
   }
-
-  @Test
-  fun `fake mode returns no directory paths on first access`() =
-    storageTest { scope, platform, root ->
-      val factory: Storage.Factory =
-        DefaultStorage.Factory(platform, lazy { FakeRuntimeModeController(RuntimeMode.Fake) })
-      val storage: Storage = factory.create("app", scope.coroutineScope())
-
-      assertThat(storage.files.path).isNull()
-      assertThat(storage.cache.directory("coil").path).isNull()
-      assertThat(FileSystem.SYSTEM.list(root)).isEmpty()
-    }
 
   @Test
   fun `library files persist within their namespace and clear with their storage area`() =

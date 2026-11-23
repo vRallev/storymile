@@ -23,9 +23,6 @@ import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.buildTestScope
 import software.ralf.app.platform.scope.coroutine.coroutineScope
 import software.ralf.app.platform.scope.runTestWithScope
-import software.ralf.storymile.runtimemode.RuntimeMode
-import software.ralf.storymile.runtimemode.RuntimeModeController
-import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 
 class StorageInjectionTest {
   @Test
@@ -105,9 +102,6 @@ class StorageInjectionTest {
     val storageFactory: Storage.Factory
 
     @ForScope(AppScope::class) val storage: Storage
-
-    @Provides
-    fun runtimeModeController(): RuntimeModeController = FakeRuntimeModeController(RuntimeMode.Real)
 
     @DependencyGraph.Factory
     fun interface Factory {

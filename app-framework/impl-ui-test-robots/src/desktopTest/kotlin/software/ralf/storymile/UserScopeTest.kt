@@ -27,6 +27,7 @@ import software.ralf.app.platform.scope.coroutine.launch
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.InMemoryStorageFactory
+import software.ralf.storymile.storage.RuntimeModeStorageFactory
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.user.User
 import software.ralf.storymile.user.UserManager
@@ -173,7 +174,8 @@ class UserScopeTest {
 
   @DependencyGraph(
     AppScope::class,
-    excludes = [DefaultStorage.Factory::class, TestStorageBindings::class],
+    excludes =
+      [DefaultStorage.Factory::class, RuntimeModeStorageFactory::class, TestStorageBindings::class],
   )
   interface Graph : AppGraph {
     val userManager: UserManager

@@ -6,7 +6,10 @@ import kotlin.time.Duration.Companion.minutes
 import software.ralf.storymile.http.HttpResponse
 
 /** Supplies local episode metadata without fetching feeds or artwork. */
-@ContributesBinding(AppScope::class, replaces = [PodcastFeedServiceImpl::class])
+@ContributesBinding(
+  AppScope::class,
+  replaces = [RssPodcastFeedService::class, PodcastFeedServiceImpl::class],
+)
 class TestPodcastFeedService : PodcastFeedService {
   override suspend fun load(feedUrl: String): HttpResponse<PodcastFeed> {
     val title =

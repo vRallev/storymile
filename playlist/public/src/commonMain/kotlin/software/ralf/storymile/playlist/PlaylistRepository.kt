@@ -15,11 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
  * [CancellationException].
  */
 interface PlaylistRepository {
-  /**
-   * Saved snapshots in creation order. Initially empty until loading succeeds; an empty value does
-   * not indicate whether loading has finished. Fake mode starts with three test episodes in one
-   * playlist when no saved snapshot exists.
-   */
+  /** Saved playlists in creation order. An empty list may mean loading is still in progress. */
   val playlists: StateFlow<List<Playlist>>
 
   /** Appends an empty playlist with a new stable ID and [name]. Duplicate names are allowed. */

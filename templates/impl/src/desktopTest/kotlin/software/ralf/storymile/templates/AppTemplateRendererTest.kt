@@ -79,7 +79,6 @@ import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.app.platform.renderer.LocalRendererFactory
 import software.ralf.app.platform.renderer.Renderer
 import software.ralf.app.platform.renderer.RendererFactory
-import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 import software.ralf.storymile.screen.DefaultScreenSizeProvider
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.screen.ScreenSizeProvider
@@ -545,7 +544,7 @@ class AppTemplateRendererTest {
         backGestureDispatcherPresenter = backGestureDispatcher,
         screenSizeProvider = mutableScreenSizeProvider,
         themeEnvironment = FakeThemeEnvironment(),
-        runtimeModeController = FakeRuntimeModeController(),
+        shortcuts = NoAppShortcuts(),
       )
     private val slotRenderer = SlotRenderer(forwardModifiers)
 

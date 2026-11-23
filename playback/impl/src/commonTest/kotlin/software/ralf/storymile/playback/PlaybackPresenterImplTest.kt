@@ -19,8 +19,6 @@ import software.ralf.storymile.player.testing.PreviewTestPlayer
 import software.ralf.storymile.podcast.PodcastEnclosure
 import software.ralf.storymile.podcast.PodcastEpisode
 import software.ralf.storymile.podcast.QueuedEpisode
-import software.ralf.storymile.runtimemode.RuntimeMode
-import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 
 class PlaybackPresenterImplTest {
   private val PlaybackPresenterImpl.Model.player: PlaybackPresenterImpl.PlayerModel
@@ -29,7 +27,7 @@ class PlaybackPresenterImplTest {
   @Test
   fun `playback is absent when the player has no selected episode`() = runTest {
     val player = PreviewTestPlayer()
-    val presenter: PlaybackPresenter = presenter(player)
+    val presenter: PlaybackPresenter = PlaybackPresenterImpl(player)
 
     presenter.test(this) {
       awaitItem().assertPlayback(visible = false)
@@ -44,43 +42,29 @@ class PlaybackPresenterImplTest {
 
   @Test
   fun `collapsed and expanded controls share playback state`() = runTest {
-    val presenter = presenter(PreviewTestPlayer().apply { showPreview() })
+    val presenter = PlaybackPresenterImpl(PreviewTestPlayer().apply { showPreview() })
 
     presenter.testPlayer(this) {
       var model = awaitItem()
       assertThat(requireNotNull(model.collapsed).player).isSameInstanceAs(model.player)
-      assertThat(model.player.activeChapterIndex).isEqualTo(2)
 
       requireNotNull(model.collapsed).player.onPlayPause()
       model = awaitItem()
       assertThat(model.player.isPlaying).isFalse()
 
-      model.player.onBookmark()
-      model = awaitItem()
-      assertThat(requireNotNull(model.collapsed).player.isBookmarked).isTrue()
-
-      model.player.onDownload()
-      model = awaitItem()
-      assertThat(requireNotNull(model.collapsed).player.isDownloaded).isTrue()
-
       model.player.onSpeed(1.5f)
-      model = awaitItem()
-      model.player.onSleep(30)
       model = awaitItem()
       requireNotNull(model.collapsed).player.onPlayPause()
       model = awaitItem()
       assertThat(model.player.isPlaying).isTrue()
-      assertThat(model.player.isBookmarked).isTrue()
-      assertThat(model.player.isDownloaded).isTrue()
       assertThat(model.player.speed).isEqualTo(1.5f)
-      assertThat(model.player.sleepMinutes).isEqualTo(30)
       assertThat(requireNotNull(model.collapsed).player).isSameInstanceAs(model.player)
     }
   }
 
   @Test
   fun `seeking and skips stay within the current episode`() = runTest {
-    val presenter = presenter(PreviewTestPlayer().apply { showPreview() })
+    val presenter = PlaybackPresenterImpl(PreviewTestPlayer().apply { showPreview() })
 
     presenter.testPlayer(this) {
       var player = awaitItem().player
@@ -97,14 +81,12 @@ class PlaybackPresenterImplTest {
       player.onSkipBack()
       player = awaitItem().player
       assertThat(player.positionSeconds).isEqualTo(0)
-      assertThat(player.activeChapterIndex).isEqualTo(0)
 
       player.onSeek(player.durationSeconds - 5)
       player = awaitItem().player
       player.onSkipForward()
       player = awaitItem().player
       assertThat(player.positionSeconds).isEqualTo(player.durationSeconds)
-      assertThat(player.activeChapterIndex).isEqualTo(player.chapters.lastIndex)
 
       player.onSeek(-100)
       player = awaitItem().player
@@ -117,42 +99,15 @@ class PlaybackPresenterImplTest {
   }
 
   @Test
-  fun `chapter selection and seeking keep the active chapter in sync`() = runTest {
-    val presenter = presenter(PreviewTestPlayer().apply { showPreview() })
-
-    presenter.testPlayer(this) {
-      var player = awaitItem().player
-      player.onChapter(4)
-      player = awaitItem().player
-      assertThat(player.positionSeconds).isEqualTo(player.chapters[4].startSeconds)
-      assertThat(player.activeChapterIndex).isEqualTo(4)
-
-      player.onSeek(player.chapters[4].startSeconds - 1)
-      player = awaitItem().player
-      assertThat(player.activeChapterIndex).isEqualTo(3)
-
-      player.onChapter(-1)
-      player.onChapter(player.chapters.size)
-      expectNoEvents()
-    }
-  }
-
-  @Test
   fun `queue selection loads the episode and preserves listening preferences`() = runTest {
-    val presenter = presenter(PreviewTestPlayer().apply { showPreview() })
+    val presenter = PlaybackPresenterImpl(PreviewTestPlayer().apply { showPreview() })
 
     presenter.testPlayer(this) {
       var player = awaitItem().player
       val nextEpisode = player.queue[1]
-      player.onBookmark()
-      player = awaitItem().player
-      player.onDownload()
-      player = awaitItem().player
       player.onPlayPause()
       player = awaitItem().player
       player.onSpeed(1.5f)
-      player = awaitItem().player
-      player.onSleep(30)
       player = awaitItem().player
 
       player.onEpisode(1)
@@ -162,19 +117,11 @@ class PlaybackPresenterImplTest {
       assertThat(player.showTitle).isEqualTo(nextEpisode.showTitle)
       assertThat(player.durationSeconds).isEqualTo(nextEpisode.durationSeconds)
       assertThat(player.positionSeconds).isEqualTo(0)
-      assertThat(player.activeChapterIndex).isEqualTo(0)
       assertThat(player.queue.size).isEqualTo(2)
       assertThat(player.queue.contains(nextEpisode)).isFalse()
       assertThat(player.isPlaying).isTrue()
-      assertThat(player.isBookmarked).isFalse()
-      assertThat(player.isDownloaded).isFalse()
       assertThat(player.speed).isEqualTo(1.5f)
-      assertThat(player.sleepMinutes).isEqualTo(30)
       assertThat(requireNotNull(model.collapsed).player).isSameInstanceAs(player)
-
-      player.onSleep(null)
-      player = awaitItem().player
-      assertThat(player.sleepMinutes).isNull()
 
       player.onEpisode(-1)
       player.onEpisode(player.queue.size)
@@ -183,9 +130,9 @@ class PlaybackPresenterImplTest {
   }
 
   @Test
-  fun `real playback shows Library Queue metadata and plays the chosen entry`() = runTest {
+  fun `playback presents Library Queue metadata and plays the chosen entry`() = runTest {
     val player = FakePlayer()
-    val presenter = presenter(player = player, mode = RuntimeMode.Real)
+    val presenter = PlaybackPresenterImpl(player)
 
     presenter.testPlayer(this) {
       awaitItem().assertPlayback(visible = false)
@@ -199,6 +146,7 @@ class PlaybackPresenterImplTest {
       assertThat(model.player.title).isEqualTo(current.episode.title)
       assertThat(model.player.showTitle).isEqualTo(current.podcastTitle)
       assertThat(model.player.artworkUrl).isEqualTo(current.artworkUrl)
+      assertThat(model.player.description).isEqualTo("Notes about Current episode")
       assertThat(model.player.queue.map { it.title }).isEqualTo(listOf(next.episode.title))
       model.player.onEpisode(0)
       assertThat(player.playRequests).isEqualTo(listOf(next))
@@ -207,15 +155,6 @@ class PlaybackPresenterImplTest {
       awaitItem().assertPlayback(visible = false)
     }
   }
-
-  private fun presenter(
-    player: Player,
-    mode: RuntimeMode = RuntimeMode.Fake,
-  ) =
-    PlaybackPresenterImpl(
-      player = player,
-      runtimeModeController = FakeRuntimeModeController(mode),
-    )
 
   private fun queued(title: String) =
     QueuedEpisode(
@@ -226,7 +165,7 @@ class PlaybackPresenterImplTest {
         PodcastEpisode(
           id = title,
           title = title,
-          description = null,
+          description = "<p>Notes about $title</p>",
           author = null,
           artworkUrl = null,
           publishedAt = null,

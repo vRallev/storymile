@@ -19,6 +19,9 @@
 -keep class * implements coil3.util.DecoderServiceLoaderTarget { *; }
 -keep class * implements coil3.util.FetcherServiceLoaderTarget { *; }
 
+# Compose Desktop does not read SQLite's META-INF/proguard rules.
+-keepclasseswithmembers class androidx.sqlite.driver.bundled.** { native <methods>; }
+
 # Ktor loads HTTP engines through ServiceLoader and updates volatile fields by name.
 -keep class io.ktor.client.engine.** implements io.ktor.client.HttpClientEngineContainer
 -keepclassmembers class io.ktor.** {

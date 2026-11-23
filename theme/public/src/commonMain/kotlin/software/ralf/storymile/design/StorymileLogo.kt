@@ -10,15 +10,16 @@ import software.ralf.storymile.theme.generated.resources.Res
 import software.ralf.storymile.theme.generated.resources.storymile_logo
 
 /** Hidden action for [StorymileLogo]. Defaults to no action. */
-val LocalOnLogoLongPress = staticCompositionLocalOf<() -> Unit> { {} }
+val LocalOnLogoLongPress = staticCompositionLocalOf<(() -> Unit)?> { null }
 
 /** Themed logo with a hidden five-second hold action supplied by [LocalOnLogoLongPress]. */
 @Composable
 fun StorymileLogo(modifier: Modifier = Modifier) {
+  val onLongPress = LocalOnLogoLongPress.current
   Image(
     painter = storymileLogoPainter(),
     contentDescription = null,
-    modifier = modifier.hiddenLongPress(LocalOnLogoLongPress.current),
+    modifier = if (onLongPress != null) modifier.hiddenLongPress(onLongPress) else modifier,
   )
 }
 

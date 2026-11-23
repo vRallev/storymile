@@ -1,10 +1,15 @@
 package software.ralf.storymile.podcast
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import software.ralf.storymile.http.HttpClient
 import software.ralf.storymile.http.HttpResponse
 
 @Inject
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 class RssPodcastFeedService(private val client: HttpClient) : PodcastFeedService {
   override suspend fun load(feedUrl: String): HttpResponse<PodcastFeed> {
     var url =

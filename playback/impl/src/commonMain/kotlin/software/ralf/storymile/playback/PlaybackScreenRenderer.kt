@@ -79,7 +79,6 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
             PlaybackArtwork(
               modifier = Modifier.size(artworkSize),
               artworkUrl = model.player.artworkUrl,
-              isPreview = model.player.isPreview,
             )
             PlayerDetails(
               model.player,
@@ -97,7 +96,6 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
               PlaybackArtwork(
                 modifier = Modifier.size(minOf(available, maxHeight)),
                 artworkUrl = model.player.artworkUrl,
-                isPreview = model.player.isPreview,
               )
             }
             Spacer(Modifier.height(20.dp))
@@ -150,7 +148,7 @@ class PlaybackScreenRenderer : ComposeRenderer<PlaybackPresenterImpl.ScreenModel
         }
         PlaybackOptions.Actions(player, onPanel)
       }
-      if (player.chapters.isNotEmpty()) {
+      if (player.onChapter != null && player.activeChapterIndex in player.chapters.indices) {
         PlaybackOptions.Chapter(player) { onPanel(PlaybackOptions.Panel.CHAPTERS) }
       }
     }

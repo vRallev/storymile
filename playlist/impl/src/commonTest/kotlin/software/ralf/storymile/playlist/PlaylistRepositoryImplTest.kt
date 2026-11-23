@@ -14,19 +14,16 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runCurrent
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.runTestWithScope
-import software.ralf.storymile.runtimemode.RuntimeMode
-import software.ralf.storymile.runtimemode.testing.FakeRuntimeModeController
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.storage.testing.FakeStorage
 
 class PlaylistRepositoryImplTest {
   @Test
-  fun `fake mode seeds three ordered episodes before queued edits`() = runTestWithScope { scope ->
+  fun `initial playlists are saved before queued edits`() = runTestWithScope { scope ->
     val storage = storage()
-    val mode = RuntimeMode.Fake
     val readBarrier = CompletableDeferred<Unit>()
     storage.readBarrier = readBarrier
-    val repository: PlaylistRepository = scope.repository(storage, mode)
+    val repository: PlaylistRepository = scope.repository(storage = storage, defaults = defaults)
     repository.create(PlaylistName("My playlist"))
     runCurrent()
     assertThat(repository.playlists.value).isEmpty()
@@ -35,43 +32,33 @@ class PlaylistRepositoryImplTest {
     readBarrier.complete(Unit)
     runCurrent()
     val playlists = repository.playlists.value
-    assertThat(playlists.map { it.name.value })
-      .isEqualTo(listOf("Storymile test episodes", "My playlist"))
-    assertThat(playlists.first().episodeIds)
-      .isEqualTo(
-        listOf(
-          EpisodeId("test-episode-1"),
-          EpisodeId("test-episode-2"),
-          EpisodeId("test-episode-3"),
-        ),
-      )
+    assertThat(playlists.map { it.name.value }).isEqualTo(listOf("Starter playlist", "My playlist"))
+    assertThat(playlists.first()).isEqualTo(defaults.single())
 
-    val reopened: PlaylistRepository = scope.repository(storage, mode)
+    val reopened: PlaylistRepository = scope.repository(storage = storage, defaults = defaults)
     runCurrent()
     assertThat(reopened.playlists.value).isEqualTo(playlists)
     assertThat(storage.writeCount).isEqualTo(2)
   }
 
   @Test
-  fun `deleting the default playlist does not reseed it in the same fake session`() =
-    runTestWithScope { scope ->
-      val storage = storage()
-      val mode = RuntimeMode.Fake
-      val repository: PlaylistRepository = scope.repository(storage, mode)
-      runCurrent()
-      repository.delete(repository.playlists.value.single().id)
-      runCurrent()
+  fun `a saved empty list takes precedence over default playlists`() = runTestWithScope { scope ->
+    val storage = storage()
+    val repository: PlaylistRepository = scope.repository(storage = storage, defaults = defaults)
+    runCurrent()
+    repository.delete(repository.playlists.value.single().id)
+    runCurrent()
 
-      val reopened: PlaylistRepository = scope.repository(storage, mode)
-      runCurrent()
-      assertThat(reopened.playlists.value).isEmpty()
-      assertThat(storage.writeCount).isEqualTo(2)
-    }
+    val reopened: PlaylistRepository = scope.repository(storage = storage, defaults = defaults)
+    runCurrent()
+    assertThat(reopened.playlists.value).isEmpty()
+    assertThat(storage.writeCount).isEqualTo(2)
+  }
 
   @Test
   fun `failed seeding is retried before applying a later command`() = runTestWithScope { scope ->
     val storage = storage().apply { writeFailure = IllegalStateException("Unavailable") }
-    val repository: PlaylistRepository = scope.repository(storage, RuntimeMode.Fake)
+    val repository: PlaylistRepository = scope.repository(storage = storage, defaults = defaults)
     runCurrent()
     assertThat(repository.playlists.value).isEmpty()
 
@@ -79,11 +66,11 @@ class PlaylistRepositoryImplTest {
     repository.create(PlaylistName("After retry"))
     runCurrent()
     assertThat(repository.playlists.value.map { it.name.value })
-      .isEqualTo(listOf("Storymile test episodes", "After retry"))
+      .isEqualTo(listOf("Starter playlist", "After retry"))
   }
 
   @Test
-  fun `real mode starts empty without writing a default playlist`() = runTestWithScope { scope ->
+  fun `an empty default list needs no write`() = runTestWithScope { scope ->
     val storage = storage()
     val repository: PlaylistRepository = scope.repository(storage)
     runCurrent()
@@ -379,9 +366,10 @@ class PlaylistRepositoryImplTest {
 
   private fun Scope.repository(
     storage: Storage,
-    mode: RuntimeMode = RuntimeMode.Real,
+    defaults: List<Playlist> = emptyList(),
   ): PlaylistRepository =
-    PlaylistRepositoryImpl(storage, FakeRuntimeModeController(mode)).also { register(it) }
+    PlaylistRepositoryImpl(storage = storage, initialPlaylists = InitialPlaylists { defaults })
+      .also { register(it) }
 
   private fun storage(savedDocument: String? = null): FakeStorage =
     FakeStorage(
@@ -392,6 +380,15 @@ class PlaylistRepositoryImplTest {
     )
 
   private companion object {
+    val defaults =
+      listOf(
+        Playlist(
+          id = PlaylistId("starter"),
+          name = PlaylistName("Starter playlist"),
+          episodeIds = listOf(EpisodeId("one"), EpisodeId("two")),
+        ),
+      )
+
     const val SAVED_PLAYLISTS =
       """{"version":1,"playlists":[{"id":"saved","name":"Saved","episodeIds":["one"]}]}"""
   }

@@ -99,7 +99,7 @@ open class PreviewTestPlayer : FakePlayer() {
         PodcastEpisode(
           id = title,
           title = title,
-          description = null,
+          description = "Show notes for $title.",
           author = null,
           artworkUrl = null,
           publishedAt = null,

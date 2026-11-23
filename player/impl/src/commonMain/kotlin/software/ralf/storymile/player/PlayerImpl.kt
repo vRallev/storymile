@@ -1,6 +1,5 @@
 package software.ralf.storymile.player
 
-import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
@@ -9,28 +8,22 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import software.ralf.app.platform.inject.metro.ContributesScoped
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.Scoped
 import software.ralf.app.platform.scope.coroutine.MainCoroutineDispatcher
 import software.ralf.app.platform.scope.coroutine.launch
-import software.ralf.storymile.player.impl.generated.resources.Res
 import software.ralf.storymile.podcast.QueueRepository
 import software.ralf.storymile.podcast.QueuedEpisode
-import software.ralf.storymile.runtimemode.RuntimeMode
-import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.user.UserScope
 
 @SingleIn(UserScope::class)
 @ContributesScoped(UserScope::class)
-class PlayerImpl
-internal constructor(
+class PlayerImpl(
   private val audioPlayer: Lazy<AudioPlayer>,
-  private val runtimeModeController: RuntimeModeController,
   private val queueRepository: QueueRepository,
+  private val audioSourceResolver: AudioSourceResolver,
   @MainCoroutineDispatcher private val mainDispatcher: CoroutineDispatcher,
-  private val sourceUri: (String) -> String,
 ) : Player, Scoped {
   override val state: StateFlow<Player.State>
     field = MutableStateFlow(Player.State())
@@ -40,26 +33,10 @@ internal constructor(
   private val queue: List<QueuedEpisode>
     get() = queueRepository.episodes.value.orEmpty()
 
-  private var fakeMode = false
   private var source: String? = null
   private var closed = false
   private var playRequested = false
   private var observedPlayIntent = false
-
-  @Inject
-  @OptIn(ExperimentalResourceApi::class)
-  constructor(
-    audioPlayer: Lazy<AudioPlayer>,
-    runtimeModeController: RuntimeModeController,
-    queueRepository: QueueRepository,
-    @MainCoroutineDispatcher mainDispatcher: CoroutineDispatcher,
-  ) : this(
-    audioPlayer = audioPlayer,
-    runtimeModeController = runtimeModeController,
-    queueRepository = queueRepository,
-    mainDispatcher = mainDispatcher,
-    sourceUri = { Res.getUri(it) },
-  )
 
   override fun onEnterScope(scope: Scope) {
     scope.launch(mainDispatcher) {
@@ -67,7 +44,6 @@ internal constructor(
         if (closed) {
           return@launch
         }
-        fakeMode = runtimeModeController.mode == RuntimeMode.Fake
         scope.launch(mainDispatcher) {
           queueRepository.episodes.filterNotNull().collect { updateQueue(it) }
         }
@@ -220,7 +196,7 @@ internal constructor(
   private fun startQueuedEpisode(episode: QueuedEpisode) {
     state.value = selection(episode).copy(playWhenReady = true)
     try {
-      load(source = resolveEnclosure(episode.episode.enclosure.url), autoPlay = true)
+      load(source = audioSourceResolver.resolve(episode.episode.enclosure.url), autoPlay = true)
     } catch (exception: Exception) {
       if (exception is CancellationException) {
         throw exception
@@ -268,18 +244,6 @@ internal constructor(
     if (autoPlay) {
       audio.play()
     }
-  }
-
-  private fun resolveEnclosure(url: String): String {
-    if (fakeMode) {
-      for (number in 1..3) {
-        val file = "test-episode-$number.mp3"
-        if (url == "https://storymile.invalid/test-episodes/$file") {
-          return sourceUri("files/test-episodes/$file")
-        }
-      }
-    }
-    return url
   }
 
   private val QueuedEpisode.key: Pair<String, String>

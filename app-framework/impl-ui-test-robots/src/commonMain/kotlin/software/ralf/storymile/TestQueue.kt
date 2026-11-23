@@ -6,23 +6,30 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
+import software.ralf.storymile.podcast.FakePodcasts
 import software.ralf.storymile.podcast.QueueRepository
+import software.ralf.storymile.runtimemode.RuntimeMode
+import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.user.UserScope
 
 /** Gives tests an empty Library Queue. */
 object TestQueue {
   suspend fun clear(rootScope: Scope) {
-    val userScope = rootScope.metroDependencyGraph<AppBindings>().userManager.userScope.value
+    val graph = rootScope.metroDependencyGraph<AppBindings>()
+    val userScope = graph.userManager.userScope.value
     val queue = userScope.metroDependencyGraph<UserBindings>().queue
     val entries = queue.episodes.filterNotNull()
-    entries.first().forEach { queue.remove(it) }
+    val seedSize =
+      if (graph.runtimeModeController.mode == RuntimeMode.Fake) FakePodcasts.queue.size else 0
+    entries.first { it.size >= seedSize }.forEach { queue.remove(it) }
     entries.first { it.isEmpty() }
   }
 
   @ContributesTo(AppScope::class)
   interface AppBindings {
     val userManager: UserManager
+    val runtimeModeController: RuntimeModeController
   }
 
   @ContributesTo(UserScope::class)

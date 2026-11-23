@@ -1,11 +1,16 @@
 package software.ralf.storymile.discovery
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import software.ralf.storymile.http.HttpClient
 import software.ralf.storymile.http.HttpResponse
 import software.ralf.storymile.util.Device
 
 @Inject
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 class ApplePodcastDiscoveryService(private val client: HttpClient, private val device: Device) :
   PodcastDiscoveryService {
   override suspend fun search(query: String): HttpResponse<List<DiscoveredPodcast>> {

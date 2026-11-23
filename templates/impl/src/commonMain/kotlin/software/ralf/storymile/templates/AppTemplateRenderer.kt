@@ -96,8 +96,6 @@ import software.ralf.app.platform.presenter.compose.backgesture.ForwardBackPress
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.app.platform.renderer.Render
 import software.ralf.storymile.design.LocalOnLogoLongPress
-import software.ralf.storymile.runtimemode.RuntimeMode
-import software.ralf.storymile.runtimemode.RuntimeModeController
 import software.ralf.storymile.screen.DefaultScreenSizeProvider
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize
@@ -118,7 +116,7 @@ class AppTemplateRenderer(
   private val backGestureDispatcherPresenter: BackGestureDispatcherPresenter,
   private val screenSizeProvider: DefaultScreenSizeProvider,
   private val themeEnvironment: ThemeEnvironment,
-  private val runtimeModeController: RuntimeModeController,
+  private val shortcuts: AppShortcuts,
 ) : ComposeRenderer<AppTemplate>() {
   @Composable
   override fun Compose(model: AppTemplate, modifier: Modifier) {
@@ -129,15 +127,8 @@ class AppTemplateRenderer(
     CompositionLocalProvider(
       LocalScreenSize provides screenSize,
       LocalOnLogoLongPress provides
-        {
-          coroutineScope.launch {
-            val mode =
-              when (runtimeModeController.mode) {
-                RuntimeMode.Real -> RuntimeMode.Fake
-                RuntimeMode.Fake -> RuntimeMode.Real
-              }
-            runtimeModeController.switchMode(mode)
-          }
+        shortcuts.logoLongPress?.let { action ->
+          { coroutineScope.launch { action() } }
         },
     ) {
       StorymileTheme(environment = themeEnvironment) {

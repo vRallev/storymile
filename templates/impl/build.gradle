@@ -2,16 +2,14 @@ plugins {
   id 'software.ralf.storymile.library.kmp'
 }
 
- storymile {
+storymile {
   enableComposeUi true
   enableMetro true
   enableComposePresenters true
 }
 
 dependencies {
-  commonMainImplementation project(':runtime-mode:public')
   commonMainImplementation project(':theme:public')
 
-  commonTestImplementation project(':runtime-mode:testing')
   commonTestImplementation project(':theme:testing')
 }
