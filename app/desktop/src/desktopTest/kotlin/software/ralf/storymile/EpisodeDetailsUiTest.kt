@@ -3,7 +3,6 @@ package software.ralf.storymile
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.PixelMap
-import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.semantics.SemanticsActions
@@ -28,8 +27,6 @@ import assertk.assertions.isFalse
 import assertk.assertions.isGreaterThan
 import assertk.assertions.isLessThan
 import assertk.assertions.isNotEqualTo
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.storymile.discovery.DiscoveryRobot
@@ -289,10 +286,8 @@ class EpisodeDetailsUiTest {
   }
 
   private fun ComposeUiTest.saveFrame(name: String): PixelMap {
-    val file = File("build/reports/screenshots/episode-navigation-$name.png")
-    file.parentFile.mkdirs()
     val image = onRoot().captureToImage()
-    ImageIO.write(image.toAwtImage(), "png", file)
+    image.saveScreenshot("episode-navigation-$name")
     return image.toPixelMap()
   }
 

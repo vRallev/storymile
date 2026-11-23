@@ -2,7 +2,6 @@ package software.ralf.storymile
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.MouseInjectionScope
@@ -24,8 +23,6 @@ import androidx.compose.ui.unit.dp
 import assertk.assertThat
 import assertk.assertions.isLessThan
 import assertk.assertions.isTrue
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.math.abs
 import kotlin.test.Test
 
@@ -184,10 +181,7 @@ class HomeDiscoveryTransitionUiTest {
           }
           Frame(bounds(targetSearch), titlePosition(targetTitle), bounds(targetProfile))
         }
-      val screenshot =
-        File("build/reports/screenshots/discovery-transition-$name-$targetSearch.png")
-      screenshot.parentFile.mkdirs()
-      ImageIO.write(onRoot().captureToImage().toAwtImage(), "png", screenshot)
+      onRoot().captureToImage().saveScreenshot("discovery-transition-$name-$targetSearch")
       mainClock.advanceTimeBy(2_000)
       val endSearch = bounds(targetSearch)
       val endTitle = titlePosition(targetTitle)

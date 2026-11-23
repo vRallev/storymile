@@ -3,7 +3,6 @@ package software.ralf.storymile
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
@@ -28,8 +27,6 @@ import assertk.assertions.isGreaterThan
 import assertk.assertions.isLessThan
 import assertk.assertions.isLessThanOrEqualTo
 import assertk.assertions.isTrue
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.storymile.discovery.DiscoveryRobot
@@ -385,9 +382,7 @@ class ShowEpisodePaneUiTest {
   }
 
   private fun ComposeUiTest.saveFrame(name: String) {
-    val file = File("build/reports/screenshots/show-episode-pane-$name.png")
-    file.parentFile.mkdirs()
-    ImageIO.write(onRoot().captureToImage().toAwtImage(), "png", file)
+    onRoot().captureToImage().saveScreenshot("show-episode-pane-$name")
   }
 
   private data class Frame(

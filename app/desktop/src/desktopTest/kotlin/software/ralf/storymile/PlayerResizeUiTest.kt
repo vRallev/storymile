@@ -1,7 +1,6 @@
 package software.ralf.storymile
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsDisplayed
@@ -15,8 +14,6 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import assertk.assertThat
 import assertk.assertions.isGreaterThanOrEqualTo
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.math.roundToInt
 import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
@@ -69,9 +66,7 @@ class PlayerResizeUiTest {
 
   private fun ComposeUiTest.assertSpeedDrawn(step: String, pairedControls: Boolean = false) {
     val screenshot = onRoot().captureToImage()
-    val file = File("build/reports/screenshots/player-resize-$step.png")
-    file.parentFile.mkdirs()
-    ImageIO.write(screenshot.toAwtImage(), "png", file)
+    screenshot.saveScreenshot("player-resize-$step")
     val pixels = screenshot.toPixelMap()
     val parts =
       listOf("speed-value", "speed-label") +

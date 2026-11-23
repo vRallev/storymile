@@ -4,7 +4,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PixelMap
-import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.test.ComposeUiTest
@@ -16,8 +15,6 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import assertk.assertThat
 import assertk.assertions.isLessThan
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.test.Test
@@ -44,9 +41,7 @@ class PlayerSliderTransitionUiTest {
               val bounds = thumbBounds(expanded = true)
               val screenshot = onRoot().captureToImage()
               if (darkTheme && size.width == 1440.dp && target == 0.2f) {
-                val file = File("build/reports/screenshots/player-slider-dark-transition.png")
-                file.parentFile.mkdirs()
-                ImageIO.write(screenshot.toAwtImage(), "png", file)
+                screenshot.saveScreenshot("player-slider-dark-transition")
               }
               assertThumbAboveTrack(screenshot.toPixelMap(), bounds, color)
             }

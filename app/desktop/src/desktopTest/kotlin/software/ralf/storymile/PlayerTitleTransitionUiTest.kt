@@ -11,7 +11,6 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PixelMap
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.platform.LocalDensity
@@ -39,8 +38,6 @@ import assertk.assertions.isFalse
 import assertk.assertions.isGreaterThanOrEqualTo
 import assertk.assertions.isNotEmpty
 import assertk.assertions.isStrictlyBetween
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -117,9 +114,7 @@ class PlayerTitleTransitionUiTest {
               mainClock.advanceTimeByFrame()
               val artwork = bounds("playback-artwork-expanded")
               if (size.width == 390.dp && target in listOf(0.1f, 0.2f, 0.5f)) {
-                val file = File("build/reports/screenshots/player-title-path-$target.png")
-                file.parentFile.mkdirs()
-                ImageIO.write(onRoot().captureToImage().toAwtImage(), "png", file)
+                onRoot().captureToImage().saveScreenshot("player-title-path-$target")
               }
               listOf("title", "subtitle").forEach { key ->
                 val label = bounds("playback-$key-expanded")
