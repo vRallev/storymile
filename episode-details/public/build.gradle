@@ -11,5 +11,6 @@ dependencies {
   commonMainApi project(':podcast:public')
 
   commonMainImplementation project(':templates:public')
+  commonMainImplementation project(':theme:public')
   commonMainImplementation project(':util:public')
 }

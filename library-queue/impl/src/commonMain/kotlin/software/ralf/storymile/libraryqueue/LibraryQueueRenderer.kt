@@ -5,14 +5,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
-import software.ralf.storymile.library.LibraryEpisodePanes
+import software.ralf.storymile.episodedetails.EpisodeListDetailLayout
 
 @ContributesRenderer
 class LibraryQueueRenderer : ComposeRenderer<LibraryQueuePresenterImpl.ListModel>() {
   @Composable
   override fun Compose(model: LibraryQueuePresenterImpl.ListModel, modifier: Modifier) {
     val listState = LocalLibraryQueueListState.current ?: rememberLazyListState()
-    LibraryEpisodePanes(
+    EpisodeListDetailLayout(
       loading = model.episodes == null,
       detail = model.selection?.content,
       modifier = modifier,

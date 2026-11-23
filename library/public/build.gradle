@@ -4,12 +4,4 @@ plugins {
 
 storymile {
   enableComposePresenters true
-  enableComposeUi true
-}
-
-dependencies {
-  commonMainImplementation project(':episode-details:public')
-  commonMainImplementation project(':podcast-shows:public')
-  commonMainImplementation project(':templates:public')
-  commonMainImplementation project(':theme:public')
 }
