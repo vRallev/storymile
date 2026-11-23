@@ -13,7 +13,6 @@ import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import software.ralf.storymile.http.HttpClient
 import software.ralf.storymile.http.HttpResponse
-import software.ralf.storymile.podcast.BundledPodcastFixtures
 import software.ralf.storymile.podcast.PodcastFeed
 import software.ralf.storymile.runtimemode.RuntimeMode
 import software.ralf.storymile.runtimemode.RuntimeModeController
@@ -52,7 +51,7 @@ class PodcastDiscoveryOverrideInjectionTest {
         controller = FakeRuntimeModeController(mode),
         client = client,
         device = FakeDevice(),
-        feeds = BundledPodcastFixtures.feeds,
+        feeds = DiscoveryPodcastFixtures.feeds,
       )
 
   @DependencyGraph(AppScope::class)

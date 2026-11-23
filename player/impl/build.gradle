@@ -12,6 +12,10 @@ dependencies {
   commonMainImplementation project(':user:public')
 
   desktopMainImplementation libs.jlayer
+}
 
-  desktopTestImplementation project(':podcast:impl-robots')
+tasks.named('desktopTestProcessResources') {
+  from(project.isolated.rootProject.projectDirectory.dir('podcast/impl-fake/src/commonMain/composeResources/files/test-episodes')) {
+    into 'test-episodes'
+  }
 }

@@ -7,17 +7,19 @@ import java.net.InetSocketAddress
 import java.net.URI
 import java.nio.ByteBuffer
 import java.nio.file.Files
+import java.nio.file.Path
 import java.util.jar.JarEntry
 import java.util.jar.JarOutputStream
+import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
-import software.ralf.storymile.podcast.BundledPodcastFixtures
 
 class Mp3DecoderTest {
   private val sources =
-    BundledPodcastFixtures.queue.map {
-      checkNotNull(BundledPodcastFixtures.audioUri(it.episode.enclosure.url))
-    }
+    Path.of(checkNotNull(javaClass.getResource("/test-episodes")).toURI())
+      .listDirectoryEntries("*.mp3")
+      .sorted()
+      .map { it.toUri().toString() }
 
   @Test
   fun `all bundled episode URIs decode to audible PCM`() = runTest {
