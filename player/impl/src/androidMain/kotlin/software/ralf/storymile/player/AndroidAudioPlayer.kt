@@ -65,6 +65,24 @@ class AndroidAudioPlayer(
             }
           }
 
+          override fun onIsPlayingChanged(isPlaying: Boolean) {
+            if (this@AndroidAudioPlayer.player !== engine) {
+              return
+            }
+            polling?.cancel()
+            polling =
+              if (isPlaying) {
+                coroutineScope.launch(mainDispatcher) {
+                  while (isActive) {
+                    delay(100)
+                    publish(engine)
+                  }
+                }
+              } else {
+                null
+              }
+          }
+
           override fun onPlayerError(error: PlaybackException) {
             if (this@AndroidAudioPlayer.player === engine) {
               fail(error)
@@ -76,13 +94,6 @@ class AndroidAudioPlayer(
       engine.playbackParameters = PlaybackParameters(speed, 1f)
       engine.setMediaItem(MediaItem.fromUri(source))
       engine.prepare()
-      polling =
-        coroutineScope.launch(mainDispatcher) {
-          while (isActive && player === engine) {
-            publish(engine)
-            delay(100)
-          }
-        }
     } catch (exception: Throwable) {
       fail(exception)
     }
