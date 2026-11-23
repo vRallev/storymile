@@ -71,9 +71,6 @@ abstract class OkioStoragePlatform(
   ): ByteArray? {
     return withContext(ioDispatcher) {
       val path = storageFile(namespace, area, name, create = false) ?: return@withContext null
-      if (fileSystem.metadataOrNull(path) == null) {
-        return@withContext null
-      }
       fileSystem.read(path) { readByteArray() }
     }
   }
@@ -160,7 +157,10 @@ abstract class OkioStoragePlatform(
       storageDirectory(namespace, area, segments.dropLast(1), create, root) ?: return null
     val path = directory / segments.last()
     val metadata = fileSystem.metadataOrNull(path)
-    check(metadata == null || (metadata.symlinkTarget == null && metadata.isRegularFile)) {
+    if (metadata == null) {
+      return if (create) path else null
+    }
+    check(metadata.symlinkTarget == null && metadata.isRegularFile) {
       "Storage path must be a regular file: $path"
     }
     return path
