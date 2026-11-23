@@ -23,7 +23,7 @@ class ApplePodcastChartResponseTest {
       """
         .trimIndent()
 
-    assertThat(ApplePodcastChartResponse().decode(body).single().artworkUrl)
+    assertThat(ApplePodcastChartResponse.decode(body).single().artworkUrl)
       .isEqualTo("https://is1-ssl.mzstatic.com/image/thumb/cover.jpg/1200x1200bb.png")
   }
 
@@ -42,7 +42,7 @@ class ApplePodcastChartResponseTest {
       """
         .trimIndent()
 
-    assertThat(ApplePodcastChartResponse().decode(body))
+    assertThat(ApplePodcastChartResponse.decode(body))
       .isEqualTo(
         listOf(
           DiscoveredPodcast(
@@ -75,7 +75,7 @@ class ApplePodcastChartResponseTest {
       """
         .trimIndent()
 
-    assertThat(ApplePodcastChartResponse().decode(body))
+    assertThat(ApplePodcastChartResponse.decode(body))
       .isEqualTo(
         listOf(
           DiscoveredPodcast("1", "Absent", null, null, null, null),
@@ -84,8 +84,7 @@ class ApplePodcastChartResponseTest {
           DiscoveredPodcast("4", "Empty", null, null, null, null),
         ),
       )
-    assertThat(ApplePodcastChartResponse().decode("""{"feed":{"entry":[]}}"""))
-      .isEqualTo(emptyList())
+    assertThat(ApplePodcastChartResponse.decode("""{"feed":{"entry":[]}}""")).isEqualTo(emptyList())
   }
 
   @Test
@@ -101,7 +100,7 @@ class ApplePodcastChartResponseTest {
       )
 
     bodies.forEach { body ->
-      assertFailure { ApplePodcastChartResponse().decode(body) }
+      assertFailure { ApplePodcastChartResponse.decode(body) }
         .isInstanceOf<IllegalArgumentException>()
     }
   }
@@ -124,7 +123,7 @@ class ApplePodcastChartResponseTest {
       )
 
     entries.forEach { entry ->
-      assertFailure { ApplePodcastChartResponse().decode("""{"feed":{"entry":[$entry]}}""") }
+      assertFailure { ApplePodcastChartResponse.decode("""{"feed":{"entry":[$entry]}}""") }
         .isInstanceOf<IllegalArgumentException>()
     }
   }
