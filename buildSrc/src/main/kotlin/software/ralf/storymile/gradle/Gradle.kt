@@ -1,6 +1,7 @@
 package software.ralf.storymile.gradle
 
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.CompileSdkSpec
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import java.util.Locale
 import org.gradle.api.JavaVersion
@@ -23,8 +24,11 @@ internal val Project.ci: Boolean
 internal val Project.enableWasm: Boolean
   get() = providers.gradleProperty("storymile.enableWasm").map { it.toBoolean() }.getOrElse(false)
 
-internal val Project.androidCompileSdk: Int
-  get() = libs.findVersion("android-compileSdk").get().requiredVersion.toInt()
+internal fun Project.configureAndroidCompileSdk(spec: CompileSdkSpec) {
+  val major = libs.findVersion("android-compileSdk").get().requiredVersion.toInt()
+  val minor = libs.findVersion("android-compileSdkMinor").get().requiredVersion.toInt()
+  spec.version = spec.release(major) { minorApiLevel = minor }
+}
 
 internal val Project.androidMinSdk: Int
   get() = libs.findVersion("android-minSdk").get().requiredVersion.toInt()
