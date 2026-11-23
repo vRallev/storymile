@@ -1,5 +1,6 @@
 package software.ralf.storymile.playback
 
+import androidx.compose.runtime.SideEffect
 import app.cash.turbine.ReceiveTurbine
 import assertk.assertThat
 import assertk.assertions.isEqualTo
@@ -10,6 +11,7 @@ import assertk.assertions.isSameInstanceAs
 import assertk.assertions.isTrue
 import kotlin.test.Test
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.presenter.compose.ComposePresenter
 import software.ralf.app.platform.presenter.compose.test
@@ -97,6 +99,36 @@ class PlaybackPresenterImplTest {
       assertThat(player.positionSeconds).isEqualTo(player.durationSeconds)
     }
   }
+
+  @Test
+  fun `subsecond progress keeps the current model and skips from the latest audio position`() =
+    runTest {
+      val player = FakePlayer()
+      val initial = Player.State(episode = queued("Current"), positionMillis = 1_100)
+      player.publish(initial)
+      val presenter = PlaybackPresenterImpl(player)
+      var presentations = 0
+      ComposePresenter<Unit, PlaybackPresenterImpl.Model> {
+          val model = presenter.present(it)
+          SideEffect { presentations++ }
+          model
+        }
+        .test(this) {
+          val model = awaitItem().player
+          val beforeTick = presentations
+          player.publish(initial.copy(positionMillis = 1_950))
+          runCurrent()
+          expectNoEvents()
+          assertThat(presentations).isEqualTo(beforeTick)
+          model.onSkipForward()
+          assertThat(player.seekRequests).isEqualTo(listOf(31_950L))
+
+          player.publish(initial.copy(positionMillis = 1_990, playWhenReady = true))
+          assertThat(awaitItem().player.isPlaying).isTrue()
+          player.publish(initial.copy(positionMillis = 2_000, playWhenReady = true))
+          assertThat(awaitItem().player.positionSeconds).isEqualTo(2)
+        }
+    }
 
   @Test
   fun `queue selection loads the episode and preserves listening preferences`() = runTest {
