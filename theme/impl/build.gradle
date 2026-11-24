@@ -8,8 +8,9 @@ storymile {
 }
 
 dependencies {
-  commonMainImplementation libs.compose.multiplatform.ui
   commonMainImplementation project(':logging:public')
   commonMainImplementation project(':storage:public')
+  commonMainImplementation libs.compose.multiplatform.ui
+
   commonTestImplementation project(':storage:testing')
 }
