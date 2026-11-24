@@ -4,11 +4,15 @@ import kotlin.js.JsAny
 import kotlin.js.Promise
 
 internal external interface BrowserFileStorage : JsAny {
+  fun hasNamespace(namespace: String): Promise<JsAny?>
+
+  fun copyPreferences(sourceNamespace: String, targetNamespace: String)
+
+  fun deleteNamespace(namespace: String): Promise<JsAny?>
+
   fun readFile(namespace: String, area: String, name: String): Promise<JsAny?>
 
   fun writeFile(namespace: String, area: String, name: String, content: JsAny): Promise<JsAny?>
-
-  fun cancel(operation: Promise<JsAny?>)
 
   fun deleteFile(namespace: String, area: String, name: String): Promise<JsAny?>
 
@@ -35,7 +39,50 @@ internal external interface BrowserFileStorage : JsAny {
       }
       return { folder, name };
     }
+    function preferencesPrefix(namespace) {
+      return 'storymile.storage/' + namespace + '/preferences/';
+    }
+    function preferenceKeys(namespace) {
+      return Object.keys(localStorage).filter(key => key.startsWith(preferencesPrefix(namespace)));
+    }
+    async function namespaceParent() {
+      const root = await navigator.storage.getDirectory();
+      const storymile = await root.getDirectoryHandle('storymile');
+      return storymile.getDirectoryHandle('storage');
+    }
     return {
+      async hasNamespace(namespace) {
+        if (preferenceKeys(namespace).length) return true;
+        try {
+          const parent = await namespaceParent();
+          await parent.getDirectoryHandle(namespace);
+          return true;
+        } catch (error) {
+          if (error.name === 'NotFoundError') return false;
+          throw error;
+        }
+      },
+      copyPreferences(sourceNamespace, targetNamespace) {
+        const source = preferencesPrefix(sourceNamespace);
+        const target = preferencesPrefix(targetNamespace);
+        for (const key of preferenceKeys(sourceNamespace)) {
+          localStorage.setItem(target + key.slice(source.length), localStorage.getItem(key));
+        }
+      },
+      async deleteNamespace(namespace) {
+        const prefix = preferencesPrefix(namespace);
+        for (const key of Object.keys(localStorage)) {
+          if (key.startsWith(prefix) || key.startsWith('datastore_LOCAL_' + prefix)) {
+            localStorage.removeItem(key);
+          }
+        }
+        try {
+          const parent = await namespaceParent();
+          await parent.removeEntry(namespace, { recursive: true });
+        } catch (error) {
+          if (error.name !== 'NotFoundError') throw error;
+        }
+      },
       async readFile(namespace, area, name) {
         try {
           const location = await locateEntry(namespace, area, name, false);
@@ -76,7 +123,6 @@ internal external interface BrowserFileStorage : JsAny {
         promise.cancel = () => { cancelled = true; };
         return promise;
       },
-      cancel(operation) { operation.cancel(); },
       deleteFile(namespace, area, name) {
         let cancelled = false;
         const promise = (async () => {
@@ -119,3 +165,6 @@ internal external interface BrowserFileStorage : JsAny {
   }""",
 )
 internal external fun createBrowserFileStorage(): BrowserFileStorage
+
+@JsFun("(operation) => operation.cancel()")
+internal external fun cancelBrowserFileOperation(operation: Promise<JsAny?>)

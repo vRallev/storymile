@@ -59,14 +59,7 @@ class DatabaseStorageIntegrationTest {
 
         override fun cacheDirectory(): Path = root / "cache"
       }
-    val factory: Storage.Factory =
-      object : Storage.Factory {
-        override fun create(
-          namespace: String,
-          coroutineScope: CoroutineScope,
-          mustBePersistent: Boolean,
-        ): Storage = DefaultStorage(namespace, coroutineScope, storagePlatform)
-      }
+    val factory: Storage.Factory = DefaultStorage.Factory(storagePlatform)
     val platform = DelayedClosePlatform()
     val dispatcher = StandardTestDispatcher(testScheduler)
     val fixtures = mutableListOf<DatabaseFixture>()

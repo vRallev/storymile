@@ -72,7 +72,8 @@ delegates to the app-scoped
 obtains the
 [tabs](../tabs/impl/src/commonMain/kotlin/software/ralf/storymile/tabs/TabsPresenterImpl.kt) and
 [playback](../playback/impl/src/commonMain/kotlin/software/ralf/storymile/playback/PlaybackPresenterImpl.kt)
-presenters from the active user scope. A scope change resets their state.
+presenters from the active user scope. Sign-in and sign-out with kept files preserve both presenters.
+During a wipe, the app shows a progress indicator until the new guest scope is ready.
 The tabs presenter owns the selected destination and produces its content model.
 It starts with
 [HomePresenterImpl](../home/impl/src/commonMain/kotlin/software/ralf/storymile/home/HomePresenterImpl.kt).
@@ -117,7 +118,7 @@ provides the empty Downloads screen, rendered by
 [DownloadsRenderer](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsRenderer.kt).
 The user presenter places these models in the content, navigation, and playback slots of
 [AppTemplate](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/AppTemplate.kt).
-For guests, the profile icon opens
+The profile icon opens
 [SettingsPresenterImpl](../settings/impl/src/commonMain/kotlin/software/ralf/storymile/settings/SettingsPresenterImpl.kt)
 in the content backstack. Back restores the previous screen. The navigation and playback slots stay
 available.

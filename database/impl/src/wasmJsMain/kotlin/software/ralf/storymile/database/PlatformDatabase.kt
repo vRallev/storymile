@@ -10,9 +10,13 @@ import dev.zacsweers.metro.SingleIn
 import kotlin.coroutines.CoroutineContext
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
+import kotlin.js.JsBoolean
 import kotlin.js.Promise
+import kotlin.js.toBoolean
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.await
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.w3c.dom.Worker
 import software.ralf.storymile.user.UserScope
 
@@ -37,13 +41,19 @@ class PlatformDatabase : DatabasePlatform {
           RoomPodcastDatabaseConstructor.initialize()
         }
       }
-    val databaseWorker = createDatabaseWorker().also { worker = it }
-    return builder
-      .setDriver(WebWorkerSQLiteDriver(databaseWorker))
-      .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
-      .setSingleConnectionPool()
-      .setQueryCoroutineContext(coroutineContext)
-      .build()
+    return workerMutex.withLock {
+      val databaseWorker = createDatabaseWorker()
+      val result =
+        builder
+          .setDriver(WebWorkerSQLiteDriver(databaseWorker))
+          .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
+          .setSingleConnectionPool()
+          .setQueryCoroutineContext(coroutineContext)
+          .build()
+      worker = databaseWorker
+      if (path != null) persistentWorkers.add(databaseWorker)
+      result
+    }
   }
 
   override suspend fun close(database: RoomPodcastDatabase) {
@@ -56,7 +66,12 @@ class PlatformDatabase : DatabasePlatform {
         // A database that failed to open still needs its Room handle closed.
       } finally {
         database.close()
-        worker?.let { shutdownDatabaseWorker(it).await<JsAny?>() }
+        workerMutex.withLock {
+          worker?.let {
+            persistentWorkers.remove(it)
+            shutdownDatabaseWorker(it).await<JsAny?>()
+          }
+        }
       }
     } finally {
       worker = null
@@ -67,8 +82,22 @@ class PlatformDatabase : DatabasePlatform {
     }
   }
 
-  private companion object {
-    var pendingClose: CompletableDeferred<Unit>? = null
+  internal companion object {
+    private val workerMutex = Mutex()
+    private val persistentWorkers = mutableSetOf<Worker>()
+    private var pendingClose: CompletableDeferred<Unit>? = null
+
+    // The worker with the open database owns the browser's exclusive SQLite storage lock.
+    suspend fun manageFiles(encodedNamespace: String, delete: Boolean): Boolean =
+      workerMutex.withLock {
+        val active = persistentWorkers.firstOrNull()
+        val worker = active ?: createDatabaseWorker()
+        try {
+          manageDatabaseFiles(worker, encodedNamespace, delete).await<JsBoolean>().toBoolean()
+        } finally {
+          if (active == null) worker.terminate()
+        }
+      }
   }
 }
 
@@ -95,5 +124,30 @@ private fun shutdownDatabaseWorker(worker: Worker): Promise<JsAny?> =
       worker.addEventListener("message", onMessage);
       worker.addEventListener("error", onError);
       worker.postMessage({id: -1, data: {cmd: "shutdown"}});
+    })""",
+  )
+
+@Suppress("UnusedParameter") // Referenced by the JavaScript body.
+@OptIn(ExperimentalWasmJsInterop::class)
+private fun manageDatabaseFiles(
+  worker: Worker,
+  encodedNamespace: String,
+  deleteFiles: Boolean,
+): Promise<JsBoolean> =
+  js(
+    """new Promise((resolve, reject) => {
+      const channel = new MessageChannel();
+      const finish = () => {
+        worker.removeEventListener("error", onError);
+        channel.port1.close();
+      };
+      const onError = (event) => { finish(); reject(new Error(event.message)); };
+      worker.addEventListener("error", onError);
+      channel.port1.onmessage = ({data}) => {
+        finish();
+        if (data.error) reject(new Error(data.error));
+        else resolve(data.found);
+      };
+      worker.postMessage({cmd: "namespaceFiles", encodedNamespace, deleteFiles}, [channel.port2]);
     })""",
   )

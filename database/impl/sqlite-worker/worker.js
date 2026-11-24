@@ -8,7 +8,7 @@ let nextStatementId = 0;
 let shuttingDown = false;
 const databases = new Map();
 const statements = new Map();
-const persistentDatabases = new Set();
+const persistentDatabases = new Map();
 let releaseStorageLock;
 let storageLockRequest;
 
@@ -45,6 +45,45 @@ async function pauseStorage() {
   }
 }
 
+async function openPool() {
+  await acquireStorageLock();
+  sqlite ??= await sqlite3InitModule();
+  if (!pool) {
+    // This VFS works on static hosts without COOP/COEP response headers.
+    pool = await sqlite.installOpfsSAHPoolVfs({ directory: ".storymile-sqlite" });
+  } else {
+    await pool.unpauseVfs();
+  }
+}
+
+async function namespaceFiles({encodedNamespace, deleteFiles}) {
+  if (!/^(?:[0-9a-f]{2})+$/.test(encodedNamespace)) throw new Error("Invalid namespace");
+  if (!pool) {
+    // A fresh install has no databases. Avoid initializing SQLite just to inspect it.
+    const root = await navigator.storage.getDirectory();
+    try {
+      await root.getDirectoryHandle(".storymile-sqlite");
+    } catch (error) {
+      if (error.name === "NotFoundError") return false;
+      throw error;
+    }
+  }
+  const prefix = "/storymile-" + encodedNamespace + "-";
+  try {
+    await openPool();
+    const names = pool.getFileNames().filter((name) => name.startsWith(prefix));
+    if (deleteFiles) {
+      for (const name of persistentDatabases.values()) {
+        if (name.startsWith(prefix)) throw new Error("Cannot delete an open database");
+      }
+      for (const name of names) pool.unlink(name);
+    }
+    return names.length > 0;
+  } finally {
+    if (persistentDatabases.size === 0) await pauseStorage();
+  }
+}
+
 async function dispatch({ id, data }) {
   switch (data.cmd) {
     case "open": {
@@ -54,14 +93,8 @@ async function dispatch({ id, data }) {
         database = new sqlite.oo1.DB(":memory:");
       } else {
         // Reject competing workers before VFS initialization can touch their files.
-        await acquireStorageLock();
         try {
-          if (!pool) {
-            // This VFS works on static hosts without COOP/COEP response headers.
-            pool = await sqlite.installOpfsSAHPoolVfs({ directory: ".storymile-sqlite" });
-          } else {
-            await pool.unpauseVfs();
-          }
+          await openPool();
           await pool.reserveMinimumCapacity(pool.getFileCount() + 4);
           database = new pool.OpfsSAHPoolDb(data.fileName, "c");
         } catch (error) {
@@ -71,7 +104,7 @@ async function dispatch({ id, data }) {
       }
       const databaseId = nextDatabaseId++;
       databases.set(databaseId, database);
-      if (data.fileName !== ":memory:") persistentDatabases.add(databaseId);
+      if (data.fileName !== ":memory:") persistentDatabases.set(databaseId, data.fileName);
       postMessage({ id, data: { databaseId } });
       break;
     }
@@ -154,7 +187,20 @@ async function dispatch({ id, data }) {
 
 // Preserve message order across asynchronous initialization, open, and close operations.
 let requests = Promise.resolve();
-self.onmessage = ({ data }) => {
+self.onmessage = ({ data, ports }) => {
+  if (data.cmd === "namespaceFiles") {
+    const port = ports[0];
+    requests = requests.then(async () => {
+      try {
+        port.postMessage({found: await namespaceFiles(data)});
+      } catch (error) {
+        port.postMessage({error: error.message});
+      } finally {
+        port.close();
+      }
+    });
+    return;
+  }
   requests = requests.then(() => dispatch(data)).catch((error) => {
     postMessage({ id: data.id, error: error.message });
   });

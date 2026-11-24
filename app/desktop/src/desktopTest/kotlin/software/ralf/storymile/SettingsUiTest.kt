@@ -19,10 +19,12 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelected
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -65,6 +67,57 @@ class SettingsUiTest {
       }
       composeRobot<DiscoveryRobot> { seeQuery("Field") }
       onNode(settings).assertDoesNotExist()
+    }
+  }
+
+  @Test
+  fun `account long presses sign in and offer a choice of what to keep on sign-out`() {
+    DesktopUiTestRule().runPhoneRobotTest {
+      val guest = hasText("Guest") and hasText("Sign in to sync") and hasClickAction()
+      val signedIn = hasText("Fake user") and hasText("Basic") and hasText("Sign out")
+
+      fun openSettings() {
+        runOnUiThread { onNodeWithTag("tab-profile").performClick() }
+        waitUntilAtLeastOneExists(matcher = guest, timeoutMillis = 5_000)
+      }
+
+      fun signIn() {
+        runOnUiThread { onNode(guest).performTouchInput { longClick() } }
+        waitUntilAtLeastOneExists(matcher = signedIn, timeoutMillis = 5_000)
+        onNode(signedIn).assertIsDisplayed()
+      }
+
+      fun openSignOutDialog() {
+        runOnUiThread { onNode(signedIn).performTouchInput { longClick() } }
+        onNodeWithText("Sign out?").assertIsDisplayed()
+      }
+
+      openSettings()
+      signIn()
+      runOnUiThread { onNode(signedIn).performClick() }
+      onNodeWithText("Sign out?").assertDoesNotExist()
+
+      openSignOutDialog()
+      onNodeWithText("Wiping deletes your local Library, queue, and files.", substring = true)
+        .assertIsDisplayed()
+      onNodeWithText("Both choices keep your preferences.", substring = true).assertIsDisplayed()
+      onNodeWithText("Keep files").assertIsDisplayed()
+      onNodeWithText("Wipe files").assertIsDisplayed()
+      runOnUiThread { onNodeWithText("Cancel").performClick() }
+      onNodeWithText("Sign out?").assertDoesNotExist()
+      onNode(signedIn).assertIsDisplayed()
+
+      openSignOutDialog()
+      runOnUiThread { onNodeWithText("Keep files").performClick() }
+      waitUntilAtLeastOneExists(matcher = guest, timeoutMillis = 5_000)
+
+      signIn()
+      openSignOutDialog()
+      runOnUiThread { onNodeWithText("Wipe files").performClick() }
+      waitUntil(timeoutMillis = 5_000) { onAllNodes(signedIn).fetchSemanticsNodes().isEmpty() }
+      composeRobot<AppShellRobot> { selectTab(Tab.HOME) }
+      openSettings()
+      onNode(guest).assertIsDisplayed()
     }
   }
 

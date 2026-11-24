@@ -12,9 +12,11 @@ import dev.zacsweers.metro.SingleIn
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.js.JsAny
+import kotlin.js.JsBoolean
 import kotlin.js.JsException
 import kotlin.js.Promise
 import kotlin.js.asJsException
+import kotlin.js.toBoolean
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
@@ -26,8 +28,24 @@ import kotlinx.coroutines.withContext
 /** Stores preferences in browser local storage and files in origin-private storage. */
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
-class WasmJsStoragePlatform : StoragePlatform() {
+class WasmJsStoragePlatform(private val databases: Lazy<BrowserStorageDatabases>) :
+  StoragePlatform() {
   private val files = createBrowserFileStorage()
+
+  internal override suspend fun hasNamespace(namespace: String): Boolean =
+    accessBrowserStorage { (files.hasNamespace(namespace).await() as JsBoolean).toBoolean() } ||
+      databases.value.hasDatabases(namespace)
+
+  internal override suspend fun copyPreferences(sourceNamespace: String, targetNamespace: String) {
+    accessBrowserStorage {
+      files.copyPreferences(sourceNamespace = sourceNamespace, targetNamespace = targetNamespace)
+    }
+  }
+
+  internal override suspend fun deleteNamespace(namespace: String) {
+    databases.value.deleteDatabases(namespace)
+    accessBrowserStorage { files.deleteNamespace(namespace).await() }
+  }
 
   internal override fun databasePath(namespace: String, name: String): String =
     "/storymile-$namespace-$name.db"
@@ -70,14 +88,14 @@ class WasmJsStoragePlatform : StoragePlatform() {
         files.writeByte(bytes, index, content[index].toInt() and 0xff)
       }
       val write = files.writeFile(namespace, area.directoryName, name, bytes)
-      write.await { files.cancel(write) }
+      write.await { cancelBrowserFileOperation(write) }
     }
   }
 
   internal override suspend fun deleteFile(namespace: String, area: FileStorageArea, name: String) {
     accessBrowserStorage {
       val delete = files.deleteFile(namespace, area.directoryName, name)
-      delete.await { files.cancel(delete) }
+      delete.await { cancelBrowserFileOperation(delete) }
     }
   }
 
@@ -88,7 +106,7 @@ class WasmJsStoragePlatform : StoragePlatform() {
   ) {
     accessBrowserStorage {
       val delete = files.deleteAllFiles(namespace, area.directoryName, path)
-      delete.await { files.cancel(delete) }
+      delete.await { cancelBrowserFileOperation(delete) }
     }
   }
 

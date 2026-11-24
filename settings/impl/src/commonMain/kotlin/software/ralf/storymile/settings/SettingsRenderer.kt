@@ -2,9 +2,11 @@ package software.ralf.storymile.settings
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +29,7 @@ import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.SdStorage
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.Wifi
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -40,6 +43,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
@@ -64,12 +68,17 @@ import software.ralf.storymile.design.TitleBar
 import software.ralf.storymile.settings.SettingsPresenter.Section
 import software.ralf.storymile.settings.impl.generated.resources.Res
 import software.ralf.storymile.settings.impl.generated.resources.account
+import software.ralf.storymile.settings.impl.generated.resources.account_action_failed
 import software.ralf.storymile.settings.impl.generated.resources.appearance
+import software.ralf.storymile.settings.impl.generated.resources.basic
+import software.ralf.storymile.settings.impl.generated.resources.cancel
 import software.ralf.storymile.settings.impl.generated.resources.default_speed
 import software.ralf.storymile.settings.impl.generated.resources.default_speed_description
 import software.ralf.storymile.settings.impl.generated.resources.default_speed_value
 import software.ralf.storymile.settings.impl.generated.resources.downloads
+import software.ralf.storymile.settings.impl.generated.resources.fake_user
 import software.ralf.storymile.settings.impl.generated.resources.guest
+import software.ralf.storymile.settings.impl.generated.resources.keep_files
 import software.ralf.storymile.settings.impl.generated.resources.manage_storage
 import software.ralf.storymile.settings.impl.generated.resources.manage_storage_value
 import software.ralf.storymile.settings.impl.generated.resources.no_settings_available
@@ -81,6 +90,9 @@ import software.ralf.storymile.settings.impl.generated.resources.rewind_on_resum
 import software.ralf.storymile.settings.impl.generated.resources.rewind_on_resume_value
 import software.ralf.storymile.settings.impl.generated.resources.settings
 import software.ralf.storymile.settings.impl.generated.resources.sign_in_to_sync
+import software.ralf.storymile.settings.impl.generated.resources.sign_out
+import software.ralf.storymile.settings.impl.generated.resources.sign_out_description
+import software.ralf.storymile.settings.impl.generated.resources.sign_out_title
 import software.ralf.storymile.settings.impl.generated.resources.skip_silence
 import software.ralf.storymile.settings.impl.generated.resources.skip_silence_description
 import software.ralf.storymile.settings.impl.generated.resources.theme
@@ -88,6 +100,7 @@ import software.ralf.storymile.settings.impl.generated.resources.theme_dark
 import software.ralf.storymile.settings.impl.generated.resources.theme_light
 import software.ralf.storymile.settings.impl.generated.resources.theme_system
 import software.ralf.storymile.settings.impl.generated.resources.wifi_only
+import software.ralf.storymile.settings.impl.generated.resources.wipe_files
 import software.ralf.storymile.theme.AppTheme
 import software.ralf.storymile.theme.ThemeMode
 
@@ -125,7 +138,7 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
                   .padding(vertical = 16.dp),
               verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-              Account(model.account)
+              Account(model)
               Section.entries.forEach { section ->
                 SectionRow(section = section, selected = model.selectedSection == section) {
                   model.onSelectSection(section)
@@ -162,7 +175,7 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
                 .padding(horizontal = sidePadding, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
           ) {
-            Account(model.account)
+            Account(model)
             Playback(detailed = false)
             Downloads()
             Appearance(themeMode = model.themeMode, onSelectThemeMode = model.onSelectThemeMode)
@@ -175,20 +188,61 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
         }
       }
     }
+    model.signOutConfirmation?.let { SignOutDialog(it) }
   }
 
   @Composable
-  private fun Account(account: SettingsPresenter.Account) {
+  private fun Account(model: SettingsPresenter.Model) {
     Group(title = stringResource(Res.string.account)) {
-      when (account) {
+      when (model.account) {
         SettingsPresenter.Account.Guest ->
           SettingRow(
             title = stringResource(Res.string.guest),
             icon = Icons.Filled.AccountCircle,
             value = stringResource(Res.string.sign_in_to_sync),
+            onLongClick = model.onAccountLongPress,
+          )
+        SettingsPresenter.Account.Fake ->
+          SettingRow(
+            title = stringResource(Res.string.fake_user),
+            icon = Icons.Filled.AccountCircle,
+            description = stringResource(Res.string.basic),
+            value = stringResource(Res.string.sign_out),
+            onLongClick = model.onAccountLongPress,
           )
       }
+      if (model.accountActionFailed) {
+        Text(
+          text = stringResource(Res.string.account_action_failed),
+          modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+          color = AppTheme.colorScheme.error,
+          style = AppTheme.typography.bodyMedium,
+        )
+      }
     }
+  }
+
+  @Composable
+  private fun SignOutDialog(confirmation: SettingsPresenter.SignOutConfirmation) {
+    AlertDialog(
+      onDismissRequest = confirmation.onCancel,
+      title = { Text(stringResource(Res.string.sign_out_title)) },
+      text = { Text(stringResource(Res.string.sign_out_description)) },
+      confirmButton = {
+        FlowRow(horizontalArrangement = Arrangement.End) {
+          TextButton(onClick = confirmation.onCancel) { Text(stringResource(Res.string.cancel)) }
+          TextButton(
+            onClick = confirmation.onWipeFiles,
+            colors = ButtonDefaults.textButtonColors(contentColor = AppTheme.colorScheme.error),
+          ) {
+            Text(stringResource(Res.string.wipe_files))
+          }
+          TextButton(onClick = confirmation.onKeepFiles) {
+            Text(stringResource(Res.string.keep_files))
+          }
+        }
+      },
+    )
   }
 
   @Composable
@@ -370,6 +424,7 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
     value: String? = null,
     checked: Boolean? = null,
     selected: Boolean? = null,
+    onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit = {},
   ) {
     val action =
@@ -378,6 +433,12 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
           Modifier.selectable(selected = selected, role = Role.Tab, onClick = onClick)
         checked != null ->
           Modifier.toggleable(value = checked, role = Role.Switch, onValueChange = {})
+        onLongClick != null ->
+          Modifier.combinedClickable(
+            role = Role.Button,
+            onLongClick = onLongClick,
+            onClick = onClick,
+          )
         else -> Modifier.clickable(role = Role.Button, onClick = onClick)
       }
     ListItem(

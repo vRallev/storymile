@@ -13,7 +13,6 @@ import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.createGraphFactory
 import java.nio.file.Files
 import kotlin.test.Test
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -39,7 +38,6 @@ import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.OkioStoragePlatform
 import software.ralf.storymile.storage.RuntimeModeStorageFactory
 import software.ralf.storymile.storage.Storage
-import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.user.UserScope
 
 class FollowShowPersistenceTest {
@@ -52,14 +50,7 @@ class FollowShowPersistenceTest {
 
         override fun cacheDirectory(): Path = root / "cache"
       }
-    val storageFactory =
-      object : Storage.Factory {
-        override fun create(
-          namespace: String,
-          coroutineScope: CoroutineScope,
-          mustBePersistent: Boolean,
-        ): Storage = DefaultStorage(namespace, coroutineScope, platform)
-      }
+    val storageFactory = DefaultStorage.Factory(platform)
     try {
       withApplication(storageFactory) { graph, user ->
         graph.showPresenter(user).test(this) {
@@ -131,7 +122,7 @@ class FollowShowPersistenceTest {
     }
     application.awaitReady()
     val graph = application.rootScope.metroDependencyGraph<Graph>()
-    val user = graph.userManager.userScope.value.metroDependencyGraph<UserBindings>()
+    val user = checkNotNull(graph.userManager.userScope.value).metroDependencyGraph<UserBindings>()
     try {
       block(graph, user)
     } finally {
@@ -147,7 +138,6 @@ class FollowShowPersistenceTest {
       [DefaultStorage.Factory::class, RuntimeModeStorageFactory::class, TestStorageBindings::class],
   )
   interface Graph : AppGraph {
-    val userManager: UserManager
     val catalog: PodcastDiscoveryRepository
     val feeds: PodcastFeedRepository
 

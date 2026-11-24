@@ -55,6 +55,13 @@ class PersistentRuntimeModeStorageTest {
 
   private class TestStorageFactory(private val preferences: DataStore<Preferences>) :
     Storage.Factory {
+    override suspend fun hasNamespace(namespace: String): Boolean = error("Unexpected lookup")
+
+    override suspend fun copyPreferences(sourceNamespace: String, targetNamespace: String): Unit =
+      error("Unexpected preference copy")
+
+    override suspend fun deleteNamespace(namespace: String): Unit = error("Unexpected deletion")
+
     override fun create(
       namespace: String,
       coroutineScope: CoroutineScope,

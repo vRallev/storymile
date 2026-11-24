@@ -95,9 +95,11 @@ Use assertk for value and exception assertions.
 Use `:storage:public` for preferences, files, and caches. App assembly selects `:storage:impl`.
 Inject `@ForScope(AppScope::class) storage: Storage` for app data.
 Inject `@ForScope(UserScope::class) storage: Storage` for user data, including guest data.
-`UserManager` starts a guest user and owns its child scope. Guest data uses `user-guest`.
+`UserManager` restores the local session at startup. New guests get a random `User.storageId`.
+Sign-in and sign-out with kept data reuse the same storage and user scope.
+Wiping starts a new guest with the previous preferences and deletes the old storage asynchronously.
 For future scopes, inject `Storage.Factory` in the owning module's binding container.
-Create one scope-qualified `Storage` with a dedicated child coroutine scope and stable `user-<id>` namespace.
+Create one scope-qualified `Storage` with a dedicated child coroutine scope and stable `user-<storageId>` namespace.
 The caller owns cancellation. Storage needs no lifecycle registration.
 Do not reuse the app handle for user data. Scope exit cancels storage work and preserves saved data.
 Delete files explicitly. Keep preference keys in the owning feature.
@@ -127,6 +129,8 @@ On Desktop, drag inward from either window edge to preview back navigation.
 Release past half the preview distance to go back. Return toward the edge and release to cancel.
 Escape cancels an active preview.
 To change the theme, choose System, Light, or Dark in Settings.
+To test account changes, long-press **Sign in to sync** in Settings.
+Long-press **Sign out** to choose whether to keep or wipe local files.
 
 Wasm is disabled and Isolated Projects is enabled by default. Wasm commands need
 `-Pstorymile.enableWasm=true --no-isolated-projects` until Kotlin's Wasm plugin supports isolation.

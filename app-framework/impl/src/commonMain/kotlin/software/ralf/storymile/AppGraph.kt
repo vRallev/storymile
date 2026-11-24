@@ -8,6 +8,7 @@ import software.ralf.app.platform.scope.Scoped
 import software.ralf.app.platform.scope.coroutine.CoroutineScopeScoped
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.theme.ThemeController
+import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.util.Platform
 
 /**
@@ -24,6 +25,9 @@ interface AppGraph {
 
   /** Appearance preference shared by the app's hosts. */
   val themeController: ThemeController
+
+  /** Loads and changes the active user session. */
+  val userManager: UserManager
 
   /** All [Scoped] instances that share the application lifecycle. */
   @ForScope(AppScope::class) @Multibinds(allowEmpty = true) val appScopedInstances: Set<Scoped>

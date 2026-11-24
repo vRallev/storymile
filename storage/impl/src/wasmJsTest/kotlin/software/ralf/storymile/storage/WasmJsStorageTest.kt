@@ -15,8 +15,53 @@ import software.ralf.app.platform.scope.runTestWithScope
 
 class WasmJsStorageTest {
   @Test
+  fun `rotating a browser namespace keeps preferences and clears files and caches`() =
+    runTestWithScope { _ ->
+      val platform = testPlatform()
+      val factory: Storage.Factory = DefaultStorage.Factory(platform)
+      val suffix = Random.nextInt(Int.MAX_VALUE)
+      val old = "old-$suffix"
+      val new = "new-$suffix"
+      val sourceScope = Scope.buildTestScope(this, name = "old")
+      val prefs = intPreferencesKey("speed")
+      try {
+        val guest = sourceScope.storage(old, platform)
+        guest.preferences("playback").edit { it[prefs] = 2 }
+        guest.files.write("episode", byteArrayOf(1))
+        guest.cache.write("audio", byteArrayOf(3))
+      } finally {
+        sourceScope.destroy()
+      }
+      val targetScope = Scope.buildTestScope(this, name = "new")
+      try {
+        factory.copyPreferences(sourceNamespace = old, targetNamespace = new)
+        val target = targetScope.storage(new, platform)
+        assertThat(target.preferences("playback").data.first()[prefs]).isEqualTo(2)
+        assertThat(target.files.read("episode")).isNull()
+        assertThat(target.cache.read("audio")).isNull()
+        factory.deleteNamespace(old)
+        assertThat(factory.hasNamespace(old)).isEqualTo(false)
+      } finally {
+        targetScope.destroy()
+        factory.deleteNamespace(old)
+        factory.deleteNamespace(new)
+      }
+    }
+
+  private fun testPlatform() =
+    WasmJsStoragePlatform(
+      lazy {
+        object : BrowserStorageDatabases {
+          override suspend fun hasDatabases(encodedNamespace: String): Boolean = false
+
+          override suspend fun deleteDatabases(encodedNamespace: String) = Unit
+        }
+      },
+    )
+
+  @Test
   fun `browser storage does not return native directory paths`() = runTestWithScope { scope ->
-    val storage: Storage = scope.storage("test-paths", WasmJsStoragePlatform())
+    val storage: Storage = scope.storage("test-paths", testPlatform())
 
     assertThat(storage.files.path).isNull()
     assertThat(storage.cache.directory("coil").path).isNull()
@@ -25,7 +70,7 @@ class WasmJsStorageTest {
   @Test
   fun `database filenames are stable and isolate user and database names`() =
     runTestWithScope { scope ->
-      val platform = WasmJsStoragePlatform()
+      val platform = testPlatform()
       val first: Storage = scope.storage(namespace = "user-alice", platform = platform)
       val second: Storage = scope.storage(namespace = "user-Alice", platform = platform)
       val path = first.databasePath("podcasts")
@@ -38,7 +83,7 @@ class WasmJsStorageTest {
   @Test
   fun `browser files preserve all byte values and empty replacements`() =
     runTestWithScope { scope ->
-      val platform = WasmJsStoragePlatform()
+      val platform = testPlatform()
       val storage: Storage = scope.storage("test-binary-${Random.nextInt(Int.MAX_VALUE)}", platform)
       val bytes = ByteArray(256) { it.toByte() }
 
@@ -56,7 +101,7 @@ class WasmJsStorageTest {
   @Test
   fun `browser directories isolate nested files and preserve their paths`() =
     runTestWithScope { scope ->
-      val platform = WasmJsStoragePlatform()
+      val platform = testPlatform()
       val storage: Storage =
         scope.storage("test-folders-${Random.nextInt(Int.MAX_VALUE)}", platform)
       val first: FileStorage = storage.files.directory("stories").directory("audio")
@@ -91,7 +136,7 @@ class WasmJsStorageTest {
   @Test
   fun `browser cache stays separate from durable files and other scopes`() =
     runTestWithScope { scope ->
-      val platform = WasmJsStoragePlatform()
+      val platform = testPlatform()
       val otherScope = Scope.buildTestScope(this, name = scope.name)
       val suffix = Random.nextInt(Int.MAX_VALUE)
       val first: Storage = scope.storage("test-cache-first-$suffix", platform)
@@ -129,7 +174,7 @@ class WasmJsStorageTest {
   @Test
   fun `browser clearing removes only the selected subtree and handles remain usable`() =
     runTestWithScope { scope ->
-      val platform = WasmJsStoragePlatform()
+      val platform = testPlatform()
       val otherScope = Scope.buildTestScope(this, name = scope.name)
       val suffix = Random.nextInt(Int.MAX_VALUE)
       val first: Storage = scope.storage("test-clear-first-$suffix", platform)
@@ -189,7 +234,7 @@ class WasmJsStorageTest {
   @Test
   fun `browser files with the same name stay isolated across same-name scopes`() =
     runTestWithScope { scope ->
-      val platform = WasmJsStoragePlatform()
+      val platform = testPlatform()
       val otherScope = Scope.buildTestScope(this, name = scope.name)
       val suffix = Random.nextInt(Int.MAX_VALUE)
       val first: Storage = scope.storage("test-first-$suffix", platform)

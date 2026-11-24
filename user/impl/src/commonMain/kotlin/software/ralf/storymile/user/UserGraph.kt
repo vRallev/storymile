@@ -23,6 +23,9 @@ interface UserGraph {
   @GraphExtension.Factory
   @ContributesTo(AppScope::class)
   fun interface Factory {
-    fun createUserGraph(@Provides user: User): UserGraph
+    fun createUserGraph(
+      @Provides user: User,
+      @Provides @ForScope(UserScope::class) storageNamespace: String,
+    ): UserGraph
   }
 }

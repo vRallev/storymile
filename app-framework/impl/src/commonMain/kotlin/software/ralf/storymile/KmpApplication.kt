@@ -60,8 +60,10 @@ class KmpApplication(
           controller.awaitInitialMode()
           launchThemeController.value = controller
         }
-        // Publish before registration because lifecycle callbacks can access the root scope.
+        // Publish before registration because lifecycle callbacks can access the root
+        // scope.
         rootScope.register(appGraph.appScopedInstances)
+        appGraph.userManager.awaitReady()
         themeLoading.await()
         ensureActive()
       } catch (failure: Throwable) {

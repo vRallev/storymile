@@ -49,7 +49,6 @@ import software.ralf.storymile.storage.InMemoryStoragePlatform
 import software.ralf.storymile.storage.Storage
 import software.ralf.storymile.storage.StoragePlatform
 import software.ralf.storymile.templates.AppTemplate
-import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.user.UserScope
 
 class RuntimeModeStorageTest {
@@ -58,7 +57,9 @@ class RuntimeModeStorageTest {
     withApplication(InMemoryStoragePlatform()) { graph, _ ->
       assertThat(graph.runtimeModeController.mode).isEqualTo(RuntimeMode.Real)
       val queue =
-        graph.userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().queue
+        checkNotNull(graph.userManager.userScope.value)
+          .metroDependencyGraph<UserStorageBindings>()
+          .queue
       val player = graph.player()
       val episode =
         QueuedEpisode(
@@ -111,7 +112,9 @@ class RuntimeModeStorageTest {
 
     withApplication(platform) { graph, _ ->
       val queue =
-        graph.userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().queue
+        checkNotNull(graph.userManager.userScope.value)
+          .metroDependencyGraph<UserStorageBindings>()
+          .queue
       val entries = queue.episodes.filterNotNull()
       val initial = entries.first { it.size >= demoIds.size }
       assertThat(initial.map { it.episode.id }).isEqualTo(demoIds)
@@ -158,7 +161,9 @@ class RuntimeModeStorageTest {
 
     withApplication(platform) { graph, _ ->
       val queue =
-        graph.userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().queue
+        checkNotNull(graph.userManager.userScope.value)
+          .metroDependencyGraph<UserStorageBindings>()
+          .queue
       val seeded = queue.episodes.filterNotNull().first { it.size >= demoIds.size }
       assertThat(seeded.map { it.episode.id }).isEqualTo(demoIds)
       graph.runtimeModeController.switchMode(RuntimeMode.Real)
@@ -166,7 +171,9 @@ class RuntimeModeStorageTest {
 
     withApplication(platform) { graph, _ ->
       val queue =
-        graph.userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().queue
+        checkNotNull(graph.userManager.userScope.value)
+          .metroDependencyGraph<UserStorageBindings>()
+          .queue
       assertThat(queue.episodes.filterNotNull().first()).isEqualTo(emptyList())
     }
   }
@@ -282,10 +289,10 @@ class RuntimeModeStorageTest {
   }
 
   private fun Graph.userStorage(): Storage =
-    userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().storage
+    checkNotNull(userManager.userScope.value).metroDependencyGraph<UserStorageBindings>().storage
 
   private fun Graph.player(): Player =
-    userManager.userScope.value.metroDependencyGraph<UserStorageBindings>().player
+    checkNotNull(userManager.userScope.value).metroDependencyGraph<UserStorageBindings>().player
 
   private suspend fun Storage.writeData(value: String) {
     preferences("settings").edit { it[stringPreferencesKey("value")] = value }
@@ -314,8 +321,6 @@ class RuntimeModeStorageTest {
   )
   interface Graph : AppGraph {
     val runtimeModeController: RuntimeModeController
-
-    val userManager: UserManager
 
     val appRootPresenter: AppRootPresenter
 

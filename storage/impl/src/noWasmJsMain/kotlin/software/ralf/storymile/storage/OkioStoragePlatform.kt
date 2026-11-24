@@ -31,6 +31,63 @@ abstract class OkioStoragePlatform(
   /** Returns an absolute cache directory reserved for Storymile. */
   protected abstract fun cacheDirectory(): Path
 
+  internal final override suspend fun hasNamespace(namespace: String): Boolean =
+    withContext(ioDispatcher) {
+      listOf(rootDirectory(), cacheDirectory()).any { root ->
+        ensureDirectory(root, create = false) && ensureDirectory(root / namespace, create = false)
+      }
+    }
+
+  internal final override suspend fun copyPreferences(
+    sourceNamespace: String,
+    targetNamespace: String,
+  ) {
+    withContext(ioDispatcher) {
+      val directory =
+        storageDirectory(
+          namespace = sourceNamespace,
+          area = "preferences",
+          segments = emptyList(),
+          create = false,
+          root = rootDirectory(),
+        ) ?: return@withContext
+      for (entry in fileSystem.list(directory)) {
+        coroutineContext.ensureActive()
+        if (entry.name.endsWith(".preferences_pb")) {
+          val source =
+            requireNotNull(
+              storageFile(
+                namespace = sourceNamespace,
+                area = "preferences",
+                name = entry.name,
+                create = false,
+              ),
+            )
+          val target =
+            requireNotNull(
+              storageFile(
+                namespace = targetNamespace,
+                area = "preferences",
+                name = entry.name,
+                create = true,
+              ),
+            )
+          fileSystem.copy(source, target)
+        }
+      }
+    }
+  }
+
+  internal final override suspend fun deleteNamespace(namespace: String) {
+    withContext(ioDispatcher) {
+      for (root in listOf(rootDirectory(), cacheDirectory())) {
+        if (ensureDirectory(root, create = false)) {
+          deleteTree(root / namespace)
+        }
+      }
+    }
+  }
+
   internal final override fun directoryPath(
     namespace: String,
     area: FileStorageArea,
