@@ -130,7 +130,7 @@ class PlaybackTransition(private val progress: () -> Float) {
     content: @Composable BoxScope.() -> Unit,
   ) {
     require(style.fontSize.value.isFinite() && style.fontSize.value > 0f)
-    val textMeasurer = rememberTextMeasurer(cacheSize = 0)
+    val textMeasurer = rememberTextMeasurer(cacheSize = 1)
     SharedContent(
       key,
       expanded,
