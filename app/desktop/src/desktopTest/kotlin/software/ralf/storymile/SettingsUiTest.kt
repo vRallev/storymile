@@ -6,7 +6,6 @@ import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasAnyAncestor
-import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -38,13 +37,9 @@ class SettingsUiTest {
       onNodeWithTag("settings-detail").assertDoesNotExist()
       onNodeWithTag("discovery-screen").assertDoesNotExist()
 
-      val signIn = onNode(hasText("Sign in to sync") and hasClickAction()).assertIsDisplayed()
+      onNode(hasContentDescription("Sign in with Google")).assertIsDisplayed()
       val skipSilence = onNodeWithTag("settings-skip-silence").assertIsOn()
-      runOnUiThread {
-        signIn.performClick()
-        skipSilence.performClick()
-      }
-      signIn.assertIsDisplayed()
+      runOnUiThread { skipSilence.performClick() }
       skipSilence.assertIsOn()
 
       runOnUiThread {
@@ -52,6 +47,28 @@ class SettingsUiTest {
       }
       composeRobot<DiscoveryRobot> { seeQuery("Field") }
       onNode(settings).assertDoesNotExist()
+    }
+  }
+
+  @Test
+  fun `signing in and signing out switches the account shown in settings`() {
+    DesktopUiTestRule().runPhoneRobotTest {
+      val settings = hasTestTag("settings-screen")
+      val profile = onNodeWithTag("tab-profile")
+      waitUntilAtLeastOneExists(matcher = hasTestTag("tab-profile"), timeoutMillis = 5_000)
+      runOnUiThread { profile.performClick() }
+      waitUntilAtLeastOneExists(matcher = settings, timeoutMillis = 5_000)
+      runOnUiThread { onNode(hasContentDescription("Sign in with Google")).performClick() }
+      waitUntil(timeoutMillis = 5_000) { onAllNodes(settings).fetchSemanticsNodes().isEmpty() }
+
+      runOnUiThread { profile.performClick() }
+      waitUntilAtLeastOneExists(matcher = hasText("listener@example.com"), timeoutMillis = 5_000)
+      runOnUiThread { onNodeWithText("Sign out").performClick() }
+      waitUntil(timeoutMillis = 5_000) { onAllNodes(settings).fetchSemanticsNodes().isEmpty() }
+
+      runOnUiThread { profile.performClick() }
+      waitUntilAtLeastOneExists(matcher = hasText("Guest"), timeoutMillis = 5_000)
+      onNode(hasContentDescription("Sign in with Google")).assertIsDisplayed()
     }
   }
 

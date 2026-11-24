@@ -1,15 +1,20 @@
 package software.ralf.storymile.settings
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
@@ -34,6 +39,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
@@ -43,10 +49,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
@@ -60,6 +69,7 @@ import software.ralf.storymile.settings.impl.generated.resources.default_speed
 import software.ralf.storymile.settings.impl.generated.resources.default_speed_description
 import software.ralf.storymile.settings.impl.generated.resources.default_speed_value
 import software.ralf.storymile.settings.impl.generated.resources.downloads
+import software.ralf.storymile.settings.impl.generated.resources.google_account
 import software.ralf.storymile.settings.impl.generated.resources.guest
 import software.ralf.storymile.settings.impl.generated.resources.manage_storage
 import software.ralf.storymile.settings.impl.generated.resources.manage_storage_value
@@ -71,13 +81,19 @@ import software.ralf.storymile.settings.impl.generated.resources.rewind_on_resum
 import software.ralf.storymile.settings.impl.generated.resources.rewind_on_resume_description
 import software.ralf.storymile.settings.impl.generated.resources.rewind_on_resume_value
 import software.ralf.storymile.settings.impl.generated.resources.settings
-import software.ralf.storymile.settings.impl.generated.resources.sign_in_to_sync
+import software.ralf.storymile.settings.impl.generated.resources.sign_in_failed
+import software.ralf.storymile.settings.impl.generated.resources.sign_in_unavailable
+import software.ralf.storymile.settings.impl.generated.resources.sign_in_with_google
+import software.ralf.storymile.settings.impl.generated.resources.sign_out
+import software.ralf.storymile.settings.impl.generated.resources.signing_in
+import software.ralf.storymile.settings.impl.generated.resources.signing_out
 import software.ralf.storymile.settings.impl.generated.resources.skip_silence
 import software.ralf.storymile.settings.impl.generated.resources.skip_silence_description
 import software.ralf.storymile.settings.impl.generated.resources.theme
 import software.ralf.storymile.settings.impl.generated.resources.theme_value
 import software.ralf.storymile.settings.impl.generated.resources.wifi_only
 import software.ralf.storymile.theme.AppTheme
+import software.ralf.storymile.user.GoogleLogin
 
 @ContributesRenderer
 class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
@@ -105,7 +121,7 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
                   .padding(vertical = 16.dp),
               verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-              Account(model.account)
+              Account(model)
               Section.entries.forEach { section ->
                 SectionRow(section = section, selected = model.selectedSection == section) {
                   model.onSelectSection(section)
@@ -138,7 +154,7 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
                 .padding(horizontal = sidePadding, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
           ) {
-            Account(model.account)
+            Account(model)
             Playback(detailed = false)
             Downloads()
             Appearance()
@@ -154,15 +170,51 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
   }
 
   @Composable
-  private fun Account(account: SettingsPresenter.Account) {
+  private fun Account(model: SettingsPresenter.Model) {
+    val signedIn = model.account as? GoogleLogin.State.SignedIn
+    val status =
+      when (model.account) {
+        GoogleLogin.State.Unavailable -> Res.string.sign_in_unavailable
+        GoogleLogin.State.SigningIn -> Res.string.signing_in
+        GoogleLogin.State.SigningOut -> Res.string.signing_out
+        GoogleLogin.State.Failed -> Res.string.sign_in_failed
+        else -> null
+      }
     Group(title = stringResource(Res.string.account)) {
-      when (account) {
-        SettingsPresenter.Account.Guest ->
-          SettingRow(
-            title = stringResource(Res.string.guest),
-            icon = Icons.Filled.AccountCircle,
-            value = stringResource(Res.string.sign_in_to_sync),
+      ListItem(
+        headlineContent = {
+          val title = if (signedIn == null) Res.string.guest else Res.string.google_account
+          Text(signedIn?.email ?: stringResource(title))
+        },
+        leadingContent = {
+          Icon(imageVector = Icons.Filled.AccountCircle, contentDescription = null)
+        },
+        supportingContent =
+          status?.let {
+            { Text(stringResource(it), Modifier.semantics { liveRegion = LiveRegionMode.Polite }) }
+          },
+        trailingContent =
+          signedIn?.let {
+            { TextButton(onClick = model.onSignOut) { Text(stringResource(Res.string.sign_out)) } }
+          },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+      )
+      if (model.account == GoogleLogin.State.Guest || model.account == GoogleLogin.State.Failed) {
+        Box(
+          modifier =
+            Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
+              .heightIn(min = 48.dp)
+              .clip(AppTheme.shapes.large)
+              .clickable(role = Role.Button, onClick = model.onSignIn),
+          contentAlignment = Alignment.Center,
+        ) {
+          // Google's neutral pill from https://developers.google.com/identity/branding-guidelines.
+          Image(
+            painter = painterResource(Res.drawable.sign_in_with_google),
+            contentDescription = stringResource(Res.string.sign_in_with_google),
+            modifier = Modifier.width(180.dp * LocalDensity.current.fontScale).aspectRatio(4.5f),
           )
+        }
       }
     }
   }
