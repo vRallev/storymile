@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.core.view.WindowCompat
 import software.ralf.app.platform.renderer.ComposeAndroidRendererFactory
 import software.ralf.app.platform.renderer.renderCompose
 import software.ralf.storymile.theme.AndroidThemeEnvironment
@@ -30,12 +31,18 @@ class MainActivity : ComponentActivity() {
       splashScreen.setOnExitAnimationListener { it.remove() }
     }
     enableEdgeToEdge()
+    val insetsController = WindowCompat.getInsetsController(window, window.decorView)
 
     val kmpApplication = (application as KmpApplication.Provider).kmpApplication
     setContent {
       // The Android interop renderer does not forward the root modifier.
       Box(Modifier.fillMaxSize().semantics { testTagsAsResourceId = true }) {
-        kmpApplication.Content(themeEnvironment = remember { AndroidThemeEnvironment() }) {
+        kmpApplication.Content(
+          themeEnvironment = remember { AndroidThemeEnvironment() },
+          onAppearanceChanged = { darkTheme ->
+            insetsController.isAppearanceLightStatusBars = !darkTheme
+          },
+        ) {
           val rendererFactory = remember {
             ComposeAndroidRendererFactory.createForComposeUi(
               rootScopeProvider = rootScopeProvider(),

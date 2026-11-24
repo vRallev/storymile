@@ -8,6 +8,7 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.ForScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +27,7 @@ class StoredThemeController(
 ) : ThemeController {
   private val preferences = storage.preferences("appearance")
   private val changes = Channel<(ThemeMode) -> ThemeMode>(Channel.UNLIMITED)
+  private val initialModeLoaded = CompletableDeferred<Unit>()
 
   override val mode: StateFlow<ThemeMode>
     field = MutableStateFlow(ThemeMode.SYSTEM)
@@ -34,13 +36,23 @@ class StoredThemeController(
     coroutineScope
       .launch {
         mode.value = readMode()
+        initialModeLoaded.complete(Unit)
         for (change in changes) {
           val selection = change(mode.value)
           saveMode(selection)
           mode.value = selection
         }
       }
-      .invokeOnCompletion { changes.cancel() }
+      .invokeOnCompletion { cause ->
+        changes.cancel()
+        if (cause != null) {
+          initialModeLoaded.completeExceptionally(cause)
+        }
+      }
+  }
+
+  override suspend fun awaitInitialMode() {
+    initialModeLoaded.await()
   }
 
   override fun setMode(mode: ThemeMode) {

@@ -15,6 +15,7 @@ import software.ralf.storymile.util.Platform
 internal class StartupTestGraph(
   dispatcher: CoroutineDispatcher,
   override val appScopedInstances: Set<Scoped> = emptySet(),
+  loadTheme: suspend () -> ThemeMode = { ThemeMode.SYSTEM },
 ) : AppGraph {
   override val platform: Platform = Platform.Desktop.Linux
   override val storage: Storage
@@ -22,7 +23,12 @@ internal class StartupTestGraph(
 
   override val themeController: ThemeController =
     object : ThemeController {
-      override val mode: StateFlow<ThemeMode> = MutableStateFlow(ThemeMode.SYSTEM)
+      private val currentMode = MutableStateFlow(ThemeMode.SYSTEM)
+      override val mode: StateFlow<ThemeMode> = currentMode
+
+      override suspend fun awaitInitialMode() {
+        currentMode.value = loadTheme()
+      }
 
       override fun setMode(mode: ThemeMode) = Unit
 

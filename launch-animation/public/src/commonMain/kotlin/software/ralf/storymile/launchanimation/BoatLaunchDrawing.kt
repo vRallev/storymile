@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.PathParser
@@ -30,6 +31,8 @@ internal class BoatLaunchDrawing(
   private val painter: Painter,
   private val colors: ColorScheme,
   private val wordmark: TextLayoutResult,
+  private val initialPainter: Painter?,
+  private val initialColors: ColorScheme,
 ) {
   // The rounded silhouette from images/icon-light.svg and icon-dark.svg, in their 48-unit viewport.
   private val outline =
@@ -44,9 +47,11 @@ internal class BoatLaunchDrawing(
       .toPath()
   private val aperture = Path()
   private val transform = Matrix()
-  private var backdropBrushes: Pair<Size, List<Brush>>? = null
+  private val initialGlow = initialColors.backdropGlow
+  private val glow = colors.backdropGlow
+  private var backdropBrushes: BackdropBrushes? = null
 
-  fun DrawScope.draw(progress: Float) {
+  fun DrawScope.draw(progress: Float, themeProgress: Float) {
     if (size.minDimension <= 0f) {
       return
     }
@@ -59,7 +64,7 @@ internal class BoatLaunchDrawing(
         (1f - 0.09f * preparation) *
         exp(ln(size.maxDimension * 9f / (boatSize * 0.91f)) * zoom)
     val logoAlpha = 1f - progress.segment(start = 0.34f, end = 0.46f)
-    val titleAlpha = 1f - progress.segment(start = 0.34f, end = 0.46f)
+    val coverAlpha = 1f - progress.segment(start = 0.64f, end = 0.91f)
 
     aperture.reset()
     aperture.addPath(outline)
@@ -68,11 +73,13 @@ internal class BoatLaunchDrawing(
     transform.scale(x = revealSize / 48f, y = revealSize / 48f)
     aperture.transform(transform)
     if (logoAlpha > 0f) {
-      backdrop(logoAlpha)
+      backdrop(alpha = logoAlpha, themeProgress = themeProgress)
     }
     // One continuous cover prevents seams between adjacent antialiased clips before the reveal.
     if (logoAlpha < 1f) {
-      clipPath(path = aperture, clipOp = ClipOp.Difference) { backdrop() }
+      clipPath(path = aperture, clipOp = ClipOp.Difference) {
+        backdrop(alpha = coverAlpha, themeProgress = themeProgress)
+      }
     }
     if (logoAlpha > 0f) {
       val settle = (progress / 0.32f).coerceIn(0f, 1f)
@@ -81,41 +88,81 @@ internal class BoatLaunchDrawing(
       val drift = 4.dp.toPx() * sin(PI.toFloat() * 2f * settle) * decay
       rotate(degrees = angle, pivot = center) {
         translate(left = center.x - revealSize / 2f, top = center.y - revealSize / 2f + drift) {
-          with(painter) {
-            draw(size = Size(width = revealSize, height = revealSize), alpha = logoAlpha)
-          }
+          drawLogo(
+            size = Size(width = revealSize, height = revealSize),
+            alpha = logoAlpha,
+            themeProgress = themeProgress,
+          )
         }
       }
     }
-    if (titleAlpha > 0f) {
+    if (logoAlpha > 0f) {
       drawText(
         textLayoutResult = wordmark,
-        color = colors.onBackground,
+        color =
+          color(
+            initial = initialColors.onBackground,
+            target = colors.onBackground,
+            themeProgress = themeProgress,
+          ),
         topLeft = Offset(x = center.x - wordmark.size.width / 2f, y = center.y + 61.dp.toPx()),
-        alpha = titleAlpha,
+        alpha = logoAlpha,
       )
       val wakeWidth = 82.dp.toPx() * (1f + progress.segment(start = 0f, end = 0.32f) * 0.45f)
       drawOval(
-        color = colors.primary,
+        color =
+          color(
+            initial = initialColors.primary,
+            target = colors.primary,
+            themeProgress = themeProgress,
+          ),
         topLeft = Offset(x = center.x - wakeWidth / 2f, y = center.y + 32.dp.toPx()),
         size = Size(width = wakeWidth, height = 10.dp.toPx()),
-        alpha = titleAlpha * 0.11f,
+        alpha = logoAlpha * 0.11f,
         style = Stroke(1.dp.toPx()),
       )
     }
   }
 
-  private fun DrawScope.backdrop(alpha: Float = 1f) {
-    drawRect(color = colors.background, alpha = alpha)
-    val brushes = backdropBrushes?.takeIf { it.first == size }?.second ?: createBackdropBrushes()
+  private fun DrawScope.drawLogo(size: Size, alpha: Float, themeProgress: Float) {
+    if (initialPainter != null && themeProgress < 1f) {
+      with(initialPainter) { draw(size = size, alpha = alpha) }
+    }
+    if (themeProgress > 0f) {
+      with(painter) { draw(size = size, alpha = alpha * themeProgress) }
+    }
+  }
+
+  private fun DrawScope.backdrop(alpha: Float, themeProgress: Float) {
+    drawRect(
+      color =
+        color(
+          initial = initialColors.background,
+          target = colors.background,
+          themeProgress = themeProgress,
+        ),
+      alpha = alpha,
+    )
+    val primaryContainer =
+      color(
+        initial = initialColors.primaryContainer,
+        target = colors.primaryContainer,
+        themeProgress = themeProgress,
+      )
+    val blendedGlow = color(initial = initialGlow, target = glow, themeProgress = themeProgress)
+    val brushes =
+      backdropBrushes
+        ?.takeIf {
+          it.size == size && it.primaryContainer == primaryContainer && it.glow == blendedGlow
+        }
+        ?.values ?: createBackdropBrushes(primaryContainer = primaryContainer, glow = blendedGlow)
     brushes.forEach { drawRect(brush = it, alpha = alpha) }
   }
 
-  private fun DrawScope.createBackdropBrushes(): List<Brush> {
-    val glow = if (colors.background.luminance() < 0.5f) colors.surfaceVariant else colors.surface
+  private fun DrawScope.createBackdropBrushes(primaryContainer: Color, glow: Color): List<Brush> {
     return listOf(
         Brush.radialGradient(
-          colors = listOf(colors.primaryContainer, Color.Transparent),
+          colors = listOf(primaryContainer, Color.Transparent),
           center = Offset(x = size.width * 0.08f, y = size.height * 0.84f),
           radius = size.maxDimension * 0.76f,
         ),
@@ -125,11 +172,36 @@ internal class BoatLaunchDrawing(
           radius = size.maxDimension * 0.64f,
         ),
       )
-      .also { backdropBrushes = size to it }
+      .also {
+        backdropBrushes =
+          BackdropBrushes(
+            size = size,
+            primaryContainer = primaryContainer,
+            glow = glow,
+            values = it,
+          )
+      }
   }
+
+  private val ColorScheme.backdropGlow
+    get() = if (background.luminance() < 0.5f) surfaceVariant else surface
+
+  private fun color(initial: Color, target: Color, themeProgress: Float): Color =
+    when (themeProgress) {
+      0f -> initial
+      1f -> target
+      else -> lerp(start = initial, stop = target, fraction = themeProgress)
+    }
 
   private fun Float.segment(start: Float, end: Float): Float {
     val value = ((this - start) / (end - start)).coerceIn(0f, 1f)
     return value * value * (3f - 2f * value)
   }
+
+  private data class BackdropBrushes(
+    val size: Size,
+    val primaryContainer: Color,
+    val glow: Color,
+    val values: List<Brush>,
+  )
 }
