@@ -22,9 +22,9 @@ class StoredThemeControllerTest {
         override fun preferences(name: String): DataStore<Preferences> = preferences
       }
 
-    fun reopen(): ThemeController =
+    suspend fun reopen(): ThemeController =
       StoredThemeController(storage = storage, coroutineScope = backgroundScope).also {
-        runCurrent()
+        it.awaitInitialMode()
       }
 
     val original = reopen()

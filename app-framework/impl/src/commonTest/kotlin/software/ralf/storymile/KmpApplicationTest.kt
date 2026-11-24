@@ -12,6 +12,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.job
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -87,6 +89,38 @@ class KmpApplicationTest {
       secondHost.await()
       assertThat(application.rootScope.isDestroyed()).isFalse()
       assertThat(creations).isEqualTo(1)
+    } finally {
+      application.destroy()
+    }
+  }
+
+  @Test
+  fun `closing while loading the launch theme cancels the theme load and app scope`() = runTest {
+    val dispatcher = StandardTestDispatcher(testScheduler)
+    val loading = CompletableDeferred<Unit>()
+    var loadCancelled = false
+    val graph =
+      StartupTestGraph(
+        dispatcher = dispatcher,
+        loadTheme = {
+          loading.complete(Unit)
+          try {
+            awaitCancellation()
+          } finally {
+            loadCancelled = true
+          }
+        },
+      )
+    val application = KmpApplication(dispatcher) { graph }
+    try {
+      async { application.awaitReady() }
+      loading.await()
+
+      application.destroy()
+      runCurrent()
+      assertThat(loadCancelled).isTrue()
+      assertThat(graph.appScopeCoroutineScopeScoped.coroutineContext.job.isCancelled).isTrue()
+      assertFailure { application.rootScope }.isInstanceOf<IllegalStateException>()
     } finally {
       application.destroy()
     }

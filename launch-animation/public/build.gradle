@@ -7,7 +7,5 @@ storymile {
 }
 
 dependencies {
-  commonMainImplementation project(':theme:public')
-
-  commonTestImplementation project(':theme:testing')
+  commonMainApi project(':theme:public')
 }
