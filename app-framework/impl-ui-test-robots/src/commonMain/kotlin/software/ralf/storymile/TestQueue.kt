@@ -17,7 +17,7 @@ import software.ralf.storymile.user.UserScope
 object TestQueue {
   suspend fun clear(rootScope: Scope) {
     val graph = rootScope.metroDependencyGraph<AppBindings>()
-    val userScope = graph.userManager.userScope.value
+    val userScope = graph.userManager.userScope.filterNotNull().first()
     val queue = userScope.metroDependencyGraph<UserBindings>().queue
     val entries = queue.episodes.filterNotNull()
     val seedSize =

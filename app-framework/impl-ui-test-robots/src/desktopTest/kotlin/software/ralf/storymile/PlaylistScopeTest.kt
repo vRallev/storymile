@@ -22,7 +22,6 @@ import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.InMemoryStorageFactory
 import software.ralf.storymile.storage.RuntimeModeStorageFactory
 import software.ralf.storymile.storage.Storage
-import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.user.UserScope
 
 class PlaylistScopeTest {
@@ -79,7 +78,9 @@ class PlaylistScopeTest {
     }
 
   private fun Graph.playlistRepository(): PlaylistRepository =
-    userManager.userScope.value.metroDependencyGraph<UserBindings>().playlistRepository
+    checkNotNull(userManager.userScope.value)
+      .metroDependencyGraph<UserBindings>()
+      .playlistRepository
 
   private suspend fun <T> withApplication(
     storageFactory: Storage.Factory = InMemoryStorageFactory(),
@@ -102,7 +103,6 @@ class PlaylistScopeTest {
       [DefaultStorage.Factory::class, RuntimeModeStorageFactory::class, TestStorageBindings::class],
   )
   interface Graph : AppGraph {
-    val userManager: UserManager
 
     @DependencyGraph.Factory
     fun interface Factory {

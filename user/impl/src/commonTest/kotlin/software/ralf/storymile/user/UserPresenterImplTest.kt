@@ -82,12 +82,39 @@ class UserPresenterImplTest {
     }
   }
 
+  @Test
+  fun `presenter starts while user storage is being replaced`() = runTest {
+    val replacement = FakeGraph("replacement")
+    val replacementScope = Scope.buildTestScope(this) { addMetroDependencyGraph(replacement) }
+    val userManager = FakeUserManager(initialScope = null)
+    val presenter: UserPresenter<AppTemplate> = UserPresenterImpl(userManager)
+
+    presenter.test(this) {
+      assertThat(awaitItem()).isEqualTo(AppTemplate.LoadingUserStorage)
+
+      userManager.switchUser(replacementScope)
+      val template = awaitTemplate()
+      assertThat((template.content as DefaultBackstackModel).backstack)
+        .isEqualTo(listOf(Content("replacement")))
+    }
+  }
+
   private suspend fun ReceiveTurbine<AppTemplate>.awaitTemplate(): AppTemplate.AdaptiveTemplate =
     awaitItem() as AppTemplate.AdaptiveTemplate
 
-  private class FakeUserManager(initialScope: Scope) : UserManager {
-    override val userScope: StateFlow<Scope>
+  private class FakeUserManager(initialScope: Scope?) : UserManager {
+    override val userScope: StateFlow<Scope?>
       field = MutableStateFlow(initialScope)
+
+    override val user: StateFlow<User>
+      get() = error("This test switches the scope directly.")
+
+    override suspend fun awaitReady() = Unit
+
+    override suspend fun signIn(): Unit = error("This test switches the scope directly.")
+
+    override suspend fun signOut(keepData: Boolean): Unit =
+      error("This test switches the scope directly.")
 
     fun switchUser(scope: Scope) {
       userScope.value = scope
@@ -95,7 +122,6 @@ class UserPresenterImplTest {
   }
 
   private class FakeGraph(user: String) : UserPresenterImpl.Graph {
-    override val user: User = GuestUser()
     override val tabsPresenter = FakeTabsPresenter(user)
     override val playbackPresenter = FakePlaybackPresenter()
     override val settingsPresenter =

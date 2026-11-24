@@ -270,6 +270,16 @@ class StorageTest {
     val finishWrite = CompletableDeferred<Unit>()
     private val files = mutableMapOf<Triple<String, FileStorageArea, String>, ByteArray>()
 
+    override suspend fun hasNamespace(namespace: String): Boolean =
+      files.keys.any { it.first == namespace }
+
+    override suspend fun copyPreferences(sourceNamespace: String, targetNamespace: String) =
+      error("Unused")
+
+    override suspend fun deleteNamespace(namespace: String) {
+      files.keys.removeAll { it.first == namespace }
+    }
+
     override fun databasePath(namespace: String, name: String): String? = null
 
     override fun createPreferences(

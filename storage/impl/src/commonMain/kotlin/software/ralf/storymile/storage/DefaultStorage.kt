@@ -7,6 +7,7 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,13 +40,7 @@ class DefaultStorage(
   private val coroutineScope: CoroutineScope,
   private val platform: StoragePlatform,
 ) : Storage {
-  init {
-    require(namespace.matches(namePattern)) {
-      "Storage namespace must contain only letters, digits, underscores, and hyphens."
-    }
-  }
-
-  private val encodedNamespace = namespace.encodeUtf8().hex()
+  private val encodedNamespace = encodeNamespace(namespace)
   private val previousOwners =
     platform.namespaceOwners.claim(
       key = encodedNamespace,
@@ -93,6 +88,13 @@ class DefaultStorage(
 
   private companion object {
     val namePattern = Regex("[A-Za-z0-9_-]+")
+
+    fun encodeNamespace(namespace: String): String {
+      require(namespace.matches(namePattern)) {
+        "Storage namespace must contain only letters, digits, underscores, and hyphens."
+      }
+      return namespace.encodeUtf8().hex()
+    }
   }
 
   @SingleIn(AppScope::class)
@@ -100,6 +102,32 @@ class DefaultStorage(
   class Factory(
     private val platform: StoragePlatform,
   ) : Storage.Factory {
+    override suspend fun hasNamespace(namespace: String): Boolean = coroutineScope {
+      platform.hasNamespace(claimNamespace(namespace))
+    }
+
+    override suspend fun copyPreferences(sourceNamespace: String, targetNamespace: String) {
+      require(sourceNamespace != targetNamespace) { "Choose a different destination namespace." }
+      coroutineScope {
+        platform.copyPreferences(
+          sourceNamespace = claimNamespace(sourceNamespace),
+          targetNamespace = claimNamespace(targetNamespace),
+        )
+      }
+    }
+
+    override suspend fun deleteNamespace(namespace: String) = coroutineScope {
+      platform.deleteNamespace(claimNamespace(namespace))
+    }
+
+    private suspend fun CoroutineScope.claimNamespace(namespace: String): String {
+      val encoded = encodeNamespace(namespace)
+      platform.namespaceOwners.claim(key = encoded, owner = coroutineContext.job).forEach {
+        it.join()
+      }
+      return encoded
+    }
+
     override fun create(
       namespace: String,
       coroutineScope: CoroutineScope,

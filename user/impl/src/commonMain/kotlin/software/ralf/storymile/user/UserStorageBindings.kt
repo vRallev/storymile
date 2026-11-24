@@ -16,9 +16,9 @@ interface UserStorageBindings {
     @SingleIn(UserScope::class)
     @ForScope(UserScope::class)
     fun storage(
-      user: User,
+      @ForScope(UserScope::class) storageNamespace: String,
       factory: Storage.Factory,
       @ForScope(UserScope::class) coroutineScope: CoroutineScope,
-    ): Storage = factory.create("user-${user.id}", coroutineScope)
+    ): Storage = factory.create(namespace = storageNamespace, coroutineScope = coroutineScope)
   }
 }

@@ -45,12 +45,24 @@ interface Storage {
 
   /** Creates storage for an owning coroutine scope. */
   interface Factory {
+    /** Returns whether an inactive namespace contains stored data on this platform. */
+    suspend fun hasNamespace(namespace: String): Boolean
+
+    /**
+     * Copies all saved preferences into a fresh namespace. Both namespaces must be inactive. The
+     * caller can retry a partial copy before exposing the destination.
+     */
+    suspend fun copyPreferences(sourceNamespace: String, targetNamespace: String)
+
+    /** Deletes an inactive namespace, including preferences, databases, files, and caches. */
+    suspend fun deleteNamespace(namespace: String)
+
     /**
      * Creates storage and claims its namespace.
      *
      * [namespace] contains only letters, digits, underscores, and hyphens. Use `app` for app data
-     * and a stable `user-<id>` for each user. An active namespace cannot be shared. File operations
-     * and preference reads and updates wait for the previous owner's cleanup to finish.
+     * and a stable `user-<storageId>` for user data. An active namespace cannot be shared. File
+     * operations and preference reads and updates wait for the previous owner's cleanup to finish.
      *
      * [coroutineScope] must be a dedicated child of the owning scope. The caller cancels it to stop
      * storage access while preserving saved data.

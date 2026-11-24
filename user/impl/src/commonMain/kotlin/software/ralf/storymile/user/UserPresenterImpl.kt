@@ -2,7 +2,6 @@ package software.ralf.storymile.user
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.withCompositionLocal
@@ -16,6 +15,7 @@ import software.ralf.app.platform.presenter.backstack.nav3.backstack
 import software.ralf.app.platform.presenter.backstack.nav3.presenterBackstack
 import software.ralf.app.platform.presenter.backstack.nav3.requireNotNull
 import software.ralf.app.platform.presenter.compose.ComposePresenter
+import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.playback.PlaybackPresenter
 import software.ralf.storymile.presenternavigation.DefaultBackstackModel
@@ -28,9 +28,11 @@ import software.ralf.storymile.templates.AppTemplate
 class UserPresenterImpl(private val userManager: UserManager) : UserPresenter<AppTemplate> {
   @Composable
   override fun present(input: Unit): AppTemplate {
-    val userScope by userManager.userScope.collectAsState()
+    val userScope =
+      userManager.userScope.collectAsState().value ?: return AppTemplate.LoadingUserStorage
+    val graph =
+      remember(userScope) { userScope.activeGraph() } ?: return AppTemplate.LoadingUserStorage
     return key(userScope) {
-      val graph = remember { userScope.metroDependencyGraph<Graph>() }
       val root = remember {
         ComposePresenter<Unit, AppTemplate.AdaptiveTemplate> { graph.presentRoot() }
       }
@@ -47,6 +49,16 @@ class UserPresenterImpl(private val userManager: UserManager) : UserPresenter<Ap
     }
   }
 
+  private fun Scope.activeGraph(): Graph? =
+    try {
+      metroDependencyGraph<Graph>()
+    } catch (exception: IllegalStateException) {
+      if (!isDestroyed()) {
+        throw exception
+      }
+      null
+    }
+
   @Composable
   private fun Graph.presentRoot(): AppTemplate.AdaptiveTemplate {
     val stack = LocalBackstackScope.requireNotNull()
@@ -57,7 +69,7 @@ class UserPresenterImpl(private val userManager: UserManager) : UserPresenter<Ap
         }
       }
     }
-    return withCompositionLocal(LocalOpenSettings provides openSettings.takeIf { user.isGuest }) {
+    return withCompositionLocal(LocalOpenSettings provides openSettings) {
       val tabs = remember { tabsPresenter }.present(Unit)
       val playback = remember { playbackPresenter }.present(Unit)
       AppTemplate.AdaptiveTemplate(
@@ -77,8 +89,6 @@ class UserPresenterImpl(private val userManager: UserManager) : UserPresenter<Ap
 
   @ContributesTo(UserScope::class)
   interface Graph {
-    val user: User
-
     val tabsPresenter: TabsPresenter
 
     val playbackPresenter: PlaybackPresenter

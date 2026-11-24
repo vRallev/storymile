@@ -15,13 +15,29 @@ class RuntimeModeStorageFactory(
 ) : Storage.Factory {
   private val memory by lazy { InMemoryStorageFactory() }
 
+  private val activeFactory: Storage.Factory
+    get() = if (controller.value.mode == RuntimeMode.Real) real else memory
+
+  override suspend fun hasNamespace(namespace: String): Boolean =
+    activeFactory.hasNamespace(namespace)
+
+  override suspend fun copyPreferences(sourceNamespace: String, targetNamespace: String) {
+    activeFactory.copyPreferences(
+      sourceNamespace = sourceNamespace,
+      targetNamespace = targetNamespace,
+    )
+  }
+
+  override suspend fun deleteNamespace(namespace: String) {
+    activeFactory.deleteNamespace(namespace)
+  }
+
   override fun create(
     namespace: String,
     coroutineScope: CoroutineScope,
     mustBePersistent: Boolean,
   ): Storage {
-    val factory =
-      if (mustBePersistent || controller.value.mode == RuntimeMode.Real) real else memory
+    val factory = if (mustBePersistent) real else activeFactory
     return factory.create(
       namespace = namespace,
       coroutineScope = coroutineScope,

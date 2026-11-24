@@ -3,6 +3,15 @@
   <string name="account">Account</string>
   <string name="guest">Guest</string>
   <string name="sign_in_to_sync">Sign in to sync</string>
+  <string name="fake_user">Fake user</string>
+  <string name="basic">Basic</string>
+  <string name="sign_out">Sign out</string>
+  <string name="sign_out_title">Sign out?</string>
+  <string name="sign_out_description">Wiping deletes your local Library, queue, and files. Keeping files retains them. Both choices keep your preferences.</string>
+  <string name="cancel">Cancel</string>
+  <string name="keep_files">Keep files</string>
+  <string name="wipe_files">Wipe files</string>
+  <string name="account_action_failed">Could not complete the account change. Try again.</string>
   <string name="playback">Playback</string>
   <string name="default_speed">Default speed</string>
   <string name="default_speed_description">Set the default playback speed for new episodes.</string>

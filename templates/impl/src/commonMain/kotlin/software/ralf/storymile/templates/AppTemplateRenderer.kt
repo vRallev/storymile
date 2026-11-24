@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
@@ -42,6 +43,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithCache
@@ -137,6 +139,10 @@ class AppTemplateRenderer(
           CompositionLocalProvider(LocalSharedTransitionScope provides this) {
             when (model) {
               is AppTemplate.AdaptiveTemplate -> AdaptiveTemplateContent(model)
+              AppTemplate.LoadingUserStorage ->
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                  CircularProgressIndicator()
+                }
             }
             backGestureDispatcherPresenter.ForwardBackPressEventsToPresenters()
           }

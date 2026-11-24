@@ -45,6 +45,45 @@ import software.ralf.app.platform.scope.runTestWithScope
 
 class PersistentStorageTest {
   @Test
+  fun `rotation copies only preferences and deleting the retired namespace removes both roots`() =
+    storageTest { scope, platform, _ ->
+      val factory: Storage.Factory = DefaultStorage.Factory(platform)
+      val sourceScope = scope.child(this)
+      val source = sourceScope.storage("old", platform)
+      val preference = stringPreferencesKey("value")
+      for (name in listOf("settings", "Settings")) {
+        source.preferences(name).edit { it[preference] = name }
+      }
+      source.files.directory("playlists").write("later", byteArrayOf(7))
+      source.cache.write("art", byteArrayOf(8))
+      val dbPath = requireNotNull(source.databasePath("podcasts")).toPath()
+      FileSystem.SYSTEM.write(dbPath) { writeByte(42) }
+
+      assertFailure { factory.deleteNamespace("old") }.isInstanceOf<IllegalStateException>()
+      sourceScope.destroy()
+      assertThat(factory.hasNamespace("old")).isTrue()
+      factory.copyPreferences(sourceNamespace = "old", targetNamespace = "new")
+      factory.copyPreferences(sourceNamespace = "old", targetNamespace = "new")
+      val rotated = scope.child(this).storage("new", platform)
+      for (name in listOf("settings", "Settings")) {
+        assertThat(rotated.preferences(name).data.first()[preference]).isEqualTo(name)
+      }
+      assertThat(rotated.files.directory("playlists").read("later")).isNull()
+      assertThat(rotated.cache.read("art")).isNull()
+      assertThat(
+          FileSystem.SYSTEM.exists(requireNotNull(rotated.databasePath("podcasts")).toPath()),
+        )
+        .isFalse()
+      assertThat(FileSystem.SYSTEM.exists(dbPath)).isTrue()
+
+      factory.deleteNamespace("old")
+      factory.deleteNamespace("old")
+      assertThat(FileSystem.SYSTEM.exists(dbPath)).isFalse()
+      assertThat(factory.hasNamespace("old")).isFalse()
+      assertThat(rotated.preferences("settings").data.first()[preference]).isEqualTo("settings")
+    }
+
+  @Test
   fun `directory paths create isolated roots and nested directories`() =
     storageTest { scope, platform, _ ->
       val app: Storage = scope.storage("app", platform)

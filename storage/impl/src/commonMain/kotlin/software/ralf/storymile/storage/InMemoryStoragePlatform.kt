@@ -15,6 +15,24 @@ class InMemoryStoragePlatform : StoragePlatform() {
   private val filesMutex = Mutex()
   private val files = mutableMapOf<FileKey, ByteArray>()
 
+  override suspend fun hasNamespace(namespace: String): Boolean =
+    preferences.value.keys.any { it.namespace == namespace } ||
+      filesMutex.withLock { files.keys.any { it.namespace == namespace } }
+
+  override suspend fun copyPreferences(sourceNamespace: String, targetNamespace: String) {
+    for ((key, source) in preferences.value) {
+      if (key.namespace == sourceNamespace) {
+        val target = store(PreferencesKey(namespace = targetNamespace, name = key.name))
+        target.updateData { source.data.value }
+      }
+    }
+  }
+
+  override suspend fun deleteNamespace(namespace: String) {
+    preferences.updateAndGet { stores -> stores.filterKeys { it.namespace != namespace } }
+    filesMutex.withLock { files.keys.removeAll { it.namespace == namespace } }
+  }
+
   override fun databasePath(namespace: String, name: String): String? = null
 
   override fun createPreferences(
@@ -22,13 +40,15 @@ class InMemoryStoragePlatform : StoragePlatform() {
     name: String,
     coroutineScope: CoroutineScope,
   ): DataStore<Preferences> {
-    val key = PreferencesKey(namespace, name)
-    return preferences
+    return store(PreferencesKey(namespace = namespace, name = name))
+  }
+
+  private fun store(key: PreferencesKey): InMemoryPreferencesDataStore =
+    preferences
       .updateAndGet { stores ->
         if (key in stores) stores else stores + (key to InMemoryPreferencesDataStore())
       }
       .getValue(key)
-  }
 
   override suspend fun readFile(
     namespace: String,

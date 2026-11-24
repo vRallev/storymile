@@ -6,6 +6,9 @@ import software.ralf.app.platform.presenter.template.toTemplate
 
 /** Application-level templates selected by the presenter tree. */
 sealed interface AppTemplate : Template {
+  /** Shows progress while the app replaces the active user's storage. */
+  data object LoadingUserStorage : AppTemplate
+
   /**
    * Application slots shared by compact and expanded layouts.
    *

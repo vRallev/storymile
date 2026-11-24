@@ -10,6 +10,12 @@ import software.ralf.storymile.util.ExclusiveResourceOwners
 abstract class StoragePlatform {
   internal val namespaceOwners = ExclusiveResourceOwners("Storage namespace")
 
+  internal abstract suspend fun hasNamespace(namespace: String): Boolean
+
+  internal abstract suspend fun copyPreferences(sourceNamespace: String, targetNamespace: String)
+
+  internal abstract suspend fun deleteNamespace(namespace: String)
+
   internal abstract fun createPreferences(
     namespace: String,
     name: String,
