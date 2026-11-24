@@ -51,13 +51,9 @@ class SettingsUiTest {
       onNodeWithTag("settings-detail").assertDoesNotExist()
       onNodeWithTag("discovery-screen").assertDoesNotExist()
 
-      val signIn = onNode(hasText("Sign in to sync") and hasClickAction()).assertIsDisplayed()
+      onNode(hasText("Sign in with Google") and hasClickAction()).assertIsDisplayed()
       val skipSilence = onNodeWithTag("settings-skip-silence").assertIsOn()
-      runOnUiThread {
-        signIn.performClick()
-        skipSilence.performClick()
-      }
-      signIn.assertIsDisplayed()
+      runOnUiThread { skipSilence.performClick() }
       skipSilence.assertIsOn()
 
       runOnUiThread {
@@ -65,6 +61,27 @@ class SettingsUiTest {
       }
       composeRobot<DiscoveryRobot> { seeQuery("Field") }
       onNode(settings).assertDoesNotExist()
+    }
+  }
+
+  @Test
+  fun `settings can sign in and return to guest`() {
+    DesktopUiTestRule().runPhoneRobotTest {
+      val settings = hasTestTag("settings-screen")
+      val profile = hasTestTag("tab-profile")
+      for (action in listOf("Sign in with Google", "Sign out")) {
+        waitUntilAtLeastOneExists(matcher = profile, timeoutMillis = 5_000)
+        runOnUiThread { onNode(profile).performClick() }
+        val accountAction = hasText(action) and hasClickAction()
+        waitUntilAtLeastOneExists(matcher = accountAction, timeoutMillis = 5_000)
+        if (action == "Sign out") {
+          onNodeWithText("listener@example.com").assertIsDisplayed()
+        }
+        runOnUiThread { onNode(accountAction).performClick() }
+        waitUntil(timeoutMillis = 5_000) { onAllNodes(settings).fetchSemanticsNodes().isEmpty() }
+      }
+      runOnUiThread { onNode(profile).performClick() }
+      waitUntilAtLeastOneExists(matcher = hasText("Guest"), timeoutMillis = 5_000)
     }
   }
 

@@ -14,6 +14,7 @@ dependencies {
   commonMainApi project(':player:testing')
   commonMainApi project(':tabs:public')
 
+  androidMainImplementation project(':login:impl')
   androidMainImplementation libs.androidx.test.junit
   androidMainImplementation libs.androidx.test.rules
   androidMainImplementation libs.androidx.test.runner
@@ -32,6 +33,7 @@ dependencies {
   commonMainImplementation project(':library-saved:impl')
   commonMainImplementation project(':library-shows:impl')
   commonMainImplementation project(':library:impl')
+  commonMainImplementation project(':login:public')
   commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':player:impl')
   commonMainImplementation project(':player:impl-fake')

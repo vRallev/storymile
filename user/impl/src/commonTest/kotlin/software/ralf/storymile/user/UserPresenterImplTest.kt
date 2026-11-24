@@ -22,6 +22,7 @@ import software.ralf.app.platform.presenter.compose.test
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.buildTestScope
 import software.ralf.app.platform.scope.di.metro.addMetroDependencyGraph
+import software.ralf.storymile.login.Login
 import software.ralf.storymile.playback.PlaybackPresenter
 import software.ralf.storymile.presenternavigation.DefaultBackstackModel
 import software.ralf.storymile.settings.SettingsPresenter
@@ -95,7 +96,6 @@ class UserPresenterImplTest {
   }
 
   private class FakeGraph(user: String) : UserPresenterImpl.Graph {
-    override val user: User = GuestUser()
     override val tabsPresenter = FakeTabsPresenter(user)
     override val playbackPresenter = FakePlaybackPresenter()
     override val settingsPresenter =
@@ -103,7 +103,8 @@ class UserPresenterImplTest {
         @Composable
         override fun present(input: Unit): SettingsPresenter.Model =
           SettingsPresenter.Model(
-            account = SettingsPresenter.Account.Guest,
+            account = Login.State.SignedOut,
+            onAccountAction = {},
             selectedSection = SettingsPresenter.Section.PLAYBACK,
             themeMode = ThemeMode.SYSTEM,
             onSelectSection = {},

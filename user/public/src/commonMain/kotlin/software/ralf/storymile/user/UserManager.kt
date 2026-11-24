@@ -6,8 +6,8 @@ import software.ralf.app.platform.scope.Scope
 /** Owns the active user's child scope for the application lifetime. */
 interface UserManager {
   /**
-   * The active user's scope, initially for a guest user. Available after application startup and
-   * before teardown starts. Obtain [User] from the scope's Metro graph.
+   * The active account or guest scope. Available after application startup and before teardown.
+   * Obtain [User] from its Metro graph. A change of identity destroys the previous scope.
    */
   val userScope: StateFlow<Scope>
 }

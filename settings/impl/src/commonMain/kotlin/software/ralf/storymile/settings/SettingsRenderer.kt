@@ -61,6 +61,7 @@ import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.storymile.design.PaneDivider
 import software.ralf.storymile.design.TitleBar
+import software.ralf.storymile.login.Login
 import software.ralf.storymile.settings.SettingsPresenter.Section
 import software.ralf.storymile.settings.impl.generated.resources.Res
 import software.ralf.storymile.settings.impl.generated.resources.account
@@ -69,6 +70,9 @@ import software.ralf.storymile.settings.impl.generated.resources.default_speed
 import software.ralf.storymile.settings.impl.generated.resources.default_speed_description
 import software.ralf.storymile.settings.impl.generated.resources.default_speed_value
 import software.ralf.storymile.settings.impl.generated.resources.downloads
+import software.ralf.storymile.settings.impl.generated.resources.google_account
+import software.ralf.storymile.settings.impl.generated.resources.google_sign_in
+import software.ralf.storymile.settings.impl.generated.resources.google_unavailable
 import software.ralf.storymile.settings.impl.generated.resources.guest
 import software.ralf.storymile.settings.impl.generated.resources.manage_storage
 import software.ralf.storymile.settings.impl.generated.resources.manage_storage_value
@@ -80,7 +84,9 @@ import software.ralf.storymile.settings.impl.generated.resources.rewind_on_resum
 import software.ralf.storymile.settings.impl.generated.resources.rewind_on_resume_description
 import software.ralf.storymile.settings.impl.generated.resources.rewind_on_resume_value
 import software.ralf.storymile.settings.impl.generated.resources.settings
-import software.ralf.storymile.settings.impl.generated.resources.sign_in_to_sync
+import software.ralf.storymile.settings.impl.generated.resources.sign_in_failed
+import software.ralf.storymile.settings.impl.generated.resources.sign_out
+import software.ralf.storymile.settings.impl.generated.resources.signing_in
 import software.ralf.storymile.settings.impl.generated.resources.skip_silence
 import software.ralf.storymile.settings.impl.generated.resources.skip_silence_description
 import software.ralf.storymile.settings.impl.generated.resources.theme
@@ -125,7 +131,7 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
                   .padding(vertical = 16.dp),
               verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-              Account(model.account)
+              Account(model)
               Section.entries.forEach { section ->
                 SectionRow(section = section, selected = model.selectedSection == section) {
                   model.onSelectSection(section)
@@ -162,7 +168,7 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
                 .padding(horizontal = sidePadding, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
           ) {
-            Account(model.account)
+            Account(model)
             Playback(detailed = false)
             Downloads()
             Appearance(themeMode = model.themeMode, onSelectThemeMode = model.onSelectThemeMode)
@@ -178,16 +184,29 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
   }
 
   @Composable
-  private fun Account(account: SettingsPresenter.Account) {
-    Group(title = stringResource(Res.string.account)) {
-      when (account) {
-        SettingsPresenter.Account.Guest ->
-          SettingRow(
-            title = stringResource(Res.string.guest),
-            icon = Icons.Filled.AccountCircle,
-            value = stringResource(Res.string.sign_in_to_sync),
-          )
+  private fun Account(model: SettingsPresenter.Model) {
+    val signedIn = model.account as? Login.State.SignedIn
+    val (action, status) =
+      when (model.account) {
+        is Login.State.SignedIn -> Res.string.sign_out to null
+        Login.State.SignedOut -> Res.string.google_sign_in to null
+        Login.State.Failed -> Res.string.google_sign_in to Res.string.sign_in_failed
+        Login.State.SigningIn -> null to Res.string.signing_in
+        Login.State.Unavailable -> null to Res.string.google_unavailable
       }
+    Group(title = stringResource(Res.string.account)) {
+      SettingRow(
+        title =
+          signedIn?.email
+            ?: stringResource(
+              if (signedIn == null) Res.string.guest else Res.string.google_account,
+            ),
+        icon = Icons.Filled.AccountCircle,
+        description = status?.let { stringResource(it) },
+        value = action?.let { stringResource(it) },
+        enabled = action != null,
+        onClick = model.onAccountAction,
+      )
     }
   }
 
@@ -370,6 +389,7 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
     value: String? = null,
     checked: Boolean? = null,
     selected: Boolean? = null,
+    enabled: Boolean = true,
     onClick: () -> Unit = {},
   ) {
     val action =
@@ -378,7 +398,7 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
           Modifier.selectable(selected = selected, role = Role.Tab, onClick = onClick)
         checked != null ->
           Modifier.toggleable(value = checked, role = Role.Switch, onValueChange = {})
-        else -> Modifier.clickable(role = Role.Button, onClick = onClick)
+        else -> Modifier.clickable(enabled = enabled, role = Role.Button, onClick = onClick)
       }
     ListItem(
       modifier = modifier.clip(AppTheme.shapes.large).then(action),
@@ -386,7 +406,9 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
       supportingContent = description?.let { { Text(it) } },
       leadingContent = { Icon(imageVector = icon, contentDescription = null) },
       trailingContent = {
-        if (checked == null) {
+        if (checked != null) {
+          Switch(checked = checked, onCheckedChange = null)
+        } else if (enabled) {
           Row(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -400,8 +422,6 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
               tint = AppTheme.colorScheme.primary,
             )
           }
-        } else {
-          Switch(checked = checked, onCheckedChange = null)
         }
       },
       colors =

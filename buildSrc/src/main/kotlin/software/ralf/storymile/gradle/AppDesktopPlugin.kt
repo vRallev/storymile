@@ -28,7 +28,7 @@ public open class AppDesktopPlugin : Plugin<Project> {
       buildTypes.release.proguard.configurationFiles.from(file("proguard-rules.pro"))
 
       nativeDistributions.apply {
-        modules("jdk.unsupported")
+        modules("jdk.httpserver", "jdk.unsupported")
         targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
         packageName = "Storymile"
         packageVersion = versionName

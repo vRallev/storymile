@@ -7,5 +7,6 @@ storymile {
 }
 
 dependencies {
+  commonMainApi project(':login:public')
   commonMainApi project(':theme:public')
 }
