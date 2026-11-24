@@ -7,4 +7,7 @@ interface User {
 
   /** Whether this user uses the app without a signed-in account. */
   val isGuest: Boolean
+
+  /** The active subscription tier. Guests always have [SubscriptionTier.BASIC]. */
+  val subscriptionTier: SubscriptionTier
 }

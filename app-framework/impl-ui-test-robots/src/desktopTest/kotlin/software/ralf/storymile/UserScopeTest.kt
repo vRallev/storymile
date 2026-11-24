@@ -29,6 +29,7 @@ import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.InMemoryStorageFactory
 import software.ralf.storymile.storage.RuntimeModeStorageFactory
 import software.ralf.storymile.storage.Storage
+import software.ralf.storymile.user.SubscriptionTier
 import software.ralf.storymile.user.User
 import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.user.UserScope
@@ -47,6 +48,7 @@ class UserScopeTest {
       val userScope = manager.userScope.first()
       val user: User = userScope.metroDependencyGraph<UserBindings>().user
       assertThat(user.isGuest).isTrue()
+      assertThat(user.subscriptionTier).isEqualTo(SubscriptionTier.BASIC)
       assertThat(manager.userScope.value).isSameInstanceAs(userScope)
       assertThat(userScope.isDestroyed()).isFalse()
     } finally {
