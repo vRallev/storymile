@@ -3,7 +3,11 @@ package software.ralf.storymile
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.captureToImage
@@ -13,11 +17,14 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isLessThanOrEqualTo
@@ -68,8 +75,7 @@ class SettingsUiTest {
       darkTheme = systemDarkTheme,
     ) {
       val settings = hasTestTag("settings-screen")
-      val theme = hasTestTag("settings-theme")
-      val options = hasAnyAncestor(hasTestTag("settings-theme-options"))
+      val segments = hasAnyAncestor(hasTestTag("settings-theme-segments"))
 
       fun assertBackground(color: Color) {
         val pixels = onNode(settings).captureToImage().toPixelMap()
@@ -78,11 +84,11 @@ class SettingsUiTest {
       }
 
       fun chooseTheme(current: String, choice: String) {
-        waitUntilAtLeastOneExists(matcher = theme and hasText(current), timeoutMillis = 5_000)
-        runOnUiThread { onNode(theme).performScrollTo().performClick() }
-        onNode(options and hasText(current)).assertIsSelected()
-        runOnUiThread { onNode(options and hasText(choice)).performClick() }
-        waitUntilAtLeastOneExists(matcher = theme and hasText(choice), timeoutMillis = 5_000)
+        waitUntilAtLeastOneExists(matcher = segments and hasText(current), timeoutMillis = 5_000)
+        onNode(segments and hasText(current)).assertIsSelected()
+        val option = segments and hasText(choice)
+        runOnUiThread { onNode(option).performScrollTo().performClick() }
+        waitUntilAtLeastOneExists(matcher = option and isSelected(), timeoutMillis = 5_000)
       }
 
       runOnUiThread { onNodeWithTag("tab-profile").performClick() }
@@ -106,6 +112,45 @@ class SettingsUiTest {
 
       runOnIdle { systemDarkTheme.value = false }
       assertBackground(StorymileColorSchemes.paperTide.background)
+    }
+  }
+
+  @Test
+  fun `theme choices adapt to the available width and keep the selection`() {
+    val wide = DpSize(width = 600.dp, height = 1000.dp)
+    val size = mutableStateOf(DpSize(width = 320.dp, height = 1000.dp))
+    DesktopUiTestRule().runRobotTest(
+      windowSize = wide,
+      contentSize = size,
+      fontScale = 2f,
+    ) {
+      runOnUiThread { onNodeWithTag("tab-profile").performClick() }
+      val rows = hasTestTag("settings-theme-radio-rows")
+      waitUntilAtLeastOneExists(matcher = rows, timeoutMillis = 5_000)
+      runOnUiThread { onNode(rows).performScrollTo() }
+      onNodeWithTag("settings-theme-segments").assertDoesNotExist()
+
+      val radioButtons =
+        hasAnyAncestor(rows) and
+          SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton)
+      val system = onNode(radioButtons and hasText("System")).assertIsSelected().assertIsDisplayed()
+      val light = onNode(radioButtons and hasText("Light")).assertIsDisplayed()
+      val dark = radioButtons and hasText("Dark")
+      val darkOption = onNode(dark).assertIsDisplayed()
+      assertThat(system.getUnclippedBoundsInRoot().bottom)
+        .isLessThanOrEqualTo(light.getUnclippedBoundsInRoot().top)
+      assertThat(light.getUnclippedBoundsInRoot().bottom)
+        .isLessThanOrEqualTo(darkOption.getUnclippedBoundsInRoot().top)
+
+      runOnUiThread { darkOption.performClick() }
+      waitUntilAtLeastOneExists(matcher = dark and isSelected(), timeoutMillis = 5_000)
+      system.assertIsNotSelected()
+
+      runOnIdle { size.value = wide }
+      val segments = hasTestTag("settings-theme-segments")
+      val darkSegment = hasAnyAncestor(segments) and hasText("Dark") and isSelected()
+      waitUntilAtLeastOneExists(matcher = darkSegment, timeoutMillis = 5_000)
+      onNode(rows).assertDoesNotExist()
     }
   }
 

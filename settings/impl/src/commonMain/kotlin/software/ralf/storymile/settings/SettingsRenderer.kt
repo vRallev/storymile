@@ -5,11 +5,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -27,7 +29,6 @@ import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.SdStorage
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.Wifi
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -35,20 +36,19 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -65,7 +65,6 @@ import software.ralf.storymile.settings.SettingsPresenter.Section
 import software.ralf.storymile.settings.impl.generated.resources.Res
 import software.ralf.storymile.settings.impl.generated.resources.account
 import software.ralf.storymile.settings.impl.generated.resources.appearance
-import software.ralf.storymile.settings.impl.generated.resources.cancel
 import software.ralf.storymile.settings.impl.generated.resources.default_speed
 import software.ralf.storymile.settings.impl.generated.resources.default_speed_description
 import software.ralf.storymile.settings.impl.generated.resources.default_speed_value
@@ -104,7 +103,6 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
 
   @Composable
   override fun Compose(model: SettingsPresenter.Model, modifier: Modifier) {
-    var showThemePicker by rememberSaveable { mutableStateOf(false) }
     val overviewScroll = rememberScrollState()
     val sectionsScroll = rememberScrollState()
     val detailScroll = key(model.selectedSection) { rememberScrollState() }
@@ -146,7 +144,10 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
                 Section.PLAYBACK -> Playback(detailed = true)
                 Section.DOWNLOADS -> Downloads()
                 Section.APPEARANCE ->
-                  Appearance(themeMode = model.themeMode) { showThemePicker = true }
+                  Appearance(
+                    themeMode = model.themeMode,
+                    onSelectThemeMode = model.onSelectThemeMode,
+                  )
                 Section.NOTIFICATIONS -> EmptySection(stringResource(Res.string.notifications))
                 Section.PRIVACY -> EmptySection(stringResource(Res.string.privacy))
               }
@@ -164,7 +165,7 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
             Account(model.account)
             Playback(detailed = false)
             Downloads()
-            Appearance(themeMode = model.themeMode) { showThemePicker = true }
+            Appearance(themeMode = model.themeMode, onSelectThemeMode = model.onSelectThemeMode)
             Group {
               SectionRow(Section.NOTIFICATIONS)
               Divider()
@@ -173,16 +174,6 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
           }
         }
       }
-    }
-    if (showThemePicker) {
-      ThemePicker(
-        themeMode = model.themeMode,
-        onSelectThemeMode = {
-          model.onSelectThemeMode(it)
-          showThemePicker = false
-        },
-        onDismiss = { showThemePicker = false },
-      )
     }
   }
 
@@ -247,54 +238,74 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
   }
 
   @Composable
-  private fun Appearance(themeMode: ThemeMode, onOpenThemePicker: () -> Unit) {
+  private fun Appearance(themeMode: ThemeMode, onSelectThemeMode: (ThemeMode) -> Unit) {
     Group(title = stringResource(Res.string.appearance)) {
-      SettingRow(
-        title = stringResource(Res.string.theme),
-        icon = Icons.Outlined.Palette,
-        modifier = Modifier.testTag("settings-theme"),
-        value = stringResource(themeMode.titleResource),
-        onClick = onOpenThemePicker,
+      Text(
+        text = stringResource(Res.string.theme),
+        modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp),
       )
+      SubcomposeLayout(
+        Modifier.fillMaxWidth().padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 12.dp),
+      ) { constraints ->
+        val segments =
+          subcompose("segments") {
+              SingleChoiceSegmentedButtonRow(Modifier.testTag("settings-theme-segments")) {
+                ThemeMode.entries.forEachIndexed { index, option ->
+                  SegmentedButton(
+                    selected = themeMode == option,
+                    onClick = { onSelectThemeMode(option) },
+                    shape =
+                      SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = ThemeMode.entries.size,
+                      ),
+                  ) {
+                    // Measure the full localized label, including spaces.
+                    Text(
+                      text = stringResource(option.titleResource),
+                      modifier = Modifier.width(IntrinsicSize.Max),
+                      maxLines = 1,
+                      softWrap = false,
+                    )
+                  }
+                }
+              }
+            }
+            .single()
+        val options =
+          if (segments.minIntrinsicWidth(constraints.maxHeight) <= constraints.maxWidth) {
+            segments
+          } else {
+            subcompose("radioRows") {
+                ThemeRadioRows(themeMode = themeMode, onSelectThemeMode = onSelectThemeMode)
+              }
+              .single()
+          }
+        val placeable = options.measure(constraints)
+        layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+      }
     }
   }
 
   @Composable
-  private fun ThemePicker(
-    themeMode: ThemeMode,
-    onSelectThemeMode: (ThemeMode) -> Unit,
-    onDismiss: () -> Unit,
-  ) {
-    AlertDialog(
-      onDismissRequest = onDismiss,
-      title = { Text(stringResource(Res.string.theme)) },
-      text = {
-        Column(
-          Modifier.testTag("settings-theme-options")
-            .selectableGroup()
-            .verticalScroll(rememberScrollState()),
-        ) {
-          ThemeMode.entries.forEach { option ->
-            val selected = themeMode == option
-            ListItem(
-              modifier =
-                Modifier.clip(AppTheme.shapes.large)
-                  .selectable(
-                    selected = selected,
-                    role = Role.RadioButton,
-                    onClick = { onSelectThemeMode(option) },
-                  ),
-              headlineContent = { Text(stringResource(option.titleResource)) },
-              leadingContent = { RadioButton(selected = selected, onClick = null) },
-              colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-            )
-          }
-        }
-      },
-      confirmButton = {
-        TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
-      },
-    )
+  private fun ThemeRadioRows(themeMode: ThemeMode, onSelectThemeMode: (ThemeMode) -> Unit) {
+    Column(Modifier.testTag("settings-theme-radio-rows").selectableGroup()) {
+      ThemeMode.entries.forEach { option ->
+        val selected = themeMode == option
+        ListItem(
+          modifier =
+            Modifier.clip(AppTheme.shapes.large)
+              .selectable(
+                selected = selected,
+                role = Role.RadioButton,
+                onClick = { onSelectThemeMode(option) },
+              ),
+          headlineContent = { Text(stringResource(option.titleResource)) },
+          leadingContent = { RadioButton(selected = selected, onClick = null) },
+          colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        )
+      }
+    }
   }
 
   @Composable
