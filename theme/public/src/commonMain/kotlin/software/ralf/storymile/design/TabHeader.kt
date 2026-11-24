@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.storymile.theme.AppTheme
-import software.ralf.storymile.theme.LocalOnToggleTheme
 import software.ralf.storymile.theme.generated.resources.Res
 import software.ralf.storymile.theme.generated.resources.back
 import software.ralf.storymile.theme.generated.resources.storymile
@@ -79,11 +78,7 @@ fun TabHeader(
           StorymileLogo(Modifier.size(44.dp).testTag("tab-brand-logo"))
           Text(
             text = stringResource(Res.string.storymile),
-            modifier =
-              Modifier.weight(1f)
-                .then(appBarTitleModifier)
-                .testTag("tab-brand-name")
-                .hiddenLongPress(LocalOnToggleTheme.current),
+            modifier = Modifier.weight(1f).then(appBarTitleModifier).testTag("tab-brand-name"),
             style = AppTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold,
             color = AppTheme.colorScheme.onSurface,

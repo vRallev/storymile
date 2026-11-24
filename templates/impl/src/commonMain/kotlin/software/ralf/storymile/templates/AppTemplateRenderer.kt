@@ -100,22 +100,19 @@ import software.ralf.storymile.screen.DefaultScreenSizeProvider
 import software.ralf.storymile.screen.LocalScreenSize
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.theme.AppTheme
-import software.ralf.storymile.theme.StorymileTheme
-import software.ralf.storymile.theme.ThemeEnvironment
 import software.ralf.storymile.theme.appLayerShadow
 
 /**
  * Compose renderer for the application's outer template layer.
  *
- * It owns theme installation, safe-area padding, window-size reporting, renderer delegation, and
- * forwarding platform back events to active presenters.
+ * It owns safe-area padding, window-size reporting, renderer delegation, and forwarding platform
+ * back events to active presenters.
  */
 @Inject
 @ContributesRenderer
 class AppTemplateRenderer(
   private val backGestureDispatcherPresenter: BackGestureDispatcherPresenter,
   private val screenSizeProvider: DefaultScreenSizeProvider,
-  private val themeEnvironment: ThemeEnvironment,
   private val shortcuts: AppShortcuts,
 ) : ComposeRenderer<AppTemplate>() {
   @Composable
@@ -131,19 +128,17 @@ class AppTemplateRenderer(
           { coroutineScope.launch { action() } }
         },
     ) {
-      StorymileTheme(environment = themeEnvironment) {
-        Surface(
-          modifier = modifier.fillMaxSize(),
-          color = AppTheme.colorScheme.background,
-          contentColor = AppTheme.colorScheme.onBackground,
-        ) {
-          SharedTransitionLayout {
-            CompositionLocalProvider(LocalSharedTransitionScope provides this) {
-              when (model) {
-                is AppTemplate.AdaptiveTemplate -> AdaptiveTemplateContent(model)
-              }
-              backGestureDispatcherPresenter.ForwardBackPressEventsToPresenters()
+      Surface(
+        modifier = modifier.fillMaxSize(),
+        color = AppTheme.colorScheme.background,
+        contentColor = AppTheme.colorScheme.onBackground,
+      ) {
+        SharedTransitionLayout {
+          CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+            when (model) {
+              is AppTemplate.AdaptiveTemplate -> AdaptiveTemplateContent(model)
             }
+            backGestureDispatcherPresenter.ForwardBackPressEventsToPresenters()
           }
         }
       }

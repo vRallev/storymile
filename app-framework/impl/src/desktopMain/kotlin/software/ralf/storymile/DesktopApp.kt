@@ -39,14 +39,18 @@ class DesktopApp(graph: (RootScopeProvider) -> AppGraph) : RootScopeProvider {
     }
   }
 
-  /** Runs the app action for an unhandled Command or Ctrl shortcut. */
-  fun handleShortcut(key: Key): Boolean {
+  /** Runs the app action for a Command or Ctrl shortcut, using the current system appearance. */
+  fun handleShortcut(key: Key, systemDarkTheme: Boolean): Boolean {
     if (!templateProvider.isInitialized()) {
       return false
     }
     val scope = rootScope
     if (scope.isDestroyed()) {
       return false
+    }
+    if (key == Key.D) {
+      scope.metroDependencyGraph<AppGraph>().themeController.toggle(systemDarkTheme)
+      return true
     }
     val action = scope.metroDependencyGraph<Graph>().shortcuts.actionForKey(key) ?: return false
     scope.launch { action() }

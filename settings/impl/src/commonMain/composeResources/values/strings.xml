@@ -18,7 +18,10 @@
   <string name="manage_storage_value">1.2 GB</string>
   <string name="appearance">Appearance</string>
   <string name="theme">Theme</string>
-  <string name="theme_value">System</string>
+  <string name="theme_system">System</string>
+  <string name="theme_light">Light</string>
+  <string name="theme_dark">Dark</string>
+  <string name="cancel">Cancel</string>
   <string name="notifications">Notifications</string>
   <string name="privacy">Privacy</string>
   <string name="no_settings_available">No settings available yet.</string>

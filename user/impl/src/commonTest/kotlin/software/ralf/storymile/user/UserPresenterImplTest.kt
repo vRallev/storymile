@@ -27,6 +27,7 @@ import software.ralf.storymile.presenternavigation.DefaultBackstackModel
 import software.ralf.storymile.settings.SettingsPresenter
 import software.ralf.storymile.tabs.TabsPresenter
 import software.ralf.storymile.templates.AppTemplate
+import software.ralf.storymile.theme.ThemeMode
 
 class UserPresenterImplTest {
   @Test
@@ -104,7 +105,9 @@ class UserPresenterImplTest {
           SettingsPresenter.Model(
             account = SettingsPresenter.Account.Guest,
             selectedSection = SettingsPresenter.Section.PLAYBACK,
+            themeMode = ThemeMode.SYSTEM,
             onSelectSection = {},
+            onSelectThemeMode = {},
             onBack = {},
           )
       }

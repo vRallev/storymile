@@ -126,7 +126,7 @@ Command/Ctrl+F toggles fake mode and restarts the app.
 On Desktop, drag inward from either window edge to preview back navigation.
 Release past half the preview distance to go back. Return toward the edge and release to cancel.
 Escape cancels an active preview.
-Hold the Storymile title for five seconds to toggle the theme until the process exits.
+To change the theme, open Settings and select Theme under Appearance.
 
 Wasm is disabled and Isolated Projects is enabled by default. Wasm commands need
 `-Pstorymile.enableWasm=true --no-isolated-projects` until Kotlin's Wasm plugin supports isolation.

@@ -1,9 +1,12 @@
 package software.ralf.storymile
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
@@ -16,11 +19,13 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import assertk.assertThat
+import assertk.assertions.isEqualTo
 import assertk.assertions.isLessThanOrEqualTo
 import kotlin.test.Test
 import software.ralf.app.platform.robot.composeRobot
 import software.ralf.storymile.discovery.DiscoveryRobot
 import software.ralf.storymile.tabs.TabsPresenter.Tab
+import software.ralf.storymile.theme.StorymileColorSchemes
 
 class SettingsUiTest {
   @Test
@@ -52,6 +57,55 @@ class SettingsUiTest {
       }
       composeRobot<DiscoveryRobot> { seeQuery("Field") }
       onNode(settings).assertDoesNotExist()
+    }
+  }
+
+  @Test
+  fun `theme choices change app colors and System follows the host appearance`() {
+    val systemDarkTheme = mutableStateOf<Boolean?>(false)
+    DesktopUiTestRule().runRobotTest(
+      windowSize = DesktopWindowSizes.phone,
+      darkTheme = systemDarkTheme,
+    ) {
+      val settings = hasTestTag("settings-screen")
+      val theme = hasTestTag("settings-theme")
+      val options = hasAnyAncestor(hasTestTag("settings-theme-options"))
+
+      fun assertBackground(color: Color) {
+        val pixels = onNode(settings).captureToImage().toPixelMap()
+        // Sample the side gutter beyond the Settings cards.
+        assertThat(pixels[1, pixels.height / 2]).isEqualTo(color)
+      }
+
+      fun chooseTheme(current: String, choice: String) {
+        waitUntilAtLeastOneExists(matcher = theme and hasText(current), timeoutMillis = 5_000)
+        runOnUiThread { onNode(theme).performScrollTo().performClick() }
+        onNode(options and hasText(current)).assertIsSelected()
+        runOnUiThread { onNode(options and hasText(choice)).performClick() }
+        waitUntilAtLeastOneExists(matcher = theme and hasText(choice), timeoutMillis = 5_000)
+      }
+
+      runOnUiThread { onNodeWithTag("tab-profile").performClick() }
+      waitUntilAtLeastOneExists(matcher = settings, timeoutMillis = 5_000)
+      assertBackground(StorymileColorSchemes.paperTide.background)
+
+      chooseTheme(current = "System", choice = "Dark")
+      assertBackground(StorymileColorSchemes.harborNight.background)
+
+      runOnIdle { systemDarkTheme.value = true }
+      chooseTheme(current = "Dark", choice = "Light")
+      assertBackground(StorymileColorSchemes.paperTide.background)
+
+      runOnUiThread {
+        onNode(hasContentDescription("Back") and hasAnyAncestor(settings)).performClick()
+      }
+      onNode(settings).assertDoesNotExist()
+      runOnUiThread { onNodeWithTag("tab-profile").performClick() }
+      chooseTheme(current = "Light", choice = "System")
+      assertBackground(StorymileColorSchemes.harborNight.background)
+
+      runOnIdle { systemDarkTheme.value = false }
+      assertBackground(StorymileColorSchemes.paperTide.background)
     }
   }
 

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -26,16 +27,23 @@ import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.SdStorage
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.Wifi
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +55,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
@@ -56,6 +65,7 @@ import software.ralf.storymile.settings.SettingsPresenter.Section
 import software.ralf.storymile.settings.impl.generated.resources.Res
 import software.ralf.storymile.settings.impl.generated.resources.account
 import software.ralf.storymile.settings.impl.generated.resources.appearance
+import software.ralf.storymile.settings.impl.generated.resources.cancel
 import software.ralf.storymile.settings.impl.generated.resources.default_speed
 import software.ralf.storymile.settings.impl.generated.resources.default_speed_description
 import software.ralf.storymile.settings.impl.generated.resources.default_speed_value
@@ -75,14 +85,26 @@ import software.ralf.storymile.settings.impl.generated.resources.sign_in_to_sync
 import software.ralf.storymile.settings.impl.generated.resources.skip_silence
 import software.ralf.storymile.settings.impl.generated.resources.skip_silence_description
 import software.ralf.storymile.settings.impl.generated.resources.theme
-import software.ralf.storymile.settings.impl.generated.resources.theme_value
+import software.ralf.storymile.settings.impl.generated.resources.theme_dark
+import software.ralf.storymile.settings.impl.generated.resources.theme_light
+import software.ralf.storymile.settings.impl.generated.resources.theme_system
 import software.ralf.storymile.settings.impl.generated.resources.wifi_only
 import software.ralf.storymile.theme.AppTheme
+import software.ralf.storymile.theme.ThemeMode
 
 @ContributesRenderer
 class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
+  private val ThemeMode.titleResource: StringResource
+    get() =
+      when (this) {
+        ThemeMode.SYSTEM -> Res.string.theme_system
+        ThemeMode.LIGHT -> Res.string.theme_light
+        ThemeMode.DARK -> Res.string.theme_dark
+      }
+
   @Composable
   override fun Compose(model: SettingsPresenter.Model, modifier: Modifier) {
+    var showThemePicker by rememberSaveable { mutableStateOf(false) }
     val overviewScroll = rememberScrollState()
     val sectionsScroll = rememberScrollState()
     val detailScroll = key(model.selectedSection) { rememberScrollState() }
@@ -123,7 +145,8 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
               when (model.selectedSection) {
                 Section.PLAYBACK -> Playback(detailed = true)
                 Section.DOWNLOADS -> Downloads()
-                Section.APPEARANCE -> Appearance()
+                Section.APPEARANCE ->
+                  Appearance(themeMode = model.themeMode) { showThemePicker = true }
                 Section.NOTIFICATIONS -> EmptySection(stringResource(Res.string.notifications))
                 Section.PRIVACY -> EmptySection(stringResource(Res.string.privacy))
               }
@@ -141,7 +164,7 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
             Account(model.account)
             Playback(detailed = false)
             Downloads()
-            Appearance()
+            Appearance(themeMode = model.themeMode) { showThemePicker = true }
             Group {
               SectionRow(Section.NOTIFICATIONS)
               Divider()
@@ -150,6 +173,16 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
           }
         }
       }
+    }
+    if (showThemePicker) {
+      ThemePicker(
+        themeMode = model.themeMode,
+        onSelectThemeMode = {
+          model.onSelectThemeMode(it)
+          showThemePicker = false
+        },
+        onDismiss = { showThemePicker = false },
+      )
     }
   }
 
@@ -214,14 +247,54 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
   }
 
   @Composable
-  private fun Appearance() {
+  private fun Appearance(themeMode: ThemeMode, onOpenThemePicker: () -> Unit) {
     Group(title = stringResource(Res.string.appearance)) {
       SettingRow(
         title = stringResource(Res.string.theme),
         icon = Icons.Outlined.Palette,
-        value = stringResource(Res.string.theme_value),
+        modifier = Modifier.testTag("settings-theme"),
+        value = stringResource(themeMode.titleResource),
+        onClick = onOpenThemePicker,
       )
     }
+  }
+
+  @Composable
+  private fun ThemePicker(
+    themeMode: ThemeMode,
+    onSelectThemeMode: (ThemeMode) -> Unit,
+    onDismiss: () -> Unit,
+  ) {
+    AlertDialog(
+      onDismissRequest = onDismiss,
+      title = { Text(stringResource(Res.string.theme)) },
+      text = {
+        Column(
+          Modifier.testTag("settings-theme-options")
+            .selectableGroup()
+            .verticalScroll(rememberScrollState()),
+        ) {
+          ThemeMode.entries.forEach { option ->
+            val selected = themeMode == option
+            ListItem(
+              modifier =
+                Modifier.clip(AppTheme.shapes.large)
+                  .selectable(
+                    selected = selected,
+                    role = Role.RadioButton,
+                    onClick = { onSelectThemeMode(option) },
+                  ),
+              headlineContent = { Text(stringResource(option.titleResource)) },
+              leadingContent = { RadioButton(selected = selected, onClick = null) },
+              colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            )
+          }
+        }
+      },
+      confirmButton = {
+        TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
+      },
+    )
   }
 
   @Composable

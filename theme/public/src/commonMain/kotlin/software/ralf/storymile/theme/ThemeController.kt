@@ -1,27 +1,15 @@
 package software.ralf.storymile.theme
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
+import kotlinx.coroutines.flow.StateFlow
 
-/**
- * Shares a controller across UI hosts until the process exits, unless a local instance is supplied.
- */
-val LocalThemeController = staticCompositionLocalOf { ThemeController.processInstance }
+/** Shares the appearance preference across the app's UI hosts. */
+interface ThemeController {
+  /** The selected appearance. The default follows the system. */
+  val mode: StateFlow<ThemeMode>
 
-/** Holds a manual appearance choice in memory without saving it to storage. */
-class ThemeController {
-  /** The manual appearance, or null until the first toggle. */
-  var darkThemeOverride: Boolean? by mutableStateOf(null)
-    private set
+  /** Applies [mode] to the app and saves it for future launches. */
+  fun setMode(mode: ThemeMode)
 
-  /** Toggles the manual appearance, using [darkTheme] when no choice has been made. */
-  fun toggle(darkTheme: Boolean) {
-    darkThemeOverride = !(darkThemeOverride ?: darkTheme)
-  }
-
-  internal companion object {
-    val processInstance = ThemeController()
-  }
+  /** Selects the opposite appearance, using [systemDarkTheme] when following the system. */
+  fun toggle(systemDarkTheme: Boolean)
 }

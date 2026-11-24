@@ -5,3 +5,7 @@ plugins {
 storymile {
   enableComposePresenters true
 }
+
+dependencies {
+  commonMainApi project(':theme:public')
+}
