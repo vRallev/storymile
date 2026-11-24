@@ -5,13 +5,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -29,6 +27,7 @@ import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.SdStorage
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.Wifi
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -48,12 +47,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -244,46 +244,51 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
         text = stringResource(Res.string.theme),
         modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp),
       )
-      SubcomposeLayout(
+      BoxWithConstraints(
         Modifier.fillMaxWidth().padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 12.dp),
-      ) { constraints ->
-        val segments =
-          subcompose("segments") {
-              SingleChoiceSegmentedButtonRow(Modifier.testTag("settings-theme-segments")) {
-                ThemeMode.entries.forEachIndexed { index, option ->
-                  SegmentedButton(
-                    selected = themeMode == option,
-                    onClick = { onSelectThemeMode(option) },
-                    shape =
-                      SegmentedButtonDefaults.itemShape(
-                        index = index,
-                        count = ThemeMode.entries.size,
-                      ),
-                  ) {
-                    // Measure the full localized label, including spaces.
-                    Text(
-                      text = stringResource(option.titleResource),
-                      modifier = Modifier.width(IntrinsicSize.Max),
-                      maxLines = 1,
-                      softWrap = false,
-                    )
-                  }
-                }
+      ) {
+        val labels = ThemeMode.entries.map { stringResource(it.titleResource) }
+        if (themeSegmentsWidthPx(labels) <= constraints.maxWidth) {
+          SingleChoiceSegmentedButtonRow(
+            Modifier.fillMaxWidth().testTag("settings-theme-segments"),
+          ) {
+            ThemeMode.entries.forEachIndexed { index, option ->
+              SegmentedButton(
+                selected = themeMode == option,
+                onClick = { onSelectThemeMode(option) },
+                shape = SegmentedButtonDefaults.itemShape(index = index, count = labels.size),
+              ) {
+                Text(text = labels[index], maxLines = 1, softWrap = false)
               }
             }
-            .single()
-        val options =
-          if (segments.minIntrinsicWidth(constraints.maxHeight) <= constraints.maxWidth) {
-            segments
-          } else {
-            subcompose("radioRows") {
-                ThemeRadioRows(themeMode = themeMode, onSelectThemeMode = onSelectThemeMode)
-              }
-              .single()
           }
-        val placeable = options.measure(constraints)
-        layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+        } else {
+          ThemeRadioRows(themeMode = themeMode, onSelectThemeMode = onSelectThemeMode)
+        }
       }
+    }
+  }
+
+  @Composable
+  private fun themeSegmentsWidthPx(labels: List<String>): Int {
+    val measurer = rememberTextMeasurer()
+    val style = AppTheme.typography.labelLarge
+    val widestLabelPx = labels.maxOf {
+      measurer.measure(text = it, style = style, softWrap = false, maxLines = 1).size.width
+    }
+    val padding = SegmentedButtonDefaults.ContentPadding
+    val direction = LocalLayoutDirection.current
+    return with(LocalDensity.current) {
+      // Material 3 reserves space for the check icon and its 8 dp gap in each segment.
+      val contentWidth =
+        widestLabelPx +
+          SegmentedButtonDefaults.IconSize.roundToPx() +
+          8.dp.roundToPx() +
+          padding.calculateLeftPadding(direction).roundToPx() +
+          padding.calculateRightPadding(direction).roundToPx()
+      val segmentWidth = maxOf(ButtonDefaults.MinWidth.roundToPx(), contentWidth)
+      val spacing = (-SegmentedButtonDefaults.BorderWidth).roundToPx()
+      segmentWidth * labels.size + spacing * (labels.size - 1)
     }
   }
 

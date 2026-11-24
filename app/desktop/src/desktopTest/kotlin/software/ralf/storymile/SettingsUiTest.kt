@@ -117,10 +117,10 @@ class SettingsUiTest {
 
   @Test
   fun `theme choices adapt to the available width and keep the selection`() {
-    val wide = DpSize(width = 600.dp, height = 1000.dp)
+    val wide = DpSize(width = 1000.dp, height = 480.dp)
     val size = mutableStateOf(DpSize(width = 320.dp, height = 1000.dp))
     DesktopUiTestRule().runRobotTest(
-      windowSize = wide,
+      windowSize = DpSize(width = 1000.dp, height = 1000.dp),
       contentSize = size,
       fontScale = 2f,
     ) {
@@ -150,6 +150,8 @@ class SettingsUiTest {
       val segments = hasTestTag("settings-theme-segments")
       val darkSegment = hasAnyAncestor(segments) and hasText("Dark") and isSelected()
       waitUntilAtLeastOneExists(matcher = darkSegment, timeoutMillis = 5_000)
+      runOnUiThread { onNode(darkSegment).performScrollTo() }
+      onNode(darkSegment).assertIsDisplayed()
       onNode(rows).assertDoesNotExist()
     }
   }
