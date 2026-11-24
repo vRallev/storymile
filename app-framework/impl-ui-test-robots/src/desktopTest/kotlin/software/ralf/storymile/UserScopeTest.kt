@@ -9,6 +9,7 @@ import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isNotSameInstanceAs
+import assertk.assertions.isNull
 import assertk.assertions.isSameInstanceAs
 import assertk.assertions.isTrue
 import dev.zacsweers.metro.AppScope
@@ -25,6 +26,7 @@ import kotlinx.coroutines.test.runTest
 import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.coroutine.launch
 import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
+import software.ralf.storymile.login.Login
 import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.InMemoryStorageFactory
 import software.ralf.storymile.storage.RuntimeModeStorageFactory
@@ -35,6 +37,39 @@ import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.user.UserScope
 
 class UserScopeTest {
+  @Test
+  fun `signing in and out closes the old scope and preserves separate libraries`() = runTest {
+    withApplication { graph ->
+      val scopes = graph.userManager.userScope
+      val guest = scopes.value
+      guest.metroDependencyGraph<UserBindings>().storage.files.write("episode", byteArrayOf(1))
+      val work = guest.launch { awaitCancellation() }
+
+      graph.login.signIn()
+      val account = scopes.first { it !== guest }
+      val accountBindings = account.metroDependencyGraph<UserBindings>()
+      assertThat(guest.isDestroyed()).isTrue()
+      assertThat(work.isCancelled).isTrue()
+      assertThat(accountBindings.user.isGuest).isFalse()
+      assertThat(accountBindings.user.subscriptionTier).isEqualTo(SubscriptionTier.BASIC)
+      assertThat(accountBindings.storage.files.read("episode")).isNull()
+      accountBindings.storage.files.write("episode", byteArrayOf(2))
+
+      graph.login.signOut()
+      val nextGuest = scopes.first { it !== account }
+      assertThat(account.isDestroyed()).isTrue()
+      assertThat(nextGuest.metroDependencyGraph<UserBindings>().storage.files.read("episode"))
+        .isNotNull()
+        .isEqualTo(byteArrayOf(1))
+
+      graph.login.signIn()
+      val nextAccount = scopes.first { it !== nextGuest }
+      assertThat(nextAccount.metroDependencyGraph<UserBindings>().storage.files.read("episode"))
+        .isNotNull()
+        .isEqualTo(byteArrayOf(2))
+    }
+  }
+
   @Test
   fun `application starts with a guest bound to its user scope`() = runTest {
     val application = KmpApplication {
@@ -181,6 +216,7 @@ class UserScopeTest {
   )
   interface Graph : AppGraph {
     val userManager: UserManager
+    val login: Login
 
     @DependencyGraph.Factory
     fun interface Factory {

@@ -21,6 +21,8 @@ dependencyResolutionManagement {
       content {
         includeGroupAndSubgroups 'androidx'
         includeGroupAndSubgroups 'com.android'
+        includeGroup 'com.google.android.gms'
+        includeGroup 'com.google.android.libraries.identity.googleid'
         includeGroup 'com.google.testing.platform'
       }
     }
@@ -64,6 +66,8 @@ include ':library-shows:public'
 include ':library:impl'
 include ':library:public'
 include ':logging:public'
+include ':login:impl'
+include ':login:public'
 include ':playback:impl'
 include ':playback:public'
 include ':player:impl'

@@ -32,6 +32,7 @@ dependencies {
   commonMainImplementation project(':library-saved:impl')
   commonMainImplementation project(':library-shows:impl')
   commonMainImplementation project(':library:impl')
+  commonMainImplementation project(':login:public')
   commonMainImplementation project(':playback:impl')
   commonMainImplementation project(':player:impl')
   commonMainImplementation project(':player:impl-fake')

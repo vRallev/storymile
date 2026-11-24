@@ -57,7 +57,7 @@ class UserPresenterImpl(private val userManager: UserManager) : UserPresenter<Ap
         }
       }
     }
-    return withCompositionLocal(LocalOpenSettings provides openSettings.takeIf { user.isGuest }) {
+    return withCompositionLocal(LocalOpenSettings provides openSettings) {
       val tabs = remember { tabsPresenter }.present(Unit)
       val playback = remember { playbackPresenter }.present(Unit)
       AppTemplate.AdaptiveTemplate(
@@ -77,8 +77,6 @@ class UserPresenterImpl(private val userManager: UserManager) : UserPresenter<Ap
 
   @ContributesTo(UserScope::class)
   interface Graph {
-    val user: User
-
     val tabsPresenter: TabsPresenter
 
     val playbackPresenter: PlaybackPresenter

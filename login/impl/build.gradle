@@ -1,0 +1,24 @@
+plugins {
+  id 'software.ralf.storymile.library.kmp'
+}
+
+storymile {
+  enableLoginConfig true
+  enableMetro true
+}
+
+dependencies {
+  androidMainImplementation libs.androidx.credentials.core
+  androidMainImplementation libs.androidx.credentials.play.services
+  androidMainImplementation libs.googleid
+
+  commonJvmMainImplementation libs.ktor.client.okhttp
+
+  commonMainImplementation libs.ktor.client.core
+  commonMainImplementation libs.okio
+  commonMainImplementation libs.serialization.json
+
+  commonTestImplementation libs.ktor.client.mock
+
+  iosMainImplementation libs.ktor.client.darwin
+}

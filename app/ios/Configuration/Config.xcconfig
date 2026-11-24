@@ -1,6 +1,8 @@
 TEAM_ID=
 BUNDLE_ID=software.ralf.storymile
 APP_NAME=Storymile
+// Set the part of the iOS OAuth client ID before .apps.googleusercontent.com.
+STORYMILE_GOOGLE_IOS_CLIENT_ID_PREFIX=unconfigured
 
 // Match the Kotlin iosSimulatorArm64 target.
 EXCLUDED_ARCHS[sdk=iphonesimulator*] = x86_64

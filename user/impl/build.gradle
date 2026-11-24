@@ -8,6 +8,7 @@ storymile {
 }
 
 dependencies {
+  commonMainImplementation project(':login:public')
   commonMainImplementation project(':playback:public')
   commonMainImplementation project(':presenter-navigation:public')
   commonMainImplementation project(':settings:public')

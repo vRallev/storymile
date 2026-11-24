@@ -43,6 +43,26 @@ public open class StorymileExtension(private val project: Project) {
     }
   }
 
+  /** Embeds public client settings for the login implementation. */
+  public fun enableLoginConfig(enabled: Boolean) {
+    if (!enabled) {
+      return
+    }
+    project.plugins.apply(Plugins.BUILD_CONFIG)
+    project.extensions.getByType(BuildConfigExtension::class.java).apply {
+      packageName("software.ralf.storymile.login")
+      className("LoginConfig")
+      useKotlinOutput()
+      for (name in listOf("firebaseApiKey", "googleClientId")) {
+        buildConfigField(
+          String::class.java,
+          name,
+          project.providers.gradleProperty("storymile.login.$name").orElse(""),
+        )
+      }
+    }
+  }
+
   public fun enableComposeUi(enabled: Boolean) {
     project.appPlatform.enableComposeUi(enabled)
     if (enabled) {

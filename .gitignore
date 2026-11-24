@@ -4,6 +4,7 @@
 build/
 !/scripts/**/build
 local.properties
+/login/impl/src/desktopMain/resources/google-desktop-client.json
 /reports/
 
 # Documentation builds

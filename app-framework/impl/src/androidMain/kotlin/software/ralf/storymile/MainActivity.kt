@@ -14,8 +14,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import software.ralf.app.platform.renderer.ComposeAndroidRendererFactory
 import software.ralf.app.platform.renderer.renderCompose
+import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
+import software.ralf.storymile.login.AndroidLoginHost
 import software.ralf.storymile.theme.AndroidThemeEnvironment
 import software.ralf.storymile.util.rootScopeProvider
 
@@ -36,6 +39,12 @@ class MainActivity : ComponentActivity() {
       // The Android interop renderer does not forward the root modifier.
       Box(Modifier.fillMaxSize().semantics { testTagsAsResourceId = true }) {
         kmpApplication.Content(themeEnvironment = remember { AndroidThemeEnvironment() }) {
+          LifecycleResumeEffect(kmpApplication) {
+            val host =
+              kmpApplication.rootScope.metroDependencyGraph<AndroidLoginHost.Graph>().loginHost
+            host.attach(this@MainActivity)
+            onPauseOrDispose { host.detach(this@MainActivity) }
+          }
           val rendererFactory = remember {
             ComposeAndroidRendererFactory.createForComposeUi(
               rootScopeProvider = rootScopeProvider(),

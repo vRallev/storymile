@@ -117,7 +117,7 @@ provides the empty Downloads screen, rendered by
 [DownloadsRenderer](../downloads/impl/src/commonMain/kotlin/software/ralf/storymile/downloads/DownloadsRenderer.kt).
 The user presenter places these models in the content, navigation, and playback slots of
 [AppTemplate](../templates/public/src/commonMain/kotlin/software/ralf/storymile/templates/AppTemplate.kt).
-For guests, the profile icon opens
+The profile icon opens
 [SettingsPresenterImpl](../settings/impl/src/commonMain/kotlin/software/ralf/storymile/settings/SettingsPresenterImpl.kt)
 in the content backstack. Back restores the previous screen. The navigation and playback slots stay
 available.

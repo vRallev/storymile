@@ -6,6 +6,7 @@ import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.createGraphFactory
 import platform.UIKit.UIApplication
 import software.ralf.app.platform.scope.RootScopeProvider
+import software.ralf.storymile.login.IosGoogleSignInHost
 
 /** Final iOS graph, including dependencies supplied by UIKit. */
 @DependencyGraph(AppScope::class)
@@ -17,14 +18,23 @@ interface IosAppGraph {
     fun create(
       @Provides uiApplication: UIApplication,
       @Provides rootScopeProvider: RootScopeProvider,
+      @Provides googleSignIn: IosGoogleSignInHost,
     ): IosAppGraph
   }
 }
 
 /** Called from Swift to retain the application before creating the production iOS graph. */
 @Suppress("unused")
-fun createIosApplication(application: UIApplication): KmpApplication {
+fun createIosApplication(
+  application: UIApplication,
+  googleSignIn: IosGoogleSignInHost,
+): KmpApplication {
   return KmpApplication {
-    createGraphFactory<IosAppGraph.Factory>().create(application, it)
+    createGraphFactory<IosAppGraph.Factory>()
+      .create(
+        uiApplication = application,
+        rootScopeProvider = it,
+        googleSignIn = googleSignIn,
+      )
   }
 }
