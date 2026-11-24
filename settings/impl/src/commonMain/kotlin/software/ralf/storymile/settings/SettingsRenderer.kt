@@ -239,11 +239,7 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
 
   @Composable
   private fun Appearance(themeMode: ThemeMode, onSelectThemeMode: (ThemeMode) -> Unit) {
-    Group(title = stringResource(Res.string.appearance)) {
-      Text(
-        text = stringResource(Res.string.theme),
-        modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp),
-      )
+    Group(title = stringResource(Res.string.theme)) {
       BoxWithConstraints(
         Modifier.fillMaxWidth().padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 12.dp),
       ) {

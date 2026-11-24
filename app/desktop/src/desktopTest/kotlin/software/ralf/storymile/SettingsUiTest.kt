@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOn
@@ -190,7 +191,6 @@ class SettingsUiTest {
           "Downloads" to "Wi-Fi only",
           "Notifications" to "No settings available yet.",
           "Privacy" to "No settings available yet.",
-          "Appearance" to "Theme",
         )) {
         val item = onNode(hasText(category) and inSections)
         runOnUiThread { item.performScrollTo().performClick() }
@@ -199,6 +199,15 @@ class SettingsUiTest {
         onNode(hasText(setting) and inDetail).assertIsDisplayed()
       }
 
+      val appearance = onNode(hasText("Appearance") and inSections)
+      val themeTitle = onNode(hasText("Theme") and inDetail)
+      runOnUiThread { appearance.performScrollTo().performClick() }
+      appearance.assertIsSelected()
+      themeTitle
+        .assertIsDisplayed()
+        .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+      onNode(hasText("Appearance") and inDetail).assertDoesNotExist()
+
       runOnIdle { size.value = DesktopWindowSizes.phone }
       onNodeWithTag("settings-overview").assertIsDisplayed()
       detail.assertDoesNotExist()
@@ -206,8 +215,8 @@ class SettingsUiTest {
       onNodeWithText("Theme").assertIsDisplayed()
 
       runOnIdle { size.value = DesktopWindowSizes.tablet }
-      onNode(hasText("Appearance") and inSections).assertIsSelected()
-      onNode(hasText("Theme") and inDetail).assertIsDisplayed()
+      appearance.assertIsSelected()
+      themeTitle.assertIsDisplayed()
 
       composeRobot<AppShellRobot> { selectTab(Tab.DOWNLOADS) }
       onNodeWithTag("settings-screen").assertDoesNotExist()
