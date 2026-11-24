@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -26,12 +27,17 @@ import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.SdStorage
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.Wifi
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,11 +48,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
@@ -75,12 +84,23 @@ import software.ralf.storymile.settings.impl.generated.resources.sign_in_to_sync
 import software.ralf.storymile.settings.impl.generated.resources.skip_silence
 import software.ralf.storymile.settings.impl.generated.resources.skip_silence_description
 import software.ralf.storymile.settings.impl.generated.resources.theme
-import software.ralf.storymile.settings.impl.generated.resources.theme_value
+import software.ralf.storymile.settings.impl.generated.resources.theme_dark
+import software.ralf.storymile.settings.impl.generated.resources.theme_light
+import software.ralf.storymile.settings.impl.generated.resources.theme_system
 import software.ralf.storymile.settings.impl.generated.resources.wifi_only
 import software.ralf.storymile.theme.AppTheme
+import software.ralf.storymile.theme.ThemeMode
 
 @ContributesRenderer
 class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
+  private val ThemeMode.titleResource: StringResource
+    get() =
+      when (this) {
+        ThemeMode.SYSTEM -> Res.string.theme_system
+        ThemeMode.LIGHT -> Res.string.theme_light
+        ThemeMode.DARK -> Res.string.theme_dark
+      }
+
   @Composable
   override fun Compose(model: SettingsPresenter.Model, modifier: Modifier) {
     val overviewScroll = rememberScrollState()
@@ -123,7 +143,11 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
               when (model.selectedSection) {
                 Section.PLAYBACK -> Playback(detailed = true)
                 Section.DOWNLOADS -> Downloads()
-                Section.APPEARANCE -> Appearance()
+                Section.APPEARANCE ->
+                  Appearance(
+                    themeMode = model.themeMode,
+                    onSelectThemeMode = model.onSelectThemeMode,
+                  )
                 Section.NOTIFICATIONS -> EmptySection(stringResource(Res.string.notifications))
                 Section.PRIVACY -> EmptySection(stringResource(Res.string.privacy))
               }
@@ -141,7 +165,7 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
             Account(model.account)
             Playback(detailed = false)
             Downloads()
-            Appearance()
+            Appearance(themeMode = model.themeMode, onSelectThemeMode = model.onSelectThemeMode)
             Group {
               SectionRow(Section.NOTIFICATIONS)
               Divider()
@@ -214,13 +238,74 @@ class SettingsRenderer : ComposeRenderer<SettingsPresenter.Model>() {
   }
 
   @Composable
-  private fun Appearance() {
-    Group(title = stringResource(Res.string.appearance)) {
-      SettingRow(
-        title = stringResource(Res.string.theme),
-        icon = Icons.Outlined.Palette,
-        value = stringResource(Res.string.theme_value),
-      )
+  private fun Appearance(themeMode: ThemeMode, onSelectThemeMode: (ThemeMode) -> Unit) {
+    Group(title = stringResource(Res.string.theme)) {
+      BoxWithConstraints(
+        Modifier.fillMaxWidth().padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 12.dp),
+      ) {
+        val labels = ThemeMode.entries.map { stringResource(it.titleResource) }
+        if (themeSegmentsWidthPx(labels) <= constraints.maxWidth) {
+          SingleChoiceSegmentedButtonRow(
+            Modifier.fillMaxWidth().testTag("settings-theme-segments"),
+          ) {
+            ThemeMode.entries.forEachIndexed { index, option ->
+              SegmentedButton(
+                selected = themeMode == option,
+                onClick = { onSelectThemeMode(option) },
+                shape = SegmentedButtonDefaults.itemShape(index = index, count = labels.size),
+              ) {
+                Text(text = labels[index], maxLines = 1, softWrap = false)
+              }
+            }
+          }
+        } else {
+          ThemeRadioRows(themeMode = themeMode, onSelectThemeMode = onSelectThemeMode)
+        }
+      }
+    }
+  }
+
+  @Composable
+  private fun themeSegmentsWidthPx(labels: List<String>): Int {
+    val measurer = rememberTextMeasurer()
+    val style = AppTheme.typography.labelLarge
+    val widestLabelPx = labels.maxOf {
+      measurer.measure(text = it, style = style, softWrap = false, maxLines = 1).size.width
+    }
+    val padding = SegmentedButtonDefaults.ContentPadding
+    val direction = LocalLayoutDirection.current
+    return with(LocalDensity.current) {
+      // Material 3 reserves space for the check icon and its 8 dp gap in each segment.
+      val contentWidth =
+        widestLabelPx +
+          SegmentedButtonDefaults.IconSize.roundToPx() +
+          8.dp.roundToPx() +
+          padding.calculateLeftPadding(direction).roundToPx() +
+          padding.calculateRightPadding(direction).roundToPx()
+      val segmentWidth = maxOf(ButtonDefaults.MinWidth.roundToPx(), contentWidth)
+      val spacing = (-SegmentedButtonDefaults.BorderWidth).roundToPx()
+      segmentWidth * labels.size + spacing * (labels.size - 1)
+    }
+  }
+
+  @Composable
+  private fun ThemeRadioRows(themeMode: ThemeMode, onSelectThemeMode: (ThemeMode) -> Unit) {
+    Column(Modifier.testTag("settings-theme-radio-rows").selectableGroup()) {
+      ThemeMode.entries.forEach { option ->
+        val selected = themeMode == option
+        ListItem(
+          modifier =
+            Modifier.clip(AppTheme.shapes.large)
+              .selectable(
+                selected = selected,
+                role = Role.RadioButton,
+                onClick = { onSelectThemeMode(option) },
+              ),
+          headlineContent = { Text(stringResource(option.titleResource)) },
+          leadingContent = { RadioButton(selected = selected, onClick = null) },
+          colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        )
+      }
     }
   }
 

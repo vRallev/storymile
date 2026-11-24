@@ -1,8 +1,10 @@
 package software.ralf.storymile
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,8 +22,10 @@ import software.ralf.app.platform.scope.RootScopeProvider
 import software.ralf.app.platform.scope.Scope
 import software.ralf.app.platform.scope.coroutine.addCoroutineScopeScoped
 import software.ralf.app.platform.scope.di.metro.addMetroDependencyGraph
+import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.app.platform.scope.register
 import software.ralf.storymile.launchanimation.LaunchAnimation
+import software.ralf.storymile.theme.LocalDarkThemeOverride
 import software.ralf.storymile.theme.StorymileTheme
 import software.ralf.storymile.theme.ThemeEnvironment
 
@@ -84,7 +88,17 @@ class KmpApplication(
         ready = true
       }
     }
-    StorymileTheme(environment = themeEnvironment) {
+    val hostDarkTheme = LocalDarkThemeOverride.current ?: isSystemInDarkTheme()
+    val darkTheme =
+      if (ready) {
+        val controller =
+          remember(this) { rootScope.metroDependencyGraph<AppGraph>().themeController }
+        val mode by controller.mode.collectAsState()
+        mode.isDark(hostDarkTheme)
+      } else {
+        hostDarkTheme
+      }
+    StorymileTheme(environment = themeEnvironment, darkTheme = darkTheme) {
       LaunchAnimation(
         progress = launchProgress,
         modifier = modifier,

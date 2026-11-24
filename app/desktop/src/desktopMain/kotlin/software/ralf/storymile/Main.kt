@@ -24,7 +24,6 @@ import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import software.ralf.storymile.theme.LocalThemeController
 import software.ralf.storymile.util.Platform
 import software.ralf.storymile.util.PlatformBindings
 
@@ -66,7 +65,6 @@ fun main(args: Array<String>) {
     }
     var windowSize by remember { mutableStateOf(initialSize) }
     val windowState = rememberWindowState(width = initialSize.width, height = initialSize.height)
-    val themeController = LocalThemeController.current
     var systemDarkTheme by remember { mutableStateOf(false) }
 
     Window(
@@ -86,11 +84,7 @@ fun main(args: Array<String>) {
               windowState.size = windowSize
               true
             }
-            Key.D -> {
-              themeController.toggle(systemDarkTheme)
-              true
-            }
-            else -> desktopApp.handleShortcut(keyEvent.key)
+            else -> desktopApp.handleShortcut(key = keyEvent.key, systemDarkTheme = systemDarkTheme)
           }
         } else {
           false

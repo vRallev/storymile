@@ -2,6 +2,7 @@ package software.ralf.storymile.settings
 
 import software.ralf.app.platform.presenter.BaseModel
 import software.ralf.app.platform.presenter.compose.ComposePresenter
+import software.ralf.storymile.theme.ThemeMode
 
 /** Presents the account and preferences for the active session. */
 interface SettingsPresenter : ComposePresenter<Unit, SettingsPresenter.Model> {
@@ -31,8 +32,12 @@ interface SettingsPresenter : ComposePresenter<Unit, SettingsPresenter.Model> {
     val account: Account,
     /** Section displayed in the detail pane. Starts at [Section.PLAYBACK]. */
     val selectedSection: Section,
+    /** The current app appearance preference. */
+    val themeMode: ThemeMode,
     /** Selects a section in the detail pane. */
     val onSelectSection: (Section) -> Unit,
+    /** Applies an appearance preference to the app. */
+    val onSelectThemeMode: (ThemeMode) -> Unit,
     /** Returns to the screen that opened Settings. */
     val onBack: () -> Unit,
   ) : BaseModel

@@ -7,6 +7,7 @@ import dev.zacsweers.metro.Multibinds
 import software.ralf.app.platform.scope.Scoped
 import software.ralf.app.platform.scope.coroutine.CoroutineScopeScoped
 import software.ralf.storymile.storage.Storage
+import software.ralf.storymile.theme.ThemeController
 import software.ralf.storymile.util.Platform
 
 /**
@@ -20,6 +21,9 @@ interface AppGraph {
 
   /** Preferences, files, and caches owned by the app scope. */
   @ForScope(AppScope::class) val storage: Storage
+
+  /** Appearance preference shared by the app's hosts. */
+  val themeController: ThemeController
 
   /** All [Scoped] instances that share the application lifecycle. */
   @ForScope(AppScope::class) @Multibinds(allowEmpty = true) val appScopedInstances: Set<Scoped>

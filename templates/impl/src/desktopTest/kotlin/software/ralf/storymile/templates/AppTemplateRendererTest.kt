@@ -83,6 +83,7 @@ import software.ralf.storymile.screen.DefaultScreenSizeProvider
 import software.ralf.storymile.screen.ScreenSize
 import software.ralf.storymile.screen.ScreenSizeProvider
 import software.ralf.storymile.theme.LocalDarkThemeOverride
+import software.ralf.storymile.theme.StorymileTheme
 import software.ralf.storymile.theme.testing.FakeThemeEnvironment
 
 class AppTemplateRendererTest {
@@ -539,11 +540,11 @@ class AppTemplateRendererTest {
     private val mutableScreenSizeProvider = DefaultScreenSizeProvider()
     val screenSizeProvider: ScreenSizeProvider = mutableScreenSizeProvider
     val backGestureDispatcher = BackGestureDispatcherPresenter.createNewInstance()
+    private val themeEnvironment = FakeThemeEnvironment()
     private val templateRenderer =
       AppTemplateRenderer(
         backGestureDispatcherPresenter = backGestureDispatcher,
         screenSizeProvider = mutableScreenSizeProvider,
-        themeEnvironment = FakeThemeEnvironment(),
         shortcuts = NoAppShortcuts(),
       )
     private val slotRenderer = SlotRenderer(forwardModifiers)
@@ -561,7 +562,9 @@ class AppTemplateRendererTest {
         LocalPlatformWindowInsets provides windowInsets,
         LocalWindowInfo provides (windowInfo ?: LocalWindowInfo.current),
       ) {
-        Box(modifier) { templateRenderer.renderCompose(template) }
+        StorymileTheme(environment = themeEnvironment) {
+          Box(modifier) { templateRenderer.renderCompose(template) }
+        }
       }
     }
 
