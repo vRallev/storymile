@@ -27,6 +27,7 @@ import org.jetbrains.compose.resources.stringResource
 import software.ralf.app.platform.inject.ContributesRenderer
 import software.ralf.app.platform.renderer.ComposeRenderer
 import software.ralf.app.platform.renderer.Render
+import software.ralf.storymile.design.supportsListDetailPanes
 import software.ralf.storymile.library.LibraryPresenterImpl.Tab
 import software.ralf.storymile.library.impl.generated.resources.Res
 import software.ralf.storymile.library.impl.generated.resources.library_queue_removed
@@ -34,7 +35,6 @@ import software.ralf.storymile.library.impl.generated.resources.library_saved_re
 import software.ralf.storymile.library.impl.generated.resources.library_undo
 import software.ralf.storymile.libraryqueue.LocalLibraryQueueListState
 import software.ralf.storymile.librarysaved.LocalLibrarySavedListState
-import software.ralf.storymile.podcastshows.supportsShowPanes
 import software.ralf.storymile.presenternavigation.DefaultBackstackModel
 import software.ralf.storymile.theme.AppTheme
 
@@ -55,7 +55,7 @@ class LibraryRenderer : ComposeRenderer<LibraryPresenterImpl.Model>() {
         val shows = model.shows
         val selectedShow = shows.selectedShow
         val showsList = shows.list.takeUnless { shows.isEmpty }
-        if (maxWidth.supportsShowPanes(LocalDensity.current.fontScale)) {
+        if (maxWidth.supportsListDetailPanes(LocalDensity.current.fontScale)) {
           if (model.selectedTab == Tab.SHOWS) {
             val openFirstShow by rememberUpdatedState(shows.onOpenFirstShow)
             LaunchedEffect(Unit) {
