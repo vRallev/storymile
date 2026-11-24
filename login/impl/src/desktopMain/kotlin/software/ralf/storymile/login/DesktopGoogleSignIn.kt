@@ -33,6 +33,7 @@ import software.ralf.app.platform.scope.coroutine.IoCoroutineDispatcher
 class DesktopGoogleSignIn(
   @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : GoogleSignIn {
+  private val random by lazy { SecureRandom.getInstanceStrong() }
   private val installed: JsonObject? by lazy {
     try {
       javaClass.getResourceAsStream("/google-desktop-client.json")?.bufferedReader()?.use {
@@ -161,7 +162,7 @@ class DesktopGoogleSignIn(
     }
   }
 
-  private fun randomValue(): String = base64(ByteArray(32).also { SecureRandom().nextBytes(it) })
+  private fun randomValue(): String = base64(ByteArray(32).also(random::nextBytes))
 
   private fun base64(bytes: ByteArray): String =
     Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
