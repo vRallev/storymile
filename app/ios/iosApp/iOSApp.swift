@@ -1,12 +1,13 @@
 import StorymileApp
 import SwiftUI
+import GoogleSignIn
 
 class AppDelegate: NSObject, UIApplicationDelegate {
 
     private(set) var kmpApplication: KmpApplication!
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        kmpApplication = IosAppGraphKt.createIosApplication(application: application)
+        kmpApplication = IosAppGraphKt.createIosApplication(application: application, googleSignIn: GoogleSignInPresenter())
         return true
     }
 }
@@ -19,6 +20,9 @@ struct iOSApp: App {
     var body: some Scene {
         WindowGroup {
             ComposeContentView(kmpApplication: appDelegate.kmpApplication)
+                .onOpenURL { url in
+                    GIDSignIn.sharedInstance.handle(url)
+                }
         }
     }
 }

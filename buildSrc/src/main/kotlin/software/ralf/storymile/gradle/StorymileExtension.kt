@@ -50,6 +50,35 @@ public open class StorymileExtension(private val project: Project) {
     }
   }
 
+  /** Embeds the public client settings for the Google login prototype. */
+  public fun enableGoogleLoginConfig(enabled: Boolean) {
+    if (!enabled) {
+      return
+    }
+
+    project.plugins.apply(Plugins.BUILD_CONFIG)
+    project.extensions.getByType(BuildConfigExtension::class.java).apply {
+      packageName("software.ralf.storymile.user")
+      className("GoogleLoginConfig")
+      useKotlinOutput()
+      fun property(name: String) =
+        project.providers.gradleProperty("storymile.auth.$name").orNull.orEmpty()
+
+      val url = property("supabaseUrl").trimEnd('/')
+      require(url.isEmpty() || Regex("https://[A-Za-z0-9.-]+(:[0-9]+)?").matches(url)) {
+        "storymile.auth.supabaseUrl must be an HTTPS origin."
+      }
+      val key = property("publishableKey")
+      require(key.isEmpty() || key.startsWith("sb_publishable_")) {
+        "storymile.auth.publishableKey must be a Supabase publishable key."
+      }
+      buildConfigField(String::class.java, "supabaseUrl", url)
+      buildConfigField(String::class.java, "publishableKey", key)
+      buildConfigField(String::class.java, "googleWebClientId", property("googleWebClientId"))
+      buildConfigField(Boolean::class.java, "configured", url.isNotEmpty() && key.isNotEmpty())
+    }
+  }
+
   public fun enableMetro(enabled: Boolean) {
     project.appPlatform.enableMetro(enabled)
     if (enabled) {

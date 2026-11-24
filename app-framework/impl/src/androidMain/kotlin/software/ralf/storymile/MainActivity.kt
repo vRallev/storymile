@@ -16,12 +16,20 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import software.ralf.app.platform.renderer.ComposeAndroidRendererFactory
 import software.ralf.app.platform.renderer.renderCompose
+import software.ralf.app.platform.scope.di.metro.metroDependencyGraph
 import software.ralf.storymile.theme.AndroidThemeEnvironment
+import software.ralf.storymile.user.AndroidGoogleLoginHost
 import software.ralf.storymile.util.rootScopeProvider
 
 /** Android entry point that renders the shared template stream. */
 class MainActivity : ComponentActivity() {
   private val viewModel by viewModels<MainActivityViewModel>()
+  private val googleLoginHost by lazy {
+    rootScopeProvider()
+      .rootScope
+      .metroDependencyGraph<AndroidGoogleLoginHost.Graph>()
+      .googleLoginHost
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -46,5 +54,15 @@ class MainActivity : ComponentActivity() {
         }
       }
     }
+  }
+
+  override fun onResume() {
+    super.onResume()
+    googleLoginHost.attach(this)
+  }
+
+  override fun onPause() {
+    googleLoginHost.detach(this)
+    super.onPause()
   }
 }

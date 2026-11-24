@@ -9,6 +9,7 @@ import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isNotSameInstanceAs
+import assertk.assertions.isNull
 import assertk.assertions.isSameInstanceAs
 import assertk.assertions.isTrue
 import dev.zacsweers.metro.AppScope
@@ -29,11 +30,44 @@ import software.ralf.storymile.storage.DefaultStorage
 import software.ralf.storymile.storage.InMemoryStorageFactory
 import software.ralf.storymile.storage.RuntimeModeStorageFactory
 import software.ralf.storymile.storage.Storage
+import software.ralf.storymile.user.GoogleLogin
 import software.ralf.storymile.user.User
 import software.ralf.storymile.user.UserManager
 import software.ralf.storymile.user.UserScope
 
 class UserScopeTest {
+  @Test
+  fun `switching accounts cancels the previous scope and keeps guest and account storage separate`() =
+    runTest {
+      withApplication { graph ->
+        val scopes = graph.userManager.userScope
+        val guest = scopes.value
+        val guestWork = guest.launch { awaitCancellation() }
+        guest.metroDependencyGraph<UserBindings>().storage.files.write("episode", byteArrayOf(1))
+
+        graph.login.signIn()
+        val account = scopes.first { it !== guest }
+        assertThat(guestWork.isCancelled).isTrue()
+        assertThat(guest.isDestroyed()).isTrue()
+        val files = account.metroDependencyGraph<UserBindings>().storage.files
+        assertThat(files.read("episode")).isNull()
+        files.write("episode", byteArrayOf(2))
+
+        graph.login.signOut()
+        val nextGuest = scopes.first { it !== account }
+        assertThat(account.isDestroyed()).isTrue()
+        assertThat(nextGuest.metroDependencyGraph<UserBindings>().storage.files.read("episode"))
+          .isNotNull()
+          .isEqualTo(byteArrayOf(1))
+
+        graph.login.signIn()
+        val nextAccount = scopes.first { it !== nextGuest }
+        assertThat(nextAccount.metroDependencyGraph<UserBindings>().storage.files.read("episode"))
+          .isNotNull()
+          .isEqualTo(byteArrayOf(2))
+      }
+    }
+
   @Test
   fun `application starts with a guest bound to its user scope`() = runTest {
     val application = KmpApplication {
@@ -179,6 +213,7 @@ class UserScopeTest {
   )
   interface Graph : AppGraph {
     val userManager: UserManager
+    val login: GoogleLogin
 
     @DependencyGraph.Factory
     fun interface Factory {

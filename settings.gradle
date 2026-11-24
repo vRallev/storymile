@@ -22,6 +22,8 @@ dependencyResolutionManagement {
         includeGroupAndSubgroups 'androidx'
         includeGroupAndSubgroups 'com.android'
         includeGroup 'com.google.testing.platform'
+        includeGroup 'com.google.android.libraries.identity.googleid'
+        includeGroupAndSubgroups 'com.google.android.gms'
       }
     }
     mavenCentral()

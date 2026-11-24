@@ -3,15 +3,32 @@ plugins {
 }
 
 storymile {
+  enableGoogleLoginConfig true
   enableComposePresenterBackstack true
   enableMetro true
 }
 
 dependencies {
+  if (providers.gradleProperty('storymile.enableWasm').map { it.toBoolean() }.getOrElse(false)) {
+    wasmJsMainImplementation libs.kotlinx.browser
+  }
+
+  androidMainImplementation libs.androidx.credentials.core
+  androidMainImplementation libs.androidx.credentials.play.services
+  androidMainImplementation libs.googleid
+
+  commonJvmMainImplementation libs.ktor.client.okhttp
+
   commonMainImplementation project(':playback:public')
   commonMainImplementation project(':presenter-navigation:public')
   commonMainImplementation project(':settings:public')
   commonMainImplementation project(':storage:public')
   commonMainImplementation project(':tabs:public')
   commonMainImplementation project(':templates:public')
+  commonMainImplementation libs.ktor.client.core
+  commonMainImplementation libs.serialization.json
+
+  commonTestImplementation libs.ktor.client.mock
+
+  iosMainImplementation libs.ktor.client.darwin
 }

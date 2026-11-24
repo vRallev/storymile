@@ -94,7 +94,6 @@ class UserPresenterImplTest {
   }
 
   private class FakeGraph(user: String) : UserPresenterImpl.Graph {
-    override val user: User = GuestUser()
     override val tabsPresenter = FakeTabsPresenter(user)
     override val playbackPresenter = FakePlaybackPresenter()
     override val settingsPresenter =
@@ -102,7 +101,9 @@ class UserPresenterImplTest {
         @Composable
         override fun present(input: Unit): SettingsPresenter.Model =
           SettingsPresenter.Model(
-            account = SettingsPresenter.Account.Guest,
+            account = GoogleLogin.State.Guest,
+            onSignIn = {},
+            onSignOut = {},
             selectedSection = SettingsPresenter.Section.PLAYBACK,
             onSelectSection = {},
             onBack = {},
