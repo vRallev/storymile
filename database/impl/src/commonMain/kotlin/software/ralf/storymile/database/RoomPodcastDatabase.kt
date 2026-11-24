@@ -17,7 +17,7 @@ import software.ralf.storymile.podcast.SavedEpisode
       QueuedEpisodeEntity::class,
       SavedEpisodeEntity::class,
     ],
-  version = 1,
+  version = 2,
 )
 @ConstructedBy(RoomPodcastDatabaseConstructor::class)
 abstract class RoomPodcastDatabase : RoomDatabase() {

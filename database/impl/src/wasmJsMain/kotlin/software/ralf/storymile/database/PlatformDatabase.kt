@@ -42,6 +42,7 @@ class PlatformDatabase : DatabasePlatform {
       .setDriver(WebWorkerSQLiteDriver(databaseWorker))
       .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
       .setSingleConnectionPool()
+      .addMigrations(PodcastDatabaseMigration1To2)
       .setQueryCoroutineContext(coroutineContext)
       .build()
   }
